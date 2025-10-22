@@ -153,8 +153,30 @@ After platform checks, confirm:
 ls credentials.txt
 ```
 
-**If file exists**: Proceed to Step 2 (Parse Credentials)
-**If file NOT found**: Proceed to Step 1B (Elicit Credentials)
+**If file exists**: Proceed to Step 2 (Parse Credentials from File)
+
+**If file NOT found**: Ask user how to proceed
+
+### Step 1A: Ask User for Credential Source (If No File Found)
+
+**Say to user**:
+```
+I couldn't find a credentials.txt file in the repository.
+
+I can obtain your Neo4j Aura credentials in two ways:
+
+1. I can ask you for your credentials interactively, or
+2. I can check if you already have Neo4j credentials set in your system environment variables
+
+Which would you prefer?
+```
+
+**Present options**:
+- **Option 1**: "Elicit credentials from me interactively"
+- **Option 2**: "Check for existing environment variables"
+
+**If user chooses Option 1**: Proceed to Step 1B (Elicit Credentials)
+**If user chooses Option 2**: Proceed to Step 1C (Check Existing Environment Variables)
 
 ### Step 1B: Elicit Credentials from User
 
@@ -237,7 +259,63 @@ The script will automatically:
 
 → **STOP HERE** - Do not proceed to Step 5 (manual environment variable setting)
 
-## Step 2: Parse Credentials
+### Step 1C: Check Existing Environment Variables
+
+**Say to user**:
+```
+Checking for existing Neo4j environment variables...
+```
+
+**Windows**:
+```powershell
+[Environment]::GetEnvironmentVariable('NEO4J_URI', 'Machine')
+[Environment]::GetEnvironmentVariable('NEO4J_USER', 'Machine')
+[Environment]::GetEnvironmentVariable('NEO4J_PASSWORD', 'Machine')
+[Environment]::GetEnvironmentVariable('NEO4J_DATABASE', 'Machine')
+```
+
+**macOS/Linux**:
+```bash
+echo $NEO4J_URI
+echo $NEO4J_USER
+echo $NEO4J_PASSWORD
+echo $NEO4J_DATABASE
+```
+
+**If all required variables found** (NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD):
+```
+Found existing Neo4j environment variables:
+✓ NEO4J_URI = [show URI]
+✓ NEO4J_USER = [show username]
+✓ NEO4J_PASSWORD = [masked - show first 10 chars]***
+✓ NEO4J_DATABASE = [show database or 'neo4j' default]
+```
+
+**Store in credentials dictionary**:
+```python
+credentials = {
+    'NEO4J_URI': env_neo4j_uri,
+    'NEO4J_USERNAME': env_neo4j_user,
+    'NEO4J_PASSWORD': env_neo4j_password,
+    'NEO4J_DATABASE': env_neo4j_database or 'neo4j'
+}
+```
+
+→ Proceed to Step 3 (Detect VM Environment)
+
+**If any required variables missing**:
+```
+Some required environment variables are missing:
+[List which ones are missing]
+
+These credentials haven't been set up yet. Would you like me to collect
+your credentials interactively?
+```
+
+**If user says yes**: Proceed to Step 1B (Elicit Credentials)
+**If user says no**: Inform user they need to set up credentials first and STOP
+
+## Step 2: Parse Credentials from File
 
 **If from file**:
 ```bash
@@ -322,7 +400,175 @@ if is_vm and credentials['NEO4J_URI'].startswith('neo4j+s://'):
     credentials['NEO4J_URI'] = credentials['NEO4J_URI'].replace('neo4j+s://', 'neo4j+ssc://')
 ```
 
-## Step 5: Set Environment Variables
+## Step 5: Test Connection to Neo4j Aura
+
+**IMPORTANT**: Before setting environment variables, validate the credentials by testing the connection.
+
+**Say to user**:
+```
+Testing connection to Neo4j Aura with your credentials...
+```
+
+**Test connection using Python**:
+```python
+# Test Neo4j connection
+from neo4j import GraphDatabase
+import sys
+
+uri = credentials['NEO4J_URI']
+username = credentials['NEO4J_USERNAME']
+password = credentials['NEO4J_PASSWORD']
+
+try:
+    driver = GraphDatabase.driver(uri, auth=(username, password))
+    driver.verify_connectivity()
+    print("✓ Connection successful!")
+    driver.close()
+except Exception as e:
+    print(f"✗ Connection failed: {e}")
+    sys.exit(1)
+```
+
+### If Connection Succeeds
+
+**Say to user**:
+```
+✓ Successfully connected to Neo4j Aura!
+  Database: [show URI without credentials]
+  User: [show username]
+
+Your credentials are valid. Proceeding with environment variable setup...
+```
+
+→ Proceed to Step 6 (Set Environment Variables)
+
+### If Connection Fails - Diagnose and Report
+
+**Analyze the error** and categorize it:
+
+#### Error Type 1: Authentication Failure
+
+**Error contains**: `AuthError`, `Unauthorized`, `authentication failed`, `invalid credentials`
+
+**Say to user**:
+```
+✗ Authentication Failed
+
+The credentials appear to be incorrect. Common causes:
+- Wrong password (passwords are case-sensitive)
+- Wrong username (should typically be 'neo4j')
+- Password was recently changed in Neo4j Aura console
+
+Please double-check your credentials from the Neo4j Aura console:
+https://console.neo4j.io
+
+Would you like to:
+1. Re-enter your credentials
+2. Check Neo4j Aura console and try again
+```
+
+**If user chooses option 1**: Go back to Step 1B (Elicit Credentials)
+**If user chooses option 2**: STOP and wait for user to verify credentials
+
+#### Error Type 2: Network/Connection Failure
+
+**Error contains**: `ServiceUnavailable`, `Unable to retrieve routing information`, `Connection refused`, `timeout`, `no route to host`
+
+**Say to user**:
+```
+✗ Network Connection Failed
+
+Cannot reach Neo4j Aura. Possible causes:
+
+1. **Instance not running**: Check https://console.neo4j.io
+   - Ensure instance status is "Running" (not "Stopped" or "Paused")
+
+2. **Firewall blocking**: Your network may block outbound HTTPS (port 7687)
+   - Check firewall/antivirus settings
+
+3. **URI scheme issue**: [show current URI scheme]
+   - You're using: [neo4j+s:// or neo4j+ssc://]
+   - Running in VM: [yes/no]
+
+Would you like me to try fixing the URI scheme automatically?
+(This will change neo4j+s:// to neo4j+ssc:// if you're in a VM)
+```
+
+**If user says yes**:
+- If in VM and using `neo4j+s://`: Change to `neo4j+ssc://` and retry connection test
+- If already using `neo4j+ssc://` or not in VM:
+  ```
+  The URI scheme looks correct. This is likely a firewall or instance issue.
+  Please check:
+  1. Neo4j Aura instance is running
+  2. Your firewall allows outbound connections on port 7687
+  ```
+
+**If user says no**: STOP and report issue for user to resolve
+
+#### Error Type 3: SSL/Certificate Error
+
+**Error contains**: `SSLError`, `certificate verify failed`, `SSL handshake`
+
+**Say to user**:
+```
+✗ SSL Certificate Error
+
+The SSL certificate validation failed. This typically happens in VM environments.
+
+Current URI: [show URI]
+Running in VM: [yes/no]
+
+Would you like me to fix this by changing to neo4j+ssc://
+(which accepts self-signed certificates)?
+```
+
+**If user says yes**: Change URI to `neo4j+ssc://` and retry connection test
+**If user says no**: STOP and report issue
+
+#### Error Type 4: Database Not Found
+
+**Error contains**: `database does not exist`, `DatabaseNotFound`
+
+**Say to user**:
+```
+✗ Database Not Found
+
+The database '[show database name]' doesn't exist in your Neo4j Aura instance.
+
+Common causes:
+- Typo in database name
+- Database name should typically be 'neo4j' for Aura free tier
+
+Would you like me to:
+1. Try using the default database name 'neo4j'
+2. Let you specify a different database name
+```
+
+**Handle based on user choice**
+
+#### Error Type 5: Unknown Error
+
+**Say to user**:
+```
+✗ Connection Test Failed
+
+An unexpected error occurred:
+[Show full error message]
+
+This doesn't match any known error patterns. Please:
+1. Verify your Neo4j Aura instance is running at https://console.neo4j.io
+2. Check that your credentials are correct
+3. Ensure you have network connectivity
+
+Would you like to:
+1. Re-enter credentials and try again
+2. Skip connection test and proceed with setup (not recommended)
+```
+
+**Important**: Do NOT automatically proceed if connection test fails. Always report to user first and get their decision.
+
+## Step 6: Set Environment Variables
 
 **Environment variables to set**:
 ```
@@ -367,7 +613,7 @@ Would you like me to:
 3. Set user-level variables instead (may not work for all applications)
 ```
 
-## Step 6: Check for OpenAI API Key
+## Step 7: Check for OpenAI API Key
 
 **Action**: Verify OPENAI_API_KEY is set.
 
@@ -394,9 +640,9 @@ Would you like to set it now? (yes/no)
 
 **If yes**:
 - Ask: "Please enter your OpenAI API key (starts with 'sk-'):"
-- Set using same method as Step 5
+- Set using same method as Step 6
 
-## Step 7: Validation
+## Step 8: Validation
 
 **Verify each environment variable was set correctly**:
 
@@ -434,7 +680,7 @@ echo $OPENAI_API_KEY
 All environment variables configured successfully!
 ```
 
-## Step 8: Next Steps Instructions
+## Step 9: Next Steps Instructions
 
 **Tell the user**:
 ```
