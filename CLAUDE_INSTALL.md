@@ -87,19 +87,21 @@ cd graphiti
 
 **Example credentials format**:
 ```
-NEO4J_URI=neo4j+s://YOUR_INSTANCE_ID.databases.neo4j.io
+NEO4J_URI=neo4j+ssc://YOUR_INSTANCE_ID.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=YOUR_PASSWORD_HERE
 ```
 
-**⚠️ IMPORTANT FOR VMs**: If you're running in a Virtual Machine (Proxmox, VMware, VirtualBox, etc.), change the URI scheme from `neo4j+s://` to `neo4j+ssc://`:
+**⚠️ IMPORTANT - URI Scheme**: Use `neo4j+ssc://` (recommended for all environments):
+- ✅ Works on VMs (Proxmox, VMware, VirtualBox, Hyper-V, WSL2)
+- ✅ Works on bare metal (Windows, Mac, Linux)
+- ✅ Works in Docker containers
+- ✅ Accepts Neo4j Aura's self-signed certificates
+- ✅ Fully encrypted (TLS/SSL)
 
-```
-# VM-compatible URI (accepts self-signed certificates)
-NEO4J_URI=neo4j+ssc://YOUR_INSTANCE_ID.databases.neo4j.io
-```
+**Note**: Neo4j Aura provides `neo4j+s://` in downloaded credentials, but `neo4j+ssc://` is universally compatible. The automated scripts will fix this automatically.
 
-See the [VM Troubleshooting](#vm-troubleshooting-neo4j-routing-errors) section for details.
+See the [VM Troubleshooting](#vm-troubleshooting-neo4j-routing-errors) section for technical details.
 
 ### 3. Configure System Environment Variables
 
@@ -143,11 +145,13 @@ my Graphiti environment variables. My credentials are in credentials.txt
 **Prerequisites**:
 1. Create `credentials.txt` in repository root with your Neo4j Aura credentials:
    ```
-   NEO4J_URI=neo4j+s://xxxxx.databases.neo4j.io
+   NEO4J_URI=neo4j+ssc://xxxxx.databases.neo4j.io
    NEO4J_USERNAME=neo4j
    NEO4J_PASSWORD=your-generated-password
    NEO4J_DATABASE=neo4j
    ```
+
+   **Note**: Use `neo4j+ssc://` for universal compatibility (VMs and bare metal)
 
 **Run the script**:
 ```powershell
@@ -175,7 +179,7 @@ The script will:
 If scripts are not available, set manually via PowerShell (as Administrator):
 
 ```powershell
-# Use neo4j+ssc:// for VMs, or neo4j+s:// for bare metal
+# Use neo4j+ssc:// (recommended for universal compatibility)
 [Environment]::SetEnvironmentVariable('NEO4J_URI', 'neo4j+ssc://YOUR_INSTANCE.databases.neo4j.io', 'Machine')
 [Environment]::SetEnvironmentVariable('NEO4J_USER', 'neo4j', 'Machine')
 [Environment]::SetEnvironmentVariable('NEO4J_PASSWORD', 'YOUR_PASSWORD', 'Machine')
@@ -564,11 +568,11 @@ Neo4j Aura uses self-signed SSL certificates, but the `neo4j+s://` URI scheme re
 **The Fix**: Change URI scheme from `neo4j+s://` to `neo4j+ssc://`
 
 **URI Scheme Comparison**:
-| Scheme | Encryption | Certificate Requirement | Use Case |
-|--------|------------|-------------------------|----------|
-| `neo4j+s://` | ✅ Encrypted | CA-signed certificates | Bare metal systems |
-| `neo4j+ssc://` | ✅ Encrypted | Accepts self-signed | VMs, containers |
-| `neo4j://` | ❌ Unencrypted | None | Local development only |
+| Scheme | Encryption | Certificate Requirement | Compatibility | Recommended |
+|--------|------------|-------------------------|---------------|-------------|
+| `neo4j+ssc://` | ✅ Encrypted | Accepts self-signed | ✅ Universal (VMs, bare metal, containers) | ⭐ **Yes** |
+| `neo4j+s://` | ✅ Encrypted | CA-signed certificates | ⚠️ Bare metal only (fails in VMs) | No |
+| `neo4j://` | ❌ Unencrypted | None | ⚠️ Local development only | No |
 
 **Step-by-Step Fix**:
 
@@ -593,19 +597,23 @@ Neo4j Aura uses self-signed SSL certificates, but the `neo4j+s://` URI scheme re
 - The connection remains fully encrypted (TLS/SSL)
 - No security downgrade - just correct certificate validation
 
-**When to Use Which Scheme**:
-- **VMs (Proxmox, VMware, etc.)**: Use `neo4j+ssc://`
-- **Docker containers**: Use `neo4j+ssc://`
-- **WSL2**: Use `neo4j+ssc://`
-- **Bare metal Windows/Mac/Linux**: Either works, `neo4j+s://` preferred
-- **Local Neo4j Desktop**: Use `bolt://localhost:7687`
+**Recommended URI Scheme**:
+- **⭐ All Neo4j Aura connections**: Use `neo4j+ssc://` (universally compatible)
+  - ✅ Works on VMs (Proxmox, VMware, VirtualBox, Hyper-V)
+  - ✅ Works on bare metal (Windows, Mac, Linux)
+  - ✅ Works in Docker containers
+  - ✅ Works in WSL2
+  - ✅ Fully encrypted (TLS/SSL)
+- **Local Neo4j Desktop only**: Use `bolt://localhost:7687`
+
+**Note**: `neo4j+s://` works on bare metal but fails in VMs. Since `neo4j+ssc://` works everywhere, it's the recommended choice for Neo4j Aura.
 
 ## Current Configuration Summary
 
 | Component | Configuration | Reason |
 |-----------|---------------|--------|
 | **Database Backend** | Neo4j Aura (Cloud) | Zero setup, free tier, concurrent access |
-| **Database Location** | Remote (neo4j+s://xxx.databases.neo4j.io) | VM-agnostic, survives migrations |
+| **Database Location** | Remote (neo4j+ssc://xxx.databases.neo4j.io) | Universal compatibility, VM-agnostic |
 | **Configuration Method** | System environment variables | Secure, system-wide, easy to update |
 | **Python Package Manager** | uv | Fast, reliable dependency management |
 | **Graphiti Version** | Vanilla upstream (no custom modifications) | Clean state, easy to update |
