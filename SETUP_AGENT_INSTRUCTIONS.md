@@ -1,6 +1,8 @@
 # AI Agent Setup Instructions for Graphiti
 
 > **For AI Agents**: These are step-by-step instructions to configure Graphiti environment variables interactively with the user.
+>
+> **⚠️ SECURITY WARNING**: When updating this document or creating examples, NEVER include real credentials (passwords, API keys, instance IDs, URIs with actual instance IDs). Always use placeholders like `YOUR_PASSWORD_HERE`, `YOUR_INSTANCE_ID`, `neo4j+s://YOUR_INSTANCE_ID.databases.neo4j.io`.
 
 ## Overview
 

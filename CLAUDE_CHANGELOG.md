@@ -7,6 +7,7 @@
 > - **Cross-Reference**: Link to `CLAUDE_INSTALL.md` when changes affect installation steps
 > - **Verify First**: Only document changes after successful verification
 > - **Bidirectional Updates**: When updating this file, also update `CLAUDE_INSTALL.md` if installation steps changed
+> - **⚠️ SECURITY**: NEVER commit real credentials (passwords, API keys, instance IDs). Use placeholders like `YOUR_PASSWORD_HERE` or `YOUR_INSTANCE_ID` in examples
 
 ## Changelog Format
 

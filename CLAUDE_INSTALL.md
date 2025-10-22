@@ -6,6 +6,7 @@
 > 2. Add an entry to `CLAUDE_CHANGELOG.md` documenting what changed and why
 > 3. Verify the changes work before updating documentation
 > 4. Maintain the bidirectional relationship between this document and `CLAUDE_CHANGELOG.md`
+> 5. **⚠️ SECURITY**: NEVER commit real credentials. Always use placeholders in examples: `YOUR_PASSWORD_HERE`, `YOUR_INSTANCE_ID`, etc.
 
 ## Document Purpose
 
