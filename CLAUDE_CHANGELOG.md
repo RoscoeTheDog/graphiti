@@ -25,11 +25,148 @@
 ## [Unreleased] - Current Working State
 
 ### Summary
-Repository is in **vanilla state** (matches upstream), using **Neo4j Aura (Cloud)** backend with system environment variables for configuration. Zero local database setup required.
+Repository is in **vanilla state** (matches upstream), with **two database backend options**:
 
-**IMPORTANT**: VM users must use `neo4j+ssc://` URI scheme instead of `neo4j+s://` to avoid routing errors.
+1. **Neo4j Aura (Cloud)** - Zero setup, $65/month, VM-friendly (`neo4j+ssc://` URI scheme)
+2. **Neo4j Community Edition (Local Windows Service)** - Free, requires setup, runs in background
 
-**NEW**: Idiot-proof setup with automated script (`setup-graphiti-env.ps1`) and AI agent instructions (`SETUP_AGENT_INSTRUCTIONS.md`).
+Choose based on your needs:
+- **Cloud (Aura)**: Multi-machine access, zero maintenance, managed backups
+- **Local (Community)**: Free, private data, full control, fast performance
+
+**Documentation**:
+- Neo4j Aura setup: `CLAUDE_INSTALL_NEO4J_AURA.md`
+- Neo4j Community Edition setup: `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+- Troubleshooting: `CLAUDE_INSTALL_NEO4J_COMMUNITY_TROUBLESHOOTING.md`
+
+---
+
+## [2025-10-23] - Neo4j Community Edition Windows Service Setup
+
+### Added
+- **Neo4j Community Edition Setup Guide**: `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+  - **Purpose**: Free local alternative to Neo4j Aura ($65/month cloud service)
+  - **Target**: Windows 10/11 with Neo4j as background Windows service
+  - **Key Features**:
+    - Step-by-step installation (9 steps with validation)
+    - Java 21 installation via Chocolatey
+    - Windows Service configuration (background execution)
+    - Environment variable setup (`NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`)
+    - MCP server configuration for Claude Code
+    - Connection testing and verification
+  - **Benefits**: $0 cost, fast localhost performance, private data, offline capable
+  - **Trade-offs**: Manual setup (30-40 min), single machine only, self-managed backups
+  - **Related**: See § "Why Neo4j Community Edition (Local)?" in installation guide
+
+- **Comprehensive Troubleshooting Document**: `CLAUDE_INSTALL_NEO4J_COMMUNITY_TROUBLESHOOTING.md`
+  - **Purpose**: Complete record of all issues encountered during setup process
+  - **Content**: 7 major issues documented with root causes, solutions, and prevention strategies
+  - **Structure**: Problem → Symptoms → Root Cause → Solution → Impact → Recommendations
+  - **Issues Documented**:
+    1. Neo4j Community 2025.09.0 not available in Chocolatey (only v3.5.1)
+    2. Java 21 requirement not automatically detected (silent failure, empty logs)
+    3. Java installation requires PowerShell restart (PATH not updated in current session)
+    4. Claude Code doesn't see Java on PATH (requires full app restart)
+    5. Windows service command syntax changed in 2025.x (`windows-service install` vs `install-service`)
+    6. Neo4j service doesn't auto-start after install (explicit start required)
+    7. Console mode blocks terminal (foreground execution issue)
+  - **Lessons Learned**: Version-specific docs critical, env var propagation complex, silent failures worst UX
+  - **Prevention Strategies**: Prerequisite validation, version-specific logic, explicit checkpoints
+  - **Related**: See § "Lessons Learned" and § "Prevention Strategies" in troubleshooting doc
+
+### Changed
+- **CLAUDE_INSTALL.md** → **CLAUDE_INSTALL_NEO4J_AURA.md** (renamed)
+  - **Reason**: Preserve complete Neo4j Aura (cloud) setup guide while adding local option
+  - **Impact**: Users can now choose between cloud and local database backends
+  - **No content changes**: File renamed only, all Aura setup instructions preserved
+
+### Motivation
+
+**Cost consideration**: Neo4j Aura costs ~$65/month ($0.09/hour), which is expensive for personal development or testing environments.
+
+**Development workflow issue**: Neo4j Desktop (GUI) runs database in console mode by default, blocking terminal and disrupting development workflow.
+
+**Solution**: Neo4j Community Edition as Windows Service provides:
+- ✅ Free alternative ($0 vs $65/month)
+- ✅ Background execution (no terminal blocking)
+- ✅ Full Neo4j features (Community Edition capabilities)
+- ✅ Private data (stays on local machine)
+- ✅ Fast performance (localhost, no network latency)
+
+**Trade-offs accepted**:
+- ⚠️ Manual setup required (vs Aura's zero setup)
+- ⚠️ Single machine only (vs Aura's multi-machine access)
+- ⚠️ Self-managed backups (vs Aura's automatic backups)
+
+### Technical Details
+
+**Neo4j Version**: Community Edition 2025.09.0
+- **Download**: Manual (not available in Chocolatey)
+- **Java Requirement**: Java 21 (Temurin via Chocolatey)
+- **Installation Path**: `C:\neo4j\neo4j-community-2025.09.0`
+- **Service Mode**: Windows Service (background)
+- **Connection**: `bolt://localhost:7687`
+
+**Environment Variables** (system-level):
+```
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=user-set-password
+NEO4J_DATABASE=neo4j
+```
+
+**Note**: Different variable names than Aura setup (no `GRAPHITI_` prefix) to avoid conflicts when switching backends.
+
+**Service Management**:
+```powershell
+# Install
+.\bin\neo4j.bat windows-service install
+
+# Start/Stop
+Start-Service Neo4j / Stop-Service Neo4j
+
+# Status
+Get-Service Neo4j
+
+# Auto-start on boot
+Set-Service -Name Neo4j -StartupType Automatic
+```
+
+### Breaking Changes from Neo4j 4.x/5.x
+
+**Command syntax changed in Neo4j 2025.x**:
+- Old: `neo4j.bat install-service` (no longer works)
+- New: `neo4j.bat windows-service install` (subcommand structure)
+
+**Impact**: Documentation and scripts must use new syntax for Neo4j 2025.x. Old scripts will fail with "Unmatched argument" error.
+
+### Documentation Cross-References
+
+**Installation Guides**:
+- Neo4j Aura (Cloud): `CLAUDE_INSTALL_NEO4J_AURA.md`
+- Neo4j Community (Local): `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+
+**Troubleshooting**:
+- Detailed issue documentation: `CLAUDE_INSTALL_NEO4J_COMMUNITY_TROUBLESHOOTING.md`
+
+**Both docs link to each other** for:
+- Issue #1-7 references in installation guide point to troubleshooting doc
+- Troubleshooting doc links back to installation guide
+
+### Benefits of Two-Backend Strategy
+
+**Flexibility**:
+- Users choose based on needs (cost, setup complexity, access patterns)
+- Can switch between backends by changing environment variables
+- Documentation covers both options comprehensively
+
+**Cost-conscious development**:
+- Free local option for development/testing
+- Paid cloud option for production/multi-machine access
+
+**VM-friendly**:
+- Aura: Works in VMs with `neo4j+ssc://` URI scheme
+- Community: Works locally, no VM routing issues
 
 ---
 
