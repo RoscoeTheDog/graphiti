@@ -299,7 +299,58 @@ Set environment variables at **system level** (not user level) so they're availa
 
 **Note**: These use different variable names than the Aura setup (no `GRAPHITI_` prefix) to avoid conflicts if you switch between local and cloud.
 
-#### Set Variables via PowerShell
+#### Setup Methods
+
+Choose **ONE** of the following methods:
+
+##### Method 1: Interactive PowerShell Script (Recommended)
+
+**Location**: `C:\Users\Admin\Documents\GitHub\graphiti\setup-neo4j-community-env.ps1`
+
+**Run in PowerShell as Administrator**:
+
+```powershell
+cd C:\Users\Admin\Documents\GitHub\graphiti
+.\setup-neo4j-community-env.ps1
+```
+
+**What this script does**:
+- ✅ Checks for Administrator privileges
+- ✅ Shows current environment variable values
+- ✅ Prompts you to enter each credential
+- ✅ Provides defaults (bolt://localhost:7687, neo4j, etc.)
+- ✅ Asks for confirmation before setting
+- ✅ Verifies variables were set correctly
+- ✅ Shows next steps (restart PowerShell, restart Claude Code)
+
+**Example interaction**:
+```
+NEO4J_URI
+  For local Neo4j Community Edition: bolt://localhost:7687
+  Enter NEO4J_URI [bolt://localhost:7687]: (press Enter)
+
+NEO4J_USER
+  Default username is typically: neo4j
+  Enter NEO4J_USER [neo4j]: (press Enter)
+
+NEO4J_PASSWORD
+  Enter the password you set when first logging into Neo4j Browser
+  Enter NEO4J_PASSWORD: password
+
+NEO4J_DATABASE
+  Default database name is: neo4j
+  Enter NEO4J_DATABASE [neo4j]: (press Enter)
+
+Review your settings:
+  NEO4J_URI      : bolt://localhost:7687
+  NEO4J_USER     : neo4j
+  NEO4J_PASSWORD : password
+  NEO4J_DATABASE : neo4j
+
+Set these values? (Y/N): Y
+```
+
+##### Method 2: Manual PowerShell Commands
 
 **Run in PowerShell as Administrator**:
 
