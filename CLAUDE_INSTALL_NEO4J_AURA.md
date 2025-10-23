@@ -156,7 +156,7 @@ my Graphiti environment variables. My credentials are in credentials.txt
 **Run the script**:
 ```powershell
 # Script automatically elevates to Administrator if needed
-.\setup-graphiti-env.ps1
+.\setup-neo4j-aura-env.ps1
 ```
 
 The script will:
@@ -168,7 +168,7 @@ The script will:
 - ✅ Validate configuration
 - ✅ Display next steps
 
-**Location**: `C:\Users\Admin\Documents\GitHub\graphiti\setup-graphiti-env.ps1`
+**Location**: `C:\Users\Admin\Documents\GitHub\graphiti\setup-neo4j-aura-env.ps1`
 
 ##### Method 3: Manual Setup (Fallback)
 
@@ -317,8 +317,8 @@ Verify each variable individually in PowerShell:
 1. **Verify you ran the setup script as Administrator**:
    ```powershell
    # Run PowerShell as Administrator, then:
-   cd C:\Users\Admin\Downloads
-   .\setup-graphiti-env-vars.ps1
+   cd C:\Users\Admin\Documents\GitHub\graphiti
+   .\setup-neo4j-aura-env.ps1
    ```
 
 2. **Check if variables are set at User level instead** (wrong scope):
@@ -735,9 +735,9 @@ External (not in repo):
 C:\Users\Admin\.claude\
 ├── mcp_servers.json               ← Your MCP config (local, not committed)
 
-C:\Users\Admin\Downloads\
-├── setup-graphiti-env-vars.ps1    ← Setup script (local, not committed)
-└── verify-graphiti-env-vars.ps1   ← Verification script (local, not committed)
+C:\Users\Admin\Documents\GitHub\graphiti\
+├── setup-neo4j-aura-env.ps1       ← Aura setup script (in repo)
+└── setup-neo4j-community-env.ps1  ← Community setup script (in repo)
 ```
 
 ### Clean Git Status
@@ -760,7 +760,7 @@ This confirms:
 ## Related Documentation
 
 - See `CLAUDE_CHANGELOG.md` for history of configuration changes
-- See `setup-graphiti-env-vars.ps1` for environment variable setup script
+- See `setup-neo4j-aura-env.ps1` for environment variable setup script
 - See `verify-graphiti-env-vars.ps1` for verification script
 - See upstream docs: https://github.com/getzep/graphiti
 - See Neo4j Aura docs: https://neo4j.com/docs/aura/

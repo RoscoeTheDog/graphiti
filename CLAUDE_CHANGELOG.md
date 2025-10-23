@@ -198,7 +198,7 @@ Set-Service -Name Neo4j -StartupType Automatic
 ## [2025-10-22 Final] - Idiot-Proof Setup Process
 
 ### Added
-- **Automated Setup Script**: `setup-graphiti-env.ps1` in repository root
+- **Automated Setup Script**: `setup-neo4j-aura-env.ps1` in repository root
   - **Auto-elevation**: Automatically requests Administrator privileges if needed
   - **Credential parsing**: Reads from `credentials.txt` file (Neo4j Aura format)
   - **VM detection**: Auto-detects Virtual Machines and fixes URI scheme
@@ -229,7 +229,7 @@ Set-Service -Name Neo4j -StartupType Automatic
   - **Template tracked**: credentials.txt.template IS committed for reference
 
 ### Benefits
-- ✅ **One-command setup**: `.\setup-graphiti-env.ps1` does everything
+- ✅ **One-command setup**: `.\setup-neo4j-aura-env.ps1` does everything
 - ✅ **No admin confusion**: Script auto-elevates to Administrator
 - ✅ **VM-aware**: Automatically fixes neo4j+s:// → neo4j+ssc:// in VMs
 - ✅ **Error-proof**: Clear messages for every failure scenario
@@ -250,7 +250,7 @@ Set-Service -Name Neo4j -StartupType Automatic
 
 ### Changed
 - **Environment Variable Scripts**: Updated to use `neo4j+ssc://` by default
-  - **File**: `setup-graphiti-env-vars-final.ps1`
+  - **File**: `setup-neo4j-aura-env.ps1`
   - **Change**: `NEO4J_URI` now uses `neo4j+ssc://YOUR_INSTANCE_ID.databases.neo4j.io`
   - **Reason**: Prevent VM routing errors out of the box
   - **Impact**: Setup works on first try for VM users
@@ -309,7 +309,8 @@ Set-Service -Name Neo4j -StartupType Automatic
 ### Added
 - **PowerShell Setup Scripts**: Automated environment variable configuration
   - **Files**:
-    - `setup-graphiti-env-vars.ps1` - Sets environment variables (requires admin)
+    - `setup-neo4j-aura-env.ps1` - Sets environment variables for Aura (requires admin)
+    - `setup-neo4j-community-env.ps1` - Sets environment variables for Community Edition (requires admin)
     - `verify-graphiti-env-vars.ps1` - Verifies variables are set correctly
   - **Location**: `C:\Users\Admin\Downloads\`
   - **Reason**: Automate setup process, reduce human error
