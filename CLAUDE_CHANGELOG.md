@@ -41,6 +41,77 @@ Choose based on your needs:
 
 ---
 
+## [2025-10-29] - Neo4j Community Edition Setup Completion & MCP Configuration
+
+### Added
+- **Connection Test Script**: `test_neo4j_connection.py`
+  - **Purpose**: Automated Neo4j connection testing using environment variables
+  - **Key Features**:
+    - Automatic loading of machine-level environment variables on Windows via registry
+    - Cross-platform compatible (Windows/Linux/macOS)
+    - Displays loaded environment variables (with password masking)
+    - Validates all required environment variables before testing
+    - Clear success/failure messages with troubleshooting guidance
+  - **Usage**: `uv run python test_neo4j_connection.py`
+  - **Related**: See § "Test Neo4j Connection" in `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+
+- **MCP Server Configuration Script**: `update_claude_config_with_env.py` (temporary utility)
+  - **Purpose**: Update `.claude.json` with hardcoded Neo4j credentials for MCP server
+  - **Reason**: Claude Code's MCP configuration doesn't support environment variable references (e.g., `${NEO4J_URI}`)
+  - **Solution**: Read credentials from Windows registry and write actual values to configuration
+  - **Impact**: Enables graphiti-memory MCP server to connect to local Neo4j instance
+
+### Fixed
+- **MCP Server Configuration Issue**: `.claude.json` environment variable references
+  - **Problem**: Initial configuration used `${NEO4J_URI}` style references, which don't work in Claude Code
+  - **Root Cause**: Claude Code MCP server configuration requires hardcoded values, not variable references
+  - **Solution**: Created automated script to read from Windows registry and write actual values
+  - **Impact**: graphiti-memory MCP server now successfully connects to Neo4j Community Edition
+  - **Files Modified**:
+    - `.claude.json`: Global `mcpServers.graphiti-memory` updated with hardcoded Neo4j credentials
+    - `.claude.json`: Project-level `mcpServers` section added to enable graphiti-memory for this project
+
+- **Test Script Unicode Encoding Issue**: Windows console checkmark character error
+  - **Problem**: `✓` and `✗` Unicode characters caused `UnicodeEncodeError` on Windows (cp1252 codec)
+  - **Solution**: Replaced Unicode checkmarks with ASCII-safe `[OK]` and `[ERROR]` markers
+  - **Impact**: Test script now works reliably on Windows without encoding errors
+
+- **MCP Server Package Version**: Updated to use local editable installation
+  - **Change**: `mcp_server/pyproject.toml` now uses `graphiti-core = { path = "../", editable = true }`
+  - **Previous**: Used PyPI version `graphiti-core>=0.14.0`
+  - **Current**: Uses local editable version `0.22.0`
+  - **Reason**: Ensures MCP server uses latest local development version
+  - **Impact**: Changes to graphiti-core immediately reflected in MCP server without reinstall
+
+### Completed
+- **Neo4j Community Edition Windows Service Setup** (End-to-End)
+  - ✅ Neo4j Community 2025.09.0 installed to `C:\neo4j\neo4j-community-2025.09.0`
+  - ✅ Java 21 installed via Chocolatey (`temurin21`)
+  - ✅ Neo4j Windows Service installed and configured
+  - ✅ Neo4j service running in background (auto-starts on boot)
+  - ✅ Initial password set via Neo4j Browser (http://localhost:7474)
+  - ✅ System environment variables configured:
+    - `NEO4J_URI=bolt://localhost:7687`
+    - `NEO4J_USER=neo4j`
+    - `NEO4J_PASSWORD=<password>`
+    - `NEO4J_DATABASE=neo4j`
+  - ✅ Connection test passed (bolt://localhost:7687)
+  - ✅ MCP server configured in `.claude.json` with hardcoded credentials
+  - ✅ graphiti-memory MCP server successfully connecting to Neo4j
+
+### Documentation Updates
+- **None required**: All documentation was already accurate
+  - Installation guide correctly documented environment variable setup process
+  - Troubleshooting guide already covered major issues
+  - No bugs found in documented procedures
+
+### Lessons Learned
+- **MCP Configuration Constraints**: Claude Code MCP server configuration files (`.claude.json`) cannot use environment variable references like `${VAR_NAME}` - they require hardcoded values
+- **Windows Registry Access**: Python's `winreg` module provides reliable access to machine-level environment variables, superior to reading from current process environment in fresh sessions
+- **Setup Script Requirements**: Automated setup scripts must write actual credential values, not variable references, to MCP configuration files
+
+---
+
 ## [2025-10-23] - Neo4j Community Edition Windows Service Setup
 
 ### Added
