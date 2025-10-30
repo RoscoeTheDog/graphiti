@@ -44,15 +44,16 @@ Choose based on your needs:
 ## [2025-10-29] - Neo4j Community Edition Setup Completion & MCP Configuration
 
 ### Added
-- **Connection Test Script**: `test_neo4j_connection.py`
-  - **Purpose**: Automated Neo4j connection testing using environment variables
+- **Connection Test Script**: `test_neo4j_community_connection.py`
+  - **Purpose**: Automated Neo4j Community Edition (local) connection testing using environment variables
   - **Key Features**:
     - Automatic loading of machine-level environment variables on Windows via registry
     - Cross-platform compatible (Windows/Linux/macOS)
     - Displays loaded environment variables (with password masking)
     - Validates all required environment variables before testing
     - Clear success/failure messages with troubleshooting guidance
-  - **Usage**: `uv run python test_neo4j_connection.py`
+  - **Usage**: `uv run python test_neo4j_community_connection.py`
+  - **Note**: Renamed from `test_neo4j_connection.py` to clarify it tests local Community Edition, not Aura
   - **Related**: See § "Test Neo4j Connection" in `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
 
 - **MCP Server Configuration Script**: `update_claude_config_with_env.py` (temporary utility)
