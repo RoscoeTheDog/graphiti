@@ -1,5 +1,40 @@
 # Neo4j Community Edition Environment Variables Setup Script
-# Run this script in PowerShell as Administrator
+# DEPRECATED: Use setup-neo4j-community-wizard.ps1 instead
+#
+# This script is kept for reference but is no longer the recommended installation method.
+# The new wizard includes all functionality from this script plus:
+# - Prerequisite validation
+# - Automatic Neo4j detection
+# - Virtual environment creation
+# - Service installation
+# - .claude.json configuration
+# - Connection testing
+#
+# Migration: Run setup-neo4j-community-wizard.ps1 (as Administrator)
+
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Yellow
+Write-Host "DEPRECATED SCRIPT" -ForegroundColor Red
+Write-Host "========================================" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "This script is deprecated. Please use the new wizard instead:" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  .\setup-neo4j-community-wizard.ps1" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "The wizard includes environment variable setup plus:" -ForegroundColor White
+Write-Host "- Prerequisite validation" -ForegroundColor Gray
+Write-Host "- Auto-install of missing components (Chocolatey, Java, uv)" -ForegroundColor Gray
+Write-Host "- Neo4j installation detection" -ForegroundColor Gray
+Write-Host "- Virtual environment creation" -ForegroundColor Gray
+Write-Host "- Service installation and startup" -ForegroundColor Gray
+Write-Host "- .claude.json configuration" -ForegroundColor Gray
+Write-Host "- Connection testing" -ForegroundColor Gray
+Write-Host ""
+$continue = Read-Host "Continue anyway? (y/N)"
+if ($continue -ne 'y' -and $continue -ne 'Y') {
+    Write-Host "Exiting. Please run setup-neo4j-community-wizard.ps1 instead" -ForegroundColor Yellow
+    exit 0
+}
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

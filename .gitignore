@@ -120,6 +120,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+# Virtual environments excluded for system-agnostic distribution
+# Users should create venv locally with: python -m venv venv
 .env
 credentials.txt
 .venv

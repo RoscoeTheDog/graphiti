@@ -25,19 +25,133 @@
 ## [Unreleased] - Current Working State
 
 ### Summary
-Repository is in **vanilla state** (matches upstream), with **two database backend options**:
+Repository is in **system-agnostic state** with **AI-assisted setup wizard**, supporting **two database backend options**:
 
 1. **Neo4j Aura (Cloud)** - Zero setup, $65/month, VM-friendly (`neo4j+ssc://` URI scheme)
-2. **Neo4j Community Edition (Local Windows Service)** - Free, requires setup, runs in background
+2. **Neo4j Community Edition (Local Windows Service)** - Free, AI-assisted setup wizard, runs in background
+
+**New**: Interactive setup wizard (`setup-neo4j-community-wizard.ps1`) automates entire installation with user confirmation before any system changes.
 
 Choose based on your needs:
 - **Cloud (Aura)**: Multi-machine access, zero maintenance, managed backups
-- **Local (Community)**: Free, private data, full control, fast performance
+- **Local (Community)**: Free, private data, full control, fast performance, wizard-guided setup
 
 **Documentation**:
 - Neo4j Aura setup: `CLAUDE_INSTALL_NEO4J_AURA.md`
-- Neo4j Community Edition setup: `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+- Neo4j Community Edition setup: `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md` (now includes wizard instructions)
 - Troubleshooting: `CLAUDE_INSTALL_NEO4J_COMMUNITY_TROUBLESHOOTING.md`
+
+---
+
+## [2025-10-30] - Interactive Setup Wizard & System-Agnostic Packaging
+
+### Added
+- **Interactive Setup Wizard**: `setup-neo4j-community-wizard.ps1`
+  - **Purpose**: AI-assisted installation guide that automates Neo4j Community Edition setup with user consent
+  - **Key Features**:
+    - Non-invasive: Asks confirmation before ANY system changes
+    - Auto-installs Chocolatey and Java 21 (with admin privileges + user permission)
+    - Auto-detects Neo4j installations (version-agnostic, lists newest-to-oldest)
+    - Creates isolated virtual environment at repository root
+    - Windows-style numbered progress (Step X of 11)
+    - ASCII-compatible output (no Unicode characters)
+    - Validates prerequisites before starting
+    - Automatically configures `.claude.json` with hardcoded credentials
+    - Tests connection and provides troubleshooting
+  - **What it automates** (with user confirmation):
+    1. Prerequisite validation (Chocolatey, Java, Python 3.10+, uv)
+    2. Optional installation of missing components
+    3. Neo4j installation detection and selection
+    4. Virtual environment creation and dependency installation
+    5. Neo4j Windows Service installation
+    6. Service start and browser verification
+    7. Password setup guidance
+    8. System environment variable configuration
+    9. Claude Code MCP server configuration
+    10. Connection testing
+    11. Configuration summary display
+  - **Usage**: `.\setup-neo4j-community-wizard.ps1` (run as Administrator)
+  - **Estimated Time**: 30-40 minutes (same as manual, but with guidance)
+
+### Changed
+- **System-Agnostic Repository Structure**
+  - `.gitignore`: Added clarifying comment about virtual environment exclusion for portability
+  - Virtual environments now excluded from version control (created locally per system)
+  - Repository can now be cloned fresh on any system and wizard handles setup
+  - No system-specific paths or configurations committed
+
+- **Neo4j Path Handling**: Version-agnostic approach
+  - **Previous**: Hardcoded path `C:\neo4j\neo4j-community-2025.09.0`
+  - **Current**: Scans for any `neo4j-community-*` directory in `C:\neo4j\`
+  - **Benefit**: Works with any Neo4j Community Edition version (future-proof)
+  - **User Experience**: Lists all detected installations sorted newest-to-oldest, lets user select
+
+- **Python Environment Management**
+  - **Previous**: Global package installation or manual venv creation
+  - **Current**: Wizard creates isolated venv at repository root (`venv/`)
+  - **Benefit**: Clean dependency isolation, no global package pollution
+  - **Location**: `C:\Users\Admin\Documents\GitHub\graphiti\venv`
+
+- **Installation Documentation**: `CLAUDE_INSTALL_NEO4J_COMMUNITY_WINDOWS_SERVICE.md`
+  - Added "Option 1: Interactive Setup Wizard (Recommended)" as primary method
+  - Existing manual steps moved to "Option 2: Manual Step-by-Step Installation"
+  - Updated checklist to include virtual environment step
+  - Made Neo4j path references version-agnostic
+
+### Deprecated
+- **setup-neo4j-community-env.ps1**: Functionality merged into wizard
+  - **Reason**: Wizard includes environment variable setup + .claude.json configuration
+  - **Status**: File kept for reference but no longer primary method
+  - **Migration**: Use `setup-neo4j-community-wizard.ps1` instead
+
+### Fixed
+- **Chocolatey Installation**: Wizard auto-installs with user permission when admin privileges detected
+  - **Previous**: Manual installation required, blocked progress
+  - **Current**: Wizard offers to install automatically, provides command if no admin
+
+- **Java Installation**: Wizard auto-installs Java 21 via Chocolatey with user permission
+  - **Previous**: Manual Chocolatey command required
+  - **Current**: Wizard handles installation, restarts PowerShell reminder if needed
+
+- **Python Version Validation**: Wizard checks for Python 3.10+ before proceeding
+  - **Previous**: Assumption that compatible Python was installed
+  - **Current**: Validates version, exits with clear error if too old
+
+- **uv Package Manager**: Wizard offers to install if missing
+  - **Previous**: Manual installation required
+  - **Current**: Wizard can install automatically with `pip install uv`
+
+### Architecture Improvements
+- **Stateless Repository Design**
+  - No local virtual environments committed
+  - No system-specific configurations in version control
+  - Users create venv locally via wizard or manual commands
+  - .claude.json updated programmatically (not committed with credentials)
+
+- **Modular Confirmation System**
+  - `Confirm-Action` function handles all user prompts consistently
+  - Supports default Yes/No behaviors
+  - Clear (Y/n) or (y/N) indicators
+  - Non-invasive: Never assumes user consent
+
+- **Graceful Degradation**
+  - Wizard works without admin privileges (provides manual commands)
+  - Wizard works with existing installations (detects and skips)
+  - Wizard allows step-by-step progression (can exit and resume)
+
+### Documentation Updates
+- Updated installation guide with wizard as recommended method
+- Clarified that manual installation is for advanced users
+- Added wizard feature list and step breakdown
+- Updated Neo4j path references to be version-agnostic
+- Added virtual environment to installation checklist
+
+### Lessons Learned
+- **User Consent Critical**: Non-invasive approach builds trust, AI agents shouldn't make assumptions
+- **Version-Agnostic Paths**: Hardcoded versions break with updates, pattern matching is more robust
+- **Virtual Environment Isolation**: System-agnostic packaging requires local venv creation, not committed dependencies
+- **Progressive Enhancement**: Wizard auto-installs when possible, falls back to manual commands gracefully
+- **ASCII Compatibility**: Unicode characters (checkmarks) fail on Windows console, ASCII alternatives required
 
 ---
 

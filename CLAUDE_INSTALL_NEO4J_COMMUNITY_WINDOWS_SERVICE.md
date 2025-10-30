@@ -67,29 +67,87 @@ See `CLAUDE_INSTALL_NEO4J_AURA.md` for cloud setup instructions.
 6. **OpenAI API Key** (for LLM operations)
    - Get from: https://platform.openai.com/api-keys
 
-## Installation Steps
+## Installation Methods
 
-### Quick Start Checklist
+This guide provides **two installation approaches**:
 
-Follow these steps in order. Each step includes validation to ensure correctness before proceeding.
+### Option 1: Interactive Setup Wizard (Recommended) ⭐
 
-1. ✅ **Download Neo4j Community Edition** → Verify: Extracted to `C:\neo4j\neo4j-community-2025.09.0`
-2. ✅ **Install Java 21** → Verify: `java -version` shows Java 21
-3. ✅ **Install Neo4j Windows Service** → Verify: Service appears in Services (services.msc)
-4. ✅ **Start Neo4j Service** → Verify: http://localhost:7474 loads Neo4j Browser
-5. ✅ **Set Initial Password** → Verify: Can log into Neo4j Browser
-6. ✅ **Configure Environment Variables** → Verify: Variables appear in PowerShell
-7. ✅ **Configure MCP Server** → Verify: File exists at `.claude/mcp_servers.json`
-8. ✅ **Install Graphiti Dependencies** → Verify: `uv run python -c "import graphiti_core"`
-9. ✅ **Test Complete Setup** → Verify: MCP server connects in Claude Code
+Run the automated setup wizard that validates prerequisites, installs components with your permission, and guides you through each step:
+
+```powershell
+# Run as Administrator in PowerShell
+cd C:\Users\Admin\Documents\GitHub\graphiti
+.\setup-neo4j-community-wizard.ps1
+```
+
+**Features**:
+- ✅ Validates all prerequisites before starting (Chocolatey, Python 3.10+, uv)
+- ✅ Auto-installs Chocolatey and Java 21 with user confirmation (when admin privileges detected)
+- ✅ Auto-detects Neo4j installations and lists them newest-to-oldest
+- ✅ Creates isolated virtual environment at repository root (`venv/`)
+- ✅ Windows-style numbered progress (Step 1 of 11, Step 2 of 11, etc.)
+- ✅ Clear [OK] / [!] / [ERROR] status indicators
+- ✅ Non-invasive: Asks for confirmation before ANY system changes
+- ✅ Automatically configures `.claude.json` with hardcoded credentials
+- ✅ Tests connection and provides troubleshooting guidance
+- ✅ ASCII-compatible output for maximum compatibility
+
+**Requirements**:
+- Windows 10/11
+- Administrator privileges (for service installation and system environment variables)
+- Python 3.10+ already installed
+- Internet connection for downloading dependencies
+
+**What the wizard does**:
+1. Checks prerequisites (Chocolatey, Java, Python, uv)
+2. Offers to install missing components (Chocolatey, Java, uv)
+3. Scans for Neo4j installations in `C:\neo4j\` (version-agnostic)
+4. Creates virtual environment and installs dependencies
+5. Installs Neo4j as Windows Service
+6. Starts Neo4j service
+7. Guides password setup via browser
+8. Configures system environment variables
+9. Updates `.claude.json` for MCP server
+10. Tests connection
+11. Displays configuration summary
 
 **Estimated Time**: 30-40 minutes for fresh setup
 
 ---
 
+### Option 2: Manual Step-by-Step Installation
+
+Follow the detailed manual instructions below if you prefer full control or need to troubleshoot specific steps.
+
+### Quick Start Checklist
+
+Follow these steps in order. Each step includes validation to ensure correctness before proceeding.
+
+1. ✅ **Download Neo4j Community Edition** → Verify: Extracted to `C:\neo4j\neo4j-community-*`
+2. ✅ **Install Java 21** → Verify: `java -version` shows Java 21
+3. ✅ **Create Virtual Environment** → Verify: `venv\Scripts\python.exe` exists
+4. ✅ **Install Neo4j Windows Service** → Verify: Service appears in Services (services.msc)
+5. ✅ **Start Neo4j Service** → Verify: http://localhost:7474 loads Neo4j Browser
+6. ✅ **Set Initial Password** → Verify: Can log into Neo4j Browser
+7. ✅ **Configure Environment Variables** → Verify: Variables appear in PowerShell
+8. ✅ **Configure MCP Server** → Verify: `.claude.json` updated
+9. ✅ **Install Graphiti Dependencies** → Verify: `venv\Scripts\python -c "import graphiti_core"`
+10. ✅ **Test Complete Setup** → Verify: MCP server connects in Claude Code
+
+**Estimated Time**: 30-40 minutes for fresh setup
+
+**Note**: Manual installation requires more technical knowledge. The Interactive Setup Wizard (Option 1) is recommended for most users.
+
+---
+
+## Manual Installation Steps
+
 ### 1. Download Neo4j Community Edition
 
-Neo4j Community 2025.09.0 is **not available in Chocolatey** (only v3.5.1 is packaged). You must download manually.
+Neo4j Community Edition is **not available in Chocolatey** (only v3.5.1 is packaged). You must download manually.
+
+**Note**: This guide is version-agnostic. Any `neo4j-community-*` version will work, though 2025.09.0+ is recommended.
 
 #### Download Steps
 
