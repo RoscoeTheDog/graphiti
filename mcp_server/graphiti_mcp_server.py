@@ -34,8 +34,12 @@ from graphiti_core.search.search_config_recipes import (
 )
 from graphiti_core.search.search_filters import SearchFilters
 from graphiti_core.utils.maintenance.graph_data_operations import clear_data
+from mcp_server.unified_config import get_config
 
 load_dotenv()
+
+# Load unified config instance (will replace local GraphitiConfig)
+unified_config = get_config()
 
 
 DEFAULT_LLM_MODEL = 'gpt-4.1-mini'
@@ -571,29 +575,38 @@ mcp = FastMCP(
 # Initialize Graphiti client
 graphiti_client: Graphiti | None = None
 
+# Initialize filter manager (will be set if memory filtering enabled)
+filter_manager = None
+
 
 async def initialize_graphiti():
     """Initialize the Graphiti client with the configured settings."""
-    global graphiti_client, config
+    global graphiti_client, config, SEMAPHORE_LIMIT
 
     try:
+        # Get active database config from unified config
+        db_config = unified_config.database.get_active_config()
+
+        # Update semaphore limit from unified config
+        SEMAPHORE_LIMIT = unified_config.llm.semaphore_limit
+
         # Create LLM client if possible
         llm_client = config.llm.create_client()
         if not llm_client and config.use_custom_entities:
             # If custom entities are enabled, we must have an LLM client
             raise ValueError('OPENAI_API_KEY must be set when custom entities are enabled')
 
-        # Validate Neo4j configuration
-        if not config.neo4j.uri or not config.neo4j.user or not config.neo4j.password:
-            raise ValueError('NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD must be set')
+        # Validate database configuration
+        if not db_config.uri or not db_config.user or not db_config.password:
+            raise ValueError('Database URI, USER, and PASSWORD must be set')
 
         embedder_client = config.embedder.create_client()
 
-        # Initialize Graphiti client
+        # Initialize Graphiti client with unified config database
         graphiti_client = Graphiti(
-            uri=config.neo4j.uri,
-            user=config.neo4j.user,
-            password=config.neo4j.password,
+            uri=db_config.uri,
+            user=db_config.user,
+            password=db_config.password,
             llm_client=llm_client,
             embedder=embedder_client,
             max_coroutines=SEMAPHORE_LIMIT,
@@ -607,6 +620,26 @@ async def initialize_graphiti():
         # Initialize the graph database with Graphiti's indices
         await graphiti_client.build_indices_and_constraints()
         logger.info('Graphiti client initialized successfully')
+
+        # Initialize memory filter system (if enabled)
+        global filter_manager
+        if unified_config.memory_filter.enabled:
+            try:
+                from mcp_server.session_manager import SessionManager
+                from mcp_server.filter_manager import FilterManager
+
+                session_manager = SessionManager(unified_config.memory_filter.llm_filter)
+                filter_manager = FilterManager(session_manager)
+                logger.info("Memory filtering enabled")
+            except ImportError:
+                logger.warning("Filter system not yet implemented, filtering disabled")
+                filter_manager = None
+            except Exception as e:
+                logger.error(f"Failed to initialize filter system: {e}")
+                filter_manager = None
+        else:
+            logger.info("Memory filtering disabled in config")
+            filter_manager = None
 
         # Log configuration details for transparency
         if llm_client:
