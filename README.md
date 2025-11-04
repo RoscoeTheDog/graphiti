@@ -292,36 +292,6 @@ Use different LLM providers with hierarchical fallback:
 
 Configure multiple providers and Graphiti will automatically fall back if one fails.
 
-#### 🧠 Intelligent Memory Filtering (NEW!)
-The MCP server includes an LLM-based memory filter that intelligently decides what to store:
-
-**Stores (non-redundant insights)**:
-- `env-quirk` - Machine/OS-specific issues that can't be fixed in code
-- `user-pref` - User preferences and subjective choices
-- `external-api` - Third-party API quirks or undocumented behavior
-- `project-decision` - Architectural decisions and conventions
-- `workaround` - Non-obvious workarounds for limitations
-
-**Skips (already captured elsewhere)**:
-- `bug-in-code` - Bug fixes (now in version control)
-- `config-in-repo` - Configuration now committed
-- `docs-added` - Information now in documentation
-- `ephemeral` - Temporary issues, one-time events
-
-Use the `should_store` MCP tool to check if content should be stored before adding to memory:
-
-```python
-# In MCP server context
-result = await should_store(
-    content="User prefers 2-space indentation for Python",
-    context="Code formatting discussion"
-)
-
-if result["should_store"]:
-    # Add to Graphiti memory
-    await graphiti.add_episode(...)
-```
-
 #### ⚙️ Environment Variable Overrides
 Override specific settings via environment variables:
 - `MODEL_NAME` - Override default LLM model

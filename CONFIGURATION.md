@@ -77,7 +77,6 @@ The server will:
   "database": { /* Database backend settings */ },
   "llm": { /* LLM provider settings */ },
   "embedder": { /* Embedder settings */ },
-  "memory_filter": { /* Memory filtering settings */ },
   "project": { /* Project metadata */ },
   "search": { /* Search parameters */ },
   "logging": { /* Logging configuration */ }
@@ -294,81 +293,6 @@ Embedders generate vector representations for semantic search.
 
 ---
 
-## Memory Filter Configuration
-
-### Overview
-
-The memory filter uses LLM-based intelligent filtering to decide what should be stored in long-term memory.
-
-### Configuration Structure
-
-```json
-{
-  "memory_filter": {
-    "enabled": true,
-    "llm_filter": {
-      "providers": [
-        {
-          "name": "openai-primary",
-          "provider": "openai",
-          "model": "gpt-4o-mini",
-          "api_key": "${OPENAI_API_KEY}",
-          "max_queries_per_session": 50
-        },
-        {
-          "name": "anthropic-fallback",
-          "provider": "anthropic",
-          "model": "claude-3-5-haiku-20241022",
-          "api_key": "${ANTHROPIC_API_KEY}",
-          "max_queries_per_session": 50
-        }
-      ],
-      "session": {
-        "max_context_size": 10000,
-        "context_cleanup_threshold": 8000
-      },
-      "categories": {
-        "store": ["user-pref", "env-quirk", "external-api", "project-decision"],
-        "skip": ["bug-in-code", "config-in-repo", "docs-added", "ephemeral"]
-      }
-    }
-  }
-}
-```
-
-### Fields
-
-**memory_filter:**
-- `enabled` - Enable/disable filtering (boolean)
-
-**providers:** (hierarchical fallback)
-- `name` - Provider identifier
-- `provider` - "openai" or "anthropic"
-- `model` - Model to use for filtering
-- `api_key` - Use `${ENV_VAR}` syntax
-- `max_queries_per_session` - Rotate after N queries
-
-**session:**
-- `max_context_size` - Max tokens to track per session
-- `context_cleanup_threshold` - Reset context when reached
-
-**categories:**
-- `store` - Categories that should be stored
-- `skip` - Categories that should be skipped
-
-### Usage Example
-
-```python
-# Via MCP tool
-result = await should_store(
-    content="User prefers dark mode",
-    context="UI preferences discussion"
-)
-# Returns: {"should_store": true, "category": "user-pref", "reason": "..."}
-```
-
----
-
 ## Project Configuration
 
 ```json
@@ -469,9 +393,6 @@ MODEL_NAME=gpt-4o python -m mcp_server.graphiti_mcp_server
     "openai": {
       "api_key": "${OPENAI_API_KEY}"
     }
-  },
-  "memory_filter": {
-    "enabled": true
   }
 }
 ```
@@ -514,9 +435,6 @@ OPENAI_API_KEY=sk-your-key
       "api_version": "2024-02-15-preview",
       "deployment_name": "embedding-deployment"
     }
-  },
-  "memory_filter": {
-    "enabled": false
   }
 }
 ```
@@ -555,20 +473,6 @@ AZURE_OPENAI_API_KEY=your_azure_key
     "openai": {
       "api_key": "${OPENAI_API_KEY}"
     }
-  },
-  "memory_filter": {
-    "enabled": true,
-    "llm_filter": {
-      "providers": [
-        {
-          "name": "anthropic-filter",
-          "provider": "anthropic",
-          "model": "claude-3-5-haiku-20241022",
-          "api_key": "${ANTHROPIC_API_KEY}",
-          "max_queries_per_session": 100
-        }
-      ]
-    }
   }
 }
 ```
@@ -577,7 +481,6 @@ AZURE_OPENAI_API_KEY=your_azure_key
 ```bash
 NEO4J_PASSWORD=your_password
 OPENAI_API_KEY=sk-your-openai-key
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
 ```
 
 ---
@@ -642,29 +545,6 @@ print(f'User: {db.user}')
 ```
 
 **Solution:** Start database, verify URI/credentials in config
-
-### Filter System Not Working
-
-**Symptom:** Memory filter not filtering
-
-**Debug:**
-```bash
-# Check filter enabled
-python -c "
-from mcp_server.unified_config import get_config
-print(f'Enabled: {get_config().memory_filter.enabled}')
-"
-
-# Check providers available
-python -c "
-from mcp_server.unified_config import get_config
-config = get_config()
-for p in config.memory_filter.llm_filter.providers:
-    print(f'{p.name}: key={bool(p.api_key)}')
-"
-```
-
-**Solution:** Enable in config, ensure API keys set
 
 ### Invalid Configuration
 

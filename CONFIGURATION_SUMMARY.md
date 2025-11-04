@@ -53,18 +53,11 @@ Clean, project-local configuration system for LLM-based memory filtering with **
 
 ```
 graphiti/
-├── graphiti-filter.config.json       # ✅ Project config (version controlled)
-├── scripts/
-│   └── install-filter-config.sh      # ✅ Deployment script
+├── graphiti.config.json              # ✅ Project config (version controlled)
+├── .env                              # ✅ Secrets (API keys, passwords)
 └── mcp_server/
-    ├── filter_config.py               # Config loader (searches project → global → defaults)
-    ├── llm_provider.py
-    ├── session_manager.py
-    └── filter_manager.py
-
-Deployed to:
-~/.claude/
-└── graphiti-filter.config.json        # ✅ Global config (after installation)
+    ├── unified_config.py             # Unified configuration system
+    └── graphiti_mcp_server.py        # MCP server implementation
 ```
 
 ---
