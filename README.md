@@ -208,25 +208,242 @@ pip install graphiti-core[neptune]
 
 ## Configuration
 
-Graphiti uses unified configuration (`graphiti.config.json`) for all structural settings.
+Graphiti uses a **unified configuration system** for all structural settings:
 
-### Quick Start
+- **graphiti.config.json** - All project settings (database, LLM providers, memory filter, search, etc.)
+- **.env** - Secrets only (passwords, API keys)
 
-1. **Copy template**: `cp graphiti.config.json graphiti.config.local.json` (or edit `graphiti.config.json` directly)
-2. **Set secrets in `.env`**:
+This approach keeps your configuration organized, version-controllable, and easy to manage.
+
+### Quick Start Configuration
+
+1. **Copy the config template**:
    ```bash
-   NEO4J_PASSWORD=your_password
-   OPENAI_API_KEY=sk-your-key
+   cp graphiti.config.json graphiti.config.local.json
+   # Or edit graphiti.config.json directly
    ```
-3. **Start**: `python -m mcp_server.graphiti_mcp_server`
 
-See [Configuration Guide](implementation/guides/UNIFIED_CONFIG_SUMMARY.md) for complete details.
+2. **Set your secrets** in `.env`:
+   ```bash
+   # Database
+   NEO4J_PASSWORD=your_neo4j_password
+   # or for FalkorDB
+   FALKORDB_PASSWORD=your_falkordb_password
+   
+   # LLM Provider (choose one or more)
+   OPENAI_API_KEY=sk-your-openai-key
+   ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+   
+   # Azure OpenAI (optional)
+   AZURE_OPENAI_API_KEY=your-azure-key
+   AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+   ```
 
-### Migration
+3. **Customize settings** in `graphiti.config.json`:
+   ```json
+   {
+     "database": {
+       "backend": "neo4j",  // or "falkordb"
+       "neo4j": {
+         "uri": "bolt://localhost:7687",
+         "user": "neo4j"
+       }
+     },
+     "llm": {
+       "provider": "openai",  // or "anthropic", "azure_openai"
+       "default_model": "gpt-4o-mini",
+       "semaphore_limit": 10
+     },
+     "memory_filter": {
+       "enabled": true  // Enable intelligent memory filtering
+     }
+   }
+   ```
 
-Migrating from the old `.env` system? See [Migration Guide](implementation/guides/MIGRATION_GUIDE.md).
+4. **Start using Graphiti**:
+   ```python
+   from graphiti_core import Graphiti
+   from mcp_server.unified_config import get_config
+   
+   # Load config automatically
+   config = get_config()
+   
+   # Initialize Graphiti with your database
+   graphiti = Graphiti(uri, user, password)
+   ```
 
-For comprehensive configuration documentation, see [CONFIGURATION.md](CONFIGURATION.md).
+### Key Features
+
+#### 🔄 Multi-Backend Support
+Switch between database backends without code changes:
+- **Neo4j** (default) - Production-ready graph database
+- **FalkorDB** - Redis-based graph database
+- **Kuzu** - Embedded graph database
+- **Amazon Neptune** - AWS managed graph database
+
+Just change `database.backend` in config!
+
+#### 🤖 Multi-Provider LLM Support
+Use different LLM providers with hierarchical fallback:
+- **OpenAI** (default) - GPT-4, GPT-3.5, etc.
+- **Anthropic** - Claude models
+- **Azure OpenAI** - Enterprise OpenAI deployment
+- **Google Gemini** - Structured output support
+
+Configure multiple providers and Graphiti will automatically fall back if one fails.
+
+#### 🧠 Intelligent Memory Filtering (NEW!)
+The MCP server includes an LLM-based memory filter that intelligently decides what to store:
+
+**Stores (non-redundant insights)**:
+- `env-quirk` - Machine/OS-specific issues that can't be fixed in code
+- `user-pref` - User preferences and subjective choices
+- `external-api` - Third-party API quirks or undocumented behavior
+- `project-decision` - Architectural decisions and conventions
+- `workaround` - Non-obvious workarounds for limitations
+
+**Skips (already captured elsewhere)**:
+- `bug-in-code` - Bug fixes (now in version control)
+- `config-in-repo` - Configuration now committed
+- `docs-added` - Information now in documentation
+- `ephemeral` - Temporary issues, one-time events
+
+Use the `should_store` MCP tool to check if content should be stored before adding to memory:
+
+```python
+# In MCP server context
+result = await should_store(
+    content="User prefers 2-space indentation for Python",
+    context="Code formatting discussion"
+)
+
+if result["should_store"]:
+    # Add to Graphiti memory
+    await graphiti.add_episode(...)
+```
+
+#### ⚙️ Environment Variable Overrides
+Override specific settings via environment variables:
+- `MODEL_NAME` - Override default LLM model
+- `SEMAPHORE_LIMIT` - Control concurrency (default: 10)
+- `GRAPHITI_DB_BACKEND` - Switch database backend
+- `LLM_TEMPERATURE` - Adjust LLM temperature
+
+This allows runtime configuration without editing files.
+
+### Configuration Search Order
+
+Graphiti looks for configuration in this order:
+1. **Project directory** - `./graphiti.config.json`
+2. **Global directory** - `~/.claude/graphiti.config.json`
+3. **Built-in defaults** - Sensible defaults for all settings
+4. **Environment overrides** - Environment variables override all above
+
+### Migration from Old .env System
+
+If you're upgrading from a version that used `.env` for all configuration:
+
+```bash
+# Run the auto-migration script
+python implementation/scripts/migrate-to-unified-config.py
+
+# This will:
+# - Create graphiti.config.json from your .env
+# - Back up your old .env to .env.backup
+# - Update to the new system
+```
+
+See the [Migration Guide](implementation/guides/MIGRATION_GUIDE.md) for details.
+
+### Complete Documentation
+
+For comprehensive configuration documentation:
+- **[CONFIGURATION.md](CONFIGURATION.md)** - Complete reference for all settings
+- **[Unified Config Summary](implementation/guides/UNIFIED_CONFIG_SUMMARY.md)** - Quick reference
+- **[Migration Guide](implementation/guides/MIGRATION_GUIDE.md)** - Upgrade from old system
+- **[CLAUDE.md](CLAUDE.md)** - AI assistant integration guide
+
+### Example: Full Configuration
+
+```json
+{
+  "database": {
+    "backend": "neo4j",
+    "neo4j": {
+      "uri": "bolt://localhost:7687",
+      "user": "neo4j",
+      "password_env": "NEO4J_PASSWORD",
+      "database": "neo4j",
+      "pool_size": 50
+    }
+  },
+  
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4o-mini",
+    "temperature": 0.0,
+    "semaphore_limit": 10,
+    "max_retries": 3,
+    
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY"
+    },
+    
+    "anthropic": {
+      "api_key_env": "ANTHROPIC_API_KEY"
+    }
+  },
+  
+  "embedder": {
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "dimensions": 1536
+  },
+  
+  "memory_filter": {
+    "enabled": true,
+    "mode": "llm",
+    
+    "llm_filter": {
+      "providers": [
+        {
+          "name": "openai",
+          "model": "gpt-4o-mini",
+          "priority": 1
+        },
+        {
+          "name": "anthropic",
+          "model": "claude-3-5-haiku-20241022",
+          "priority": 2
+        }
+      ],
+      
+      "categories": {
+        "store": ["env-quirk", "user-pref", "external-api", "workaround"],
+        "skip": ["bug-in-code", "config-in-repo", "docs-added"]
+      }
+    }
+  },
+  
+  "project": {
+    "default_group_id": null,
+    "custom_entity_types": ["Requirement", "Preference", "Procedure"]
+  },
+  
+  "search": {
+    "default_max_nodes": 10,
+    "default_max_facts": 10,
+    "default_method": "hybrid_rrf"
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "log_filter_decisions": true,
+    "log_llm_calls": false
+  }
+}
+```
+
 
 ## Default to Low Concurrency; LLM Provider 429 Rate Limit Errors
 
