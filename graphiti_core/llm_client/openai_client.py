@@ -41,8 +41,8 @@ class OpenAIClient(BaseOpenAIClient):
         cache: bool = False,
         client: typing.Any = None,
         max_tokens: int = DEFAULT_MAX_TOKENS,
-        reasoning: str = DEFAULT_REASONING,
-        verbosity: str = DEFAULT_VERBOSITY,
+        reasoning: str | None = None,  # Only pass for o1/o3 models
+        verbosity: str | None = None,  # Verbosity support varies by model
     ):
         """
         Initialize the OpenAIClient with the provided configuration, cache setting, and client.
@@ -72,16 +72,30 @@ class OpenAIClient(BaseOpenAIClient):
         reasoning: str | None = None,
         verbosity: str | None = None,
     ):
-        """Create a structured completion using OpenAI's beta parse API."""
-        response = await self.client.responses.parse(
-            model=model,
-            input=messages,  # type: ignore
-            temperature=temperature,
-            max_output_tokens=max_tokens,
-            text_format=response_model,  # type: ignore
-            reasoning={'effort': reasoning} if reasoning is not None else None,  # type: ignore
-            text={'verbosity': verbosity} if verbosity is not None else None,  # type: ignore
-        )
+        """Create a structured completion using OpenAI's beta parse API.
+
+        Note: The responses.parse API has limited parameter support compared to chat.completions.
+        Temperature, reasoning, and verbosity may not be supported on all models.
+        """
+        # Build kwargs dynamically to only include supported parameters
+        kwargs = {
+            'model': model,
+            'input': messages,  # type: ignore
+            'max_output_tokens': max_tokens,
+            'text_format': response_model,  # type: ignore
+        }
+
+        # Only include optional parameters if they're provided
+        # Note: responses.parse API doesn't support temperature for most models
+        # Only add it for models that explicitly support it (none currently do)
+
+        if reasoning is not None:
+            kwargs['reasoning'] = {'effort': reasoning}  # type: ignore
+
+        if verbosity is not None:
+            kwargs['text'] = {'verbosity': verbosity}  # type: ignore
+
+        response = await self.client.responses.parse(**kwargs)
 
         return response
 

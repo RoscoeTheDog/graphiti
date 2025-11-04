@@ -33,8 +33,8 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = 'gpt-5-mini'
 DEFAULT_SMALL_MODEL = 'gpt-5-nano'
-DEFAULT_REASONING = 'minimal'
-DEFAULT_VERBOSITY = 'low'
+DEFAULT_REASONING = None  # Only o1/o3 models support reasoning.effort parameter
+DEFAULT_VERBOSITY = None  # Verbosity support varies by model
 
 
 class BaseOpenAIClient(LLMClient):
