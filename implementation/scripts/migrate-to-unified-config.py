@@ -1,39 +1,3 @@
-# Phase 5 Checkpoint: Migration & Cleanup
-
-**Status**: ✅ Complete
-**Progress**: 3/3 tasks complete (100%)
-**Estimated Time**: 2 hours
-**Actual Time**: ~30 minutes
-**Dependencies**: Phase 4 complete
-
----
-
-## 🎯 Objective
-Create migration tooling and clean up deprecated configuration files.
-
-## ✅ Prerequisites
-- [ ] Phase 4 complete (`phase-4-complete` tag exists)
-- [ ] Migration tested manually with old .env
-- [ ] Backup created before testing
-
----
-
-## 📋 Tasks
-
-### Task 5.1: Create Migration Script ⏱️ 1 hour
-**File**: `implementation/scripts/migrate-to-unified-config.py` (NEW)
-
-#### Subtasks
-- [ ] Create `implementation/scripts/` directory if needed
-- [ ] Copy complete migration script below
-- [ ] Make script executable: `chmod +x implementation/scripts/migrate-to-unified-config.py`
-- [ ] Test with `--dry-run` flag first
-
-#### Complete Migration Script
-
-**Create `implementation/scripts/migrate-to-unified-config.py` with this content:**
-
-```python
 #!/usr/bin/env python3
 """
 Migrate from scattered .env configuration to unified config system.
@@ -135,7 +99,7 @@ def read_env_file(path: str = '.env') -> Dict[str, str]:
     env_vars = {}
 
     if not Path(path).exists():
-        print(f"⚠️  .env file not found at: {path}")
+        print(f"[WARNING]  .env file not found at: {path}")
         return env_vars
 
     with open(path, 'r') as f:
@@ -160,7 +124,7 @@ def read_env_file(path: str = '.env') -> Dict[str, str]:
 
                 env_vars[key] = value
             else:
-                print(f"⚠️  Skipping invalid line {line_num}: {line}")
+                print(f"[WARNING]  Skipping invalid line {line_num}: {line}")
 
     return env_vars
 
@@ -206,7 +170,7 @@ def generate_config_from_env(env_vars: Dict[str, str]) -> Dict[str, Any]:
     if template_path.exists():
         with open(template_path) as f:
             config = json.load(f)
-        print(f"✓ Loaded template from: {template_path}")
+        print(f"[OK] Loaded template from: {template_path}")
     else:
         # Minimal default if template not found
         config = {
@@ -215,7 +179,7 @@ def generate_config_from_env(env_vars: Dict[str, str]) -> Dict[str, Any]:
             "embedder": {"openai": {}, "azure_openai": {}},
             "memory_filter": {"enabled": True},
         }
-        print("⚠️  Template not found, using minimal defaults")
+        print("[WARNING]  Template not found, using minimal defaults")
 
     # Apply environment variable mappings
     applied_count = 0
@@ -233,9 +197,9 @@ def generate_config_from_env(env_vars: Dict[str, str]) -> Dict[str, Any]:
 
                 set_nested_value(config, config_path, value)
                 applied_count += 1
-                print(f"  ✓ Mapped: {env_key} → {config_path}")
+                print(f"  [OK] Mapped: {env_key} → {config_path}")
             except (ValueError, TypeError) as e:
-                print(f"  ⚠️  Failed to convert {env_key}: {e}")
+                print(f"  [WARNING]  Failed to convert {env_key}: {e}")
 
     # Auto-detect providers
     llm_provider = detect_llm_provider(env_vars)
@@ -243,10 +207,10 @@ def generate_config_from_env(env_vars: Dict[str, str]) -> Dict[str, Any]:
 
     set_nested_value(config, "llm.provider", llm_provider)
     set_nested_value(config, "embedder.provider", embedder_provider)
-    print(f"  ✓ Detected LLM provider: {llm_provider}")
-    print(f"  ✓ Detected embedder provider: {embedder_provider}")
+    print(f"  [OK] Detected LLM provider: {llm_provider}")
+    print(f"  [OK] Detected embedder provider: {embedder_provider}")
 
-    print(f"\n✓ Applied {applied_count} environment variable mappings")
+    print(f"\n[OK] Applied {applied_count} environment variable mappings")
 
     return config
 
@@ -276,9 +240,9 @@ def extract_secrets(env_vars: Dict[str, str]) -> str:
     if not found_secrets:
         lines.append("# No secrets found in original .env")
 
-    print(f"\n✓ Extracted {len(found_secrets)} secrets")
+    print(f"\n[OK] Extracted {len(found_secrets)} secrets")
     for secret in found_secrets:
-        print(f"  ✓ {secret}")
+        print(f"  [OK] {secret}")
 
     return '\n'.join(lines) + '\n'
 
@@ -304,14 +268,14 @@ def backup_old_files() -> Tuple[list, list]:
             backup_name = f"{filename}.backup.{timestamp}"
             shutil.copy(filename, backup_name)
             backed_up.append(filename)
-            print(f"  ✓ Backed up: {filename} → {backup_name}")
+            print(f"  [OK] Backed up: {filename} → {backup_name}")
         else:
             missing.append(filename)
 
     if backed_up:
-        print(f"\n✓ Backed up {len(backed_up)} files")
+        print(f"\n[OK] Backed up {len(backed_up)} files")
     if missing:
-        print(f"ℹ️  Not found (skipped): {', '.join(missing)}")
+        print(f"[INFO]  Not found (skipped): {', '.join(missing)}")
 
     return backed_up, missing
 
@@ -347,12 +311,12 @@ def validate_config(config: Dict[str, Any]) -> bool:
             errors.append(f"Invalid LLM provider: {provider}")
 
     if errors:
-        print("\n❌ Configuration validation failed:")
+        print("\n[ERROR] Configuration validation failed:")
         for error in errors:
             print(f"  - {error}")
         return False
 
-    print("\n✅ Configuration validation passed")
+    print("\n[OK] Configuration validation passed")
     return True
 
 
@@ -372,100 +336,100 @@ def migrate(dry_run: bool = False, force: bool = False) -> int:
         Exit code (0 = success, 1 = error)
     """
     print("=" * 70)
-    print("📦 Graphiti Configuration Migration Tool")
+    print("Graphiti Configuration Migration Tool")
     print("=" * 70)
     print()
 
     # Safety checks
     config_path = Path('graphiti.config.json')
     if config_path.exists() and not force and not dry_run:
-        print(f"⚠️  {config_path} already exists!")
+        print(f"[WARNING]  {config_path} already exists!")
         response = input("   Overwrite? (y/N): ").strip().lower()
         if response != 'y':
-            print("\n❌ Migration aborted by user")
+            print("\n[ERROR] Migration aborted by user")
             return 1
 
     # Step 1: Read old .env
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 1: Reading .env file")
-    print("─" * 70)
+    print("-" * 70)
     env_vars = read_env_file('.env')
 
     if not env_vars:
-        print("\n⚠️  No environment variables found")
+        print("\n[WARNING]  No environment variables found")
         print("   Nothing to migrate!")
         return 0
 
-    print(f"✓ Found {len(env_vars)} environment variables")
+    print(f"[OK] Found {len(env_vars)} environment variables")
 
     # Step 2: Generate config
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 2: Generating unified configuration")
-    print("─" * 70)
+    print("-" * 70)
     config = generate_config_from_env(env_vars)
 
     # Step 3: Validate
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 3: Validating configuration")
-    print("─" * 70)
+    print("-" * 70)
     if not validate_config(config):
         return 1
 
     # Step 4: Extract secrets
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 4: Creating minimal .env")
-    print("─" * 70)
+    print("-" * 70)
     new_env = extract_secrets(env_vars)
 
     # Preview mode
     if dry_run:
         print("\n" + "=" * 70)
-        print("🔍 DRY RUN MODE - No files will be modified")
+        print("DRY RUN MODE - No files will be modified")
         print("=" * 70)
 
-        print("\n📄 New graphiti.config.json:")
-        print("─" * 70)
+        print("\nNew graphiti.config.json:")
+        print("-" * 70)
         print(json.dumps(config, indent=2)[:1000])
         if len(json.dumps(config, indent=2)) > 1000:
             print("... (truncated, full output would be written)")
 
-        print("\n📄 New .env:")
-        print("─" * 70)
+        print("\nNew .env:")
+        print("-" * 70)
         print(new_env)
 
-        print("\n✅ Dry run complete. Run without --dry-run to apply changes.")
+        print("\nDry run complete. Run without --dry-run to apply changes.")
         return 0
 
     # Step 5: Backup
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 5: Backing up old files")
-    print("─" * 70)
+    print("-" * 70)
     backup_old_files()
 
     # Step 6: Write new files
-    print("\n" + "─" * 70)
+    print("\n" + "-" * 70)
     print("Step 6: Writing new configuration")
-    print("─" * 70)
+    print("-" * 70)
 
     # Write graphiti.config.json
     with open('graphiti.config.json', 'w') as f:
         json.dump(config, f, indent=2)
-    print(f"  ✓ Created: graphiti.config.json")
+    print(f"  [OK] Created: graphiti.config.json")
 
     # Write minimal .env
     with open('.env', 'w') as f:
         f.write(new_env)
-    print(f"  ✓ Created: .env (minimal)")
+    print(f"  [OK] Created: .env (minimal)")
 
     # Success
     print("\n" + "=" * 70)
-    print("✨ Migration Complete!")
+    print("Migration Complete!")
     print("=" * 70)
-    print("\n📝 Next steps:")
+    print("\nNext steps:")
     print("  1. Review graphiti.config.json")
     print("  2. Test: python -m mcp_server.graphiti_mcp_server")
     print("  3. Commit graphiti.config.json to git (DO NOT commit .env)")
-    print("\n💾 Backup files created with timestamp suffix (.backup.YYYYMMDD_HHMMSS)")
+    print("\nBackup files created with timestamp suffix (.backup.YYYYMMDD_HHMMSS)")
     print("\n")
 
     return 0
@@ -487,158 +451,3 @@ if __name__ == '__main__':
     # Run migration
     exit_code = migrate(dry_run=dry_run, force=force)
     sys.exit(exit_code)
-```
-
-#### Usage Examples
-
-```bash
-# Preview migration (no changes)
-python implementation/scripts/migrate-to-unified-config.py --dry-run
-
-# Run migration (interactive)
-python implementation/scripts/migrate-to-unified-config.py
-
-# Force overwrite (no prompts)
-python implementation/scripts/migrate-to-unified-config.py --force
-
-# Make executable (optional)
-chmod +x implementation/scripts/migrate-to-unified-config.py
-./implementation/scripts/migrate-to-unified-config.py --dry-run
-```
-
-#### Validation
-
-```bash
-# Test migration in temporary directory
-mkdir /tmp/migration-test
-cp .env /tmp/migration-test/
-cd /tmp/migration-test
-python /path/to/graphiti/implementation/scripts/migrate-to-unified-config.py --dry-run
-
-# Check generated config loads
-python -c "
-import json
-with open('graphiti.config.json') as f:
-    config = json.load(f)
-print('✅ Valid JSON')
-print(f'Backend: {config[\"database\"][\"backend\"]}')
-print(f'LLM Provider: {config[\"llm\"][\"provider\"]}')
-"
-```
-
----
-
-### Task 5.2: Update .gitignore ⏱️ 15 min
-**File**: `.gitignore`
-
-#### Subtasks
-- [ ] Add backup files to gitignore:
-  ```
-  # Backup files (from migration)
-  *.backup
-  .env.backup*
-  graphiti-filter.config.json.backup
-  ```
-- [ ] Ensure .env ignored: `.env` `.env.local` `.env.*.local`
-- [ ] Ensure graphiti.config.json NOT ignored (should be committed)
-- [ ] Add comment explaining what should be version controlled
-
----
-
-### Task 5.3: Add Deprecation Warnings ⏱️ 20 min
-**File**: `mcp_server/graphiti_mcp_server.py`
-
-#### Subtasks
-- [ ] Add `check_deprecated_config()` function:
-  ```python
-  def check_deprecated_config():
-      """Warn if old config files detected."""
-      if Path('graphiti-filter.config.json').exists():
-          logger.warning(
-              "⚠️  DEPRECATED: graphiti-filter.config.json\n"
-              "   Migrate to: graphiti.config.json\n"
-              "   See: implementation/guides/MIGRATION_GUIDE.md"
-          )
-      
-      # Check for excessive env vars
-      graphiti_vars = [k for k in os.environ 
-                       if any(x in k for x in ['NEO4J', 'MODEL', 'EMBEDDER'])]
-      if len(graphiti_vars) > 10:
-          logger.warning(
-              "⚠️  Many environment variables detected\n"
-              "   Consider migrating to graphiti.config.json\n"
-              "   Run: python implementation/scripts/migrate-to-unified-config.py"
-          )
-  ```
-- [ ] Call in `initialize_graphiti()` after config loads
-- [ ] Test warnings appear when old config detected
-
----
-
-## 🧪 Validation
-
-- [ ] **V1**: Migration script runs
-  ```bash
-  python implementation/scripts/migrate-to-unified-config.py --dry-run
-  ```
-
-- [ ] **V2**: Generated config valid
-  ```bash
-  # After migration
-  python -c "from mcp_server.unified_config import get_config; print(get_config())"
-  ```
-
-- [ ] **V3**: .gitignore correct
-  ```bash
-  git check-ignore .env graphiti.config.json
-  # .env should be ignored, graphiti.config.json should NOT
-  ```
-
-- [ ] **V4**: Deprecation warnings work
-  ```bash
-  touch graphiti-filter.config.json
-  python -m mcp_server.graphiti_mcp_server 2>&1 | grep DEPRECATED
-  rm graphiti-filter.config.json
-  ```
-
-- [ ] **V5**: Test migration on sample data
-  ```bash
-  pytest tests/test_migration.py -v
-  ```
-
----
-
-## 📝 Git Commit
-
-```bash
-git add implementation/scripts/migrate-to-unified-config.py
-git add .gitignore
-git add mcp_server/graphiti_mcp_server.py
-
-git commit -m "Phase 5: Add migration tooling and cleanup
-
-- Create auto-migration script from .env to unified config
-- Update .gitignore for new config system
-- Add deprecation warnings for old config files
-- Migration tested with sample configurations
-
-Refs: implementation/checkpoints/CHECKPOINT_PHASE5.md"
-
-git tag -a phase-5-complete -m "Phase 5: Migration & Cleanup Complete"
-```
-
----
-
-## 📊 Progress Tracking
-
-- Task 5.1: [ ] Not Started | [ ] In Progress | [ ] Complete
-- Task 5.2: [ ] Not Started | [ ] In Progress | [ ] Complete
-- Task 5.3: [ ] Not Started | [ ] In Progress | [ ] Complete
-
-**Time**: Estimated 2h | Actual: [fill in]
-
----
-
-**Next**: [CHECKPOINT_PHASE6.md](CHECKPOINT_PHASE6.md)
-
-**Last Updated**: 2025-11-03

@@ -122,8 +122,11 @@ celerybeat.pid
 # Environments
 # Virtual environments excluded for system-agnostic distribution
 # Note: Only root .venv is used (mcp_server/.venv removed)
+# IMPORTANT: .env contains SECRETS (gitignored)
+#            graphiti.config.json contains STRUCTURE (version controlled - NOT ignored)
 .env
 .env.local
+.env.*.local
 credentials.txt
 .venv
 env/

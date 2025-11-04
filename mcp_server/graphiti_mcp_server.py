@@ -10,6 +10,7 @@ import os
 import sys
 from collections.abc import Callable
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, TypedDict, cast
 
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
@@ -579,11 +580,36 @@ graphiti_client: Graphiti | None = None
 filter_manager = None
 
 
+def check_deprecated_config():
+    """Warn if old config files detected."""
+    # Check for deprecated graphiti-filter.config.json
+    if Path('graphiti-filter.config.json').exists():
+        logger.warning(
+            "⚠️  DEPRECATED: graphiti-filter.config.json detected\n"
+            "   Migrate to: graphiti.config.json\n"
+            "   See: implementation/guides/MIGRATION_GUIDE.md"
+        )
+
+    # Check for excessive env vars
+    graphiti_vars = [k for k in os.environ
+                     if any(x in k for x in ['NEO4J', 'MODEL', 'EMBEDDER', 'AZURE'])]
+    if len(graphiti_vars) > 10:
+        logger.warning(
+            "⚠️  Many environment variables detected (%d found)\n"
+            "   Consider migrating to graphiti.config.json\n"
+            "   Run: python implementation/scripts/migrate-to-unified-config.py",
+            len(graphiti_vars)
+        )
+
+
 async def initialize_graphiti():
     """Initialize the Graphiti client with the configured settings."""
     global graphiti_client, config, SEMAPHORE_LIMIT
 
     try:
+        # Check for deprecated configuration files
+        check_deprecated_config()
+
         # Get active database config from unified config
         db_config = unified_config.database.get_active_config()
 
