@@ -71,62 +71,6 @@
     }
   },
 
-  "memory_filter": {
-    "enabled": true,
-    "mode": "llm",
-
-    "llm_filter": {
-      "providers": [
-        {
-          "name": "openai",
-          "model": "gpt-4o-mini",
-          "api_key_env": "OPENAI_API_KEY",
-          "temperature": 0.0,
-          "max_tokens": 200,
-          "enabled": true,
-          "priority": 1
-        },
-        {
-          "name": "anthropic",
-          "model": "claude-haiku-3-5-20241022",
-          "api_key_env": "ANTHROPIC_API_KEY",
-          "temperature": 0.0,
-          "max_tokens": 200,
-          "enabled": true,
-          "priority": 2
-        }
-      ],
-
-      "session": {
-        "max_context_tokens": 5000,
-        "auto_cleanup": true,
-        "session_timeout_minutes": 60
-      },
-
-      "categories": {
-        "store": [
-          "env-quirk",
-          "user-pref",
-          "external-api",
-          "historical-context",
-          "cross-project",
-          "workaround"
-        ],
-        "skip": [
-          "bug-in-code",
-          "config-in-repo",
-          "docs-added",
-          "first-success"
-        ]
-      }
-    },
-
-    "rule_based_filter": {
-      "enabled": false,
-      "rules": []
-    }
-  },
-
   "project": {
     "default_group_id": null,
     "namespace": null,

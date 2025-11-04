@@ -222,92 +222,6 @@ class EmbedderConfig(BaseModel):
 
 
 # ============================================================================
-# Memory Filter Configuration
-# ============================================================================
-
-
-class LLMFilterProviderConfig(BaseModel):
-    """Configuration for a single LLM filter provider"""
-
-    name: Literal["openai", "anthropic"]
-    model: str
-    api_key_env: str
-    temperature: float = 0.0
-    max_tokens: int = 200
-    enabled: bool = True
-    priority: int = 1
-
-    @property
-    def api_key(self) -> Optional[str]:
-        """Resolve API key from environment"""
-        return os.environ.get(self.api_key_env)
-
-
-class FilterSessionConfig(BaseModel):
-    """Session management configuration for filter"""
-
-    max_context_tokens: int = 5000
-    auto_cleanup: bool = True
-    session_timeout_minutes: int = 60
-
-
-class FilterCategoriesConfig(BaseModel):
-    """Filter categories configuration"""
-
-    store: list[str] = Field(
-        default_factory=lambda: [
-            "env-quirk",
-            "user-pref",
-            "external-api",
-            "historical-context",
-            "cross-project",
-            "workaround",
-        ]
-    )
-    skip: list[str] = Field(
-        default_factory=lambda: [
-            "bug-in-code",
-            "config-in-repo",
-            "docs-added",
-            "first-success",
-        ]
-    )
-
-
-class LLMFilterConfig(BaseModel):
-    """LLM-based filter configuration"""
-
-    providers: list[LLMFilterProviderConfig] = Field(default_factory=list)
-    session: FilterSessionConfig = Field(default_factory=FilterSessionConfig)
-    categories: FilterCategoriesConfig = Field(default_factory=FilterCategoriesConfig)
-
-    def get_sorted_providers(self) -> list[LLMFilterProviderConfig]:
-        """Get providers sorted by priority (lower number = higher priority)"""
-        return sorted(
-            [p for p in self.providers if p.enabled], key=lambda p: p.priority
-        )
-
-
-class RuleBasedFilterConfig(BaseModel):
-    """Rule-based filter configuration (future implementation)"""
-
-    enabled: bool = False
-    rules: list[dict[str, Any]] = Field(default_factory=list)
-
-
-class MemoryFilterConfig(BaseModel):
-    """Memory filter configuration"""
-
-    enabled: bool = True
-    mode: Literal["llm", "rule_based", "hybrid"] = "llm"
-
-    llm_filter: LLMFilterConfig = Field(default_factory=LLMFilterConfig)
-    rule_based_filter: RuleBasedFilterConfig = Field(
-        default_factory=RuleBasedFilterConfig
-    )
-
-
-# ============================================================================
 # Project Configuration
 # ============================================================================
 
@@ -396,7 +310,6 @@ class GraphitiConfig(BaseModel):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
-    memory_filter: MemoryFilterConfig = Field(default_factory=MemoryFilterConfig)
     project: ProjectConfig = Field(default_factory=ProjectConfig)
     search: SearchConfig = Field(default_factory=SearchConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
@@ -464,26 +377,6 @@ class GraphitiConfig(BaseModel):
                 small_model="gpt-4.1-nano",
             ),
             embedder=EmbedderConfig(provider="openai", model="text-embedding-3-small"),
-            memory_filter=MemoryFilterConfig(
-                enabled=True,
-                mode="llm",
-                llm_filter=LLMFilterConfig(
-                    providers=[
-                        LLMFilterProviderConfig(
-                            name="openai",
-                            model="gpt-4o-mini",
-                            api_key_env="OPENAI_API_KEY",
-                            priority=1,
-                        ),
-                        LLMFilterProviderConfig(
-                            name="anthropic",
-                            model="claude-haiku-3-5-20241022",
-                            api_key_env="ANTHROPIC_API_KEY",
-                            priority=2,
-                        ),
-                    ]
-                ),
-            ),
         )
 
     def apply_env_overrides(self) -> None:

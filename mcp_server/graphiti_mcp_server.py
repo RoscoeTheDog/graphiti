@@ -576,9 +576,6 @@ mcp = FastMCP(
 # Initialize Graphiti client
 graphiti_client: Graphiti | None = None
 
-# Initialize filter manager (will be set if memory filtering enabled)
-filter_manager = None
-
 
 def check_deprecated_config():
     """Warn if old config files detected."""
@@ -646,26 +643,6 @@ async def initialize_graphiti():
         # Initialize the graph database with Graphiti's indices
         await graphiti_client.build_indices_and_constraints()
         logger.info('Graphiti client initialized successfully')
-
-        # Initialize memory filter system (if enabled)
-        global filter_manager
-        if unified_config.memory_filter.enabled:
-            try:
-                from mcp_server.session_manager import SessionManager
-                from mcp_server.filter_manager import FilterManager
-
-                session_manager = SessionManager(unified_config.memory_filter.llm_filter)
-                filter_manager = FilterManager(session_manager)
-                logger.info("Memory filtering enabled")
-            except ImportError:
-                logger.warning("Filter system not yet implemented, filtering disabled")
-                filter_manager = None
-            except Exception as e:
-                logger.error(f"Failed to initialize filter system: {e}")
-                filter_manager = None
-        else:
-            logger.info("Memory filtering disabled in config")
-            filter_manager = None
 
         # Log configuration details for transparency
         if llm_client:
@@ -1186,70 +1163,6 @@ async def clear_graph() -> SuccessResponse | ErrorResponse:
         error_msg = str(e)
         logger.error(f'Error clearing graph: {error_msg}')
         return ErrorResponse(error=f'Error clearing graph: {error_msg}')
-
-
-@mcp.tool()
-async def should_store(
-    event_description: str,
-    context: str = "",
-    session_id: str | None = None
-) -> Dict[str, Any] | ErrorResponse:
-    """
-    Determine if an event should be stored in memory using LLM-based filtering.
-
-    This tool helps filter out redundant memories by using AI to analyze whether
-    an event provides valuable, non-redundant information worth storing.
-
-    Args:
-        event_description: Description of the event/memory to evaluate
-        context: Additional context (recent actions, errors, files changed, etc.)
-        session_id: Optional session ID for continuity (auto-generated if not provided)
-
-    Returns:
-        {
-            "should_store": bool,
-            "category": str,  # env-quirk | user-pref | external-api | etc.
-            "reason": str,
-            "session_id": str
-        }
-
-    Examples:
-        # Check if environment-specific issue should be stored
-        should_store(
-            event_description="Neo4j connection timeout, fixed by setting NEO4J_TIMEOUT=60 in .env",
-            context="Edited .env (in .gitignore), error resolved"
-        )
-        # Returns: {"should_store": true, "category": "env-quirk", ...}
-
-        # Check if code fix should be stored (redundant with git)
-        should_store(
-            event_description="Fixed infinite loop in parseData() function",
-            context="Edited src/parser.py, committed to git"
-        )
-        # Returns: {"should_store": false, "category": "bug-in-code", ...}
-    """
-    global filter_manager
-
-    if filter_manager is None:
-        # Filtering not initialized, default to store
-        return {
-            "should_store": True,
-            "category": "filter_unavailable",
-            "reason": "Memory filtering not available",
-            "session_id": session_id or "none"
-        }
-
-    try:
-        result = await filter_manager.should_store(
-            event_description=event_description,
-            context=context,
-            session_id=session_id
-        )
-        return result
-    except Exception as e:
-        error_msg = str(e)
-        logger.error(f"Error in should_store: {error_msg}")
-        return ErrorResponse(error=f"Error checking storage criteria: {error_msg}")
 
 
 @mcp.resource('http://graphiti/status')
