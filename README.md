@@ -206,6 +206,28 @@ pip install graphiti-core[falkordb,anthropic,google-genai]
 pip install graphiti-core[neptune]
 ```
 
+## Configuration
+
+Graphiti uses unified configuration (`graphiti.config.json`) for all structural settings.
+
+### Quick Start
+
+1. **Copy template**: `cp graphiti.config.json graphiti.config.local.json` (or edit `graphiti.config.json` directly)
+2. **Set secrets in `.env`**:
+   ```bash
+   NEO4J_PASSWORD=your_password
+   OPENAI_API_KEY=sk-your-key
+   ```
+3. **Start**: `python -m mcp_server.graphiti_mcp_server`
+
+See [Configuration Guide](implementation/guides/UNIFIED_CONFIG_SUMMARY.md) for complete details.
+
+### Migration
+
+Migrating from the old `.env` system? See [Migration Guide](implementation/guides/MIGRATION_GUIDE.md).
+
+For comprehensive configuration documentation, see [CONFIGURATION.md](CONFIGURATION.md).
+
 ## Default to Low Concurrency; LLM Provider 429 Rate Limit Errors
 
 Graphiti's ingestion pipelines are designed for high concurrency. By default, concurrency is set low to avoid LLM
