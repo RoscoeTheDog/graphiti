@@ -13,7 +13,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, TypedDict, cast
 
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+try:
+    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    AZURE_IDENTITY_AVAILABLE = True
+except ImportError:
+    AZURE_IDENTITY_AVAILABLE = False
+
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from openai import AsyncAzureOpenAI
@@ -173,6 +178,11 @@ class StatusResponse(TypedDict):
 
 
 def create_azure_credential_token_provider() -> Callable[[], str]:
+    if not AZURE_IDENTITY_AVAILABLE:
+        raise ImportError(
+            "Azure identity package not installed. "
+            "Install with: pip install azure-identity"
+        )
     credential = DefaultAzureCredential()
     token_provider = get_bearer_token_provider(
         credential, 'https://cognitiveservices.azure.com/.default'

@@ -68,9 +68,6 @@ def temp_config_file(tmp_path):
                 "deployment_name": "embedding-deployment"
             }
         },
-        "memory_filter": {
-            "enabled": True
-        },
         "project": {
             "default_group_id": None,
             "namespace": None
@@ -106,7 +103,6 @@ def test_config_loads_defaults(clean_env):
     assert config.llm.provider == "openai"
     assert config.llm.default_model == "gpt-4.1-mini"
     assert config.embedder.provider == "openai"
-    assert config.memory_filter.enabled == True
     assert config.llm.semaphore_limit == 10
 
 
