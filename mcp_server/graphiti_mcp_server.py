@@ -1162,6 +1162,70 @@ async def clear_graph() -> SuccessResponse | ErrorResponse:
         return ErrorResponse(error=f'Error clearing graph: {error_msg}')
 
 
+@mcp.tool()
+async def should_store(
+    event_description: str,
+    context: str = "",
+    session_id: str | None = None
+) -> Dict[str, Any] | ErrorResponse:
+    """
+    Determine if an event should be stored in memory using LLM-based filtering.
+
+    This tool helps filter out redundant memories by using AI to analyze whether
+    an event provides valuable, non-redundant information worth storing.
+
+    Args:
+        event_description: Description of the event/memory to evaluate
+        context: Additional context (recent actions, errors, files changed, etc.)
+        session_id: Optional session ID for continuity (auto-generated if not provided)
+
+    Returns:
+        {
+            "should_store": bool,
+            "category": str,  # env-quirk | user-pref | external-api | etc.
+            "reason": str,
+            "session_id": str
+        }
+
+    Examples:
+        # Check if environment-specific issue should be stored
+        should_store(
+            event_description="Neo4j connection timeout, fixed by setting NEO4J_TIMEOUT=60 in .env",
+            context="Edited .env (in .gitignore), error resolved"
+        )
+        # Returns: {"should_store": true, "category": "env-quirk", ...}
+
+        # Check if code fix should be stored (redundant with git)
+        should_store(
+            event_description="Fixed infinite loop in parseData() function",
+            context="Edited src/parser.py, committed to git"
+        )
+        # Returns: {"should_store": false, "category": "bug-in-code", ...}
+    """
+    global filter_manager
+
+    if filter_manager is None:
+        # Filtering not initialized, default to store
+        return {
+            "should_store": True,
+            "category": "filter_unavailable",
+            "reason": "Memory filtering not available",
+            "session_id": session_id or "none"
+        }
+
+    try:
+        result = await filter_manager.should_store(
+            event_description=event_description,
+            context=context,
+            session_id=session_id
+        )
+        return result
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error in should_store: {error_msg}")
+        return ErrorResponse(error=f"Error checking storage criteria: {error_msg}")
+
+
 @mcp.resource('http://graphiti/status')
 async def get_status() -> StatusResponse:
     """Get the status of the Graphiti MCP server and Neo4j connection."""
