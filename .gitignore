@@ -121,8 +121,9 @@ celerybeat.pid
 
 # Environments
 # Virtual environments excluded for system-agnostic distribution
-# Users should create venv locally with: python -m venv venv
+# Note: Only root .venv is used (mcp_server/.venv removed)
 .env
+.env.local
 credentials.txt
 .venv
 env/
@@ -130,6 +131,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Configuration backups (created during migration)
+*.backup
+graphiti-filter.config.json.backup
+.env.backup*
 
 # Spyder project settings
 .spyderproject

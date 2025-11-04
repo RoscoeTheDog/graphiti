@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Unified Graphiti Configuration - All project settings in one place",
+  "version": "1.0.0",
+
+  "database": {
+    "backend": "neo4j",
+    "neo4j": {
+      "uri": "bolt://localhost:7687",
+      "user": "neo4j",
+      "password_env": "NEO4J_PASSWORD",
+      "database": "neo4j",
+      "pool_size": 50,
+      "connection_timeout": 30,
+      "max_connection_lifetime": 3600
+    },
+    "falkordb": {
+      "uri": "redis://localhost:6379",
+      "user": "default",
+      "password_env": "FALKORDB_PASSWORD",
+      "database": "graphiti",
+      "pool_size": 50
+    }
+  },
+
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1-mini",
+    "small_model": "gpt-4.1-nano",
+    "temperature": 0.0,
+    "semaphore_limit": 10,
+    "max_retries": 3,
+    "timeout": 60,
+
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": null,
+      "organization": null
+    },
+
+    "azure_openai": {
+      "endpoint_env": "AZURE_OPENAI_ENDPOINT",
+      "api_key_env": "AZURE_OPENAI_API_KEY",
+      "api_version": "2025-01-01-preview",
+      "deployment_name": null,
+      "use_managed_identity": false
+    },
+
+    "anthropic": {
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "base_url": null
+    }
+  },
+
+  "embedder": {
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "dimensions": 1536,
+    "batch_size": 100,
+
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY"
+    },
+
+    "azure_openai": {
+      "endpoint_env": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
+      "api_key_env": "AZURE_OPENAI_EMBEDDING_API_KEY",
+      "api_version": "2023-05-15",
+      "deployment_name": null,
+      "use_managed_identity": false
+    }
+  },
+
+  "memory_filter": {
+    "enabled": true,
+    "mode": "llm",
+
+    "llm_filter": {
+      "providers": [
+        {
+          "name": "openai",
+          "model": "gpt-4o-mini",
+          "api_key_env": "OPENAI_API_KEY",
+          "temperature": 0.0,
+          "max_tokens": 200,
+          "enabled": true,
+          "priority": 1
+        },
+        {
+          "name": "anthropic",
+          "model": "claude-haiku-3-5-20241022",
+          "api_key_env": "ANTHROPIC_API_KEY",
+          "temperature": 0.0,
+          "max_tokens": 200,
+          "enabled": true,
+          "priority": 2
+        }
+      ],
+
+      "session": {
+        "max_context_tokens": 5000,
+        "auto_cleanup": true,
+        "session_timeout_minutes": 60
+      },
+
+      "categories": {
+        "store": [
+          "env-quirk",
+          "user-pref",
+          "external-api",
+          "historical-context",
+          "cross-project",
+          "workaround"
+        ],
+        "skip": [
+          "bug-in-code",
+          "config-in-repo",
+          "docs-added",
+          "first-success"
+        ]
+      }
+    },
+
+    "rule_based_filter": {
+      "enabled": false,
+      "rules": []
+    }
+  },
+
+  "project": {
+    "default_group_id": null,
+    "namespace": null,
+    "enable_entity_types": true,
+    "custom_entity_types": ["Requirement", "Preference", "Procedure"],
+    "max_reflexion_iterations": 3
+  },
+
+  "search": {
+    "default_max_nodes": 10,
+    "default_max_facts": 10,
+    "default_method": "hybrid_rrf",
+    "vector_weight": 0.7,
+    "text_weight": 0.3
+  },
+
+  "logging": {
+    "level": "INFO",
+    "log_filter_decisions": true,
+    "log_llm_calls": false,
+    "log_database_queries": false,
+    "log_file": null,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  },
+
+  "performance": {
+    "use_parallel_runtime": true,
+    "enable_caching": true,
+    "cache_ttl_seconds": 3600
+  },
+
+  "mcp_server": {
+    "host": null,
+    "port": null,
+    "enable_cors": false,
+    "allowed_origins": []
+  }
+}
