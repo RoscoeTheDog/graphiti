@@ -8,6 +8,7 @@
 
 ### Story 1: Health Check & Connection Monitoring
 **Status**: unassigned
+**Files**: `packages/mcp/src/server.py`
 **Description**: Implement health check endpoint and connection monitoring to detect connection issues proactively
 **Acceptance Criteria**:
 - [ ] Health check tool returns connection status (healthy/unhealthy)
@@ -18,6 +19,7 @@
 ### Story 1.1: Health Check Implementation
 **Status**: unassigned
 **Parent**: Story 1
+**Files**: `packages/mcp/src/server.py`
 **Description**: Add health_check() tool to MCP server that tests database connection
 **Acceptance Criteria**:
 - [ ] Add @mcp.tool() decorated health_check function
@@ -28,6 +30,7 @@
 ### Story 1.2: Connection State Tracking
 **Status**: unassigned
 **Parent**: Story 1
+**Files**: `packages/mcp/src/server.py`
 **Description**: Add internal connection state tracking for monitoring
 **Acceptance Criteria**:
 - [ ] Track last successful connection timestamp
@@ -37,6 +40,7 @@
 
 ### Story 2: Automatic Reconnection Logic
 **Status**: unassigned
+**Files**: `packages/mcp/src/server.py`
 **Description**: Implement automatic reconnection with exponential backoff when connection is lost
 **Acceptance Criteria**:
 - [ ] Automatic reconnection attempts on connection failure
@@ -48,6 +52,7 @@
 ### Story 2.1: Initialization Retry Logic
 **Status**: unassigned
 **Parent**: Story 2
+**Files**: `packages/mcp/src/server.py`
 **Description**: Add retry wrapper for initialize_graphiti() function
 **Acceptance Criteria**:
 - [ ] Create initialize_graphiti_with_retry() function
@@ -59,6 +64,7 @@
 ### Story 2.2: Queue Worker Recovery
 **Status**: unassigned
 **Parent**: Story 2
+**Files**: `packages/mcp/src/server.py`
 **Description**: Implement queue worker restart on recoverable errors
 **Acceptance Criteria**:
 - [ ] Distinguish recoverable vs non-recoverable errors
@@ -69,6 +75,7 @@
 
 ### Story 3: Episode Processing Timeouts
 **Status**: unassigned
+**Files**: `packages/mcp/src/server.py`, `graphiti.config.json`
 **Description**: Add configurable timeouts to episode processing to prevent indefinite hangs
 **Acceptance Criteria**:
 - [ ] Default timeout of 60 seconds for episode processing
@@ -80,6 +87,7 @@
 ### Story 3.1: Timeout Implementation
 **Status**: unassigned
 **Parent**: Story 3
+**Files**: `packages/mcp/src/server.py`
 **Description**: Wrap episode processing with asyncio.wait_for()
 **Acceptance Criteria**:
 - [ ] Add timeout parameter to config (default: 60)
@@ -90,6 +98,7 @@
 
 ### Story 4: Enhanced Logging
 **Status**: unassigned
+**Files**: `packages/mcp/src/server.py`, `.gitignore`
 **Description**: Add file-based logging with rotation and connection metrics tracking
 **Acceptance Criteria**:
 - [ ] File-based logging configured (logs/graphiti_mcp.log)
@@ -101,6 +110,7 @@
 ### Story 4.1: File Logging Setup
 **Status**: unassigned
 **Parent**: Story 4
+**Files**: `packages/mcp/src/server.py`, `.gitignore`
 **Description**: Configure file-based logging with rotation
 **Acceptance Criteria**:
 - [ ] Create logs/ directory if missing
@@ -112,6 +122,7 @@
 ### Story 4.2: Metrics Logging
 **Status**: unassigned
 **Parent**: Story 4
+**Files**: `packages/mcp/src/server.py`
 **Description**: Add periodic logging of connection and performance metrics
 **Acceptance Criteria**:
 - [ ] Log connection pool stats every 5 minutes
@@ -122,6 +133,7 @@
 
 ### Story 5: Configuration & Documentation
 **Status**: unassigned
+**Files**: `graphiti.config.json`, `CONFIGURATION.md`, `packages/mcp/README.md`
 **Description**: Add configuration options for new resilience features and update documentation
 **Acceptance Criteria**:
 - [ ] Add resilience section to graphiti.config.json schema
@@ -133,6 +145,7 @@
 ### Story 5.1: Configuration Schema
 **Status**: unassigned
 **Parent**: Story 5
+**Files**: `graphiti/config.py`, `graphiti.config.json`
 **Description**: Define and implement resilience configuration options
 **Acceptance Criteria**:
 - [ ] Add "resilience" section to config schema
@@ -144,6 +157,7 @@
 ### Story 5.2: Documentation Updates
 **Status**: unassigned
 **Parent**: Story 5
+**Files**: `CONFIGURATION.md`, `packages/mcp/README.md`, `CLAUDE.md`
 **Description**: Document new features and configuration options
 **Acceptance Criteria**:
 - [ ] Update CONFIGURATION.md with resilience section
@@ -154,13 +168,18 @@
 
 ### Story 6: Testing & Validation
 **Status**: unassigned
+**Files**: `tests/mcp/test_resilience.py`, `tests/mcp/test_health_check.py`, `tests/mcp/test_reconnection.py`
 **Description**: Add tests for resilience features and validate under failure scenarios
+**Test Framework**: pytest with pytest-asyncio
 **Acceptance Criteria**:
-- [ ] Unit tests for reconnection logic
-- [ ] Integration tests for health check
-- [ ] Timeout behavior validated
-- [ ] Connection failure recovery tested
-- [ ] Queue worker restart tested
+- [ ] Unit tests for reconnection logic (test_reconnection.py)
+- [ ] Integration tests for health check (test_health_check.py)
+- [ ] Timeout behavior validated (test_resilience.py)
+- [ ] Connection failure recovery tested (test_resilience.py)
+- [ ] Queue worker restart tested (test_resilience.py)
+- [ ] Mock Neo4j connection failures for testing
+- [ ] Test coverage >80% for new code
+- [ ] Tests run in CI/CD pipeline
 
 ## Progress Log
 
@@ -169,6 +188,10 @@
 - Defined 6 stories with 10 sub-stories
 - Focus on MCP server resilience based on MCP_DISCONNECT_ANALYSIS.md findings
 - Addresses critical gaps: no auto-reconnect, permanent worker stops, no timeouts
+
+### 2025-11-05 01:02 - Story 1: unassigned → in_progress
+- Starting with health check implementation
+- Will add health_check() tool to MCP server
 
 ## Sprint Summary
 {To be filled upon completion}
