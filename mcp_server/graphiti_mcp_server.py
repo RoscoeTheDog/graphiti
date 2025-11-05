@@ -177,6 +177,14 @@ class StatusResponse(TypedDict):
     message: str
 
 
+class HealthCheckResponse(TypedDict):
+    status: str
+    database_connected: bool
+    last_successful_connection: str | None
+    consecutive_failures: int
+    error_details: str | None
+
+
 def create_azure_credential_token_provider() -> Callable[[], str]:
     if not AZURE_IDENTITY_AVAILABLE:
         raise ImportError(
@@ -586,6 +594,10 @@ mcp = FastMCP(
 # Initialize Graphiti client
 graphiti_client: Graphiti | None = None
 
+# Connection state tracking
+last_successful_connection: datetime | None = None
+consecutive_connection_failures: int = 0
+
 
 def check_deprecated_config():
     """Warn if old config files detected."""
@@ -611,7 +623,7 @@ def check_deprecated_config():
 
 async def initialize_graphiti():
     """Initialize the Graphiti client with the configured settings."""
-    global graphiti_client, config, SEMAPHORE_LIMIT
+    global graphiti_client, config, SEMAPHORE_LIMIT, last_successful_connection, consecutive_connection_failures
 
     try:
         # Check for deprecated configuration files
@@ -654,6 +666,10 @@ async def initialize_graphiti():
         await graphiti_client.build_indices_and_constraints()
         logger.info('Graphiti client initialized successfully')
 
+        # Update connection tracking on successful initialization
+        last_successful_connection = datetime.now(timezone.utc)
+        consecutive_connection_failures = 0
+
         # Log configuration details for transparency
         if llm_client:
             logger.info(f'Using OpenAI model: {config.llm.model}')
@@ -668,6 +684,8 @@ async def initialize_graphiti():
         logger.info(f'Using concurrency limit: {SEMAPHORE_LIMIT}')
 
     except Exception as e:
+        # Track connection failure
+        consecutive_connection_failures += 1
         logger.error(f'Failed to initialize Graphiti: {str(e)}')
         raise
 
@@ -1173,6 +1191,69 @@ async def clear_graph() -> SuccessResponse | ErrorResponse:
         error_msg = str(e)
         logger.error(f'Error clearing graph: {error_msg}')
         return ErrorResponse(error=f'Error clearing graph: {error_msg}')
+
+
+@mcp.tool()
+async def health_check() -> HealthCheckResponse:
+    """Check the health of the MCP server and database connection.
+
+    Returns connection status, database connectivity, and connection metrics.
+    This tool can be used to proactively detect connection issues.
+
+    Returns:
+        HealthCheckResponse with:
+        - status: 'healthy' or 'unhealthy'
+        - database_connected: Boolean indicating if database is accessible
+        - last_successful_connection: ISO timestamp of last successful connection
+        - consecutive_failures: Number of consecutive connection failures
+        - error_details: Details of any error if unhealthy
+    """
+    global graphiti_client, last_successful_connection, consecutive_connection_failures
+
+    if graphiti_client is None:
+        return HealthCheckResponse(
+            status='unhealthy',
+            database_connected=False,
+            last_successful_connection=None,
+            consecutive_failures=consecutive_connection_failures,
+            error_details='Graphiti client not initialized',
+        )
+
+    try:
+        # Test database connection with a simple query
+        client = cast(Graphiti, graphiti_client)
+
+        # Execute a simple query to test connectivity
+        async with client.driver.session() as session:
+            result = await session.run('RETURN 1 as test')
+            await result.single()
+
+        # Update connection tracking on success
+        last_successful_connection = datetime.now(timezone.utc)
+        consecutive_connection_failures = 0
+
+        return HealthCheckResponse(
+            status='healthy',
+            database_connected=True,
+            last_successful_connection=last_successful_connection.isoformat(),
+            consecutive_failures=0,
+            error_details=None,
+        )
+    except Exception as e:
+        # Track connection failure
+        consecutive_connection_failures += 1
+        error_msg = str(e)
+        logger.error(f'Health check failed: {error_msg}')
+
+        return HealthCheckResponse(
+            status='unhealthy',
+            database_connected=False,
+            last_successful_connection=last_successful_connection.isoformat()
+            if last_successful_connection
+            else None,
+            consecutive_failures=consecutive_connection_failures,
+            error_details=error_msg,
+        )
 
 
 @mcp.resource('http://graphiti/status')

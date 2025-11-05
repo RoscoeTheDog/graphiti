@@ -23,6 +23,7 @@ When working with Graphiti MCP server:
 - `delete_episode` - Remove episodes
 - `delete_entity_edge` - Remove relationships
 - `clear_graph` - Clear all data
+- `health_check` - Check server health and database connectivity
 
 ---
 
