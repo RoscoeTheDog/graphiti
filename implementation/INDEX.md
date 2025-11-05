@@ -124,39 +124,52 @@
 - [x] Don't mark worker as stopped on timeout
 
 ### Story 4: Enhanced Logging
-**Status**: unassigned
-**Files**: `packages/mcp/src/server.py`, `.gitignore`
+**Status**: completed
+**Claimed**: 2025-11-05 04:15
+**Completed**: 2025-11-05 04:45
+**Files**: `mcp_server/graphiti_mcp_server.py`, `.gitignore`
 **Description**: Add file-based logging with rotation and connection metrics tracking
 **Acceptance Criteria**:
-- [ ] File-based logging configured (logs/graphiti_mcp.log)
-- [ ] Log rotation enabled (10MB max, 5 backups)
-- [ ] Connection pool metrics logged periodically
-- [ ] Transaction duration tracking added
-- [ ] Error context includes traceback
+- [x] File-based logging configured (logs/graphiti_mcp.log)
+- [x] Log rotation enabled (10MB max, 5 backups)
+- [x] Connection pool metrics logged periodically
+- [x] Transaction duration tracking added
+- [x] Error context includes traceback
+
+**Implementation Details**:
+- Added `setup_logging()` function that creates logs/ directory and configures rotating file handler
+- Implemented `MetricsTracker` class to track episode processing success/failure/timeout metrics
+- Added `log_metrics_periodically()` async task that logs metrics every 5 minutes in JSON format
+- Metrics include: connection status, episode processing stats (success rate, avg duration), queue depths
+- Updated `process_episode_queue()` to record metrics for each episode processed
+- Started metrics logging task in `run_mcp_server()` with proper cleanup on shutdown
+- Updated .gitignore to exclude logs/ directory
 
 ### Story 4.1: File Logging Setup
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 4
-**Files**: `packages/mcp/src/server.py`, `.gitignore`
+**Completed**: 2025-11-05 04:45 (as part of Story 4)
+**Files**: `mcp_server/graphiti_mcp_server.py`, `.gitignore`
 **Description**: Configure file-based logging with rotation
 **Acceptance Criteria**:
-- [ ] Create logs/ directory if missing
-- [ ] Configure RotatingFileHandler
-- [ ] Set appropriate log format with timestamps
-- [ ] Maintain both file and stderr logging
-- [ ] Add to .gitignore if not present
+- [x] Create logs/ directory if missing
+- [x] Configure RotatingFileHandler
+- [x] Set appropriate log format with timestamps
+- [x] Maintain both file and stderr logging
+- [x] Add to .gitignore if not present
 
 ### Story 4.2: Metrics Logging
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 4
-**Files**: `packages/mcp/src/server.py`
+**Completed**: 2025-11-05 04:45 (as part of Story 4)
+**Files**: `mcp_server/graphiti_mcp_server.py`
 **Description**: Add periodic logging of connection and performance metrics
 **Acceptance Criteria**:
-- [ ] Log connection pool stats every 5 minutes
-- [ ] Track and log average transaction duration
-- [ ] Log queue depth for each group_id
-- [ ] Track and log episode processing success/failure rates
-- [ ] Use structured logging format (JSON) for metrics
+- [x] Log connection pool stats every 5 minutes
+- [x] Track and log average transaction duration
+- [x] Log queue depth for each group_id
+- [x] Track and log episode processing success/failure rates
+- [x] Use structured logging format (JSON) for metrics
 
 ### Story 5: Configuration & Documentation
 **Status**: unassigned

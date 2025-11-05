@@ -5,7 +5,9 @@ Graphiti MCP Server - Exposes Graphiti functionality through the Model Context P
 
 import argparse
 import asyncio
+import json
 import logging
+import logging.handlers
 import os
 import sys
 from collections.abc import Callable
@@ -543,12 +545,44 @@ class MCPConfig(BaseModel):
         return cls(transport=args.transport)
 
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stderr,
-)
+# Configure logging with file rotation
+def setup_logging():
+    """Set up logging with file rotation and console output."""
+    # Create logs directory if it doesn't exist
+    logs_dir = Path('logs')
+    logs_dir.mkdir(exist_ok=True)
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+
+    # Create formatter with detailed timestamp
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(log_format)
+
+    # File handler with rotation (10MB max, 5 backups)
+    file_handler = logging.handlers.RotatingFileHandler(
+        logs_dir / 'graphiti_mcp.log',
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=5,
+        encoding='utf-8'
+    )
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+
+    # Console handler (stderr) for real-time monitoring
+    console_handler = logging.StreamHandler(sys.stderr)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+
+    # Add handlers to root logger
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
+
+    return root_logger
+
+# Initialize logging
+setup_logging()
 logger = logging.getLogger(__name__)
 
 # Create global config instance - will be properly initialized later
@@ -798,6 +832,103 @@ episode_queues: dict[str, asyncio.Queue] = {}
 # Dictionary to track if a worker is running for each group_id
 queue_workers: dict[str, bool] = {}
 
+# Metrics tracking
+class MetricsTracker:
+    """Track operational metrics for logging and monitoring."""
+
+    def __init__(self):
+        self.episode_processing_times: list[float] = []
+        self.episode_success_count: int = 0
+        self.episode_failure_count: int = 0
+        self.episode_timeout_count: int = 0
+        self.last_metrics_log: datetime = datetime.now(timezone.utc)
+
+    def record_episode_success(self, duration: float):
+        """Record successful episode processing."""
+        self.episode_processing_times.append(duration)
+        self.episode_success_count += 1
+
+    def record_episode_failure(self):
+        """Record failed episode processing."""
+        self.episode_failure_count += 1
+
+    def record_episode_timeout(self):
+        """Record episode timeout."""
+        self.episode_timeout_count += 1
+
+    def get_average_processing_time(self) -> float:
+        """Get average episode processing time."""
+        if not self.episode_processing_times:
+            return 0.0
+        return sum(self.episode_processing_times) / len(self.episode_processing_times)
+
+    def get_success_rate(self) -> float:
+        """Get episode processing success rate."""
+        total = self.episode_success_count + self.episode_failure_count + self.episode_timeout_count
+        if total == 0:
+            return 1.0
+        return self.episode_success_count / total
+
+    def reset_metrics(self):
+        """Reset metrics for next logging period."""
+        self.episode_processing_times = []
+        self.episode_success_count = 0
+        self.episode_failure_count = 0
+        self.episode_timeout_count = 0
+
+# Global metrics tracker
+metrics_tracker = MetricsTracker()
+
+
+async def log_metrics_periodically(interval_seconds: int = 300):
+    """Log operational metrics every interval_seconds (default: 5 minutes).
+
+    Args:
+        interval_seconds: How often to log metrics (default: 300 seconds / 5 minutes)
+    """
+    global metrics_tracker, episode_queues, consecutive_connection_failures, last_successful_connection
+
+    logger.info(f'Starting metrics logging (interval: {interval_seconds}s)')
+
+    while True:
+        try:
+            await asyncio.sleep(interval_seconds)
+
+            # Gather metrics
+            metrics = {
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'connection': {
+                    'last_successful': last_successful_connection.isoformat() if last_successful_connection else None,
+                    'consecutive_failures': consecutive_connection_failures,
+                },
+                'episode_processing': {
+                    'success_count': metrics_tracker.episode_success_count,
+                    'failure_count': metrics_tracker.episode_failure_count,
+                    'timeout_count': metrics_tracker.episode_timeout_count,
+                    'success_rate': f'{metrics_tracker.get_success_rate() * 100:.1f}%',
+                    'avg_duration_seconds': f'{metrics_tracker.get_average_processing_time():.2f}',
+                },
+                'queues': {
+                    group_id: {
+                        'depth': episode_queues[group_id].qsize(),
+                        'worker_active': queue_workers.get(group_id, False),
+                    }
+                    for group_id in episode_queues
+                },
+            }
+
+            # Log as structured JSON for easy parsing
+            logger.info(f'METRICS: {json.dumps(metrics)}')
+
+            # Reset counters for next period
+            metrics_tracker.reset_metrics()
+
+        except asyncio.CancelledError:
+            logger.info('Metrics logging task cancelled')
+            break
+        except Exception as e:
+            logger.error(f'Error logging metrics: {str(e)}')
+
 
 async def process_episode_queue(group_id: str):
     """Process episodes for a specific group_id sequentially.
@@ -806,7 +937,7 @@ async def process_episode_queue(group_id: str):
     from the queue one at a time. On recoverable errors, it attempts
     to reconnect and restart the worker.
     """
-    global queue_workers, graphiti_client
+    global queue_workers, graphiti_client, metrics_tracker
 
     logger.info(f'Starting episode queue worker for group_id: {group_id}')
     queue_workers[group_id] = True
@@ -820,19 +951,32 @@ async def process_episode_queue(group_id: str):
             # This will wait if the queue is empty
             process_func = await episode_queues[group_id].get()
 
+            # Track processing time
+            start_time = datetime.now(timezone.utc)
+
             try:
                 # Process the episode with timeout
                 await asyncio.wait_for(process_func(), timeout=episode_timeout)
+
+                # Record success metrics
+                duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+                metrics_tracker.record_episode_success(duration)
+
             except asyncio.TimeoutError:
                 # Log timeout error with episode context
                 logger.error(
                     f'Episode processing timed out after {episode_timeout} seconds for group_id {group_id}. '
                     'Continuing with next episode...'
                 )
+                # Record timeout metric
+                metrics_tracker.record_episode_timeout()
                 # Continue processing next episodes without stopping the worker
             except Exception as e:
                 error_msg = str(e)
                 logger.error(f'Error processing queued episode for group_id {group_id}: {error_msg}')
+
+                # Record failure metric
+                metrics_tracker.record_episode_failure()
 
                 # Check if this is a recoverable error
                 if is_recoverable_error(e):
@@ -1486,15 +1630,27 @@ async def run_mcp_server():
     # Initialize the server
     mcp_config = await initialize_server()
 
-    # Run the server with stdio transport for MCP in the same event loop
-    logger.info(f'Starting MCP server with transport: {mcp_config.transport}')
-    if mcp_config.transport == 'stdio':
-        await mcp.run_stdio_async()
-    elif mcp_config.transport == 'sse':
-        logger.info(
-            f'Running MCP server with SSE transport on {mcp.settings.host}:{mcp.settings.port}'
-        )
-        await mcp.run_sse_async()
+    # Start metrics logging task
+    metrics_task = asyncio.create_task(log_metrics_periodically(interval_seconds=300))
+    logger.info('Started periodic metrics logging task (5 minute interval)')
+
+    try:
+        # Run the server with stdio transport for MCP in the same event loop
+        logger.info(f'Starting MCP server with transport: {mcp_config.transport}')
+        if mcp_config.transport == 'stdio':
+            await mcp.run_stdio_async()
+        elif mcp_config.transport == 'sse':
+            logger.info(
+                f'Running MCP server with SSE transport on {mcp.settings.host}:{mcp.settings.port}'
+            )
+            await mcp.run_sse_async()
+    finally:
+        # Clean up metrics task on shutdown
+        metrics_task.cancel()
+        try:
+            await metrics_task
+        except asyncio.CancelledError:
+            logger.info('Metrics logging task cancelled successfully')
 
 
 def main():
