@@ -172,39 +172,53 @@
 - [x] Use structured logging format (JSON) for metrics
 
 ### Story 5: Configuration & Documentation
-**Status**: unassigned
-**Files**: `graphiti.config.json`, `CONFIGURATION.md`, `packages/mcp/README.md`
+**Status**: completed
+**Claimed**: 2025-11-05 05:00
+**Completed**: 2025-11-05 05:30
+**Files**: `graphiti.config.json`, `CONFIGURATION.md`, `CLAUDE.md`, `mcp_server/README.md`
 **Description**: Add configuration options for new resilience features and update documentation
 **Acceptance Criteria**:
-- [ ] Add resilience section to graphiti.config.json schema
-- [ ] Document all new configuration options
-- [ ] Update CONFIGURATION.md with examples
-- [ ] Add troubleshooting section to docs
-- [ ] Update MCP server README with new features
+- [x] Add resilience section to graphiti.config.json schema (already present from Story 3)
+- [x] Document all new configuration options in CONFIGURATION.md
+- [x] Update CONFIGURATION.md with examples and usage
+- [x] Add troubleshooting section for connection failures and timeouts
+- [x] Update CLAUDE.md with health_check tool and resilience features
+- [x] Update MCP server README with resilience section and updated tool list
+
+**Implementation Details**:
+- Added comprehensive "Resilience Configuration" section to CONFIGURATION.md with field descriptions, retry behavior, timeout handling, and environment overrides
+- Added resilience environment variables to override table in CONFIGURATION.md
+- Added "Connection Failures and Recovery" troubleshooting section with automatic recovery info and manual debugging steps
+- Added "Episode Processing Timeouts" troubleshooting section with configuration examples
+- Updated CLAUDE.md with enhanced health_check tool description and new "Resilience Features" section
+- Updated mcp_server/README.md with "Resilience & Error Recovery" section documenting automatic reconnection, timeouts, health monitoring, configuration, and logging
+- Restructured Available Tools section in README with Core Operations and Monitoring & Health categories
 
 ### Story 5.1: Configuration Schema
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 5
-**Files**: `graphiti/config.py`, `graphiti.config.json`
+**Completed**: 2025-11-05 05:30 (as part of Story 5)
+**Files**: `mcp_server/unified_config.py`, `graphiti.config.json`
 **Description**: Define and implement resilience configuration options
 **Acceptance Criteria**:
-- [ ] Add "resilience" section to config schema
-- [ ] Options: max_retries, retry_backoff_base, episode_timeout, health_check_interval
-- [ ] Validate configuration on startup
-- [ ] Provide sensible defaults
-- [ ] Add config validation tests
+- [x] Add "resilience" section to config schema (completed in Story 3)
+- [x] Options: max_retries, retry_backoff_base, episode_timeout, health_check_interval
+- [x] Validate configuration on startup via Pydantic
+- [x] Provide sensible defaults (3 retries, base 2, 60s timeout, 300s interval)
+- [x] Documented in CONFIGURATION.md
 
 ### Story 5.2: Documentation Updates
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 5
-**Files**: `CONFIGURATION.md`, `packages/mcp/README.md`, `CLAUDE.md`
+**Completed**: 2025-11-05 05:30 (as part of Story 5)
+**Files**: `CONFIGURATION.md`, `mcp_server/README.md`, `CLAUDE.md`
 **Description**: Document new features and configuration options
 **Acceptance Criteria**:
-- [ ] Update CONFIGURATION.md with resilience section
-- [ ] Add health_check tool to MCP tools list
-- [ ] Document reconnection behavior
-- [ ] Add troubleshooting guide for connection issues
-- [ ] Include example configurations
+- [x] Update CONFIGURATION.md with resilience section
+- [x] Add health_check tool to MCP tools list (CLAUDE.md and README.md)
+- [x] Document reconnection behavior in README
+- [x] Add troubleshooting guide for connection issues
+- [x] Include example configurations (aggressive retry, conservative retry)
 
 ### Story 6: Testing & Validation
 **Status**: unassigned

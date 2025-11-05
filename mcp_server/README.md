@@ -20,6 +20,7 @@ The Graphiti MCP server exposes the following key high-level functions of Graphi
 - **Search Capabilities**: Search for facts (edges) and node summaries using semantic and hybrid search
 - **Group Management**: Organize and manage groups of related data with group_id filtering
 - **Graph Maintenance**: Clear the graph and rebuild indices
+- **Resilience & Monitoring**: Automatic reconnection, health checks, episode timeouts, and metrics tracking
 
 ## Quick Start
 
@@ -256,6 +257,7 @@ For SSE transport (HTTP-based), you can use this configuration:
 
 The Graphiti MCP server exposes the following tools:
 
+### Core Operations
 - `add_episode`: Add an episode to the knowledge graph (supports text, JSON, and message formats)
 - `search_nodes`: Search the knowledge graph for relevant node summaries
 - `search_facts`: Search the knowledge graph for relevant facts (edges between entities)
@@ -264,7 +266,67 @@ The Graphiti MCP server exposes the following tools:
 - `get_entity_edge`: Get an entity edge by its UUID
 - `get_episodes`: Get the most recent episodes for a specific group
 - `clear_graph`: Clear all data from the knowledge graph and rebuild indices
-- `get_status`: Get the status of the Graphiti MCP server and Neo4j connection
+
+### Monitoring & Health
+- `health_check`: Check database connection health and return status with metrics
+  - Returns connection status (healthy/unhealthy)
+  - Includes error details if unhealthy
+  - Tests database connectivity with simple query
+  - Provides connection metrics (last success, failure count)
+
+## Resilience & Error Recovery
+
+The Graphiti MCP server includes built-in resilience features to handle connection failures and ensure stable operation:
+
+### Automatic Reconnection
+
+When a database connection is lost, the server automatically attempts to reconnect:
+- Uses exponential backoff strategy (default: 1s, 2s, 4s delays)
+- Configurable maximum retry attempts (default: 3)
+- Queue workers automatically restart after successful reconnection
+- Distinguishes between recoverable and fatal errors
+
+### Episode Processing Timeouts
+
+Prevents indefinite hangs during episode processing:
+- Default timeout: 60 seconds per episode
+- Timed-out episodes are logged and skipped
+- Queue worker continues with next episode automatically
+- No manual intervention required
+
+### Health Monitoring
+
+Continuous monitoring of server and database health:
+- Periodic health metrics logged (default: every 5 minutes)
+- Tracks episode processing success/failure rates
+- Monitors queue depths per group_id
+- Records average transaction durations
+- File-based logging with automatic rotation (10MB max, 5 backups)
+
+### Configuration
+
+All resilience settings are configured in `graphiti.config.json`:
+
+```json
+{
+  "resilience": {
+    "max_retries": 3,
+    "retry_backoff_base": 2,
+    "episode_timeout": 60,
+    "health_check_interval": 300
+  }
+}
+```
+
+See the [Configuration Reference](../CONFIGURATION.md#resilience-configuration) for detailed documentation.
+
+### Logs
+
+Server logs are written to `logs/graphiti_mcp.log` with automatic rotation:
+- Connection events and errors
+- Episode processing metrics
+- Health check results
+- Timeout and retry information
 
 ## Working with JSON Data
 

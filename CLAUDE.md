@@ -23,7 +23,21 @@ When working with Graphiti MCP server:
 - `delete_episode` - Remove episodes
 - `delete_entity_edge` - Remove relationships
 - `clear_graph` - Clear all data
-- `health_check` - Check server health and database connectivity
+- `health_check` - Check server health and database connectivity (returns connection status, metrics, and error details if unhealthy)
+
+---
+
+## Resilience Features
+
+The MCP server includes automatic recovery and monitoring features:
+
+- **Automatic Reconnection**: Reconnects to database on connection failure with exponential backoff
+- **Episode Timeouts**: Prevents indefinite hangs (default: 60 seconds per episode)
+- **Health Monitoring**: Tracks connection status and processing metrics
+- **Queue Recovery**: Queue workers restart automatically after successful reconnection
+- **Error Classification**: Distinguishes recoverable errors (retries) from fatal errors (stops)
+
+Configuration is managed through `graphiti.config.json` in the `resilience` section. See [CONFIGURATION.md](CONFIGURATION.md#resilience-configuration) for details.
 
 ---
 

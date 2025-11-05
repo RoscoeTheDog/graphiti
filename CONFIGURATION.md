@@ -325,6 +325,100 @@ Embedders generate vector representations for semantic search.
 
 ---
 
+## Resilience Configuration
+
+The resilience configuration controls automatic reconnection, health monitoring, and error recovery behavior for the MCP server.
+
+### Configuration
+
+```json
+{
+  "resilience": {
+    "max_retries": 3,
+    "retry_backoff_base": 2,
+    "episode_timeout": 60,
+    "health_check_interval": 300
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `max_retries` | int | 3 | Maximum number of connection retry attempts on failure |
+| `retry_backoff_base` | int | 2 | Base for exponential backoff calculation (seconds = base^retry_count) |
+| `episode_timeout` | int | 60 | Timeout in seconds for episode processing operations |
+| `health_check_interval` | int | 300 | Interval in seconds for logging connection health metrics |
+
+### Retry Behavior
+
+When a connection failure occurs, the MCP server will automatically attempt to reconnect using exponential backoff:
+
+- **Retry 1**: Wait 2^0 = 1 second
+- **Retry 2**: Wait 2^1 = 2 seconds
+- **Retry 3**: Wait 2^2 = 4 seconds
+
+After `max_retries` attempts, the server will stop the affected queue worker and log an error.
+
+### Episode Timeout
+
+The `episode_timeout` setting prevents indefinite hangs during episode processing:
+
+- If an episode takes longer than `episode_timeout` seconds to process, it will be cancelled
+- A timeout error will be logged with episode details
+- The episode is removed from the queue
+- Subsequent episodes continue processing normally
+- The queue worker remains active and continues processing
+
+### Health Monitoring
+
+The MCP server automatically monitors connection health:
+
+- Connection status is checked periodically
+- Health metrics are logged every `health_check_interval` seconds
+- Metrics include: connection status, episode success/failure rates, queue depths
+- Use the `health_check` tool to check connection status on demand
+
+### Environment Overrides
+
+Resilience settings can be overridden with environment variables:
+
+```bash
+export GRAPHITI_MAX_RETRIES=5
+export GRAPHITI_RETRY_BACKOFF_BASE=3
+export GRAPHITI_EPISODE_TIMEOUT=120
+export GRAPHITI_HEALTH_CHECK_INTERVAL=600
+```
+
+### Example Configuration
+
+**Aggressive Retry (for unstable connections)**:
+```json
+{
+  "resilience": {
+    "max_retries": 5,
+    "retry_backoff_base": 2,
+    "episode_timeout": 120,
+    "health_check_interval": 60
+  }
+}
+```
+
+**Conservative Retry (for stable production)**:
+```json
+{
+  "resilience": {
+    "max_retries": 2,
+    "retry_backoff_base": 3,
+    "episode_timeout": 30,
+    "health_check_interval": 600
+  }
+}
+```
+
+---
+
 ## Environment Variable Overrides
 
 ### Override Priority
@@ -349,6 +443,10 @@ Embedders generate vector representations for semantic search.
 | `AZURE_OPENAI_API_KEY` | `llm.azure_openai.api_key` | string | `...` |
 | `EMBEDDER_MODEL_NAME` | `embedder.model` | string | `text-embedding-3-small` |
 | `SEMAPHORE_LIMIT` | `llm.semaphore_limit` | int | `10` |
+| `GRAPHITI_MAX_RETRIES` | `resilience.max_retries` | int | `3` |
+| `GRAPHITI_RETRY_BACKOFF_BASE` | `resilience.retry_backoff_base` | int | `2` |
+| `GRAPHITI_EPISODE_TIMEOUT` | `resilience.episode_timeout` | int | `60` |
+| `GRAPHITI_HEALTH_CHECK_INTERVAL` | `resilience.health_check_interval` | int | `300` |
 
 ### Usage
 
@@ -588,6 +686,83 @@ ls -la .env.backup*
 
 # Restore from backup if needed
 cp .env.backup.20241103_120000 .env
+```
+
+### Connection Failures and Recovery
+
+**Symptom:** MCP server loses connection to database
+
+**Automatic Recovery:**
+- The MCP server automatically attempts reconnection using exponential backoff
+- Default: 3 retries with 1s, 2s, 4s delays
+- Queue workers restart after successful reconnection
+- Episodes continue processing after recovery
+
+**Manual Troubleshooting:**
+```bash
+# 1. Check database is running
+docker ps | grep neo4j
+
+# 2. Test connection manually
+cypher-shell -a bolt://localhost:7687 -u neo4j -p your_password
+
+# 3. Check health status using MCP tool
+# Use the health_check tool from your MCP client
+
+# 4. Review logs for connection errors
+tail -f logs/graphiti_mcp.log | grep -i "connection\|error"
+```
+
+**Tuning Resilience Settings:**
+
+For unstable networks:
+```json
+{
+  "resilience": {
+    "max_retries": 5,
+    "retry_backoff_base": 2,
+    "episode_timeout": 120
+  }
+}
+```
+
+For production environments with stable connections:
+```json
+{
+  "resilience": {
+    "max_retries": 2,
+    "retry_backoff_base": 3,
+    "episode_timeout": 30
+  }
+}
+```
+
+### Episode Processing Timeouts
+
+**Symptom:** Episodes hang indefinitely during processing
+
+**Automatic Handling:**
+- Default timeout: 60 seconds per episode
+- Timed-out episodes are logged and skipped
+- Queue worker continues with next episode
+- No manual intervention needed
+
+**Configuration:**
+```json
+{
+  "resilience": {
+    "episode_timeout": 120  // Increase for large/complex episodes
+  }
+}
+```
+
+**Debug Timeout Issues:**
+```bash
+# Check logs for timeout patterns
+grep "TimeoutError" logs/graphiti_mcp.log
+
+# Review episode that timed out
+grep "episode_name" logs/graphiti_mcp.log
 ```
 
 ---
