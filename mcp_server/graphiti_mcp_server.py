@@ -811,6 +811,9 @@ async def process_episode_queue(group_id: str):
     logger.info(f'Starting episode queue worker for group_id: {group_id}')
     queue_workers[group_id] = True
 
+    # Get episode timeout from unified config
+    episode_timeout = unified_config.resilience.episode_timeout
+
     try:
         while True:
             # Get the next episode processing function from the queue
@@ -818,8 +821,15 @@ async def process_episode_queue(group_id: str):
             process_func = await episode_queues[group_id].get()
 
             try:
-                # Process the episode
-                await process_func()
+                # Process the episode with timeout
+                await asyncio.wait_for(process_func(), timeout=episode_timeout)
+            except asyncio.TimeoutError:
+                # Log timeout error with episode context
+                logger.error(
+                    f'Episode processing timed out after {episode_timeout} seconds for group_id {group_id}. '
+                    'Continuing with next episode...'
+                )
+                # Continue processing next episodes without stopping the worker
             except Exception as e:
                 error_msg = str(e)
                 logger.error(f'Error processing queued episode for group_id {group_id}: {error_msg}')

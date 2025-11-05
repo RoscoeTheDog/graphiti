@@ -107,5 +107,12 @@
     "port": null,
     "enable_cors": false,
     "allowed_origins": []
+  },
+
+  "resilience": {
+    "max_retries": 3,
+    "retry_backoff_base": 2,
+    "episode_timeout": 60,
+    "health_check_interval": 300
   }
 }

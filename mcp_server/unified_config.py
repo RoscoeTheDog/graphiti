@@ -299,6 +299,20 @@ class MCPServerConfig(BaseModel):
 
 
 # ============================================================================
+# Resilience Configuration
+# ============================================================================
+
+
+class ResilienceConfig(BaseModel):
+    """Resilience and error recovery configuration"""
+
+    max_retries: int = 3
+    retry_backoff_base: int = 2
+    episode_timeout: int = 60
+    health_check_interval: int = 300
+
+
+# ============================================================================
 # Root Configuration
 # ============================================================================
 
@@ -315,6 +329,7 @@ class GraphitiConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
+    resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":

@@ -90,27 +90,38 @@
 - [x] Implemented with is_recoverable_error() function for error classification
 
 ### Story 3: Episode Processing Timeouts
-**Status**: unassigned
-**Files**: `packages/mcp/src/server.py`, `graphiti.config.json`
+**Status**: completed
+**Claimed**: 2025-11-05 03:15
+**Completed**: 2025-11-05 04:00
+**Files**: `mcp_server/graphiti_mcp_server.py`, `mcp_server/unified_config.py`, `graphiti.config.json`, `tests/mcp/test_episode_timeout.py`
 **Description**: Add configurable timeouts to episode processing to prevent indefinite hangs
 **Acceptance Criteria**:
-- [ ] Default timeout of 60 seconds for episode processing
-- [ ] Timeout configurable via graphiti.config.json
-- [ ] TimeoutError logged with episode details
-- [ ] Episode marked as failed and removed from queue
-- [ ] Subsequent episodes continue processing
+- [x] Default timeout of 60 seconds for episode processing
+- [x] Timeout configurable via graphiti.config.json
+- [x] TimeoutError logged with episode details
+- [x] Episode marked as failed and removed from queue
+- [x] Subsequent episodes continue processing
+
+**Implementation Details**:
+- Added `ResilienceConfig` class to `unified_config.py` with `episode_timeout` setting (default: 60 seconds)
+- Added "resilience" section to `graphiti.config.json` with configurable timeout
+- Wrapped episode processing in `process_episode_queue()` with `asyncio.wait_for()` to enforce timeout
+- Added specific `asyncio.TimeoutError` handling that logs timeout and continues with next episode
+- Worker remains active after timeout (not marked as stopped)
+- Created comprehensive test suite in `tests/mcp/test_episode_timeout.py` with 4 test cases, all passing
 
 ### Story 3.1: Timeout Implementation
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 3
-**Files**: `packages/mcp/src/server.py`
+**Completed**: 2025-11-05 04:00 (as part of Story 3)
+**Files**: `mcp_server/graphiti_mcp_server.py`, `mcp_server/unified_config.py`
 **Description**: Wrap episode processing with asyncio.wait_for()
 **Acceptance Criteria**:
-- [ ] Add timeout parameter to config (default: 60)
-- [ ] Wrap process_func() call with asyncio.wait_for()
-- [ ] Log timeout errors with episode context
-- [ ] Continue processing next episodes after timeout
-- [ ] Don't mark worker as stopped on timeout
+- [x] Add timeout parameter to config (default: 60)
+- [x] Wrap process_func() call with asyncio.wait_for()
+- [x] Log timeout errors with episode context
+- [x] Continue processing next episodes after timeout
+- [x] Don't mark worker as stopped on timeout
 
 ### Story 4: Enhanced Logging
 **Status**: unassigned
