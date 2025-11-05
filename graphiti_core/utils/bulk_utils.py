@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import asyncio
 import json
 import logging
 import typing
@@ -133,6 +134,28 @@ async def add_nodes_and_edges_bulk(
     entity_edges: list[EntityEdge],
     embedder: EmbedderClient,
 ):
+    # PERFORMANCE FIX: Generate embeddings BEFORE opening transaction
+    # This prevents holding database locks during slow external API calls
+
+    # Generate node embeddings in parallel
+    node_embedding_tasks = [
+        node.generate_name_embedding(embedder)
+        for node in entity_nodes
+        if node.name_embedding is None
+    ]
+    if node_embedding_tasks:
+        await asyncio.gather(*node_embedding_tasks)
+
+    # Generate edge embeddings in parallel
+    edge_embedding_tasks = [
+        edge.generate_embedding(embedder)
+        for edge in entity_edges
+        if edge.fact_embedding is None
+    ]
+    if edge_embedding_tasks:
+        await asyncio.gather(*edge_embedding_tasks)
+
+    # NOW open session and transaction - embeddings are already generated
     session = driver.session()
     try:
         await session.execute_write(
@@ -165,8 +188,8 @@ async def add_nodes_and_edges_bulk_tx(
     nodes = []
 
     for node in entity_nodes:
-        if node.name_embedding is None:
-            await node.generate_name_embedding(embedder)
+        # Embedding should already be generated before transaction
+        # (see add_nodes_and_edges_bulk function above)
 
         entity_data: dict[str, Any] = {
             'uuid': node.uuid,
@@ -188,8 +211,9 @@ async def add_nodes_and_edges_bulk_tx(
 
     edges = []
     for edge in entity_edges:
-        if edge.fact_embedding is None:
-            await edge.generate_embedding(embedder)
+        # Embedding should already be generated before transaction
+        # (see add_nodes_and_edges_bulk function above)
+
         edge_data: dict[str, Any] = {
             'uuid': edge.uuid,
             'source_node_uuid': edge.source_node_uuid,
