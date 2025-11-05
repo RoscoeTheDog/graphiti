@@ -1,0 +1,19 @@
+# .claude/ directory gitignore
+# Generated: 2025-11-05
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Sensitive data (if accidentally placed here)
+*.env
+credentials.txt
+secrets.*
+
+# Large research downloads (if any)
+downloads/
