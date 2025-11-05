@@ -690,6 +690,87 @@ async def initialize_graphiti():
         raise
 
 
+async def initialize_graphiti_with_retry(max_retries: int = 3) -> bool:
+    """Initialize Graphiti with automatic retry logic and exponential backoff.
+
+    Args:
+        max_retries: Maximum number of retry attempts (default: 3)
+
+    Returns:
+        bool: True if initialization succeeded, False otherwise
+    """
+    global consecutive_connection_failures
+
+    for attempt in range(max_retries):
+        try:
+            await initialize_graphiti()
+            logger.info('Graphiti initialized successfully')
+            return True
+        except Exception as e:
+            # Calculate exponential backoff delay: 2^attempt seconds (1s, 2s, 4s)
+            delay = 2 ** attempt
+
+            if attempt < max_retries - 1:
+                logger.warning(
+                    f'Failed to initialize Graphiti (attempt {attempt + 1}/{max_retries}): {str(e)}. '
+                    f'Retrying in {delay} seconds...'
+                )
+                await asyncio.sleep(delay)
+            else:
+                logger.error(
+                    f'Failed to initialize Graphiti after {max_retries} attempts: {str(e)}'
+                )
+                return False
+
+    return False
+
+
+def is_recoverable_error(error: Exception) -> bool:
+    """Determine if an error is recoverable (connection-related) or fatal.
+
+    Args:
+        error: The exception to check
+
+    Returns:
+        bool: True if the error is recoverable, False if it's fatal
+    """
+    error_str = str(error).lower()
+
+    # Recoverable errors (connection-related)
+    recoverable_indicators = [
+        'connection',
+        'timeout',
+        'network',
+        'unavailable',
+        'refused',
+        'reset',
+        'broken pipe',
+        'host unreachable',
+        'no route to host',
+    ]
+
+    # Fatal errors (configuration, authentication, etc.)
+    fatal_indicators = [
+        'authentication',
+        'unauthorized',
+        'invalid credentials',
+        'api key',
+        'permission denied',
+        'configuration',
+    ]
+
+    # Check for fatal errors first
+    if any(indicator in error_str for indicator in fatal_indicators):
+        return False
+
+    # Check for recoverable errors
+    if any(indicator in error_str for indicator in recoverable_indicators):
+        return True
+
+    # Default to non-recoverable for unknown errors
+    return False
+
+
 def format_fact_result(edge: EntityEdge) -> dict[str, Any]:
     """Format an entity edge into a readable result.
 
@@ -722,9 +803,10 @@ async def process_episode_queue(group_id: str):
     """Process episodes for a specific group_id sequentially.
 
     This function runs as a long-lived task that processes episodes
-    from the queue one at a time.
+    from the queue one at a time. On recoverable errors, it attempts
+    to reconnect and restart the worker.
     """
-    global queue_workers
+    global queue_workers, graphiti_client
 
     logger.info(f'Starting episode queue worker for group_id: {group_id}')
     queue_workers[group_id] = True
@@ -739,7 +821,37 @@ async def process_episode_queue(group_id: str):
                 # Process the episode
                 await process_func()
             except Exception as e:
-                logger.error(f'Error processing queued episode for group_id {group_id}: {str(e)}')
+                error_msg = str(e)
+                logger.error(f'Error processing queued episode for group_id {group_id}: {error_msg}')
+
+                # Check if this is a recoverable error
+                if is_recoverable_error(e):
+                    logger.warning(
+                        f'Detected recoverable error in queue worker for group_id {group_id}. '
+                        'Attempting reconnection...'
+                    )
+
+                    # Attempt to reconnect
+                    reconnection_success = await initialize_graphiti_with_retry(max_retries=3)
+
+                    if reconnection_success:
+                        logger.info(
+                            f'Successfully reconnected. Resuming queue worker for group_id {group_id}'
+                        )
+                        # Keep the worker running (queue_workers[group_id] remains True)
+                    else:
+                        logger.error(
+                            f'Failed to reconnect after recoverable error. '
+                            f'Stopping queue worker for group_id {group_id}'
+                        )
+                        queue_workers[group_id] = False
+                        break
+                else:
+                    # Non-recoverable error - log and continue with next episode
+                    logger.error(
+                        f'Non-recoverable error in queue worker for group_id {group_id}. '
+                        'Continuing with next episode...'
+                    )
             finally:
                 # Mark the task as done regardless of success/failure
                 episode_queues[group_id].task_done()
@@ -1345,8 +1457,10 @@ async def initialize_server() -> MCPConfig:
     else:
         logger.info('Entity extraction disabled (no custom entities will be used)')
 
-    # Initialize Graphiti
-    await initialize_graphiti()
+    # Initialize Graphiti with automatic retry
+    success = await initialize_graphiti_with_retry(max_retries=3)
+    if not success:
+        logger.error('Failed to initialize Graphiti after retries. Server may have limited functionality.')
 
     if args.host:
         logger.info(f'Setting MCP server host to: {args.host}')
