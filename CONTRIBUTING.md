@@ -61,6 +61,8 @@ Once you've found an issue tagged with "good first issue" or "help wanted," or p
      ```
      make install
      ```
+     This creates a `.venv` virtual environment and installs all dependencies including dev tools.
+
    - To run integration tests, set the appropriate environment variables
 
      ```
@@ -73,6 +75,41 @@ Once you've found an issue tagged with "good first issue" or "help wanted," or p
      export TEST_USER=...
      export TEST_PASSWORD=...
      ```
+
+### Virtual Environment Best Practices
+
+The project uses a `.venv` virtual environment managed by `uv`. This keeps dependencies isolated from your global Python installation.
+
+**Recommended workflow:**
+
+```bash
+# After make install, the venv is ready
+
+# Option 1: Use make targets (automatically uses venv)
+make test          # Run tests
+make format        # Format code
+make lint          # Check code quality
+
+# Option 2: Activate venv manually (Windows)
+.venv\Scripts\activate
+
+# Option 2: Activate venv manually (Linux/Mac)
+source .venv/bin/activate
+
+# Option 3: Run commands directly with uv
+uv run pytest tests/mcp -v
+uv run python -m pytest tests/
+
+# Verify you're using the venv Python
+python --version   # Should show Python 3.11.x from .venv
+which python       # Should point to .venv/Scripts/python
+```
+
+**Important Notes:**
+- The `.venv` contains Python 3.11.13 with all project dependencies
+- Always use `make` commands or `uv run` to ensure venv is used
+- Do NOT install project dependencies globally - keep them in the venv
+- If you see import errors, verify venv is activated or use `uv run`
 
 ## Making Changes
 

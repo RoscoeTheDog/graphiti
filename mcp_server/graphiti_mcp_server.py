@@ -13,7 +13,8 @@ import sys
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TypedDict, cast
+from typing import Any, cast
+from typing_extensions import TypedDict
 
 try:
     from azure.identity import DefaultAzureCredential, get_bearer_token_provider
