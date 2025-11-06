@@ -1,8 +1,12 @@
 # [PROJECT_NAME] - Installation Guide
 
+> **⚠️ TEMPLATE FILE**: Platform-agnostic generator (templates/)
+> **Generated**: `instance/CLAUDE_INSTALL.md` (platform-specific, gitignored)
+> **Agent**: Read `claude-mcp-installer/CLAUDE_README.md` first → Copy to instance/ → Populate placeholders
+
 **Version**: 1.0.0 | **Updated**: [DATE] | **For**: AI-assisted + manual install
 
----
+
 
 ## TOC
 

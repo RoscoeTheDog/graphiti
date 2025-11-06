@@ -1,6 +1,6 @@
 # .claude/ Index
 
-**Last Updated:** 2025-11-05
+**Last Updated:** 2025-11-06
 **Project:** graphiti (STD)
 
 ## Overview
@@ -14,7 +14,8 @@ This directory contains agent-generated ephemeral files organized according to t
 | Category | Purpose | Files | Last Modified |
 |----------|---------|-------|---------------|
 | implementation | Sprint tracking, checkpoints, implementation plans | 20 | 2025-11-05 |
-| context | Discovery, analysis, troubleshooting docs | 7 | 2025-11-05 |
+| context | Discovery, analysis, troubleshooting docs | 8 | 2025-11-06 |
+| test | Ephemeral test scripts and CI/CD validation | 3 | 2025-11-06 |
 | research | Research reports (empty - STD uses graphiti memory) | 0 | - |
 
 ---
@@ -52,6 +53,15 @@ Discovery, analysis, and troubleshooting documentation.
 | SECURITY_SCAN_REPORT.md | 2025-11-05 | 2025-11-05 | 5.9KB | Security audit results |
 | OTEL_TRACING.md | 2025-11-05 | 2025-11-05 | 1.2KB | OpenTelemetry tracing notes |
 
+### test/ (3 files, ~6KB)
+Ephemeral test scripts for development and CI/CD validation.
+
+| File | Created | Modified | Size | Description |
+|------|---------|----------|------|-------------|
+| README.md | 2025-11-06 | 2025-11-06 | ~1KB | Test directory documentation |
+| test_neo4j_community_connection.py | 2025-11-06 | 2025-11-06 | 4KB | Neo4j connection test script |
+| docker-compose.test.yml | 2025-11-06 | 2025-11-06 | 1KB | CI/CD test docker-compose config |
+
 ### research/ (0 files)
 Empty - STD projects use graphiti memory for research storage per EPHEMERAL-FS policy.
 
@@ -63,11 +73,15 @@ Empty - STD projects use graphiti memory for research storage per EPHEMERAL-FS p
 |---------|------|-------|-------------|
 | implementation/archive/2025-11-05-0102 | 2025-11-05 | 9 | Pre-migration implementation files |
 | context/archive/2025-11-05-migration | 2025-11-05 | 5 | Obsolete documentation archived during .claude/ migration |
+| implementation/archive/2025-11-06-setup-files | 2025-11-06 | 11 | Old root-level setup files (replaced by claude-mcp-installer/ schema) |
 
 ---
 
 ## Notes
 
-- **Migration Date:** 2025-11-05 - Migrated from scattered root/implementation files to .claude/ schema
+- **Migration Dates:**
+  - 2025-11-05: Initial migration from scattered root/implementation files to .claude/ schema
+  - 2025-11-06: Added test/ category, migrated ephemeral test scripts from root
 - **Storage Policy:** STD project (no BMAD) - Research findings stored in graphiti memory, not files
 - **Archives:** Preserved in category/archive/{timestamp}/ with restore commands in archive INDEX.md
+- **Test Files:** Development/validation scripts in .claude/test/, permanent tests in tests/
