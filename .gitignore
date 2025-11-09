@@ -185,3 +185,7 @@ cache.db*
 
 # Generated Claude MCP Installer Documentation (platform-specific)
 claude-mcp-installer/instance/
+
+# MCP Cache
+.serena/
+.claude-context/

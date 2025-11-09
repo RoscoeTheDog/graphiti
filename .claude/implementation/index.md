@@ -7,15 +7,27 @@
 ## Stories
 
 ### Story 1: Core Export Infrastructure
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-09 01:28
+**Completed**: 2025-11-09 01:35
 **Description**: Implement the foundational MemoryExporter class and path pattern resolution system
 **Acceptance Criteria**:
-- [ ] Create `graphiti_core/export.py` with MemoryExporter class
-- [ ] Implement path pattern variable substitution ({date}, {timestamp}, {session_id}, etc.)
-- [ ] Add ExportConfig Pydantic model to unified_config.py
-- [ ] Add path resolution with builtin variables (timestamp, date, fact_count, node_count)
-- [ ] Support custom path_variables parameter
-- [ ] Add export section to graphiti.config.json schema
+- [x] Create `graphiti_core/export.py` with MemoryExporter class
+- [x] Implement path pattern variable substitution ({date}, {timestamp}, {session_id}, etc.)
+- [x] Add ExportConfig Pydantic model to unified_config.py
+- [x] Add path resolution with builtin variables (timestamp, date, fact_count, node_count)
+- [x] Support custom path_variables parameter
+- [x] Add export section to graphiti.config.json schema
+
+**Implementation Notes**:
+- Created PathResolver class with builtin variable support: {date}, {timestamp}, {time}, {session_id}, {group_id}, {query_hash}, {fact_count}, {node_count}
+- Implemented SecurityScanner for credential detection (api_key, password, token, bearer, secret, auth_token)
+- Created MemoryExporter class with auto-INDEX.md updates
+- Added ExportConfig to unified_config.py with default path patterns and template metadata
+- Updated graphiti.config.json with export section
+- Security: Path traversal protection (blocks .. patterns)
+- Comprehensive test suite: 22 tests, all passing
+- Files created: graphiti_core/export.py (362 lines), tests/test_export.py (255 lines)
 
 ### Story 1.1: Export Configuration Schema
 **Status**: unassigned
