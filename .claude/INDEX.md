@@ -1,6 +1,6 @@
 # .claude/ Index
 
-**Last Updated:** 2025-11-06
+**Last Updated:** 2025-11-09
 **Project:** graphiti (STD)
 
 ## Overview
@@ -13,7 +13,7 @@ This directory contains agent-generated ephemeral files organized according to t
 
 | Category | Purpose | Files | Last Modified |
 |----------|---------|-------|---------------|
-| implementation | Sprint tracking, checkpoints, implementation plans | 20 | 2025-11-05 |
+| implementation | Sprint tracking, checkpoints, implementation plans | 3 | 2025-11-09 |
 | context | Discovery, analysis, troubleshooting docs | 8 | 2025-11-06 |
 | test | Ephemeral test scripts and CI/CD validation | 3 | 2025-11-06 |
 | research | Research reports (empty - STD uses graphiti memory) | 0 | - |
@@ -22,23 +22,14 @@ This directory contains agent-generated ephemeral files organized according to t
 
 ## Files by Category
 
-### implementation/ (20 files, ~100KB)
+### implementation/ (3 files, ~36KB)
 Sprint-related implementation tracking and planning documents.
 
 | File | Created | Modified | Size | Description |
 |------|---------|----------|------|-------------|
-| index.md | 2025-11-05 | 2025-11-05 | 13KB | Active sprint tracker (MCP Server Resilience) |
-| checkpoints/CHECKPOINT_PHASE2.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 2 checkpoint |
-| checkpoints/CHECKPOINT_PHASE3.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 3 checkpoint |
-| checkpoints/CHECKPOINT_PHASE4.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 4 checkpoint |
-| checkpoints/CHECKPOINT_PHASE5.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 5 checkpoint |
-| checkpoints/CHECKPOINT_PHASE6.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 6 checkpoint |
-| checkpoints/CHECKPOINT_PHASE6_COMPLETE.md | 2025-11-05 | 2025-11-05 | ~5KB | Phase 6 completion summary |
-| checkpoints/TEST_TEMPLATES_PHASE6.md | 2025-11-05 | 2025-11-05 | ~3KB | Test templates for Phase 6 |
-| plans/IMPLEMENTATION_PLAN_LLM_FILTER.md | 2025-11-05 | 2025-11-05 | ~8KB | LLM Filter implementation plan |
-| plans/IMPLEMENTATION_PLAN_UNIFIED_CONFIG.md | 2025-11-05 | 2025-11-05 | ~8KB | Unified config implementation plan |
-| guides/MIGRATION_GUIDE.md | 2025-11-05 | 2025-11-05 | ~6KB | Migration guide (user-facing) |
-| guides/UNIFIED_CONFIG_SUMMARY.md | 2025-11-05 | 2025-11-05 | ~4KB | Config summary |
+| index.md | 2025-11-09 | 2025-11-09 | 12KB | Active sprint tracker (Graphiti Filesystem Export) |
+| stories/context-and-architecture.md | 2025-11-09 | 2025-11-09 | 15KB | Session context, architecture, challenges, timeline for export features |
+| stories/index-template-schema.md | 2025-11-09 | 2025-11-09 | 9KB | Canonical INDEX.md schema and migration strategy |
 
 ### context/ (7 files, ~76KB)
 Discovery, analysis, and troubleshooting documentation.
@@ -72,8 +63,9 @@ Empty - STD projects use graphiti memory for research storage per EPHEMERAL-FS p
 | Archive | Date | Files | Description |
 |---------|------|-------|-------------|
 | implementation/archive/2025-11-05-0102 | 2025-11-05 | 9 | Pre-migration implementation files |
-| context/archive/2025-11-05-migration | 2025-11-05 | 5 | Obsolete documentation archived during .claude/ migration |
 | implementation/archive/2025-11-06-setup-files | 2025-11-06 | 11 | Old root-level setup files (replaced by claude-mcp-installer/ schema) |
+| implementation/archive/2025-11-09-0122 | 2025-11-09 | 4 | Completed MCP Server Resilience sprint (checkpoints, guides, plans) |
+| context/archive/2025-11-05-migration | 2025-11-05 | 5 | Obsolete documentation archived during .claude/ migration |
 
 ---
 
@@ -82,6 +74,7 @@ Empty - STD projects use graphiti memory for research storage per EPHEMERAL-FS p
 - **Migration Dates:**
   - 2025-11-05: Initial migration from scattered root/implementation files to .claude/ schema
   - 2025-11-06: Added test/ category, migrated ephemeral test scripts from root
+  - 2025-11-09: New sprint started (Graphiti Filesystem Export), archived MCP resilience sprint
 - **Storage Policy:** STD project (no BMAD) - Research findings stored in graphiti memory, not files
 - **Archives:** Preserved in category/archive/{timestamp}/ with restore commands in archive INDEX.md
 - **Test Files:** Development/validation scripts in .claude/test/, permanent tests in tests/

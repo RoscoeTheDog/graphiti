@@ -1,321 +1,211 @@
-# Implementation Sprint: MCP Server Resilience & Stability
+# Implementation Sprint: Graphiti Filesystem Export
 
-**Created**: 2025-11-05 01:02
+**Created**: 2025-11-09 01:22
 **Status**: active
-**Sprint Goal**: Implement automatic reconnection, health monitoring, and error recovery features to ensure MCP server persistent state resilience
+**Sprint Goal**: Implement filesystem export capabilities for Graphiti memory graph with flexible path patterns, templates, and INDEX.md integration for agent handoff workflows and session continuity
 
 ## Stories
 
-### Story 1: Health Check & Connection Monitoring
-**Status**: completed
-**Claimed**: 2025-11-05 01:15
-**Completed**: 2025-11-05 01:30
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Implement health check endpoint and connection monitoring to detect connection issues proactively
+### Story 1: Core Export Infrastructure
+**Status**: unassigned
+**Description**: Implement the foundational MemoryExporter class and path pattern resolution system
 **Acceptance Criteria**:
-- [x] Health check tool returns connection status (healthy/unhealthy)
-- [x] Health check tests database connectivity with simple query
-- [x] Error details included in unhealthy response
-- [x] Tool is callable from MCP client
+- [ ] Create `graphiti_core/export.py` with MemoryExporter class
+- [ ] Implement path pattern variable substitution ({date}, {timestamp}, {session_id}, etc.)
+- [ ] Add ExportConfig Pydantic model to unified_config.py
+- [ ] Add path resolution with builtin variables (timestamp, date, fact_count, node_count)
+- [ ] Support custom path_variables parameter
+- [ ] Add export section to graphiti.config.json schema
 
-### Story 1.1: Health Check Implementation
-**Status**: completed
+### Story 1.1: Export Configuration Schema
+**Status**: unassigned
 **Parent**: Story 1
-**Completed**: 2025-11-05 01:30
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Add health_check() tool to MCP server that tests database connection
+**Description**: Define export configuration in unified config system
 **Acceptance Criteria**:
-- [x] Add @mcp.tool() decorated health_check function
-- [x] Execute simple "RETURN 1" query to test connection
-- [x] Return structured response with status and optional error
-- [x] Handle exceptions gracefully
+- [ ] Add ExportConfig class to mcp_server/unified_config.py
+- [ ] Fields: enabled, default_base_path, auto_index, git_tracking, security_scan
+- [ ] Add path_patterns dict for named patterns
+- [ ] Add templates dict for template configurations
+- [ ] Validate configuration on startup
 
-### Story 1.2: Connection State Tracking
-**Status**: completed
+### Story 1.2: Path Pattern Resolution
+**Status**: unassigned
 **Parent**: Story 1
-**Completed**: 2025-11-05 01:30
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Add internal connection state tracking for monitoring
+**Description**: Implement dynamic path pattern variable substitution
 **Acceptance Criteria**:
-- [x] Track last successful connection timestamp
-- [x] Track consecutive failure count
-- [x] Expose metrics through health check
-- [x] Add connection pool status monitoring (implemented via health_check query execution)
+- [ ] Resolve builtin variables: {date}, {timestamp}, {time}, {session_id}, {group_id}, {query_hash}, {fact_count}, {node_count}
+- [ ] Support custom variables via path_variables parameter
+- [ ] Handle nested directory creation (mkdir -p behavior)
+- [ ] Validate paths for security (no path traversal attacks)
+- [ ] Generate session_id if not provided (uuid4)
 
-### Story 2: Automatic Reconnection Logic
-**Status**: completed
-**Claimed**: 2025-11-05 02:15
-**Completed**: 2025-11-05 02:45
-**Files**: `mcp_server/graphiti_mcp_server.py`, `tests/mcp/test_reconnection.py`
-**Description**: Implement automatic reconnection with exponential backoff when connection is lost
+### Story 2: Template System (MVP - Markdown Only)
+**Status**: unassigned
+**Description**: Implement template rendering system with built-in "handoff" template in markdown format
 **Acceptance Criteria**:
-- [x] Automatic reconnection attempts on connection failure
-- [x] Exponential backoff retry strategy (2^n seconds)
-- [x] Configurable max retry attempts (default: 3)
-- [x] Connection state restored after successful reconnect
-- [x] Queue workers restarted after reconnection
+- [ ] Create graphiti_core/templates.py with TemplateEngine class
+- [ ] Implement MarkdownFormatter class
+- [ ] Create built-in "handoff" template (see design doc)
+- [ ] Render facts and nodes as markdown sections
+- [ ] Support metadata injection into templates
+- [ ] Handle empty results gracefully
 
-**Implementation Details**:
-- Added `initialize_graphiti_with_retry()` function with exponential backoff (1s, 2s, 4s delays)
-- Added `is_recoverable_error()` function to distinguish connection errors from fatal errors
-- Updated `process_episode_queue()` to detect recoverable errors and attempt reconnection
-- Queue workers now remain active after successful reconnection
-- Updated `initialize_server()` to use retry logic on startup
-- Added comprehensive unit tests with 100% pass rate
-
-### Story 2.1: Initialization Retry Logic
-**Status**: completed
+### Story 2.1: Handoff Template Implementation
+**Status**: unassigned
 **Parent**: Story 2
-**Completed**: 2025-11-05 02:45 (as part of Story 2)
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Add retry wrapper for initialize_graphiti() function
+**Description**: Create production-ready handoff template for agent session transitions
 **Acceptance Criteria**:
-- [x] Create initialize_graphiti_with_retry() function
-- [x] Implement exponential backoff (1s, 2s, 4s delays)
-- [x] Configurable max_retries parameter
-- [x] Log retry attempts with warning level
-- [x] Return success/failure status after all retries
+- [ ] Template includes: Session Context, Key Entities, Critical Relationships, Next Steps sections
+- [ ] Format entities with name, type, summary, and attributes
+- [ ] Format facts with source-relationship-target pattern
+- [ ] Include review checklist at bottom
+- [ ] Support custom metadata fields
 
-### Story 2.2: Queue Worker Recovery
-**Status**: completed
-**Parent**: Story 2
-**Completed**: 2025-11-05 02:45 (as part of Story 2)
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Implement queue worker restart on recoverable errors
+### Story 3: MCP Tool Integration (export_memory_to_file)
+**Status**: unassigned
+**Description**: Add export_memory_to_file MCP tool to graphiti_mcp_server.py
 **Acceptance Criteria**:
-- [x] Distinguish recoverable vs non-recoverable errors
-- [x] Restart worker on recoverable errors (connection issues, timeouts)
-- [x] Keep queue_workers[group_id] = True on recoverable errors
-- [x] Log worker restart events
-- [x] Implemented with is_recoverable_error() function for error classification
+- [ ] Add @mcp.tool() decorated export_memory_to_file function
+- [ ] Parameters: query, output_path, template, format, group_ids, max_facts, max_nodes, metadata, path_variables
+- [ ] Execute search_memory_facts() and search_memory_nodes() internally
+- [ ] Call MemoryExporter.export_to_file() with search results
+- [ ] Return structured response with path, fact_count, node_count, success status
+- [ ] Handle errors gracefully with informative messages
 
-### Story 3: Episode Processing Timeouts
-**Status**: completed
-**Claimed**: 2025-11-05 03:15
-**Completed**: 2025-11-05 04:00
-**Files**: `mcp_server/graphiti_mcp_server.py`, `mcp_server/unified_config.py`, `graphiti.config.json`, `tests/mcp/test_episode_timeout.py`
-**Description**: Add configurable timeouts to episode processing to prevent indefinite hangs
-**Acceptance Criteria**:
-- [x] Default timeout of 60 seconds for episode processing
-- [x] Timeout configurable via graphiti.config.json
-- [x] TimeoutError logged with episode details
-- [x] Episode marked as failed and removed from queue
-- [x] Subsequent episodes continue processing
-
-**Implementation Details**:
-- Added `ResilienceConfig` class to `unified_config.py` with `episode_timeout` setting (default: 60 seconds)
-- Added "resilience" section to `graphiti.config.json` with configurable timeout
-- Wrapped episode processing in `process_episode_queue()` with `asyncio.wait_for()` to enforce timeout
-- Added specific `asyncio.TimeoutError` handling that logs timeout and continues with next episode
-- Worker remains active after timeout (not marked as stopped)
-- Created comprehensive test suite in `tests/mcp/test_episode_timeout.py` with 4 test cases, all passing
-
-### Story 3.1: Timeout Implementation
-**Status**: completed
+### Story 3.1: Security Scanning
+**Status**: unassigned
 **Parent**: Story 3
-**Completed**: 2025-11-05 04:00 (as part of Story 3)
-**Files**: `mcp_server/graphiti_mcp_server.py`, `mcp_server/unified_config.py`
-**Description**: Wrap episode processing with asyncio.wait_for()
+**Description**: Implement credential detection before writing files
 **Acceptance Criteria**:
-- [x] Add timeout parameter to config (default: 60)
-- [x] Wrap process_func() call with asyncio.wait_for()
-- [x] Log timeout errors with episode context
-- [x] Continue processing next episodes after timeout
-- [x] Don't mark worker as stopped on timeout
+- [ ] Pattern matching for: api_key, secret, password, token, bearer, auth_token
+- [ ] Scan rendered content before file write
+- [ ] Warn on detection with list of matched patterns
+- [ ] Suggest obfuscation techniques
+- [ ] Config option to enforce (halt) vs warn (continue)
 
-### Story 4: Enhanced Logging
-**Status**: completed
-**Claimed**: 2025-11-05 04:15
-**Completed**: 2025-11-05 04:45
-**Files**: `mcp_server/graphiti_mcp_server.py`, `.gitignore`
-**Description**: Add file-based logging with rotation and connection metrics tracking
+### Story 4: Priority 2 - Multi-Format Support
+**Status**: unassigned
+**Description**: Extend template system to support JSON, YAML, and HTML output formats
 **Acceptance Criteria**:
-- [x] File-based logging configured (logs/graphiti_mcp.log)
-- [x] Log rotation enabled (10MB max, 5 backups)
-- [x] Connection pool metrics logged periodically
-- [x] Transaction duration tracking added
-- [x] Error context includes traceback
+- [ ] Implement JSONFormatter class in templates.py
+- [ ] Implement YAMLFormatter class in templates.py
+- [ ] Implement HTMLFormatter class in templates.py
+- [ ] Add format parameter validation (markdown, json, yaml, html)
+- [ ] Update TemplateEngine to route to correct formatter
+- [ ] Create built-in templates for each format (investigation, snapshot)
 
-**Implementation Details**:
-- Added `setup_logging()` function that creates logs/ directory and configures rotating file handler
-- Implemented `MetricsTracker` class to track episode processing success/failure/timeout metrics
-- Added `log_metrics_periodically()` async task that logs metrics every 5 minutes in JSON format
-- Metrics include: connection status, episode processing stats (success rate, avg duration), queue depths
-- Updated `process_episode_queue()` to record metrics for each episode processed
-- Started metrics logging task in `run_mcp_server()` with proper cleanup on shutdown
-- Updated .gitignore to exclude logs/ directory
-
-### Story 4.1: File Logging Setup
-**Status**: completed
+### Story 4.1: JSON/YAML Formatters
+**Status**: unassigned
 **Parent**: Story 4
-**Completed**: 2025-11-05 04:45 (as part of Story 4)
-**Files**: `mcp_server/graphiti_mcp_server.py`, `.gitignore`
-**Description**: Configure file-based logging with rotation
+**Description**: Implement structured data export formatters
 **Acceptance Criteria**:
-- [x] Create logs/ directory if missing
-- [x] Configure RotatingFileHandler
-- [x] Set appropriate log format with timestamps
-- [x] Maintain both file and stderr logging
-- [x] Add to .gitignore if not present
+- [ ] JSONFormatter: serialize facts/nodes to JSON with proper structure
+- [ ] YAMLFormatter: serialize to YAML with human-readable formatting
+- [ ] Include metadata fields in output
+- [ ] Handle datetime serialization
+- [ ] Validate output with json.loads() / yaml.safe_load()
 
-### Story 4.2: Metrics Logging
-**Status**: completed
+### Story 4.2: Investigation Template
+**Status**: unassigned
 **Parent**: Story 4
-**Completed**: 2025-11-05 04:45 (as part of Story 4)
-**Files**: `mcp_server/graphiti_mcp_server.py`
-**Description**: Add periodic logging of connection and performance metrics
+**Description**: Create JSON-formatted investigation template for debugging
 **Acceptance Criteria**:
-- [x] Log connection pool stats every 5 minutes
-- [x] Track and log average transaction duration
-- [x] Log queue depth for each group_id
-- [x] Track and log episode processing success/failure rates
-- [x] Use structured logging format (JSON) for metrics
+- [ ] Structure: investigation.timestamp, query, context, findings, metrics
+- [ ] Include entities_as_json and facts_as_json
+- [ ] Calculate metrics: fact_count, node_count, avg_confidence
+- [ ] Suitable for machine parsing and analysis tools
 
-### Story 5: Configuration & Documentation
-**Status**: completed
-**Claimed**: 2025-11-05 05:00
-**Completed**: 2025-11-05 05:30
-**Files**: `graphiti.config.json`, `CONFIGURATION.md`, `CLAUDE.md`, `mcp_server/README.md`
-**Description**: Add configuration options for new resilience features and update documentation
+### Story 5: INDEX.md Auto-Generation
+**Status**: unassigned
+**Description**: Implement automatic INDEX.md creation and updates in export directories
 **Acceptance Criteria**:
-- [x] Add resilience section to graphiti.config.json schema (already present from Story 3)
-- [x] Document all new configuration options in CONFIGURATION.md
-- [x] Update CONFIGURATION.md with examples and usage
-- [x] Add troubleshooting section for connection failures and timeouts
-- [x] Update CLAUDE.md with health_check tool and resilience features
-- [x] Update MCP server README with resilience section and updated tool list
+- [ ] Create or update INDEX.md after each export operation
+- [ ] Track: file name, created timestamp, modified timestamp, size, description
+- [ ] Group files by category/subdirectory
+- [ ] Generate table format matching EPHEMERAL-FS schema
+- [ ] Append new entries (don't overwrite existing)
+- [ ] Extract description from file metadata or first line
 
-**Implementation Details**:
-- Added comprehensive "Resilience Configuration" section to CONFIGURATION.md with field descriptions, retry behavior, timeout handling, and environment overrides
-- Added resilience environment variables to override table in CONFIGURATION.md
-- Added "Connection Failures and Recovery" troubleshooting section with automatic recovery info and manual debugging steps
-- Added "Episode Processing Timeouts" troubleshooting section with configuration examples
-- Updated CLAUDE.md with enhanced health_check tool description and new "Resilience Features" section
-- Updated mcp_server/README.md with "Resilience & Error Recovery" section documenting automatic reconnection, timeouts, health monitoring, configuration, and logging
-- Restructured Available Tools section in README with Core Operations and Monitoring & Health categories
-
-### Story 5.1: Configuration Schema
-**Status**: completed
+### Story 5.1: INDEX.md Template Migration Strategy
+**Status**: unassigned
 **Parent**: Story 5
-**Completed**: 2025-11-05 05:30 (as part of Story 5)
-**Files**: `mcp_server/unified_config.py`, `graphiti.config.json`
-**Description**: Define and implement resilience configuration options
+**Description**: Design and implement strategy to migrate existing INDEX.md files to standardized template
 **Acceptance Criteria**:
-- [x] Add "resilience" section to config schema (completed in Story 3)
-- [x] Options: max_retries, retry_backoff_base, episode_timeout, health_check_interval
-- [x] Validate configuration on startup via Pydantic
-- [x] Provide sensible defaults (3 retries, base 2, 60s timeout, 300s interval)
-- [x] Documented in CONFIGURATION.md
+- [ ] Create migration tool/function to detect existing INDEX.md format
+- [ ] Leverage LLM (via Graphiti's llm_client) to parse and reformat existing content
+- [ ] Preserve all existing information during migration
+- [ ] Apply standardized EPHEMERAL-FS schema template
+- [ ] Support batch migration across multiple .claude/ subdirectories
+- [ ] Generate migration report (files processed, success/failure)
+- [ ] Add --dry-run mode to preview changes
 
-### Story 5.2: Documentation Updates
-**Status**: completed
+### Story 5.2: Standardized INDEX.md Template
+**Status**: unassigned
 **Parent**: Story 5
-**Completed**: 2025-11-05 05:30 (as part of Story 5)
-**Files**: `CONFIGURATION.md`, `mcp_server/README.md`, `CLAUDE.md`
-**Description**: Document new features and configuration options
+**Description**: Define and document the canonical INDEX.md template for EPHEMERAL-FS
 **Acceptance Criteria**:
-- [x] Update CONFIGURATION.md with resilience section
-- [x] Add health_check tool to MCP tools list (CLAUDE.md and README.md)
-- [x] Document reconnection behavior in README
-- [x] Add troubleshooting guide for connection issues
-- [x] Include example configurations (aggressive retry, conservative retry)
+- [ ] Document template schema in .claude/implementation/stories/index-template-schema.md
+- [ ] Include table format with columns: File, Created, Modified, Size, Description
+- [ ] Add archive summary section template
+- [ ] Define metadata header format (category, last_updated, file_count)
+- [ ] Provide examples for different categories (handoff, research, context)
 
-### Story 6: Testing & Validation
-**Status**: completed
-**Claimed**: 2025-11-05 06:00
-**Completed**: 2025-11-05 06:30
-**Files**: `tests/mcp/test_resilience.py`, `tests/mcp/test_health_check.py`, `tests/mcp/test_reconnection.py`
-**Description**: Add tests for resilience features and validate under failure scenarios
-**Test Framework**: pytest with pytest-asyncio
+### Story 6: Template Management Tool
+**Status**: unassigned
+**Description**: Add manage_export_templates MCP tool for template CRUD operations
 **Acceptance Criteria**:
-- [x] Unit tests for reconnection logic (test_reconnection.py) - 14 tests passing
-- [x] Integration tests for health check (test_health_check.py) - 8 tests passing
-- [x] Timeout behavior validated (test_resilience.py) - 17 tests passing
-- [x] Connection failure recovery tested (test_resilience.py)
-- [x] Queue worker restart tested (test_resilience.py and test_reconnection.py)
-- [x] Mock Neo4j connection failures for testing
-- [x] Test coverage: 51% overall (44% graphiti_mcp_server.py, 69% unified_config.py)
-- [x] All 39 tests passing (tests ready for CI/CD pipeline)
+- [ ] Add @mcp.tool() decorated manage_export_templates function
+- [ ] Actions: list, get, create, update, delete
+- [ ] Store custom templates in graphiti.config.json or separate template files
+- [ ] List action returns all available templates with metadata
+- [ ] Get action returns full template definition
+- [ ] Create/update validates template structure
+- [ ] Delete requires confirmation
 
-**Implementation Details**:
-- Created comprehensive test_health_check.py with 8 test cases covering all health check scenarios
-- Enhanced test_reconnection.py from 7 to 14 test cases, implementing all previously stubbed tests
-- Created test_resilience.py with 17 test cases covering timeout behavior, metrics tracking, edge cases, and retry logic
-- All tests use proper mocking with AsyncMock and MagicMock to simulate various failure scenarios
-- Tests validate: connection errors, authentication errors, timeouts, metrics tracking, exponential backoff, queue worker behavior
-- Total test suite: 39 tests (4 timeout + 8 health check + 14 reconnection + 13 resilience = 39 tests)
-- All tests passing with 100% success rate
+### Story 7: Documentation & Examples
+**Status**: unassigned
+**Description**: Comprehensive documentation for filesystem export features
+**Acceptance Criteria**:
+- [ ] Add "Filesystem Export" section to CONFIGURATION.md
+- [ ] Document all export config options with examples
+- [ ] Update CLAUDE.md with export_memory_to_file tool description
+- [ ] Create .claude/implementation/stories/export-examples.md with use cases
+- [ ] Add troubleshooting section for common export issues
+- [ ] Document template customization guide
+
+### Story 8: Testing & Validation
+**Status**: unassigned
+**Description**: Create comprehensive test suite for export functionality
+**Acceptance Criteria**:
+- [ ] Unit tests for path pattern resolution (10+ test cases)
+- [ ] Unit tests for template rendering (markdown, json, yaml)
+- [ ] Integration tests for export_memory_to_file tool
+- [ ] Tests for security scanning (credential detection)
+- [ ] Tests for INDEX.md generation
+- [ ] Mock filesystem operations (use tempfile)
+- [ ] Test error handling (invalid paths, missing templates, search failures)
+- [ ] Achieve >80% coverage for export module
 
 ## Progress Log
 
-### 2025-11-05 01:02 - Sprint Started
-- Created sprint structure
-- Defined 6 stories with 10 sub-stories
-- Focus on MCP server resilience based on MCP_DISCONNECT_ANALYSIS.md findings
-- Addresses critical gaps: no auto-reconnect, permanent worker stops, no timeouts
+### 2025-11-09 01:22 - Sprint Started
+- Archived previous sprint (MCP Server Resilience) to archive/2025-11-09-0122/
+- Created new sprint structure
+- Defined 8 main stories + 6 sub-stories = 14 total stories
+- Focus on filesystem export to enable agent handoff workflows
 
-### 2025-11-05 01:02 - Story 1: unassigned → in_progress
-- Starting with health check implementation
-- Will add health_check() tool to MCP server
-
-### 2025-11-05 06:30 - Sprint Completed
-- All 6 stories completed successfully
-- Comprehensive test suite created with 39 passing tests
-- All features documented and ready for production
+### 2025-11-09 01:22 - Session Context Documented
+**Need**: Agent handoff documents tracked in git with human review capability, reducing token overhead vs manual file creation
+**Solution**: Extend Graphiti with filesystem export using flexible path patterns and templates
+**Architecture**: MemoryExporter class → search graph → render template → write file → update INDEX.md
+**Challenges**:
+  - Migrating existing INDEX.md files to standardized template (use LLM-assisted migration)
+  - Balancing simplicity (MVP) vs flexibility (Priority 2 formats)
+  - Security scanning for credentials before export
+**Timeline**:
+  - MVP (Stories 1-3): 2-3 days (core export, markdown handoff template, MCP tool)
+  - Priority 2 (Stories 4-6): 3-5 days (multi-format, INDEX.md, template management)
+  - Total: 5-8 days for full implementation
 
 ## Sprint Summary
-
-**Sprint Goal**: Implement automatic reconnection, health monitoring, and error recovery features to ensure MCP server persistent state resilience
-
-**Duration**: 2025-11-05 01:02 - 2025-11-05 06:30 (5.5 hours)
-
-**Stories Completed**: 6 main stories + 10 sub-stories = 16 total stories
-
-**Key Deliverables**:
-
-1. **Health Check & Monitoring** (Story 1)
-   - Health check tool for proactive connection monitoring
-   - Connection state tracking with metrics
-   - Database connectivity testing with simple queries
-
-2. **Automatic Reconnection** (Story 2)
-   - Exponential backoff retry logic (1s, 2s, 4s delays)
-   - Configurable max retry attempts (default: 3)
-   - Queue worker recovery after successful reconnection
-   - Error classification (recoverable vs non-recoverable)
-
-3. **Episode Timeouts** (Story 3)
-   - Configurable timeout for episode processing (default: 60s)
-   - Timeout handling without stopping worker
-   - Continuation with next episodes after timeout
-
-4. **Enhanced Logging** (Story 4)
-   - File-based logging with rotation (10MB max, 5 backups)
-   - Metrics tracking (success/failure/timeout rates, avg duration)
-   - Periodic metrics logging (every 5 minutes) in JSON format
-
-5. **Configuration & Documentation** (Story 5)
-   - Resilience section in graphiti.config.json
-   - Comprehensive CONFIGURATION.md updates
-   - Troubleshooting guides for common issues
-   - Updated CLAUDE.md and mcp_server/README.md
-
-6. **Testing & Validation** (Story 6)
-   - 39 comprehensive tests (100% passing)
-   - Test coverage: 51% overall (adequate for new resilience features)
-   - Tests for all scenarios: timeouts, reconnection, health checks, metrics
-
-**Technical Achievements**:
-- Zero downtime on recoverable errors (automatic reconnection)
-- Configurable resilience behavior via unified config
-- Comprehensive error handling and logging
-- Production-ready test suite
-- Well-documented codebase
-
-**Code Quality**:
-- All features working as designed
-- Comprehensive test coverage for resilience features
-- Clean separation of concerns
-- Backward compatible with existing functionality
-
-**Status**: ✅ COMPLETE - All acceptance criteria met, all tests passing, ready for production deployment
+{To be filled upon completion}
