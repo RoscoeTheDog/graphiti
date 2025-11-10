@@ -114,29 +114,5 @@
     "retry_backoff_base": 2,
     "episode_timeout": 60,
     "health_check_interval": 300
-  },
-
-  "export": {
-    "enabled": true,
-    "default_base_path": ".claude/context",
-    "auto_index": true,
-    "git_tracking": true,
-    "security_scan": true,
-    "security_scan_enforce": false,
-    "path_patterns": {
-      "handoff": "{date}-handoff.md",
-      "session": "{timestamp}-session-{session_id}.md",
-      "investigation": "investigations/{date}-{query_hash}.md"
-    },
-    "templates": {
-      "handoff": {
-        "format": "markdown",
-        "description": "Agent session handoff template"
-      },
-      "investigation": {
-        "format": "json",
-        "description": "Debugging investigation template"
-      }
-    }
   }
 }

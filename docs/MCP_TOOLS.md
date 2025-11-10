@@ -21,9 +21,9 @@ Graphiti provides an MCP server that exposes memory operations as tools for AI a
 ### Memory Operations
 
 #### `add_memory`
-Add episodes to the knowledge graph.
+Add episodes to the knowledge graph and optionally export to file.
 
-**Description**: Store information as an episode in the knowledge graph. Episodes can be plain text, messages, or structured JSON data.
+**Description**: Store information as an episode in the knowledge graph. Episodes can be plain text, messages, or structured JSON data. Optionally save the episode content to a file on the filesystem.
 
 **Parameters**:
 - `name` (string, required): Name/title of the episode
@@ -32,23 +32,50 @@ Add episodes to the knowledge graph.
 - `source` (string, optional): Source type - `text`, `json`, or `message`
 - `source_description` (string, optional): Description of the source
 - `uuid` (string, optional): Custom UUID for the episode
+- `filepath` (string, optional): File path to export episode. Supports path variables:
+  - `{date}` - Current date (YYYY-MM-DD)
+  - `{timestamp}` - Date and time (YYYY-MM-DD-HHMM)
+  - `{time}` - Time only (HHMM)
+  - `{hash}` - MD5 hash of episode name (8 chars)
 
 **Example Usage**:
 ```python
-# Add plain text
+# Add to graph only (backward compatible)
 add_memory(
     name="User Preference",
     episode_body="User prefers dark mode and compact layouts",
     source="text"
 )
 
-# Add structured data
+# Add to graph AND save to file
+add_memory(
+    name="Bug Report",
+    episode_body="Login timeout after 5 minutes",
+    filepath="bugs/{date}-auth.md"
+)
+
+# Add structured data with dynamic filepath
 add_memory(
     name="Feature Request",
     episode_body='{"feature": "export", "priority": "high", "requested_by": "user123"}',
-    source="json"
+    source="json",
+    filepath="data/{timestamp}-feature-request.json"
+)
+
+# Organize files by date with hash for uniqueness
+add_memory(
+    name="Support Conversation",
+    episode_body="user: How do I reset password?\nassistant: Click 'Forgot Password'",
+    source="message",
+    filepath="chats/{date}/{timestamp}-{hash}.txt"
 )
 ```
+
+**Filesystem Export Features**:
+- Automatic directory creation (parent directories created as needed)
+- Path variable substitution for dynamic filenames
+- Security scanning (warns if credentials detected in content)
+- Path traversal protection (blocks `..` patterns)
 
 ---
 
@@ -309,3 +336,87 @@ See [claude-mcp-installer/instance/CLAUDE_INSTALL.md](../claude-mcp-installer/in
 
 **Last Updated:** 2025-11-06
 **Version:** 1.0
+
+---
+
+## Filepath Parameter - Path Resolution
+
+The `filepath` parameter in `add_memory` supports both relative and absolute paths with dynamic variable substitution.
+
+### Path Resolution Behavior
+
+**Relative Paths** (recommended):
+- Resolved relative to the **client's working directory** (where you run Claude Code)
+- Example: `.claude/handoff/snapshots/session.md` → `{project_root}/.claude/handoff/snapshots/session.md`
+
+**Absolute Paths**:
+- Used as-is without modification
+- Example: `/tmp/output.md` → `/tmp/output.md`
+
+### Path Variables
+
+Dynamic variables are substituted before path resolution:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{date}` | Current date (YYYY-MM-DD) | `2025-11-09` |
+| `{timestamp}` | Date and time (YYYY-MM-DD-HHMM) | `2025-11-09-1430` |
+| `{time}` | Time only (HHMM) | `1430` |
+| `{hash}` | MD5 hash of episode name (8 chars) | `a3f5c9d2` |
+
+### Examples
+
+**Basic Relative Path**:
+```python
+add_memory(
+    name="Session Notes",
+    episode_body="Today's progress...",
+    filepath=".claude/handoff/current.md"
+)
+# Creates: {project_root}/.claude/handoff/current.md
+```
+
+**With Date Variables**:
+```python
+add_memory(
+    name="Daily Report",
+    episode_body="Summary of work...",
+    filepath=".claude/handoff/{date}-report.md"
+)
+# Creates: {project_root}/.claude/handoff/2025-11-09-report.md
+```
+
+**With Multiple Variables**:
+```python
+add_memory(
+    name="Bug Report",
+    episode_body="Login timeout issue...",
+    filepath="bugs/{date}/{time}-{hash}.md"
+)
+# Creates: {project_root}/bugs/2025-11-09/1430-a3f5c9d2.md
+```
+
+**Absolute Path**:
+```python
+add_memory(
+    name="Temp Output",
+    episode_body="Temporary data...",
+    filepath="/tmp/scratch.md"
+)
+# Creates: /tmp/scratch.md
+```
+
+### Notes
+
+- Directories are created automatically if they don't exist
+- Path traversal (`..`) is blocked for security
+- Success messages show paths relative to project root for clarity
+- Files are written with UTF-8 encoding
+
+### Technical Details
+
+**Implementation**: The MCP server uses the `PWD` environment variable to detect the client's working directory. This is a workaround for Claude Code's roots capability bug ([GitHub issue #3315](https://github.com/anthropics/claude-code/issues/3315)).
+
+**Cross-Platform**: Works on Windows, macOS, and Linux.
+
+For more details, see `.claude/context/claude-code-roots-issue.md` in the repository.

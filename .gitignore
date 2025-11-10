@@ -178,10 +178,7 @@ cython_debug/
 cache.db*
 
 # All DS_Store files
-.DS_Store/.claude/
-
-# Agent ephemeral files
-.claude/
+.DS_Store
 
 # Generated Claude MCP Installer Documentation (platform-specific)
 claude-mcp-installer/instance/

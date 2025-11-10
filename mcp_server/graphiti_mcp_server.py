@@ -43,6 +43,7 @@ from graphiti_core.search.search_config_recipes import (
 )
 from graphiti_core.search.search_filters import SearchFilters
 from graphiti_core.utils.maintenance.graph_data_operations import clear_data
+from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path
 from mcp_server.unified_config import get_config
 
 load_dotenv()
@@ -880,6 +881,16 @@ class MetricsTracker:
 # Global metrics tracker
 metrics_tracker = MetricsTracker()
 
+# Detect client working directory (workaround for Claude Code roots bug #3315)
+# See: .claude/context/claude-code-roots-issue.md
+# Note: PWD from parent process, os.getcwd() is MCP server's cwd
+_detected_root = os.getenv("PWD", os.getcwd())
+# If cwd is mcp_server/, go up one level to project root
+if Path(_detected_root).name == "mcp_server":
+    CLIENT_ROOT = str(Path(_detected_root).parent)
+else:
+    CLIENT_ROOT = _detected_root
+
 
 async def log_metrics_periodically(interval_seconds: int = 300):
     """Log operational metrics every interval_seconds (default: 5 minutes).
@@ -1027,11 +1038,13 @@ async def add_memory(
     source: str = 'text',
     source_description: str = '',
     uuid: str | None = None,
-) -> SuccessResponse | ErrorResponse:
-    """Add an episode to memory. This is the primary way to add information to the graph.
+    filepath: str | None = None,
+) -> str:
+    """Add an episode to memory and optionally export to file.
 
     This function returns immediately and processes the episode addition in the background.
     Episodes for the same group_id are processed sequentially to avoid race conditions.
+    If filepath is provided, also saves the episode content to the specified file.
 
     Args:
         name (str): Name of the episode
@@ -1046,9 +1059,11 @@ async def add_memory(
                                - 'message': For conversation-style content
         source_description (str, optional): Description of the source
         uuid (str, optional): Optional UUID for the episode
+        filepath (str, optional): Optional file path to export episode. Supports path variables:
+                                 {date}, {timestamp}, {time}, {hash}. If provided, saves episode_body to file.
 
     Examples:
-        # Adding plain text content
+        # Adding plain text content (graph only)
         add_memory(
             name="Company News",
             episode_body="Acme Corp announced a new product line today.",
@@ -1057,22 +1072,31 @@ async def add_memory(
             group_id="some_arbitrary_string"
         )
 
-        # Adding structured JSON data
+        # Adding plain text AND saving to file
+        add_memory(
+            name="Bug Report",
+            episode_body="Login timeout after 5 minutes",
+            filepath="bugs/{date}-auth.md"
+        )
+
+        # Adding structured JSON data with dynamic filepath
         # NOTE: episode_body must be a properly escaped JSON string. Note the triple backslashes
         add_memory(
             name="Customer Profile",
             episode_body="{\\\"company\\\": {\\\"name\\\": \\\"Acme Technologies\\\"}, \\\"products\\\": [{\\\"id\\\": \\\"P001\\\", \\\"name\\\": \\\"CloudSync\\\"}, {\\\"id\\\": \\\"P002\\\", \\\"name\\\": \\\"DataMiner\\\"}]}",
             source="json",
-            source_description="CRM data"
+            source_description="CRM data",
+            filepath="data/{timestamp}-profile.json"
         )
 
-        # Adding message-style content
+        # Adding message-style content with file export
         add_memory(
             name="Customer Conversation",
             episode_body="user: What's your return policy?\nassistant: You can return items within 30 days.",
             source="message",
             source_description="chat transcript",
-            group_id="some_arbitrary_string"
+            group_id="some_arbitrary_string",
+            filepath="chats/{date}/{timestamp}.txt"
         )
 
     Notes:
@@ -1086,7 +1110,7 @@ async def add_memory(
     global graphiti_client, episode_queues, queue_workers
 
     if graphiti_client is None:
-        return ErrorResponse(error='Graphiti client not initialized')
+        return "Error: Graphiti client not initialized"
 
     try:
         # Map string source to EpisodeType enum
@@ -1147,14 +1171,53 @@ async def add_memory(
         if not queue_workers.get(group_id_str, False):
             asyncio.create_task(process_episode_queue(group_id_str))
 
-        # Return immediately with a success message
-        return SuccessResponse(
-            message=f"Episode '{name}' queued for processing (position: {episode_queues[group_id_str].qsize()})"
-        )
+        # Optional file export
+        if filepath:
+                # Resolve path pattern variables
+                resolved_path = _resolve_path_pattern(
+                    filepath,
+                    query=name,  # Use episode name for hash
+                    fact_count=0,
+                    node_count=0,
+                )
+
+                # Resolve to absolute path (relative to client root)
+                output_path = _resolve_absolute_path(resolved_path, CLIENT_ROOT)
+                logger.debug(f"Path resolution: resolved='{resolved_path}', CLIENT_ROOT='{CLIENT_ROOT}', output='{output_path}'")
+
+                # Security scan
+                warnings = []
+                if detected := _scan_for_credentials(episode_body):
+                    warnings.append(f"Detected credentials: {', '.join(detected)}")
+
+                # Write file
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text(episode_body, encoding="utf-8")
+
+                # Display path relative to client root for cleaner output
+                try:
+                    display_path = output_path.relative_to(CLIENT_ROOT)
+                except ValueError:
+                    # Path is outside client root, show absolute
+                    display_path = output_path
+
+                # Success message with file info
+                msg = f"Episode '{name}' queued successfully\nSaved to {display_path}"
+                if warnings:
+                    msg += f"\nWarning: {warnings[0]}"
+                return msg
+
+                # Success message with file info
+                # File export failed, but episode still queued
+                return f"Episode '{name}' queued successfully\nWarning: File export failed: {str(e)}"
+
+        # No filepath provided (backward compatible)
+        return f"Episode '{name}' queued successfully"
+
     except Exception as e:
         error_msg = str(e)
         logger.error(f'Error queuing episode task: {error_msg}')
-        return ErrorResponse(error=f'Error queuing episode task: {error_msg}')
+        return f"Error queuing episode task: {error_msg}"
 
 
 @mcp.tool()

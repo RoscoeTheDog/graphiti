@@ -313,41 +313,6 @@ class ResilienceConfig(BaseModel):
 
 
 # ============================================================================
-# Export Configuration
-# ============================================================================
-
-
-class ExportConfig(BaseModel):
-    """Filesystem export configuration"""
-
-    enabled: bool = True
-    default_base_path: str = ".claude/context"
-    auto_index: bool = True
-    git_tracking: bool = True
-    security_scan: bool = True
-    security_scan_enforce: bool = False
-    path_patterns: dict[str, str] = Field(
-        default_factory=lambda: {
-            "handoff": "{date}-handoff.md",
-            "session": "{timestamp}-session-{session_id}.md",
-            "investigation": "investigations/{date}-{query_hash}.md",
-        }
-    )
-    templates: dict[str, dict[str, Any]] = Field(
-        default_factory=lambda: {
-            "handoff": {
-                "format": "markdown",
-                "description": "Agent session handoff template",
-            },
-            "investigation": {
-                "format": "json",
-                "description": "Debugging investigation template",
-            },
-        }
-    )
-
-
-# ============================================================================
 # Root Configuration
 # ============================================================================
 
@@ -365,7 +330,6 @@ class GraphitiConfig(BaseModel):
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
-    export: ExportConfig = Field(default_factory=ExportConfig)
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":
