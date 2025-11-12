@@ -113,35 +113,89 @@ def _scan_for_credentials(content: str) -> list[str]:
 
 def _resolve_absolute_path(filepath: str, client_root: str | None = None) -> Path:
     """Resolve filepath to absolute path, relative to client root if needed.
-    
+
     This function handles the Claude Code roots capability bug (issue #3315)
     by using PWD environment variable to detect client working directory.
-    
+
+    Also handles MSYS/Git Bash path formats on Windows:
+    - /c/Users/... -> C:/Users/...
+    - /mnt/c/Users/... -> C:/Users/... (WSL)
+
     Args:
         filepath: Path pattern (may be relative or absolute)
         client_root: Client's working directory (typically from PWD env var)
-        
+
     Returns:
         Absolute Path object
-        
+
     Example:
         >>> _resolve_absolute_path(".claude/handoff/s001.md", "/home/user/project")
         Path('/home/user/project/.claude/handoff/s001.md')
-        
+
         >>> _resolve_absolute_path("/tmp/output.md", "/home/user/project")
         Path('/tmp/output.md')
+
+        >>> _resolve_absolute_path("/c/Users/Admin/test.md", None)  # Windows Git Bash
+        Path('C:/Users/Admin/test.md')
     """
-    path = Path(filepath)
-    
+    # Normalize MSYS/WSL paths on Windows BEFORE creating Path object
+    # This prevents Path('/c/Users/...') from being treated as absolute incorrectly
+    normalized = _normalize_msys_path(filepath)
+    path = Path(normalized)
+
     # Already absolute - use as-is
     if path.is_absolute():
         return path
-    
+
     # Relative path - resolve to client root if available
     if client_root:
-        root = Path(client_root)
+        # Also normalize client_root in case it's an MSYS path
+        root = Path(_normalize_msys_path(client_root))
         return root / path
-    
+
     # Fallback - relative to current working directory
     # (This happens when MCP server cwd != client cwd)
     return Path.cwd() / path
+
+
+def _normalize_msys_path(filepath: str) -> str:
+    """Normalize MSYS/Git Bash and WSL paths to Windows format.
+
+    Handles:
+    - MSYS paths: /c/Users/... -> C:/Users/...
+    - WSL paths: /mnt/c/Users/... -> C:/Users/...
+    - Unix paths: /home/... -> unchanged (on Unix systems)
+    - Windows paths: C:/Users/... -> unchanged
+
+    Args:
+        filepath: Path string to normalize
+
+    Returns:
+        Normalized path string
+
+    Example:
+        >>> _normalize_msys_path("/c/Users/Admin/test.md")
+        'C:/Users/Admin/test.md'
+
+        >>> _normalize_msys_path("/mnt/c/Users/Admin/test.md")
+        'C:/Users/Admin/test.md'
+
+        >>> _normalize_msys_path("C:/Users/Admin/test.md")
+        'C:/Users/Admin/test.md'
+    """
+    # MSYS/Git Bash format: /c/Users/... -> C:/Users/...
+    msys_match = re.match(r'^/([a-z])/', filepath)
+    if msys_match:
+        drive = msys_match.group(1).upper()
+        remainder = filepath[3:]  # Everything after '/c/'
+        return f"{drive}:/{remainder}"
+
+    # WSL format: /mnt/c/Users/... -> C:/Users/...
+    wsl_match = re.match(r'^/mnt/([a-z])/', filepath)
+    if wsl_match:
+        drive = wsl_match.group(1).upper()
+        remainder = filepath[7:]  # Everything after '/mnt/c/'
+        return f"{drive}:/{remainder}"
+
+    # Not an MSYS/WSL path - return unchanged
+    return filepath

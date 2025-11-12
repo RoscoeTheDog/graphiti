@@ -43,7 +43,7 @@ from graphiti_core.search.search_config_recipes import (
 )
 from graphiti_core.search.search_filters import SearchFilters
 from graphiti_core.utils.maintenance.graph_data_operations import clear_data
-from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path
+from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path, _normalize_msys_path
 from mcp_server.unified_config import get_config
 
 load_dotenv()
@@ -885,6 +885,8 @@ metrics_tracker = MetricsTracker()
 # See: .claude/context/claude-code-roots-issue.md
 # Note: PWD from parent process, os.getcwd() is MCP server's cwd
 _detected_root = os.getenv("PWD", os.getcwd())
+# Normalize MSYS paths (e.g., /c/Users/... -> C:/Users/...)
+_detected_root = _normalize_msys_path(_detected_root)
 # If cwd is mcp_server/, go up one level to project root
 if Path(_detected_root).name == "mcp_server":
     CLIENT_ROOT = str(Path(_detected_root).parent)
@@ -1173,6 +1175,7 @@ async def add_memory(
 
         # Optional file export
         if filepath:
+            try:
                 # Resolve path pattern variables
                 resolved_path = _resolve_path_pattern(
                     filepath,
@@ -1207,9 +1210,11 @@ async def add_memory(
                     msg += f"\nWarning: {warnings[0]}"
                 return msg
 
-                # Success message with file info
+            except Exception as e:
                 # File export failed, but episode still queued
-                return f"Episode '{name}' queued successfully\nWarning: File export failed: {str(e)}"
+                error_msg = str(e)
+                logger.error(f"File export failed for episode '{name}': {error_msg}")
+                return f"Episode '{name}' queued successfully\nWarning: File export failed: {error_msg}"
 
         # No filepath provided (backward compatible)
         return f"Episode '{name}' queued successfully"
