@@ -1,120 +1,300 @@
-# Implementation: Graphiti Filesystem Export
+# Implementation Sprint: Session Tracking Integration
+**Created**: 2025-11-13 09:30
+**Status**: active
+**Version**: v1.0.0
+**Base Branch**: main
+**Sprint Goal**: Integrate automatic JSONL session tracking into Graphiti MCP server with CLI opt-in/out and runtime toggle capabilities
 
-**Created**: 2025-11-09
-**Completed**: 2025-11-09
-**Status**: completed
+## Sprint Metadata
 
-## Summary
+**Source**: Extract and refactor modules from claude-window-watchdog project
+**Priority**: Session tracking first (foundation infrastructure supports independent implementation)
+**Estimated Cost**: ~$0.03-$0.50 per session (highly acceptable)
+**Timeline**: 3 weeks (15-18 days)
 
-Extended the existing `add_memory()` MCP tool with an optional `filepath` parameter to enable filesystem export of episodes alongside graph storage.
+## Stories
 
-## Implementation Details
+### Story 1: Foundation Infrastructure
+**Status**: unassigned
+**Description**: Create core module structure, extract types, implement JSONL parser and path resolver
+**Acceptance Criteria**:
+- [ ] `graphiti_core/session_tracking/` module structure created
+- [ ] `types.py` implemented with all dataclasses (SessionMessage, ConversationContext, SessionMetadata)
+- [ ] `parser.py` extracted and refactored from watchdog (SQLite dependencies removed)
+- [ ] `path_resolver.py` implemented with Claude Code path mapping
+- [ ] Unit tests pass for parser + path resolver
+- [ ] Can parse JSONL files and extract messages correctly
 
-### What Was Built
+### Story 1.1: Core Types Module
+**Status**: unassigned
+**Parent**: Story 1
+**Description**: Create type definitions for session tracking (TokenUsage, ToolCall, SessionMessage, ConversationContext, SessionMetadata)
+**Acceptance Criteria**:
+- [ ] All dataclasses defined in `types.py`
+- [ ] Proper type hints and documentation
+- [ ] No external dependencies (pure Python types)
 
-**1. Helper Functions** (`mcp_server/export_helpers.py`, ~110 lines)
-- `_resolve_path_pattern()` - Path variable substitution ({date}, {timestamp}, {time}, {hash})
-- `_scan_for_credentials()` - Security scanning for API keys, passwords, tokens
+### Story 1.2: JSONL Parser
+**Status**: unassigned
+**Parent**: Story 1
+**Description**: Extract and refactor parser from claude-window-watchdog, remove SQLite dependencies, add tool call extraction
+**Acceptance Criteria**:
+- [ ] `parser.py` created with JSONLParser class
+- [ ] Incremental parsing with offset tracking works
+- [ ] Tool call extraction implemented (MCP-specific)
+- [ ] Unit tests cover all parsing scenarios
 
-**2. MCP Tool Enhancement** (`mcp_server/graphiti_mcp_server.py`, ~50 lines added)
-- Added `filepath` parameter to existing `add_memory()` tool
-- Changed return type from `SuccessResponse | ErrorResponse` to `str` (LLM-friendly)
-- File export logic executes after episode queuing (~40 lines)
-- Backward compatible - filepath is optional
+### Story 1.3: Path Resolution
+**Status**: unassigned
+**Parent**: Story 1
+**Description**: Implement Claude Code JSONL path resolution with project root → hash mapping
+**Acceptance Criteria**:
+- [ ] `path_resolver.py` implemented with ClaudePathResolver class
+- [ ] Cross-platform path handling (Windows/Unix/WSL)
+- [ ] Can resolve `~/.claude/projects/{hash}/sessions/` correctly
+- [ ] Unit tests for path resolution edge cases
 
-**3. Test Suite** (`tests/mcp/test_add_memory_export.py`, ~230 lines)
-- 18 comprehensive tests covering:
-  - Path resolution (7 tests)
-  - Security scanning (6 tests)
-  - Integration scenarios (5 tests)
-- All tests passing ✅
+### Story 2: Smart Filtering
+**Status**: unassigned
+**Description**: Implement 93% token reduction filtering per handoff design
+**Acceptance Criteria**:
+- [ ] `filter.py` implemented with SessionFilter class
+- [ ] Filtering rules applied correctly (keep user/agent, omit tool outputs)
+- [ ] Tool output summarization works (1-line summaries)
+- [ ] MCP tool extraction implemented
+- [ ] Token reduction achieves 90%+ (validated with test data)
+- [ ] Unit tests pass for all filtering scenarios
 
-**4. Documentation** (`docs/MCP_TOOLS.md`, ~50 lines updated)
-- Documented filepath parameter with examples
-- Listed supported path variables
-- Described filesystem export features
+### Story 2.1: Filtering Logic
+**Status**: unassigned
+**Parent**: Story 2
+**Description**: Implement core filtering rules (keep structure, omit outputs)
+**Acceptance Criteria**:
+- [ ] User messages preserved (full)
+- [ ] Agent responses preserved (full)
+- [ ] Tool use blocks preserved (structure only)
+- [ ] Tool results omitted (replaced with summary)
 
-### Key Features
+### Story 2.2: Tool Output Summarization
+**Status**: unassigned
+**Parent**: Story 2
+**Description**: Create concise 1-line summaries for tool results
+**Acceptance Criteria**:
+- [ ] Read/Write/Edit summaries implemented
+- [ ] MCP tool result summaries implemented
+- [ ] Summary format is consistent and informative
 
-✅ **Backward Compatible** - Existing add_memory() calls work unchanged
-✅ **Path Variables** - Dynamic filenames with {date}, {timestamp}, {time}, {hash}
-✅ **Security Scanning** - Warns if credentials detected (api_key, password, token, etc.)
-✅ **Automatic Directory Creation** - Creates parent directories as needed
-✅ **Path Traversal Protection** - Blocks `..` patterns for security
-✅ **Format Agnostic** - Saves content exactly as provided (no transformation)
+### Story 3: File Monitoring
+**Status**: unassigned
+**Description**: Implement watchdog-based automatic session detection and lifecycle management
+**Acceptance Criteria**:
+- [ ] `watcher.py` extracted and refactored (database storage removed)
+- [ ] `session_manager.py` implemented with lifecycle detection
+- [ ] Offset tracking works correctly (incremental reading)
+- [ ] Session close detection works (inactivity timeout)
+- [ ] Configuration schema added to unified_config.py
+- [ ] Integration tests pass with mock JSONL files
 
-### Design Decisions
+### Story 3.1: File Watcher
+**Status**: unassigned
+**Parent**: Story 3
+**Description**: Extract and refactor watchdog-based file monitoring from claude-window-watchdog
+**Acceptance Criteria**:
+- [ ] SessionFileWatcher class implemented
+- [ ] Callback pattern used instead of database storage
+- [ ] Offset tracking maintained for incremental reads
+- [ ] New session file detection works
 
-**Simplified vs Original Plan**:
-- Original plan: 1,500+ lines (template system, formatters, multiple tools)
-- Final implementation: ~240 lines (one parameter, two helpers)
-- **Savings**: 84% less code, 95% faster to implement
+### Story 3.2: Session Manager
+**Status**: unassigned
+**Parent**: Story 3
+**Description**: Orchestrate session lifecycle (track active sessions, detect close, trigger summarization)
+**Acceptance Criteria**:
+- [ ] SessionManager class implemented
+- [ ] In-memory session registry tracks active sessions
+- [ ] Inactivity timeout detection works
+- [ ] Auto-compaction detection implemented (new JSONL = continuation)
+- [ ] Triggers summarization on session close
 
-**Why Simplified**:
-1. Agents can format their own content (no template engine needed)
-2. One tool does both graph + file (no separate export tool needed)
-3. Format-agnostic storage (save exactly what agent provides)
-4. Agent controls INDEX.md tracking (not MCP server responsibility)
+### Story 3.3: Configuration Integration
+**Status**: unassigned
+**Parent**: Story 3
+**Description**: Add session tracking configuration to unified_config.py
+**Acceptance Criteria**:
+- [ ] SessionTrackingConfig schema added
+- [ ] Configuration validation works
+- [ ] Default values set correctly
+- [ ] Config can be loaded from graphiti.config.json
 
-**Removed Features**:
-- ❌ Template system (TemplateEngine, formatters)
-- ❌ INDEX.md auto-generation (violates separation of concerns)
-- ❌ Separate export_memory_to_file tool (redundant)
-- ❌ Multi-format support (unnecessary - agents format their own data)
+### Story 4: LLM Summarization
+**Status**: unassigned
+**Description**: Implement LLM-based session summarization and Graphiti storage
+**Acceptance Criteria**:
+- [ ] `summarizer.py` implemented using Graphiti LLM client
+- [ ] Prompt template from handoff docs used
+- [ ] Structured summary extraction works (objective, work_completed, decisions, etc.)
+- [ ] `graphiti_storage.py` implemented for graph persistence
+- [ ] Sessions stored as EpisodicNodes with proper metadata
+- [ ] Relations created (preceded_by, continued_by, spawned_agent)
+- [ ] Cost tracking logs actual LLM costs
+- [ ] Integration test passes with real Graphiti instance
 
-### Usage Example
+### Story 4.1: Session Summarizer
+**Status**: unassigned
+**Parent**: Story 4
+**Description**: Use Graphiti LLM client to generate structured summaries
+**Acceptance Criteria**:
+- [ ] SessionSummarizer class implemented
+- [ ] Uses gpt-4.1-mini for cost efficiency
+- [ ] Prompt template matches handoff design
+- [ ] Extracts all required fields (objective, work, decisions, etc.)
+- [ ] Handles errors gracefully
 
-```python
-# Add to graph only (backward compatible)
-add_memory("User Feedback", "User prefers dark mode")
-# → "Episode 'User Feedback' queued successfully"
+### Story 4.2: Graphiti Storage Integration
+**Status**: unassigned
+**Parent**: Story 4
+**Description**: Store session summaries as EpisodicNodes in Graphiti graph
+**Acceptance Criteria**:
+- [ ] SessionStorage class implemented
+- [ ] Sessions stored as EpisodicNodes
+- [ ] Metadata includes token_count, mcp_tools_used, files_modified
+- [ ] Relations created correctly (preceded_by, continued_by)
+- [ ] Integration test with real Graphiti instance passes
 
-# Add to graph AND save to file
-add_memory(
-    name="Bug Report",
-    episode_body="Login timeout after 5 minutes",
-    filepath="bugs/{date}-auth.md"
-)
-# → "Episode 'Bug Report' queued successfully\nSaved to bugs/2025-11-09-auth.md"
+### Story 5: CLI Integration
+**Status**: unassigned
+**Description**: Add global opt-in/out CLI commands for session tracking
+**Acceptance Criteria**:
+- [ ] CLI commands implemented (enable, disable, status)
+- [ ] Configuration persisted to graphiti.config.json
+- [ ] Applied on MCP server startup
+- [ ] Documentation updated (CONFIGURATION.md)
+- [ ] Cost estimates documented
+- [ ] Opt-out instructions clear
 
-# With path variables
-add_memory(
-    name="Daily Report",
-    episode_body='{"status": "completed"}',
-    source="json",
-    filepath="data/{timestamp}-report.json"
-)
-# → Saves to data/2025-11-09-1430-report.json
-```
+### Story 5.1: CLI Commands
+**Status**: unassigned
+**Parent**: Story 5
+**Description**: Implement session tracking CLI commands
+**Acceptance Criteria**:
+- [ ] `graphiti-mcp session-tracking enable` works
+- [ ] `graphiti-mcp session-tracking disable` works
+- [ ] `graphiti-mcp session-tracking status` works
+- [ ] Commands integrated with existing MCP server CLI
 
-## Files Modified
+### Story 5.2: Configuration Persistence
+**Status**: unassigned
+**Parent**: Story 5
+**Description**: Store session tracking state in graphiti.config.json
+**Acceptance Criteria**:
+- [ ] Config updates persist to file
+- [ ] Config loaded on server startup
+- [ ] Validation works correctly
 
-- `mcp_server/export_helpers.py` - Created
-- `mcp_server/graphiti_mcp_server.py` - Modified (add_memory function)
-- `tests/mcp/test_add_memory_export.py` - Created
-- `docs/MCP_TOOLS.md` - Updated
+### Story 6: MCP Tool Integration
+**Status**: unassigned
+**Description**: Add runtime toggle via MCP tool calls for per-session control
+**Acceptance Criteria**:
+- [ ] `track_session()` MCP tool implemented
+- [ ] `stop_tracking_session()` MCP tool implemented
+- [ ] `get_session_tracking_status()` MCP tool implemented
+- [ ] Session registry tracks per-session state
+- [ ] Override global config with force parameter works
+- [ ] Integration with session_manager.py complete
+- [ ] Agent-friendly tool descriptions written
 
-## Testing
+### Story 6.1: MCP Tool Implementation
+**Status**: unassigned
+**Parent**: Story 6
+**Description**: Add MCP tools to graphiti_mcp_server.py
+**Acceptance Criteria**:
+- [ ] All three MCP tools registered
+- [ ] Tool descriptions are clear and agent-friendly
+- [ ] Tools integrated with SessionTrackingService
 
-**18/18 tests passing** ✅
+### Story 6.2: Runtime State Management
+**Status**: unassigned
+**Parent**: Story 6
+**Description**: Implement per-session enable/disable state tracking
+**Acceptance Criteria**:
+- [ ] In-memory session registry works
+- [ ] Per-session overrides global config correctly
+- [ ] force=True parameter works as expected
 
-Test coverage:
-- Path pattern resolution (simple paths, variables, security)
-- Credential detection (api_key, password, token, bearer, etc.)
-- File export (creation, directory handling, error cases)
+### Story 7: Testing & Validation
+**Status**: unassigned
+**Description**: Comprehensive testing and cost validation with real session data
+**Acceptance Criteria**:
+- [ ] End-to-end integration tests pass
+- [ ] Cost measurement validates projections ($0.03-$0.50/session)
+- [ ] Performance testing shows acceptable overhead (<5%)
+- [ ] Large sessions (100+ exchanges) handled correctly
+- [ ] Multiple concurrent sessions work
+- [ ] Documentation complete (user guide, dev guide, troubleshooting)
 
-## Commits
+### Story 7.1: Integration Testing
+**Status**: unassigned
+**Parent**: Story 7
+**Description**: End-to-end workflow testing with full session lifecycle
+**Acceptance Criteria**:
+- [ ] Full workflow test: detect → parse → filter → summarize → store
+- [ ] Multiple sequential sessions tested
+- [ ] Multiple parallel sessions tested
+- [ ] Auto-compaction detection tested
+- [ ] Agent spawning (parent-child linkage) tested
 
-- Implementation: TBD (ready to commit)
+### Story 7.2: Cost Validation
+**Status**: unassigned
+**Parent**: Story 7
+**Description**: Measure actual OpenAI API costs with real session data
+**Acceptance Criteria**:
+- [ ] Real session data processed
+- [ ] Actual costs measured and logged
+- [ ] Costs validate against projections ($0.03-$0.50/session)
+- [ ] Token reduction confirmed (90%+)
 
-## Related Documentation
+### Story 7.3: Performance Testing
+**Status**: unassigned
+**Parent**: Story 7
+**Description**: Validate performance and resource usage
+**Acceptance Criteria**:
+- [ ] Large sessions (100+ exchanges) tested
+- [ ] Multiple concurrent sessions tested
+- [ ] File watcher overhead measured (<5%)
+- [ ] Memory usage acceptable
+- [ ] No performance degradation for MCP server
 
-- `docs/MCP_TOOLS.md` - User-facing tool documentation
-- `CLAUDE.md` - Agent directives (updated with export guidance)
+### Story 7.4: Documentation
+**Status**: unassigned
+**Parent**: Story 7
+**Description**: Create user and developer documentation
+**Acceptance Criteria**:
+- [ ] User guide: How to use session tracking
+- [ ] Developer guide: Architecture and extension points
+- [ ] Troubleshooting guide created
+- [ ] README.md updated with session tracking features
+- [ ] CONFIGURATION.md updated
 
----
+### Story 8: Refinement & Launch
+**Status**: unassigned
+**Description**: Polish, code review, and release preparation
+**Acceptance Criteria**:
+- [ ] Code review completed and feedback addressed
+- [ ] Logging and debugging aids added
+- [ ] Error handling improved
+- [ ] README.md updated with session tracking features
+- [ ] Migration guide created for existing users
+- [ ] Release notes written
 
-**Implementation Philosophy**: YAGNI (You Ain't Gonna Need It)
-- Build the simplest thing that works
-- Let agents orchestrate complex workflows
-- MCP server provides primitives, not opinions
+## Progress Log
+
+### 2025-11-13 09:30 - Sprint Started
+- Created sprint structure for Session Tracking Integration
+- Archived 12 existing implementation files to `.claude/implementation/archive/2025-11-13-0930/`
+- Detected git context: No dev branch, using main as base branch
+- Defined 8 main stories with 18 sub-stories
+- Total estimated timeline: 3 weeks (15-18 days)
+- Sprint initialized and ready for execution
+
+## Sprint Summary
+*To be filled upon completion*
