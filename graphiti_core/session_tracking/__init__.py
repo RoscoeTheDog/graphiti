@@ -1,16 +1,22 @@
 """Session tracking module for Graphiti.
 
-This module provides automatic tracking and summarization of Claude Code
-conversation sessions, storing them as episodic memory in the Graphiti graph.
-"""
+This module provides automatic tracking and indexing of Claude Code
+conversation sessions into the Graphiti graph database. It uses a
+simplified architecture where filtered session content is indexed
+directly as episodes, allowing Graphiti's native LLM to extract
+entities and relationships naturally.
 
-"""Session tracking module for Graphiti.
-
-This module provides automatic tracking and summarization of Claude Code
-conversation sessions, storing them as episodic memory in the Graphiti graph.
+Core components:
+- JSONLParser: Parse Claude Code session JSONL files
+- SessionFilter: Filter session content for token efficiency
+- SessionIndexer: Index filtered sessions directly into Graphiti
+- HandoffExporter: Optional markdown export for session handoffs
+- SessionManager/Watcher: Automatic session detection and lifecycle
 """
 
 from .filter import SessionFilter
+from .handoff_exporter import HandoffExporter
+from .indexer import SessionIndexer
 from .parser import JSONLParser
 from .path_resolver import ClaudePathResolver
 from .session_manager import ActiveSession, SessionManager
@@ -23,22 +29,6 @@ from .types import (
     ToolCallStatus,
     TokenUsage,
 )
-from .filter import SessionFilter
-from .graphiti_storage import SessionStorage
-from .parser import JSONLParser
-from .path_resolver import ClaudePathResolver
-from .session_manager import ActiveSession, SessionManager
-from .summarizer import SessionSummarizer, SessionSummary, SessionSummarySchema
-from .types import (
-    ConversationContext,
-    MessageRole,
-    SessionMessage,
-    SessionMetadata,
-    ToolCall,
-    ToolCallStatus,
-    TokenUsage,
-)
-
 from .watcher import SessionFileEventHandler, SessionFileWatcher
 
 __all__ = [
@@ -48,12 +38,10 @@ __all__ = [
     "ClaudePathResolver",
     # Filtering
     "SessionFilter",
-    # Summarization
-    "SessionSummarizer",
-    "SessionSummary",
-    "SessionSummarySchema",
-    # Storage
-    "SessionStorage",
+    # Indexing (NEW - Story 4 refactoring)
+    "SessionIndexer",
+    # Optional handoff export (NEW - Story 4 refactoring)
+    "HandoffExporter",
     # File watching
     "SessionFileWatcher",
     "SessionFileEventHandler",

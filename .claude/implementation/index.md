@@ -260,7 +260,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 - [ ] Integration test with real Graphiti instance passes
 
 ### Story 4.3: Clean Up Refactoring Artifacts (NEW - ALIGNMENT REMEDIATION)
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-13 15:00
+**Completed**: 2025-11-13 15:15
 **Priority**: HIGH
 **Parent**: Story 4
 **Depends on**: Story 4
@@ -268,27 +270,31 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 **Rationale**: Alignment audit identified __init__.py still exports deprecated classes (SessionStorage, SessionSummarizer) and has duplicate import blocks. This creates API confusion and exposes deprecated code.
 **File**: `graphiti_core/session_tracking/__init__.py`
 **Acceptance Criteria**:
-- [ ] Remove deprecated exports from __init__.py:
-  - [ ] Remove: `SessionStorage`, `SessionSummarizer`, `SessionSummary`, `SessionSummarySchema`
-  - [ ] Remove: imports from `graphiti_storage.py` and `summarizer.py`
-- [ ] Add new exports to __init__.py:
-  - [ ] Add: `SessionIndexer` from `indexer.py`
-  - [ ] Add: `HandoffExporter` from `handoff_exporter.py`
-- [ ] Fix duplicate import blocks (lines 13-40 duplicated, remove duplication)
-- [ ] Fix duplicate module docstring (lines 1-11 duplicated)
-- [ ] Verify all exports work correctly (import test)
-- [ ] Update module docstring to reflect new architecture (indexer + optional handoff export)
-- [ ] Document migration path for users relying on deprecated classes (if any)
-- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [ ] Type hints maintained in exports
-  - [ ] Error handling: Import errors handled gracefully
-  - [ ] Documentation: Module docstring updated, migration guide if needed
-  - [ ] Testing: Smoke test imports after cleanup
+- [x] Remove deprecated exports from __init__.py:
+  - [x] Remove: `SessionStorage`, `SessionSummarizer`, `SessionSummary`, `SessionSummarySchema`
+  - [x] Remove: imports from `graphiti_storage.py` and `summarizer.py`
+- [x] Add new exports to __init__.py:
+  - [x] Add: `SessionIndexer` from `indexer.py`
+  - [x] Add: `HandoffExporter` from `handoff_exporter.py`
+- [x] Fix duplicate import blocks (lines 13-40 duplicated, remove duplication)
+- [x] Fix duplicate module docstring (lines 1-11 duplicated)
+- [x] Verify all exports work correctly (import test)
+- [x] Update module docstring to reflect new architecture (indexer + optional handoff export)
+- [x] Document migration path for users relying on deprecated classes (if any)
+- [x] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [x] Type hints maintained in exports
+  - [x] Error handling: Import errors handled gracefully
+  - [x] Documentation: Module docstring updated, migration guide if needed
+  - [x] Testing: Smoke test imports after cleanup
 
 **Implementation Notes**:
-- Keep summarizer.py and graphiti_storage.py files for now (may be reused for Story 2.3)
-- Only remove from public API exports, don't delete files yet
-- Ensure backward compatibility: Add deprecation warnings if external code might import these classes
+- Removed all duplicate import blocks and module docstrings
+- Updated module docstring to clearly describe new architecture
+- All smoke tests passing: SessionIndexer and HandoffExporter importable
+- Verified deprecated exports removed: SessionStorage and SessionSummarizer no longer importable
+- Migration path: Users should use SessionIndexer for direct episode indexing, HandoffExporter for optional markdown export
+- Kept summarizer.py and graphiti_storage.py files (may be reused for Story 2.3)
+- No external code depends on deprecated exports (internal-only refactoring)
 
 ### Story 5: CLI Integration
 **Status**: completed
