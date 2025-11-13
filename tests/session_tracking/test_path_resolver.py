@@ -62,21 +62,63 @@ class TestClaudePathResolver:
         hash2 = resolver.get_project_hash(project_path)
         assert hash2 == hash1
 
-    def test_normalize_path(self):
-        """Test path normalization."""
+    def test_normalize_path_for_hash(self):
+        """Test path normalization for hashing (always UNIX format)."""
         resolver = ClaudePathResolver()
 
         # Test POSIX paths
         if platform.system() != "Windows":
-            normalized = resolver._normalize_path("/home/user/project")
+            normalized = resolver._normalize_path_for_hash("/home/user/project")
             assert normalized.startswith("/")
             assert "\\" not in normalized
+            assert ":" not in normalized
         else:
-            # Test Windows paths
-            normalized = resolver._normalize_path("C:\\Users\\user\\project")
-            # Should convert to /c/Users/user/project format
-            assert normalized.startswith("/")
+            # Test Windows paths - should convert to MSYS format
+            normalized = resolver._normalize_path_for_hash("C:\\Users\\user\\project")
+            # Should convert to /c/Users/user/project format (lowercase drive)
+            assert normalized.startswith("/c/") or normalized.startswith("/C/")
             assert "\\" not in normalized
+            assert ":" not in normalized  # No colons in MSYS format
+
+    def test_to_native_path(self):
+        """Test conversion from UNIX to native path format."""
+        resolver = ClaudePathResolver()
+
+        if platform.system() == "Windows":
+            # UNIX format should convert to Windows format
+            unix_path = "/c/Users/Admin/project"
+            native = resolver._to_native_path(unix_path)
+            # Should be C:\Users\Admin\project or C:/Users/Admin/project
+            path_str = str(native)
+            assert path_str.startswith("C:")
+            assert "Users" in path_str
+        else:
+            # On Unix, should pass through unchanged
+            unix_path = "/home/user/project"
+            native = resolver._to_native_path(unix_path)
+            assert str(native) == unix_path
+
+    def test_returned_paths_are_native_format(self):
+        """Test that all returned Path objects use native OS format."""
+        resolver = ClaudePathResolver()
+        project_path = "/tmp/test-project"
+
+        # Get various paths
+        sessions_dir = resolver.get_sessions_dir(project_path)
+        session_file = resolver.get_session_file(project_path, "test-session-123")
+
+        # Path objects should work with native OS operations
+        assert isinstance(sessions_dir, Path)
+        assert isinstance(session_file, Path)
+
+        # On Windows, paths should contain backslashes when stringified with str()
+        # On Unix, paths should contain forward slashes
+        if platform.system() == "Windows":
+            # Path objects on Windows use backslashes
+            assert "\\" in str(sessions_dir) or "/" in str(sessions_dir.as_posix())
+        else:
+            # Path objects on Unix use forward slashes
+            assert "/" in str(sessions_dir)
 
     def test_get_sessions_dir(self):
         """Test sessions directory resolution."""
@@ -245,19 +287,45 @@ class TestClaudePathResolver:
         """Test that different representations of same path produce same hash."""
         resolver = ClaudePathResolver()
 
-        # These should all normalize to the same path
-        paths = [
-            "/home/user/project",
-            "/home/user/project/",
-            "/home/user/./project",
-        ]
+        if platform.system() == "Windows":
+            # Test Windows path variations
+            paths = [
+                "C:/Users/Admin/project",
+                "C:\\Users\\Admin\\project",
+                "C:/Users/Admin/project/",
+            ]
+        else:
+            # Test Unix path variations
+            paths = [
+                "/home/user/project",
+                "/home/user/project/",
+                "/home/user/./project",
+            ]
 
         hashes = [resolver.get_project_hash(p) for p in paths]
 
-        # All hashes should be the same (within platform constraints)
-        # Note: On Windows, absolute path resolution may differ
-        if platform.system() != "Windows":
-            assert len(set(hashes)) <= 2  # Allow for some variation
+        # All hashes should be the same
+        assert len(set(hashes)) == 1, f"Hashes differ: {hashes}"
+
+    def test_cross_platform_hash_consistency(self):
+        """Test that equivalent paths on different platforms produce same hash."""
+        resolver = ClaudePathResolver()
+
+        # These represent the same logical path on different platforms
+        if platform.system() == "Windows":
+            test_path = "C:/Users/Admin/Documents/project"
+            expected_unix = "/c/Users/Admin/Documents/project"
+        else:
+            test_path = "/home/user/Documents/project"
+            expected_unix = "/home/user/Documents/project"
+
+        # Normalize for hashing
+        normalized = resolver._normalize_path_for_hash(test_path)
+
+        # Should always be in UNIX format
+        assert normalized.startswith("/")
+        assert "\\" not in normalized
+        assert ":" not in normalized  # No colons in MSYS format
 
 
 class TestPathResolverIntegration:

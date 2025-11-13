@@ -2,12 +2,17 @@
 
 This module handles mapping between Claude Code's project hash-based
 directory structure and actual project paths.
+
+Platform Handling:
+- Hashing: Always uses normalized UNIX-style paths for consistency
+- Return values: Uses native OS path format (Windows: C:\\..., Unix: /...)
 """
 
 import hashlib
 import logging
 import os
 import platform
+import re
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -49,7 +54,7 @@ class ClaudePathResolver:
         unique directory names for each project.
 
         Args:
-            project_path: Absolute path to project directory
+            project_path: Absolute path to project directory (any format)
 
         Returns:
             8-character hash string
@@ -58,8 +63,8 @@ class ClaudePathResolver:
         if project_path in self._hash_cache:
             return self._hash_cache[project_path]
 
-        # Normalize path for consistent hashing
-        normalized_path = self._normalize_path(project_path)
+        # Normalize path for consistent hashing (always UNIX format)
+        normalized_path = self._normalize_path_for_hash(project_path)
 
         # Calculate hash (using SHA256, taking first 8 chars)
         hash_obj = hashlib.sha256(normalized_path.encode("utf-8"))
@@ -70,35 +75,72 @@ class ClaudePathResolver:
 
         return hash_str
 
-    def _normalize_path(self, path: str) -> str:
-        """Normalize path for cross-platform consistency.
+    def _normalize_path_for_hash(self, path: str) -> str:
+        """Normalize path to UNIX format for consistent hashing.
+
+        This method always returns UNIX-style paths (/c/Users/... on Windows)
+        to ensure hash consistency across different path representations.
 
         Args:
-            path: Path to normalize
+            path: Path to normalize (any format)
 
         Returns:
-            Normalized path string
+            UNIX-style normalized path string
         """
-        # Convert to Path object
-        p = Path(path)
+        if not path:
+            return path
 
-        # Resolve to absolute path
+        # Convert to Path object and resolve to absolute
+        p = Path(path)
         try:
             p = p.resolve()
         except (OSError, RuntimeError):
             # If resolve fails, just make it absolute
             p = p.absolute()
 
-        # Convert to POSIX format (forward slashes) for consistency
+        # Convert to POSIX format (forward slashes)
         path_str = p.as_posix()
 
-        # Handle Windows paths - convert drive letters
+        # Handle Windows paths - convert drive letters to MSYS format
         # C:/Users/... -> /c/Users/... (Git Bash style)
         if platform.system() == "Windows" and ":" in path_str:
             drive, rest = path_str.split(":", 1)
             path_str = f"/{drive.lower()}{rest}"
 
+        # Remove trailing slashes (but keep root slash)
+        path_str = path_str.rstrip('/')
+        if not path_str:
+            path_str = '/'
+
         return path_str
+
+    def _to_native_path(self, unix_path: str) -> Path:
+        """Convert UNIX-style path to native OS path format.
+
+        Args:
+            unix_path: UNIX-style path (e.g., /c/Users/Admin)
+
+        Returns:
+            Path object in native OS format
+        """
+        if not unix_path:
+            return Path(unix_path)
+
+        # On Windows, convert MSYS format back to Windows format
+        if platform.system() == "Windows":
+            # Match: /[drive-letter]/rest/of/path
+            drive_pattern = r'^/([a-zA-Z])(/.*)?$'
+            match = re.match(drive_pattern, unix_path)
+
+            if match:
+                drive_letter = match.group(1).upper()
+                rest_of_path = match.group(2) or ''
+                # Convert to Windows format: C:\Users\...
+                windows_path = f"{drive_letter}:{rest_of_path}"
+                return Path(windows_path)
+
+        # On Unix or if pattern doesn't match, use as-is
+        return Path(unix_path)
 
     def get_sessions_dir(self, project_path: str) -> Path:
         """Get sessions directory for a project.
