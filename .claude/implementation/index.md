@@ -12,6 +12,22 @@
 **Estimated Cost**: ~$0.03-$0.50 per session (highly acceptable)
 **Timeline**: 3 weeks (15-18 days)
 
+## Cross-Cutting Requirements
+
+**ALL stories must satisfy the requirements in `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`**
+
+Key requirements:
+1. **Platform-Agnostic Path Handling**: Paths must use native OS format (Windows: `C:\...`, Unix: `/...`)
+2. **Error Handling**: Comprehensive logging and graceful degradation
+3. **Type Safety**: Type hints and Pydantic models for all code
+4. **Testing**: >80% coverage with platform-specific tests
+5. **Performance**: <5% overhead for session tracking
+6. **Security**: No exposure of sensitive information
+7. **Configuration**: Use unified `graphiti.config.json` system
+8. **Documentation**: User and developer docs updated
+
+See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
+
 ## Stories
 
 ### Story 1: Foundation Infrastructure
@@ -74,6 +90,12 @@
 - [ ] MCP tool extraction implemented
 - [ ] Token reduction achieves 90%+ (validated with test data)
 - [ ] Unit tests pass for all filtering scenarios
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Platform-agnostic path handling (if applicable)
+  - [ ] Type hints and comprehensive docstrings
+  - [ ] Error handling with logging
+  - [ ] >80% test coverage
+  - [ ] Performance benchmarks (<5% overhead)
 
 ### Story 2.1: Filtering Logic
 **Status**: unassigned
@@ -104,6 +126,12 @@
 - [ ] Session close detection works (inactivity timeout)
 - [ ] Configuration schema added to unified_config.py
 - [ ] Integration tests pass with mock JSONL files
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Platform-agnostic path handling for file watching
+  - [ ] Type hints and comprehensive docstrings
+  - [ ] Error handling with logging (file I/O)
+  - [ ] >80% test coverage (including platform-specific tests)
+  - [ ] Performance: <5% CPU overhead for file watching
 
 ### Story 3.1: File Watcher
 **Status**: unassigned
@@ -148,6 +176,12 @@
 - [ ] Relations created (preceded_by, continued_by, spawned_agent)
 - [ ] Cost tracking logs actual LLM costs
 - [ ] Integration test passes with real Graphiti instance
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Type hints and comprehensive docstrings
+  - [ ] Error handling with logging (LLM API errors)
+  - [ ] Security: No credentials in summaries
+  - [ ] >80% test coverage
+  - [ ] Performance: Async summarization (no blocking)
 
 ### Story 4.1: Session Summarizer
 **Status**: unassigned
@@ -181,6 +215,12 @@
 - [ ] Documentation updated (CONFIGURATION.md)
 - [ ] Cost estimates documented
 - [ ] Opt-out instructions clear
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Platform-agnostic config file paths
+  - [ ] Type hints and comprehensive docstrings
+  - [ ] Error handling with logging (config errors)
+  - [ ] Configuration uses unified system
+  - [ ] Documentation: User guide updated
 
 ### Story 5.1: CLI Commands
 **Status**: unassigned
@@ -212,6 +252,12 @@
 - [ ] Override global config with force parameter works
 - [ ] Integration with session_manager.py complete
 - [ ] Agent-friendly tool descriptions written
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Type hints and comprehensive docstrings
+  - [ ] Error handling with logging (MCP tool errors)
+  - [ ] >80% test coverage
+  - [ ] Documentation: MCP_TOOLS.md updated
+  - [ ] Security: No sensitive data exposed in tool responses
 
 ### Story 6.1: MCP Tool Implementation
 **Status**: unassigned
@@ -241,6 +287,12 @@
 - [ ] Large sessions (100+ exchanges) handled correctly
 - [ ] Multiple concurrent sessions work
 - [ ] Documentation complete (user guide, dev guide, troubleshooting)
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Platform-specific tests (Windows + Unix)
+  - [ ] >80% overall test coverage
+  - [ ] Performance benchmarks documented
+  - [ ] Security audit completed
+  - [ ] All documentation updated
 
 ### Story 7.1: Integration Testing
 **Status**: unassigned
@@ -295,6 +347,12 @@
 - [ ] README.md updated with session tracking features
 - [ ] Migration guide created for existing users
 - [ ] Release notes written
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] All platform-agnostic path requirements met
+  - [ ] All security requirements satisfied
+  - [ ] All performance benchmarks met
+  - [ ] All documentation complete and reviewed
+  - [ ] Final compliance checklist passed
 
 ## Progress Log
 
