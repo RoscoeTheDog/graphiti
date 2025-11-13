@@ -313,6 +313,22 @@ class ResilienceConfig(BaseModel):
 
 
 # ============================================================================
+# Session Tracking Configuration
+# ============================================================================
+
+
+class SessionTrackingConfig(BaseModel):
+    """Session tracking configuration for automatic JSONL monitoring"""
+
+    enabled: bool = False
+    watch_path: Optional[str] = None  # Defaults to ~/.claude/projects/
+    inactivity_timeout: int = 300  # 5 minutes
+    check_interval: int = 60  # Check for inactive sessions every minute
+    auto_summarize: bool = True  # Automatically summarize closed sessions
+    store_in_graph: bool = True  # Store summaries in Graphiti graph
+
+
+# ============================================================================
 # Root Configuration
 # ============================================================================
 
@@ -330,6 +346,7 @@ class GraphitiConfig(BaseModel):
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
+    session_tracking: SessionTrackingConfig = Field(default_factory=SessionTrackingConfig)
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":
