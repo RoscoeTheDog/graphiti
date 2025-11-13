@@ -187,7 +187,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 - [ ] Config can be loaded from graphiti.config.json
 
 ### Story 4: LLM Summarization
-**Status**: unassigned
+**Status**: completed
+**Completed**: 2025-11-13 01:50
+**Claimed**: 2025-11-13 01:18
 **Description**: Implement LLM-based session summarization and Graphiti storage
 **Acceptance Criteria**:
 - [ ] `summarizer.py` implemented using Graphiti LLM client
