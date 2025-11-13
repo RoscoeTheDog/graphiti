@@ -455,11 +455,39 @@ allows AI assistants to interact with Graphiti's knowledge graph capabilities th
 
 Key features of the MCP server include:
 
-- Episode management (add, retrieve, delete)
-- Entity management and relationship handling
-- Semantic and hybrid search capabilities
-- Group management for organizing related data
-- Graph maintenance operations
+- **Episode management** (add, retrieve, delete)
+- **Entity management and relationship handling**
+- **Semantic and hybrid search capabilities**
+- **Group management** for organizing related data
+- **Graph maintenance operations**
+- **Automatic session tracking** (v0.4.0+) - Capture Claude Code conversations automatically
+
+### Session Tracking (New in v0.4.0)
+
+Graphiti MCP server now includes automatic session tracking for Claude Code, enabling your AI assistant to remember past work and maintain context across sessions.
+
+**Features:**
+- ✅ Automatic conversation capture from `~/.claude/projects/` directories
+- ✅ Smart filtering for 93% token reduction (cost-effective)
+- ✅ Cross-session memory and decision tracking
+- ✅ Semantic search across past work
+- ✅ Enabled by default (opt-out available)
+
+**Getting Started:**
+```bash
+# Check status
+graphiti-mcp session-tracking status
+
+# Disable if desired (enabled by default)
+graphiti-mcp session-tracking disable
+```
+
+**Documentation:**
+- [Session Tracking User Guide](docs/SESSION_TRACKING_USER_GUIDE.md)
+- [Developer Guide](docs/SESSION_TRACKING_DEV_GUIDE.md)
+- [Troubleshooting](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
+
+**Cost:** ~$0.17 per session (with smart filtering)
 
 The MCP server can be deployed using Docker with Neo4j, making it easy to integrate Graphiti into your AI assistant
 workflows.

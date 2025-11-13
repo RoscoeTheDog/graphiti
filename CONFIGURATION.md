@@ -13,9 +13,11 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 7. [Memory Filter Configuration](#memory-filter-configuration)
 8. [Project Configuration](#project-configuration)
 9. [Search Configuration](#search-configuration)
-10. [Environment Variable Overrides](#environment-variable-overrides)
-11. [Complete Examples](#complete-examples)
-12. [Troubleshooting](#troubleshooting)
+10. [Resilience Configuration](#resilience-configuration)
+11. [Session Tracking Configuration](#session-tracking-configuration) ⭐ New in v0.4.0
+12. [Environment Variable Overrides](#environment-variable-overrides)
+13. [Complete Examples](#complete-examples)
+14. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -416,6 +418,175 @@ export GRAPHITI_HEALTH_CHECK_INTERVAL=600
   }
 }
 ```
+
+---
+
+## Session Tracking Configuration
+
+**New in v0.4.0** - Automatic session tracking for Claude Code conversations.
+
+Session tracking monitors Claude Code conversation files (`~/.claude/projects/{hash}/sessions/*.jsonl`) and automatically indexes them to the Graphiti knowledge graph, enabling cross-session memory and context continuity.
+
+### Configuration
+
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_directories": [
+      "~/.claude/projects"
+    ],
+    "inactivity_timeout_minutes": 30,
+    "scan_interval_seconds": 2
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `true` | Enable/disable automatic session tracking (opt-out model) |
+| `watch_directories` | list[str] | `["~/.claude/projects"]` | Directories to monitor for JSONL session files |
+| `inactivity_timeout_minutes` | int | 30 | Minutes of inactivity before session is considered closed and indexed |
+| `scan_interval_seconds` | int | 2 | Seconds between file system scans for changes |
+
+### Behavior
+
+**When enabled:**
+1. File watcher monitors `watch_directories` for new/modified `.jsonl` files
+2. Sessions are tracked in-memory with incremental message parsing
+3. After `inactivity_timeout_minutes` of no activity, session is closed and indexed
+4. Filtered session content (93% token reduction) is added as an episode to Graphiti
+5. Graphiti automatically extracts entities, relationships, and enables semantic search
+
+**Session lifecycle:**
+```
+New JSONL file detected
+  → Parse messages incrementally
+  → Track activity (updates extend timeout)
+  → Inactivity timeout reached
+  → Filter messages (93% token reduction)
+  → Index to Graphiti as episode
+  → Link to previous session (if exists)
+```
+
+### Default: Enabled (Opt-Out Model)
+
+Session tracking is **enabled by default** starting in v0.4.0. This provides automatic cross-session memory out-of-the-box.
+
+**To disable:**
+```bash
+# CLI command
+graphiti-mcp session-tracking disable
+
+# Or set in config
+{
+  "session_tracking": {
+    "enabled": false
+  }
+}
+```
+
+### Runtime Control (MCP Tools)
+
+Session tracking can be controlled at runtime via MCP tool calls:
+
+```json
+// Enable for current session (overrides global config)
+{
+  "tool": "session_tracking_start",
+  "arguments": {
+    "force": true
+  }
+}
+
+// Disable for current session
+{
+  "tool": "session_tracking_stop"
+}
+
+// Check status
+{
+  "tool": "session_tracking_status"
+}
+```
+
+### Cost Considerations
+
+**Per session:** ~$0.17 (average)
+- Token filtering: 93% reduction (free)
+- Entity extraction: ~$0.17 (OpenAI gpt-4o-mini)
+
+**Monthly estimates:**
+- Light usage (10 sessions/month): ~$1.70/month
+- Regular usage (50 sessions/month): ~$8.50/month
+- Heavy usage (100 sessions/month): ~$17.00/month
+
+### Environment Overrides
+
+Session tracking settings can be overridden with environment variables:
+
+```bash
+export GRAPHITI_SESSION_TRACKING_ENABLED=false
+export GRAPHITI_SESSION_TRACKING_WATCH_DIRECTORIES='["~/.claude/projects"]'
+export GRAPHITI_SESSION_TRACKING_INACTIVITY_TIMEOUT_MINUTES=15
+export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
+```
+
+### Example Configurations
+
+**Default (Recommended)**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_directories": ["~/.claude/projects"],
+    "inactivity_timeout_minutes": 30,
+    "scan_interval_seconds": 2
+  }
+}
+```
+
+**High-Volume Environment** (faster session closure, lower CPU):
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_directories": ["~/.claude/projects/active"],
+    "inactivity_timeout_minutes": 15,
+    "scan_interval_seconds": 5
+  }
+}
+```
+
+**Low-Resource System** (reduced frequency):
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_directories": ["~/.claude/projects"],
+    "inactivity_timeout_minutes": 60,
+    "scan_interval_seconds": 10
+  }
+}
+```
+
+**Disabled** (opt-out):
+```json
+{
+  "session_tracking": {
+    "enabled": false
+  }
+}
+```
+
+### Documentation
+
+For detailed session tracking documentation:
+- **User Guide**: [docs/SESSION_TRACKING_USER_GUIDE.md](docs/SESSION_TRACKING_USER_GUIDE.md)
+- **Developer Guide**: [docs/SESSION_TRACKING_DEV_GUIDE.md](docs/SESSION_TRACKING_DEV_GUIDE.md)
+- **Troubleshooting**: [docs/SESSION_TRACKING_TROUBLESHOOTING.md](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
 
 ---
 
