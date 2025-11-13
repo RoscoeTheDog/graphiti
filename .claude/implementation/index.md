@@ -259,6 +259,37 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 - [ ] Relations created correctly (preceded_by, continued_by)
 - [ ] Integration test with real Graphiti instance passes
 
+### Story 4.3: Clean Up Refactoring Artifacts (NEW - ALIGNMENT REMEDIATION)
+**Status**: unassigned
+**Priority**: HIGH
+**Parent**: Story 4
+**Depends on**: Story 4
+**Description**: Remove deprecated exports and fix __init__.py after Story 4 refactoring to reflect new architecture
+**Rationale**: Alignment audit identified __init__.py still exports deprecated classes (SessionStorage, SessionSummarizer) and has duplicate import blocks. This creates API confusion and exposes deprecated code.
+**File**: `graphiti_core/session_tracking/__init__.py`
+**Acceptance Criteria**:
+- [ ] Remove deprecated exports from __init__.py:
+  - [ ] Remove: `SessionStorage`, `SessionSummarizer`, `SessionSummary`, `SessionSummarySchema`
+  - [ ] Remove: imports from `graphiti_storage.py` and `summarizer.py`
+- [ ] Add new exports to __init__.py:
+  - [ ] Add: `SessionIndexer` from `indexer.py`
+  - [ ] Add: `HandoffExporter` from `handoff_exporter.py`
+- [ ] Fix duplicate import blocks (lines 13-40 duplicated, remove duplication)
+- [ ] Fix duplicate module docstring (lines 1-11 duplicated)
+- [ ] Verify all exports work correctly (import test)
+- [ ] Update module docstring to reflect new architecture (indexer + optional handoff export)
+- [ ] Document migration path for users relying on deprecated classes (if any)
+- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
+  - [ ] Type hints maintained in exports
+  - [ ] Error handling: Import errors handled gracefully
+  - [ ] Documentation: Module docstring updated, migration guide if needed
+  - [ ] Testing: Smoke test imports after cleanup
+
+**Implementation Notes**:
+- Keep summarizer.py and graphiti_storage.py files for now (may be reused for Story 2.3)
+- Only remove from public API exports, don't delete files yet
+- Ensure backward compatibility: Add deprecation warnings if external code might import these classes
+
 ### Story 5: CLI Integration
 **Status**: completed
 **Description**: Add global opt-in/out CLI commands for session tracking
@@ -443,6 +474,22 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - [ ] Final compliance checklist passed
 
 ## Progress Log
+
+### 2025-11-13 (Session 3) - Alignment Audit and Story 4.3 Created
+- 🔍 **Alignment Audit Completed** - Reviewed version files, archived docs, and existing code
+- **Findings**:
+  - ✅ Version files aligned (graphiti-core 0.22.0, mcp-server 0.4.0)
+  - ✅ Architecture matches design docs
+  - ✅ SessionTrackingConfig exists in unified_config.py (Story 3.3 completed)
+  - ⚠️ __init__.py exports deprecated classes (SessionStorage, SessionSummarizer)
+  - ⚠️ __init__.py has duplicate import blocks and duplicate docstring
+  - ⚠️ Missing exports for new classes (SessionIndexer, HandoffExporter)
+  - ✅ filter.py confirmed as non-configurable (Story 2.3 correctly identified as remediation)
+- 🆕 **Story 4.3 Created**: Clean Up Refactoring Artifacts
+  - Priority: HIGH
+  - Remove deprecated exports, add new exports, fix duplicates
+  - Prerequisite for Stories 5-8 work
+- **Alignment Status**: 85% aligned, 3 issues identified (1 CRITICAL addressed by Story 2.3, 2 MEDIUM addressed by Story 4.3)
 
 ### 2025-11-13 (Session 2) - Audit Remediation Applied
 - 🔍 **Sprint Audit Completed** - 6 checks performed, 7 issues identified
