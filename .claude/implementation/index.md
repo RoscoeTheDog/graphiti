@@ -33,453 +33,237 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ## Stories
 
+
+
+## Stories
+
+
+
 ### Story 1: Foundation Infrastructure
-**Status**: completed
-**Claimed**: 2025-11-13 08:00
-**Completed**: 2025-11-13 09:15
-**Description**: Create core module structure, extract types, implement JSONL parser and path resolver
-**Acceptance Criteria**:
-- [x] `graphiti_core/session_tracking/` module structure created
-- [x] `types.py` implemented with all dataclasses (SessionMessage, ConversationContext, SessionMetadata)
-- [x] `parser.py` extracted and refactored from watchdog (SQLite dependencies removed)
-- [x] `path_resolver.py` implemented with Claude Code path mapping
-- [x] Unit tests pass for parser + path resolver (27 tests passing)
-- [x] Can parse JSONL files and extract messages correctly
 
-**Implementation Notes**:
-- Created comprehensive type system with MessageRole, ToolCallStatus, TokenUsage, ToolCall, SessionMessage, ConversationContext, and SessionMetadata
-- Parser successfully extracts tool calls, token usage, and message content
-- Path resolver handles cross-platform path normalization (Windows/Unix/WSL)
-- All 27 unit tests passing successfully
-- Zero SQLite dependencies, using pure Python dataclasses
-- Tool call extraction includes error detection and status tracking
-
-### Story 1.1: Core Types Module
 **Status**: completed
-**Parent**: Story 1
-**Description**: Create type definitions for session tracking (TokenUsage, ToolCall, SessionMessage, ConversationContext, SessionMetadata)
-**Acceptance Criteria**:
-- [x] All dataclasses defined in `types.py`
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-- [x] Proper type hints and documentation
-- [x] No external dependencies (pure Python types)
 
-### Story 1.2: JSONL Parser
-**Status**: completed
-**Parent**: Story 1
-**Description**: Extract and refactor parser from claude-window-watchdog, remove SQLite dependencies, add tool call extraction
-**Acceptance Criteria**:
-- [x] `parser.py` created with JSONLParser class
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-- [x] Incremental parsing with offset tracking works
-- [x] Tool call extraction implemented (MCP-specific)
-- [x] Unit tests cover all parsing scenarios
+**See**: [stories/1-foundation-infrastructure.md](stories/1-foundation-infrastructure.md)
 
-### Story 1.3: Path Resolution
+
+
+#### Story 1.1: Core Types Module
+
 **Status**: completed
-**Parent**: Story 1
-**Description**: Implement Claude Code JSONL path resolution with project root → hash mapping
-**Acceptance Criteria**:
-- [x] `path_resolver.py` implemented with ClaudePathResolver class
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 1)
-- [x] Cross-platform path handling (Windows/Unix/WSL)
-- [x] Can resolve `~/.claude/projects/{hash}/sessions/` correctly
-- [x] Unit tests for path resolution edge cases
+
+**See**: [stories/1.1-core-types-module.md](stories/1.1-core-types-module.md)
+
+
+
+#### Story 1.2: JSONL Parser
+
+**Status**: completed
+
+**See**: [stories/1.2-jsonl-parser.md](stories/1.2-jsonl-parser.md)
+
+
+
+#### Story 1.3: Path Resolution
+
+**Status**: completed
+
+**See**: [stories/1.3-path-resolution.md](stories/1.3-path-resolution.md)
+
+
 
 ### Story 2: Smart Filtering
-**Status**: completed
-**Claimed**: 2025-11-13 10:00
-**Completed**: 2025-11-13 10:45
-**Description**: Implement 93% token reduction filtering per handoff design
-**Acceptance Criteria**:
-- [x] `filter.py` implemented with SessionFilter class
-- [x] Filtering rules applied correctly (keep user/agent, omit tool outputs)
-- [x] Tool output summarization works (1-line summaries)
-- [x] MCP tool extraction implemented
-- [x] Token reduction achieves 90%+ (validated with test data)
-- [x] Unit tests pass for all filtering scenarios (27 tests passing)
-- [x] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [x] Platform-agnostic path handling (not applicable - no path operations)
-  - [x] Type hints and comprehensive docstrings
-  - [x] Error handling with logging
-  - [x] >80% test coverage (achieved 92%)
-  - [x] Performance benchmarks (<5% overhead - filtering is fast, token reduction estimated)
 
-### Story 2.1: Filtering Logic
 **Status**: completed
-**Parent**: Story 2
-**Description**: Implement core filtering rules (keep structure, omit outputs)
-**Acceptance Criteria**:
-- [x] User messages preserved (full)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-- [x] Agent responses preserved (full)
-- [x] Tool use blocks preserved (structure only)
-- [x] Tool results omitted (replaced with summary)
 
-### Story 2.2: Tool Output Summarization
+**See**: [stories/2-smart-filtering.md](stories/2-smart-filtering.md)
+
+
+
+#### Story 2.1: Filtering Logic
+
 **Status**: completed
-**Parent**: Story 2
-**Description**: Create concise 1-line summaries for tool results
-**Acceptance Criteria**:
-- [x] Read/Write/Edit summaries implemented
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 2)
-- [x] MCP tool result summaries implemented
-- [x] Summary format is consistent and informative
+
+**See**: [stories/2.1-filtering-logic.md](stories/2.1-filtering-logic.md)
+
+
+
+#### Story 2.2: Tool Output Summarization
+
+**Status**: completed
+
+**See**: [stories/2.2-tool-output-summarization.md](stories/2.2-tool-output-summarization.md)
+
+
+
+#### Story 2.3: Configurable Filtering System (NEW - REMEDIATION)
+
+**Status**: unassigned
+
+**See**: [stories/2.3-configurable-filtering-system-new---remediation.md](stories/2.3-configurable-filtering-system-new---remediation.md)
+
+
 
 ### Story 3: File Monitoring
-**Status**: completed
-**Claimed**: 2025-11-13 11:00
-**Completed**: 2025-11-13 12:30
-**Depends on**: Story 1
-**Description**: Implement watchdog-based automatic session detection and lifecycle management
-**Acceptance Criteria**:
-- [x] `watcher.py` extracted and refactored (database storage removed)
-- [x] `session_manager.py` implemented with lifecycle detection
-- [x] Offset tracking works correctly (incremental reading)
-- [x] Session close detection works (inactivity timeout)
-- [x] Configuration schema added to unified_config.py
-- [x] Integration tests pass with mock JSONL files (9 tests passing)
-- [x] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [x] Platform-agnostic path handling for file watching
-  - [x] Type hints and comprehensive docstrings
-  - [x] Error handling with logging (file I/O)
-  - [x] >80% test coverage (integration tests cover all scenarios)
-  - [x] Performance: Watchdog runs in background, minimal overhead
 
-**Implementation Notes**:
-- Created `watcher.py` with `SessionFileWatcher` class using watchdog library
-- Implemented `SessionFileEventHandler` with callbacks for file events
-- Created `session_manager.py` with `SessionManager` and `ActiveSession` dataclass
-- Session manager tracks active sessions, detects inactivity, triggers callbacks
-- Added `SessionTrackingConfig` to unified_config.py with all necessary settings
-- Added watchdog>=6.0.0 dependency to pyproject.toml
-- Updated __init__.py to export new classes
-- 9 integration tests passing, covering:
-  - File watcher detecting new/modified/deleted files
-  - Session manager tracking sessions
-  - Reading new messages incrementally
-  - Inactivity detection and session close
-  - Callback triggering on close
-  - Context manager usage
-  - Multiple concurrent sessions
-- All cross-cutting requirements satisfied (platform-agnostic paths, error handling, type safety, logging)
-
-### Story 3.1: File Watcher
 **Status**: completed
-**Parent**: Story 3
-**Description**: Extract and refactor watchdog-based file monitoring from claude-window-watchdog
-**Acceptance Criteria**:
-- [x] SessionFileWatcher class implemented
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 3)
-- [x] Callback pattern used instead of database storage
-- [x] Offset tracking maintained for incremental reads
-- [x] New session file detection works
 
-### Story 3.2: Session Manager
-**Status**: completed
-**Parent**: Story 3
-**Description**: Orchestrate session lifecycle (track active sessions, detect close, trigger summarization)
-**Acceptance Criteria**:
-- [x] SessionManager class implemented
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 3)
-- [x] In-memory session registry tracks active sessions
-- [x] Inactivity timeout detection works
-- [x] Auto-compaction detection implemented (new JSONL = continuation)
-- [x] Triggers summarization on session close
+**See**: [stories/3-file-monitoring.md](stories/3-file-monitoring.md)
 
-### Story 3.3: Configuration Integration
+
+
+#### Story 3.1: File Watcher
+
 **Status**: completed
-**Parent**: Story 3
-**Description**: Add session tracking configuration to unified_config.py
-**Acceptance Criteria**:
-- [x] SessionTrackingConfig schema added
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md (satisfied by parent Story 3)
-- [x] Configuration validation works
-- [x] Default values set correctly
-- [x] Config can be loaded from graphiti.config.json
+
+**See**: [stories/3.1-file-watcher.md](stories/3.1-file-watcher.md)
+
+
+
+#### Story 3.2: Session Manager
+
+**Status**: completed
+
+**See**: [stories/3.2-session-manager.md](stories/3.2-session-manager.md)
+
+
+
+#### Story 3.3: Configuration Integration
+
+**Status**: completed
+
+**See**: [stories/3.3-configuration-integration.md](stories/3.3-configuration-integration.md)
+
+
 
 ### Story 4: Graphiti Integration (REFACTORED)
+
 **Status**: completed
-**Original Completion**: 2025-11-13 13:50
-**Refactoring Completed**: 2025-11-13 14:45
-**Depends on**: Story 2, Story 3
-**Description**: **SIMPLIFIED: Direct episode indexing to Graphiti (no redundant summarization)**
-**Architecture Change**: Removed redundant LLM summarization layer - Graphiti's built-in LLM handles entity extraction and summarization automatically
 
-**New Implementation**:
-- `indexer.py` - SessionIndexer class (thin wrapper around graphiti.add_episode)
-- `handoff_exporter.py` - OPTIONAL HandoffExporter for markdown files (not automatic)
-- Simplified flow: Filter → Index → Let Graphiti learn
+**See**: [stories/4-graphiti-integration-refactored.md](stories/4-graphiti-integration-refactored.md)
 
-**Refactoring Acceptance Criteria**:
-- [x] `indexer.py` created with SessionIndexer class
-- [x] Direct episode indexing via graphiti.add_episode()
-- [x] Filtered content passed directly (no pre-summarization)
-- [x] Session linking support (previous_episode_uuid)
-- [x] Search and retrieval methods implemented
-- [x] HandoffExporter moved to optional module (not core flow)
-- [x] 14 new tests passing (100% pass rate)
-- [x] **Cost reduced by 63%**: $0.17/session (vs $0.46 with redundant summarization)
-- [x] **Cross-cutting requirements satisfied**:
-  - [x] Type hints and comprehensive docstrings
-  - [x] Error handling with logging
-  - [x] >80% test coverage (14 tests, 100% pass rate)
-  - [x] Performance: Direct indexing, no extra LLM calls
-  - [x] Architecture: Lets Graphiti handle entity extraction naturally
 
-### Story 4.1: Session Summarizer
+
+#### Story 4.1: Session Summarizer
+
+**Status**: deprecated
+
+**See**: [stories/4.1-session-summarizer.md](stories/4.1-session-summarizer.md)
+
+
+
+#### Story 4.2: Graphiti Storage Integration
+
+**Status**: deprecated
+
+**See**: [stories/4.2-graphiti-storage-integration.md](stories/4.2-graphiti-storage-integration.md)
+
+
+
+#### Story 4.3: Clean Up Refactoring Artifacts (NEW - ALIGNMENT REMEDIATION)
+
 **Status**: completed
-**Parent**: Story 4
-**Description**: Use Graphiti LLM client to generate structured summaries
-**Acceptance Criteria**:
-- [ ] SessionSummarizer class implemented
-- [ ] Uses gpt-4.1-mini for cost efficiency
-- [ ] Prompt template matches handoff design
-- [ ] Extracts all required fields (objective, work, decisions, etc.)
-- [ ] Handles errors gracefully
 
-### Story 4.2: Graphiti Storage Integration
-**Status**: completed
-**Parent**: Story 4
-**Description**: Store session summaries as EpisodicNodes in Graphiti graph
-**Acceptance Criteria**:
-- [ ] SessionStorage class implemented
-- [ ] Sessions stored as EpisodicNodes
-- [ ] Metadata includes token_count, mcp_tools_used, files_modified
-- [ ] Relations created correctly (preceded_by, continued_by)
-- [ ] Integration test with real Graphiti instance passes
+**See**: [stories/4.3-clean-up-refactoring-artifacts-new---alignment-rem.md](stories/4.3-clean-up-refactoring-artifacts-new---alignment-rem.md)
 
-### Story 4.3: Clean Up Refactoring Artifacts (NEW - ALIGNMENT REMEDIATION)
-**Status**: completed
-**Claimed**: 2025-11-13 15:00
-**Completed**: 2025-11-13 15:15
-**Priority**: HIGH
-**Parent**: Story 4
-**Depends on**: Story 4
-**Description**: Remove deprecated exports and fix __init__.py after Story 4 refactoring to reflect new architecture
-**Rationale**: Alignment audit identified __init__.py still exports deprecated classes (SessionStorage, SessionSummarizer) and has duplicate import blocks. This creates API confusion and exposes deprecated code.
-**File**: `graphiti_core/session_tracking/__init__.py`
-**Acceptance Criteria**:
-- [x] Remove deprecated exports from __init__.py:
-  - [x] Remove: `SessionStorage`, `SessionSummarizer`, `SessionSummary`, `SessionSummarySchema`
-  - [x] Remove: imports from `graphiti_storage.py` and `summarizer.py`
-- [x] Add new exports to __init__.py:
-  - [x] Add: `SessionIndexer` from `indexer.py`
-  - [x] Add: `HandoffExporter` from `handoff_exporter.py`
-- [x] Fix duplicate import blocks (lines 13-40 duplicated, remove duplication)
-- [x] Fix duplicate module docstring (lines 1-11 duplicated)
-- [x] Verify all exports work correctly (import test)
-- [x] Update module docstring to reflect new architecture (indexer + optional handoff export)
-- [x] Document migration path for users relying on deprecated classes (if any)
-- [x] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [x] Type hints maintained in exports
-  - [x] Error handling: Import errors handled gracefully
-  - [x] Documentation: Module docstring updated, migration guide if needed
-  - [x] Testing: Smoke test imports after cleanup
 
-**Implementation Notes**:
-- Removed all duplicate import blocks and module docstrings
-- Updated module docstring to clearly describe new architecture
-- All smoke tests passing: SessionIndexer and HandoffExporter importable
-- Verified deprecated exports removed: SessionStorage and SessionSummarizer no longer importable
-- Migration path: Users should use SessionIndexer for direct episode indexing, HandoffExporter for optional markdown export
-- Kept summarizer.py and graphiti_storage.py files (may be reused for Story 2.3)
-- No external code depends on deprecated exports (internal-only refactoring)
 
 ### Story 5: CLI Integration
-**Status**: completed
-**Description**: Add global opt-in/out CLI commands for session tracking
-**Acceptance Criteria**:
-- [ ] CLI commands implemented (enable, disable, status)
-- [ ] **Default configuration is enabled (opt-out model)** - NEW REQUIREMENT
-- [ ] Configuration persisted to graphiti.config.json
-- [ ] Applied on MCP server startup
-- [ ] Documentation updated (CONFIGURATION.md)
-- [ ] Cost estimates documented
-- [ ] Opt-out instructions clear
-- [ ] Migration note for existing users (default behavior change)
-- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [ ] Platform-agnostic config file paths
-  - [ ] Type hints and comprehensive docstrings
-  - [ ] Error handling with logging (config errors)
-  - [ ] Configuration uses unified system
-  - [ ] Documentation: User guide updated
 
-### Story 5.1: CLI Commands
-**Status**: completed
-**Parent**: Story 5
-**Description**: Implement session tracking CLI commands
-**Acceptance Criteria**:
-- [ ] `graphiti-mcp session-tracking enable` works
-- [ ] `graphiti-mcp session-tracking disable` works
-- [ ] `graphiti-mcp session-tracking status` works
-- [ ] Commands integrated with existing MCP server CLI
-- [ ] File path explicitly documented in implementation
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Type hints and comprehensive docstrings
-  - [ ] Error handling with logging
-  - [ ] >80% test coverage
-  - [ ] Documentation updated
+**Status**: unassigned
 
-### Story 5.2: Configuration Persistence
-**Status**: completed
-**Parent**: Story 5
-**Description**: Store session tracking state in graphiti.config.json
-**Acceptance Criteria**:
-- [ ] Config updates persist to file
-- [ ] Config loaded on server startup
-- [ ] Validation works correctly
-- [ ] **Default value is enabled=true** - NEW REQUIREMENT
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Type hints and Pydantic validation
-  - [ ] Error handling with logging
-  - [ ] Configuration uses unified system
+**See**: [stories/5-cli-integration.md](stories/5-cli-integration.md)
+
+
+
+#### Story 5.1: CLI Commands
+
+**Status**: unassigned
+
+**See**: [stories/5.1-cli-commands.md](stories/5.1-cli-commands.md)
+
+
+
+#### Story 5.2: Configuration Persistence
+
+**Status**: unassigned
+
+**See**: [stories/5.2-configuration-persistence.md](stories/5.2-configuration-persistence.md)
+
+
 
 ### Story 6: MCP Tool Integration
-**Status**: completed
-**Description**: Add runtime toggle via MCP tool calls for per-session control
-**Acceptance Criteria**:
-- [ ] `session_tracking_start()` MCP tool implemented (renamed from track_session)
-- [ ] `session_tracking_stop()` MCP tool implemented (renamed from stop_tracking_session)
-- [ ] `session_tracking_status()` MCP tool implemented (renamed from get_session_tracking_status)
-- [ ] Session registry tracks per-session state
-- [ ] Override global config with force parameter works
-- [ ] Integration with session_manager.py complete
-- [ ] Agent-friendly tool descriptions written
-- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [ ] Type hints and comprehensive docstrings
-  - [ ] Error handling with logging (MCP tool errors)
-  - [ ] >80% test coverage
-  - [ ] Documentation: MCP_TOOLS.md updated
-  - [ ] Security: No sensitive data exposed in tool responses
 
-### Story 6.1: MCP Tool Implementation
-**Status**: completed
-**Parent**: Story 6
-**Description**: Add MCP tools to graphiti_mcp_server.py
-**Acceptance Criteria**:
-- [ ] All three MCP tools registered with new names (session_tracking_start/stop/status)
-- [ ] Tool descriptions are clear and agent-friendly
-- [ ] Tools integrated with SessionTrackingService
-- [ ] Handler file path explicitly documented
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Type hints and comprehensive docstrings
-  - [ ] Error handling with logging
-  - [ ] >80% test coverage
-  - [ ] Documentation: MCP_TOOLS.md updated
+**Status**: unassigned
 
-### Story 6.2: Runtime State Management
-**Status**: completed
-**Parent**: Story 6
-**Description**: Implement per-session enable/disable state tracking
-**Acceptance Criteria**:
-- [ ] In-memory session registry works
-- [ ] Per-session overrides global config correctly
-- [ ] force=True parameter works as expected
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Type hints and comprehensive docstrings
-  - [ ] Error handling with logging
-  - [ ] >80% test coverage
+**See**: [stories/6-mcp-tool-integration.md](stories/6-mcp-tool-integration.md)
+
+
+
+#### Story 6.1: MCP Tool Implementation
+
+**Status**: unassigned
+
+**See**: [stories/6.1-mcp-tool-implementation.md](stories/6.1-mcp-tool-implementation.md)
+
+
+
+#### Story 6.2: Runtime State Management
+
+**Status**: unassigned
+
+**See**: [stories/6.2-runtime-state-management.md](stories/6.2-runtime-state-management.md)
+
+
 
 ### Story 7: Testing & Validation
-**Status**: completed
-**Description**: Comprehensive testing and cost validation with real session data
-**Acceptance Criteria**:
-- [ ] End-to-end integration tests pass
-- [ ] Cost measurement validates projections ($0.03-$0.50/session)
-- [ ] Performance testing shows acceptable overhead (<5%)
-- [ ] Large sessions (100+ exchanges) handled correctly
-- [ ] Multiple concurrent sessions work
-- [ ] Documentation complete (user guide, dev guide, troubleshooting)
-- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [ ] Platform-specific tests (Windows + Unix)
-  - [ ] >80% overall test coverage
-  - [ ] Performance benchmarks documented
-  - [ ] Security audit completed
-  - [ ] All documentation updated
 
-### Story 7.1: Integration Testing
-**Status**: completed
-**Parent**: Story 7
-**Description**: End-to-end workflow testing with full session lifecycle
-**Acceptance Criteria**:
-- [ ] Full workflow test: detect → parse → filter → summarize → store
-- [ ] Multiple sequential sessions tested
-- [ ] Multiple parallel sessions tested
-- [ ] Auto-compaction detection tested
-- [ ] Agent spawning (parent-child linkage) tested
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Platform-specific tests (Windows + Unix)
-  - [ ] >80% test coverage
-  - [ ] Error handling tested
+**Status**: unassigned
 
-### Story 7.2: Cost Validation
+**See**: [stories/7-testing-validation.md](stories/7-testing-validation.md)
+
+
+
+#### Story 7.1: Integration Testing
+
+**Status**: unassigned
+
+**See**: [stories/7.1-integration-testing.md](stories/7.1-integration-testing.md)
+
+
+
+#### Story 7.2: Cost Validation
+
 **Status**: deprecated
-**Parent**: Story 7
-**Description**: Measure actual OpenAI API costs with real session data
-**Acceptance Criteria**:
-- [ ] Real session data processed
-- [ ] Actual costs measured and logged
-- [ ] Costs validate against projections ($0.03-$0.50/session)
-- [ ] Token reduction confirmed (90%+)
 
-### Story 7.3: Performance Testing
+**See**: [stories/7.2-cost-validation.md](stories/7.2-cost-validation.md)
+
+
+
+#### Story 7.3: Performance Testing
+
 **Status**: deprecated
-**Parent**: Story 7
-**Description**: Validate performance and resource usage
-**Acceptance Criteria**:
-- [ ] Large sessions (100+ exchanges) tested
-- [ ] Multiple concurrent sessions tested
-- [ ] File watcher overhead measured (<5%)
-- [ ] Memory usage acceptable
-- [ ] No performance degradation for MCP server
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [ ] Performance benchmarks documented
-  - [ ] Error handling tested
 
-### Story 7.4: Documentation
+**See**: [stories/7.3-performance-testing.md](stories/7.3-performance-testing.md)
+
+
+
+#### Story 7.4: Documentation
+
 **Status**: completed
-**Claimed**: 2025-11-13 15:30
-**Completed**: 2025-11-13 16:00
-**Parent**: Story 7
-**Description**: Create user and developer documentation
-**Acceptance Criteria**:
-- [x] User guide: How to use session tracking
-- [x] Developer guide: Architecture and extension points
-- [x] Troubleshooting guide created
-- [x] README.md updated with session tracking features
-- [x] CONFIGURATION.md updated
-**Cross-cutting requirements**: See CROSS_CUTTING_REQUIREMENTS.md
-  - [x] All documentation complete and reviewed
-  - [ ] Migration guide for existing users
+
+**See**: [stories/7.4-documentation.md](stories/7.4-documentation.md)
+
+
 
 ### Story 8: Refinement & Launch
+
 **Status**: unassigned
-**Depends on**: Story 7
-**Description**: Polish, code review, and release preparation
-**Acceptance Criteria**:
-- [ ] Code review completed and feedback addressed
-- [ ] Logging and debugging aids added
-- [ ] Error handling improved
-- [ ] README.md updated with session tracking features
-- [ ] Migration guide created for existing users
-- [ ] Release notes written
-- [ ] **Cross-cutting requirements satisfied** (see CROSS_CUTTING_REQUIREMENTS.md):
-  - [ ] All platform-agnostic path requirements met
-  - [ ] All security requirements satisfied
-  - [ ] All performance benchmarks met
-  - [ ] All documentation complete and reviewed
-  - [ ] Final compliance checklist passed
+
+**See**: [stories/8-refinement-launch.md](stories/8-refinement-launch.md)
+
+
+
+
 
 ## Progress Log
 
@@ -519,7 +303,8 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - **Story 6**: Updated MCP tool naming convention (session_tracking_start/stop/status)
 - 🆕 **Cross-Cutting Requirements**: Added to all sub-stories (referencing parent story compliance)
 - 📝 **File Paths Added**: Story 5.1 and 6.1 now specify implementation file locations
-- 🔄 **Remediation Story Created**: Story 2.3 addresses gap between implemented filter.py (fixed rules) and new configurable filtering requirements
+- 🔄 **Remediation Story Planned**: Story 2.3 addresses gap between implemented filter.py (fixed rules) and new configurable filtering requirements
+  - ⚠️ **NOTE**: Story 2.3 was planned but never added to index.md in commit 7176b99. Remediation required.
 
 **Remediation Analysis**:
 - **Existing Code Status**: filter.py (Story 2) has fixed filtering rules, needs retrofit for configuration
