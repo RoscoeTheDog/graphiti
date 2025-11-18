@@ -1,3 +1,100 @@
+# Phase 4 Checkpoint: Documentation Updates
+
+**Status**: ✅ Complete
+**Progress**: 4/4 tasks complete (100%)
+**Estimated Time**: 2 hours
+**Actual Time**: ~30 minutes
+**Dependencies**: Phase 3 complete
+
+---
+
+## 🎯 Objective
+Update user-facing documentation for unified config and filter systems.
+
+## ✅ Prerequisites
+- [x] Phase 3 complete (`phase-3-complete` tag exists)
+- [x] Filter system tested with real configurations
+- [x] Both Neo4j and FalkorDB backends tested
+
+---
+
+## 📋 Tasks
+
+### Task 4.1: Update README.md ⏱️ 30 min
+**File**: `README.md` (root)
+
+#### Subtasks
+- [ ] Add "Configuration" section with quick start
+- [ ] Link to `implementation/guides/UNIFIED_CONFIG_SUMMARY.md`
+- [ ] Add example: copy config template, set env vars, start server
+- [ ] Link to migration guide for existing users
+- [ ] Update installation section to mention config file
+
+**Template** (add after installation):
+```markdown
+## Configuration
+
+Graphiti uses unified configuration (`graphiti.config.json`).
+
+### Quick Start
+1. Copy template: `cp implementation/config/graphiti.config.json .`
+2. Set secrets in `.env`: `NEO4J_PASSWORD=xxx` `OPENAI_API_KEY=xxx`
+3. Start: `python -m mcp_server.graphiti_mcp_server`
+
+See [Configuration Guide](implementation/guides/UNIFIED_CONFIG_SUMMARY.md) for details.
+
+### Migration
+Migrating from .env? See [Migration Guide](implementation/guides/MIGRATION_GUIDE.md).
+```
+
+---
+
+### Task 4.2: Update .env.example ⏱️ 15 min
+**File**: `.env.example` (root)
+
+#### Subtasks
+- [ ] Simplify to minimal set (5-8 variables)
+- [ ] Add header: "Only secrets - config in graphiti.config.json"
+- [ ] Include: NEO4J_PASSWORD, FALKORDB_PASSWORD, OPENAI_API_KEY, ANTHROPIC_API_KEY
+- [ ] Note Azure variables as optional
+- [ ] Add comment: prefer graphiti.config.json for non-secret settings
+
+**Template**:
+```bash
+# Graphiti Environment Configuration
+# Secrets only - structural config in graphiti.config.json
+
+# Database Passwords
+NEO4J_PASSWORD=your_password
+FALKORDB_PASSWORD=your_password  # Optional
+
+# LLM API Keys
+OPENAI_API_KEY=sk-your-key
+ANTHROPIC_API_KEY=sk-ant-your-key  # Optional: fallback
+
+# Azure OpenAI (Optional)
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+AZURE_OPENAI_API_KEY=your_key
+```
+
+---
+
+### Task 4.3: Create CONFIGURATION.md ⏱️ 45 min
+**File**: `CONFIGURATION.md` (NEW, root)
+
+#### Subtasks
+- [ ] Create comprehensive config reference
+- [ ] Document all sections: database, llm, embedder, memory_filter
+- [ ] Provide examples for each backend/provider
+- [ ] Explain environment variable overrides
+- [ ] Add troubleshooting section
+- [ ] Link to detailed implementation plans
+
+#### Complete CONFIGURATION.md Template
+
+**Copy this complete template to create `CONFIGURATION.md`:**
+
+```markdown
 # Graphiti Configuration Reference
 
 Complete documentation for `graphiti.config.json` - the unified configuration system for Graphiti.
@@ -13,11 +110,9 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 7. [Memory Filter Configuration](#memory-filter-configuration)
 8. [Project Configuration](#project-configuration)
 9. [Search Configuration](#search-configuration)
-10. [Resilience Configuration](#resilience-configuration)
-11. [Session Tracking Configuration](#session-tracking-configuration) ⭐ New in v0.4.0
-12. [Environment Variable Overrides](#environment-variable-overrides)
-13. [Complete Examples](#complete-examples)
-14. [Troubleshooting](#troubleshooting)
+10. [Environment Variable Overrides](#environment-variable-overrides)
+11. [Complete Examples](#complete-examples)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -37,20 +132,16 @@ Graphiti uses a **unified configuration system** where all structural settings a
 
 Configuration files are searched in this order:
 1. `./graphiti.config.json` (project directory)
-2. `~/.graphiti/graphiti.config.json` (global)
+2. `~/.claude/graphiti.config.json` (global)
 3. Built-in defaults (in `mcp_server/unified_config.py`)
-
-**Note**: If upgrading from v0.3.x or earlier, configurations from `~/.claude/graphiti.config.json` will be automatically migrated to `~/.graphiti/` on first use.
 
 ---
 
 ## Quick Start
 
-### 1. Edit Configuration
+### 1. Copy Template
 ```bash
-# Edit the existing config file or copy it
-cp graphiti.config.json graphiti.config.local.json  # Optional: for local customization
-# Or edit graphiti.config.json directly
+cp implementation/config/graphiti.config.json graphiti.config.json
 ```
 
 ### 2. Create .env with Secrets
@@ -81,6 +172,7 @@ The server will:
   "database": { /* Database backend settings */ },
   "llm": { /* LLM provider settings */ },
   "embedder": { /* Embedder settings */ },
+  "memory_filter": { /* Memory filtering settings */ },
   "project": { /* Project metadata */ },
   "search": { /* Search parameters */ },
   "logging": { /* Logging configuration */ }
@@ -297,6 +389,81 @@ Embedders generate vector representations for semantic search.
 
 ---
 
+## Memory Filter Configuration
+
+### Overview
+
+The memory filter uses LLM-based intelligent filtering to decide what should be stored in long-term memory.
+
+### Configuration Structure
+
+```json
+{
+  "memory_filter": {
+    "enabled": true,
+    "llm_filter": {
+      "providers": [
+        {
+          "name": "openai-primary",
+          "provider": "openai",
+          "model": "gpt-4o-mini",
+          "api_key": "${OPENAI_API_KEY}",
+          "max_queries_per_session": 50
+        },
+        {
+          "name": "anthropic-fallback",
+          "provider": "anthropic",
+          "model": "claude-3-5-haiku-20241022",
+          "api_key": "${ANTHROPIC_API_KEY}",
+          "max_queries_per_session": 50
+        }
+      ],
+      "session": {
+        "max_context_size": 10000,
+        "context_cleanup_threshold": 8000
+      },
+      "categories": {
+        "store": ["user-pref", "env-quirk", "external-api", "project-decision"],
+        "skip": ["bug-in-code", "config-in-repo", "docs-added", "ephemeral"]
+      }
+    }
+  }
+}
+```
+
+### Fields
+
+**memory_filter:**
+- `enabled` - Enable/disable filtering (boolean)
+
+**providers:** (hierarchical fallback)
+- `name` - Provider identifier
+- `provider` - "openai" or "anthropic"
+- `model` - Model to use for filtering
+- `api_key` - Use `${ENV_VAR}` syntax
+- `max_queries_per_session` - Rotate after N queries
+
+**session:**
+- `max_context_size` - Max tokens to track per session
+- `context_cleanup_threshold` - Reset context when reached
+
+**categories:**
+- `store` - Categories that should be stored
+- `skip` - Categories that should be skipped
+
+### Usage Example
+
+```python
+# Via MCP tool
+result = await should_store(
+    content="User prefers dark mode",
+    context="UI preferences discussion"
+)
+# Returns: {"should_store": true, "category": "user-pref", "reason": "..."}
+```
+
+---
+
 ## Project Configuration
 
 ```json
@@ -329,269 +496,6 @@ Embedders generate vector representations for semantic search.
 
 ---
 
-## Resilience Configuration
-
-The resilience configuration controls automatic reconnection, health monitoring, and error recovery behavior for the MCP server.
-
-### Configuration
-
-```json
-{
-  "resilience": {
-    "max_retries": 3,
-    "retry_backoff_base": 2,
-    "episode_timeout": 60,
-    "health_check_interval": 300
-  }
-}
-```
-
-### Fields
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `max_retries` | int | 3 | Maximum number of connection retry attempts on failure |
-| `retry_backoff_base` | int | 2 | Base for exponential backoff calculation (seconds = base^retry_count) |
-| `episode_timeout` | int | 60 | Timeout in seconds for episode processing operations |
-| `health_check_interval` | int | 300 | Interval in seconds for logging connection health metrics |
-
-### Retry Behavior
-
-When a connection failure occurs, the MCP server will automatically attempt to reconnect using exponential backoff:
-
-- **Retry 1**: Wait 2^0 = 1 second
-- **Retry 2**: Wait 2^1 = 2 seconds
-- **Retry 3**: Wait 2^2 = 4 seconds
-
-After `max_retries` attempts, the server will stop the affected queue worker and log an error.
-
-### Episode Timeout
-
-The `episode_timeout` setting prevents indefinite hangs during episode processing:
-
-- If an episode takes longer than `episode_timeout` seconds to process, it will be cancelled
-- A timeout error will be logged with episode details
-- The episode is removed from the queue
-- Subsequent episodes continue processing normally
-- The queue worker remains active and continues processing
-
-### Health Monitoring
-
-The MCP server automatically monitors connection health:
-
-- Connection status is checked periodically
-- Health metrics are logged every `health_check_interval` seconds
-- Metrics include: connection status, episode success/failure rates, queue depths
-- Use the `health_check` tool to check connection status on demand
-
-### Environment Overrides
-
-Resilience settings can be overridden with environment variables:
-
-```bash
-export GRAPHITI_MAX_RETRIES=5
-export GRAPHITI_RETRY_BACKOFF_BASE=3
-export GRAPHITI_EPISODE_TIMEOUT=120
-export GRAPHITI_HEALTH_CHECK_INTERVAL=600
-```
-
-### Example Configuration
-
-**Aggressive Retry (for unstable connections)**:
-```json
-{
-  "resilience": {
-    "max_retries": 5,
-    "retry_backoff_base": 2,
-    "episode_timeout": 120,
-    "health_check_interval": 60
-  }
-}
-```
-
-**Conservative Retry (for stable production)**:
-```json
-{
-  "resilience": {
-    "max_retries": 2,
-    "retry_backoff_base": 3,
-    "episode_timeout": 30,
-    "health_check_interval": 600
-  }
-}
-```
-
----
-
-## Session Tracking Configuration
-
-**New in v0.4.0** - Automatic session tracking for Claude Code conversations.
-
-Session tracking monitors Claude Code conversation files (`~/.claude/projects/{hash}/sessions/*.jsonl`) and automatically indexes them to the Graphiti knowledge graph, enabling cross-session memory and context continuity.
-
-### Configuration
-
-```json
-{
-  "session_tracking": {
-    "enabled": true,
-    "watch_directories": [
-      "~/.claude/projects"
-    ],
-    "inactivity_timeout_minutes": 30,
-    "scan_interval_seconds": 2
-  }
-}
-```
-
-### Fields
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable automatic session tracking (opt-out model) |
-| `watch_directories` | list[str] | `["~/.claude/projects"]` | Directories to monitor for JSONL session files |
-| `inactivity_timeout_minutes` | int | 30 | Minutes of inactivity before session is considered closed and indexed |
-| `scan_interval_seconds` | int | 2 | Seconds between file system scans for changes |
-
-### Behavior
-
-**When enabled:**
-1. File watcher monitors `watch_directories` for new/modified `.jsonl` files
-2. Sessions are tracked in-memory with incremental message parsing
-3. After `inactivity_timeout_minutes` of no activity, session is closed and indexed
-4. Filtered session content (93% token reduction) is added as an episode to Graphiti
-5. Graphiti automatically extracts entities, relationships, and enables semantic search
-
-**Session lifecycle:**
-```
-New JSONL file detected
-  → Parse messages incrementally
-  → Track activity (updates extend timeout)
-  → Inactivity timeout reached
-  → Filter messages (93% token reduction)
-  → Index to Graphiti as episode
-  → Link to previous session (if exists)
-```
-
-### Default: Enabled (Opt-Out Model)
-
-Session tracking is **enabled by default** starting in v0.4.0. This provides automatic cross-session memory out-of-the-box.
-
-**To disable:**
-```bash
-# CLI command
-graphiti-mcp session-tracking disable
-
-# Or set in config
-{
-  "session_tracking": {
-    "enabled": false
-  }
-}
-```
-
-### Runtime Control (MCP Tools)
-
-Session tracking can be controlled at runtime via MCP tool calls:
-
-```json
-// Enable for current session (overrides global config)
-{
-  "tool": "session_tracking_start",
-  "arguments": {
-    "force": true
-  }
-}
-
-// Disable for current session
-{
-  "tool": "session_tracking_stop"
-}
-
-// Check status
-{
-  "tool": "session_tracking_status"
-}
-```
-
-### Cost Considerations
-
-**Per session:** ~$0.17 (average)
-- Token filtering: 93% reduction (free)
-- Entity extraction: ~$0.17 (OpenAI gpt-4o-mini)
-
-**Monthly estimates:**
-- Light usage (10 sessions/month): ~$1.70/month
-- Regular usage (50 sessions/month): ~$8.50/month
-- Heavy usage (100 sessions/month): ~$17.00/month
-
-### Environment Overrides
-
-Session tracking settings can be overridden with environment variables:
-
-```bash
-export GRAPHITI_SESSION_TRACKING_ENABLED=false
-export GRAPHITI_SESSION_TRACKING_WATCH_DIRECTORIES='["~/.claude/projects"]'
-export GRAPHITI_SESSION_TRACKING_INACTIVITY_TIMEOUT_MINUTES=15
-export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
-```
-
-### Example Configurations
-
-**Default (Recommended)**:
-```json
-{
-  "session_tracking": {
-    "enabled": true,
-    "watch_directories": ["~/.claude/projects"],
-    "inactivity_timeout_minutes": 30,
-    "scan_interval_seconds": 2
-  }
-}
-```
-
-**High-Volume Environment** (faster session closure, lower CPU):
-```json
-{
-  "session_tracking": {
-    "enabled": true,
-    "watch_directories": ["~/.claude/projects/active"],
-    "inactivity_timeout_minutes": 15,
-    "scan_interval_seconds": 5
-  }
-}
-```
-
-**Low-Resource System** (reduced frequency):
-```json
-{
-  "session_tracking": {
-    "enabled": true,
-    "watch_directories": ["~/.claude/projects"],
-    "inactivity_timeout_minutes": 60,
-    "scan_interval_seconds": 10
-  }
-}
-```
-
-**Disabled** (opt-out):
-```json
-{
-  "session_tracking": {
-    "enabled": false
-  }
-}
-```
-
-### Documentation
-
-For detailed session tracking documentation:
-- **User Guide**: [docs/SESSION_TRACKING_USER_GUIDE.md](docs/SESSION_TRACKING_USER_GUIDE.md)
-- **Developer Guide**: [docs/SESSION_TRACKING_DEV_GUIDE.md](docs/SESSION_TRACKING_DEV_GUIDE.md)
-- **Troubleshooting**: [docs/SESSION_TRACKING_TROUBLESHOOTING.md](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
-
----
-
 ## Environment Variable Overrides
 
 ### Override Priority
@@ -616,10 +520,6 @@ For detailed session tracking documentation:
 | `AZURE_OPENAI_API_KEY` | `llm.azure_openai.api_key` | string | `...` |
 | `EMBEDDER_MODEL_NAME` | `embedder.model` | string | `text-embedding-3-small` |
 | `SEMAPHORE_LIMIT` | `llm.semaphore_limit` | int | `10` |
-| `GRAPHITI_MAX_RETRIES` | `resilience.max_retries` | int | `3` |
-| `GRAPHITI_RETRY_BACKOFF_BASE` | `resilience.retry_backoff_base` | int | `2` |
-| `GRAPHITI_EPISODE_TIMEOUT` | `resilience.episode_timeout` | int | `60` |
-| `GRAPHITI_HEALTH_CHECK_INTERVAL` | `resilience.health_check_interval` | int | `300` |
 
 ### Usage
 
@@ -664,6 +564,9 @@ MODEL_NAME=gpt-4o python -m mcp_server.graphiti_mcp_server
     "openai": {
       "api_key": "${OPENAI_API_KEY}"
     }
+  },
+  "memory_filter": {
+    "enabled": true
   }
 }
 ```
@@ -706,6 +609,9 @@ OPENAI_API_KEY=sk-your-key
       "api_version": "2024-02-15-preview",
       "deployment_name": "embedding-deployment"
     }
+  },
+  "memory_filter": {
+    "enabled": false
   }
 }
 ```
@@ -744,6 +650,20 @@ AZURE_OPENAI_API_KEY=your_azure_key
     "openai": {
       "api_key": "${OPENAI_API_KEY}"
     }
+  },
+  "memory_filter": {
+    "enabled": true,
+    "llm_filter": {
+      "providers": [
+        {
+          "name": "anthropic-filter",
+          "provider": "anthropic",
+          "model": "claude-3-5-haiku-20241022",
+          "api_key": "${ANTHROPIC_API_KEY}",
+          "max_queries_per_session": 100
+        }
+      ]
+    }
   }
 }
 ```
@@ -752,6 +672,7 @@ AZURE_OPENAI_API_KEY=your_azure_key
 ```bash
 NEO4J_PASSWORD=your_password
 OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
 ```
 
 ---
@@ -817,6 +738,29 @@ print(f'User: {db.user}')
 
 **Solution:** Start database, verify URI/credentials in config
 
+### Filter System Not Working
+
+**Symptom:** Memory filter not filtering
+
+**Debug:**
+```bash
+# Check filter enabled
+python -c "
+from mcp_server.unified_config import get_config
+print(f'Enabled: {get_config().memory_filter.enabled}')
+"
+
+# Check providers available
+python -c "
+from mcp_server.unified_config import get_config
+config = get_config()
+for p in config.memory_filter.llm_filter.providers:
+    print(f'{p.name}: key={bool(p.api_key)}')
+"
+```
+
+**Solution:** Enable in config, ensure API keys set
+
 ### Invalid Configuration
 
 **Symptom:** Pydantic validation errors
@@ -861,83 +805,6 @@ ls -la .env.backup*
 cp .env.backup.20241103_120000 .env
 ```
 
-### Connection Failures and Recovery
-
-**Symptom:** MCP server loses connection to database
-
-**Automatic Recovery:**
-- The MCP server automatically attempts reconnection using exponential backoff
-- Default: 3 retries with 1s, 2s, 4s delays
-- Queue workers restart after successful reconnection
-- Episodes continue processing after recovery
-
-**Manual Troubleshooting:**
-```bash
-# 1. Check database is running
-docker ps | grep neo4j
-
-# 2. Test connection manually
-cypher-shell -a bolt://localhost:7687 -u neo4j -p your_password
-
-# 3. Check health status using MCP tool
-# Use the health_check tool from your MCP client
-
-# 4. Review logs for connection errors
-tail -f logs/graphiti_mcp.log | grep -i "connection\|error"
-```
-
-**Tuning Resilience Settings:**
-
-For unstable networks:
-```json
-{
-  "resilience": {
-    "max_retries": 5,
-    "retry_backoff_base": 2,
-    "episode_timeout": 120
-  }
-}
-```
-
-For production environments with stable connections:
-```json
-{
-  "resilience": {
-    "max_retries": 2,
-    "retry_backoff_base": 3,
-    "episode_timeout": 30
-  }
-}
-```
-
-### Episode Processing Timeouts
-
-**Symptom:** Episodes hang indefinitely during processing
-
-**Automatic Handling:**
-- Default timeout: 60 seconds per episode
-- Timed-out episodes are logged and skipped
-- Queue worker continues with next episode
-- No manual intervention needed
-
-**Configuration:**
-```json
-{
-  "resilience": {
-    "episode_timeout": 120  // Increase for large/complex episodes
-  }
-}
-```
-
-**Debug Timeout Issues:**
-```bash
-# Check logs for timeout patterns
-grep "TimeoutError" logs/graphiti_mcp.log
-
-# Review episode that timed out
-grep "episode_name" logs/graphiti_mcp.log
-```
-
 ---
 
 ## Additional Resources
@@ -951,3 +818,204 @@ grep "episode_name" logs/graphiti_mcp.log
 
 **Last Updated:** 2025-11-03
 **Version:** 2.0 (Unified Configuration)
+```
+
+#### Notes
+- This template is complete and ready to use as-is
+- All sections include practical examples
+- Troubleshooting covers common issues
+- Copy entire markdown block to create CONFIGURATION.md
+
+---
+
+### Task 4.4: Update CLAUDE.md ⏱️ 20 min
+**File**: Root `CLAUDE.md` or `.claude/CLAUDE.md`
+
+#### Subtasks
+- [ ] Locate the `## TOOL DETAILS` section
+- [ ] Find the `**g**: Store: prefs, conventions...` line
+- [ ] Add filter integration documentation after it
+- [ ] Add new workflow to `## WORKFLOWS` section
+
+#### Detailed Instructions
+
+**Step 1: Find TOOL DETAILS Section**
+
+Locate this line in CLAUDE.md:
+```markdown
+**g**: Store: prefs, conventions, bugs, decisions, patterns | NOT: ephemeral, full-reports
+```
+
+**Step 2: Add Filter Documentation After It**
+
+Add this content immediately after the existing `**g**:` line:
+
+```markdown
+**g**: Store: prefs, conventions, bugs, decisions, patterns | NOT: ephemeral, full-reports
+
+### Graphiti Filter Integration (NEW)
+
+**Before storing to memory, use the filter tool:**
+
+```python
+# Check if content should be stored
+result = should_store(
+    content="Description of what happened",
+    context="Additional context (files changed, errors encountered, etc.)"
+)
+
+# Result structure:
+{
+    "should_store": true/false,
+    "category": "user-pref|env-quirk|project-decision|skip",
+    "confidence": 0.0-1.0,
+    "reason": "Explanation of the decision"
+}
+
+# If should_store=true, proceed with storage
+if result["should_store"]:
+    g:add_memory(
+        name="Descriptive name",
+        episode_body=content,
+        source="text",
+        group_id="session-id"
+    )
+```
+
+**Filter Categories:**
+
+✅ **STORE** (non-redundant insights):
+- `user-pref` - User preferences (dark mode, editor settings, etc.)
+- `env-quirk` - Machine/OS-specific issues (can't fix in code)
+- `external-api` - Third-party API quirks or undocumented behavior
+- `project-decision` - Architectural decisions, conventions
+- `workaround` - Non-obvious workarounds for limitations
+
+❌ **SKIP** (already captured elsewhere):
+- `bug-in-code` - Fixed bugs (now in version control)
+- `config-in-repo` - Configuration now committed
+- `docs-added` - Information now in README/docs
+- `ephemeral` - Temporary issues, one-time events
+
+**Configuration:**
+- Config file: `graphiti.config.json` (memory_filter section)
+- Enable/disable: `memory_filter.enabled: true/false`
+- Providers: Hierarchical fallback (OpenAI → Anthropic)
+```
+
+**Step 3: Add Workflow Example**
+
+Find the `## WORKFLOWS & ANTI-PATTERNS` section and add:
+
+```markdown
+### Graphiti Memory Storage Workflow (with Filter)
+
+**Scenario:** User expresses a preference or you discover an environment quirk
+
+1. **Capture the event**
+   ```
+   Event: "User prefers 2-space indentation for Python"
+   Context: "Discussion about code formatting"
+   ```
+
+2. **Check if it should be stored**
+   ```python
+   result = should_store(
+       content="User prefers 2-space indentation for Python files",
+       context="Code formatting discussion, user explicitly stated preference"
+   )
+   ```
+
+3. **Evaluate result**
+   ```python
+   if result["should_store"]:
+       category = result["category"]  # Expected: "user-pref"
+       reason = result["reason"]
+   ```
+
+4. **Store to memory**
+   ```python
+   g:add_memory(
+       name="Python Indentation Preference",
+       episode_body="User prefers 2-space indentation for Python files",
+       source="message",
+       source_description="user preference",
+       group_id="user-preferences"
+   )
+   ```
+
+**Anti-Pattern:**
+❌ Don't blindly store everything:
+```python
+# BAD: No filtering
+g:add_memory("Fixed bug in parser.py", ...)  # Already in git!
+```
+
+✅ Use filter first:
+```python
+# GOOD: Check before storing
+result = should_store("Fixed bug in parser.py", "Committed to git")
+if result["should_store"]:  # Will be False (bug-in-code)
+    g:add_memory(...)  # Won't execute
+```
+```
+
+---
+
+## 🧪 Validation
+
+- [ ] **V1**: All docs exist
+  ```bash
+  ls -la README.md .env.example CONFIGURATION.md
+  ```
+
+- [ ] **V2**: Links valid
+  ```bash
+  grep -r "implementation/" README.md CONFIGURATION.md
+  ```
+
+- [ ] **V3**: Bash examples run without errors
+  ```bash
+  # Extract and test bash snippets from docs
+  ```
+
+- [ ] **V4**: Config examples valid JSON
+  ```bash
+  # Validate JSON examples in docs
+  ```
+
+---
+
+## 📝 Git Commit
+
+```bash
+git add README.md .env.example CONFIGURATION.md CLAUDE.md
+
+git commit -m "Phase 4: Update documentation for unified config
+
+- Add configuration section to README
+- Simplify .env.example to minimal secrets
+- Create comprehensive CONFIGURATION.md
+- Update CLAUDE.md with filter integration
+
+Refs: implementation/checkpoints/CHECKPOINT_PHASE4.md"
+
+git tag -a phase-4-complete -m "Phase 4: Documentation Complete"
+```
+
+---
+
+## 📊 Progress Tracking
+
+- Task 4.1: [ ] Not Started | [ ] In Progress | [ ] Complete
+- Task 4.2: [ ] Not Started | [ ] In Progress | [ ] Complete
+- Task 4.3: [ ] Not Started | [ ] In Progress | [ ] Complete
+- Task 4.4: [ ] Not Started | [ ] In Progress | [ ] Complete
+
+**Time**: Estimated 2h | Actual: [fill in]
+
+---
+
+**Next**: [CHECKPOINT_PHASE5.md](CHECKPOINT_PHASE5.md)
+
+**Last Updated**: 2025-11-03

@@ -355,7 +355,7 @@ class GraphitiConfig(BaseModel):
         Args:
             config_path: Path to config file. If None, searches in:
                 1. ./graphiti.config.json (project root)
-                2. ~/.claude/graphiti.config.json (global)
+                2. ~/.graphiti/graphiti.config.json (global)
                 3. Falls back to defaults
 
         Returns:
@@ -363,9 +363,29 @@ class GraphitiConfig(BaseModel):
         """
         if config_path is None:
             # Search order: project root -> global -> defaults
+            global_config_path = Path.home() / ".graphiti" / "graphiti.config.json"
+            old_global_config_path = Path.home() / ".claude" / "graphiti.config.json"
+
+            # Migration: Check for old ~/.claude/ location and migrate to ~/.graphiti/
+            if old_global_config_path.exists() and not global_config_path.exists():
+                try:
+                    global_config_path.parent.mkdir(parents=True, exist_ok=True)
+                    import shutil
+                    shutil.copy2(old_global_config_path, global_config_path)
+                    logger.info(f"Migrated config from {old_global_config_path} to {global_config_path}")
+
+                    # Create deprecation notice
+                    deprecation_notice = old_global_config_path.parent / "graphiti.config.json.deprecated"
+                    deprecation_notice.write_text(
+                        "This config has been migrated to ~/.graphiti/graphiti.config.json\n"
+                        "Graphiti now uses ~/.graphiti/ for global configuration (MCP server independence).\n"
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to migrate config from {old_global_config_path}: {e}")
+
             search_paths = [
                 Path.cwd() / "graphiti.config.json",
-                Path.home() / ".claude" / "graphiti.config.json",
+                global_config_path,
             ]
 
             for path in search_paths:

@@ -305,9 +305,11 @@ This allows runtime configuration without editing files.
 
 Graphiti looks for configuration in this order:
 1. **Project directory** - `./graphiti.config.json`
-2. **Global directory** - `~/.claude/graphiti.config.json`
+2. **Global directory** - `~/.graphiti/graphiti.config.json`
 3. **Built-in defaults** - Sensible defaults for all settings
 4. **Environment overrides** - Environment variables override all above
+
+**Note**: Configurations from the old `~/.claude/graphiti.config.json` location are automatically migrated to `~/.graphiti/` on first use.
 
 ### Migration from Old .env System
 

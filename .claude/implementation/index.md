@@ -105,7 +105,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 2.3.1: Configuration Architecture Fix
 
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 2.3
 
 **See**: [stories/2.3.1-config-architecture-fix.md](stories/2.3.1-config-architecture-fix.md)
@@ -295,6 +295,21 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 ## Progress Log
+
+### 2025-11-17 17:02 - Story 2.3.1: in_progress → completed
+- ✅ **Configuration Architecture Fix** - Migrated global config from `~/.claude/` to `~/.graphiti/`
+- **Code Changes**:
+  - Updated `mcp_server/unified_config.py` with migration logic
+  - Changed config search path: `~/.claude/graphiti.config.json` → `~/.graphiti/graphiti.config.json`
+  - Automatic migration: Copies old config to new location if exists
+  - Creates deprecation notice for users
+- **Documentation Updates**:
+  - Updated `CONFIGURATION.md` and `README.md` with new paths
+  - Added migration notes for users upgrading from v0.3.x
+- **Testing**:
+  - Added test cases to `tests/test_unified_config.py`
+  - Manual testing documented in story file
+- **Impact**: Graphiti now properly positioned as MCP-agnostic server (not Claude Code-specific)
 
 ### 2025-11-17 16:55 - Sprint Index Updated (Story Registration)
 - 📋 **Registered Missing Substories**: Added Stories 2.3.1, 2.3.2, 2.3.3 to index.md

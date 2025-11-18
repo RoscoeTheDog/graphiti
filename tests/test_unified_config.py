@@ -271,4 +271,75 @@ def test_config_search_order(tmp_path, monkeypatch, clean_env):
     assert config.llm.default_model == "gpt-4o-project"
 
 
+def test_config_migration_from_claude_dir(tmp_path, monkeypatch, clean_env):
+    """Test automatic migration from ~/.claude/ to ~/.graphiti/."""
+    from pathlib import Path
+    import mcp_server.unified_config
+
+    # Create old config location (~/.claude/graphiti.config.json)
+    old_config_dir = tmp_path / ".claude"
+    old_config_dir.mkdir(parents=True, exist_ok=True)
+    old_config = old_config_dir / "graphiti.config.json"
+    old_config.write_text(json.dumps({
+        "database": {"backend": "neo4j"},
+        "llm": {"provider": "openai", "default_model": "gpt-4o-migrated"}
+    }))
+
+    # Load config (should trigger migration)
+    from mcp_server.unified_config import GraphitiConfig
+
+    # Mock Path.home() AFTER importing to patch the module's imported Path class
+    import mcp_server.unified_config
+    monkeypatch.setattr(mcp_server.unified_config.Path, "home", lambda: tmp_path)
+
+    config = GraphitiConfig.from_file()
+
+    # Verify migration occurred
+    new_config_path = tmp_path / ".graphiti" / "graphiti.config.json"
+    assert new_config_path.exists(), "Config not migrated to ~/.graphiti/"
+    assert config.llm.default_model == "gpt-4o-migrated", "Config not loaded correctly after migration"
+
+    # Verify deprecation notice created
+    deprecation_notice = old_config_dir / "graphiti.config.json.deprecated"
+    assert deprecation_notice.exists(), "Deprecation notice not created"
+    assert "~/.graphiti/" in deprecation_notice.read_text(), "Deprecation notice doesn't mention new path"
+
+
+def test_config_no_migration_if_new_exists(tmp_path, monkeypatch, clean_env):
+    """Test that migration doesn't overwrite existing ~/.graphiti/ config."""
+    from pathlib import Path
+
+    # Create both old and new config locations
+    old_config_dir = tmp_path / ".claude"
+    old_config_dir.mkdir(parents=True, exist_ok=True)
+    old_config = old_config_dir / "graphiti.config.json"
+    old_config.write_text(json.dumps({
+        "llm": {"default_model": "gpt-4o-old"}
+    }))
+
+    new_config_dir = tmp_path / ".graphiti"
+    new_config_dir.mkdir(parents=True, exist_ok=True)
+    new_config = new_config_dir / "graphiti.config.json"
+    new_config.write_text(json.dumps({
+        "llm": {"default_model": "gpt-4o-new"}
+    }))
+
+    # Load config (should NOT trigger migration since new config exists)
+    from mcp_server.unified_config import GraphitiConfig
+
+    # Mock Path.home() AFTER importing to patch the module's imported Path class
+    import mcp_server.unified_config
+    monkeypatch.setattr(mcp_server.unified_config.Path, "home", lambda: tmp_path)
+
+    config = GraphitiConfig.from_file()
+
+    # Verify new config is loaded (not old)
+    assert config.llm.default_model == "gpt-4o-new", "Should load from new location when both exist"
+
+    # Verify old config is untouched
+    assert old_config.exists(), "Old config should not be deleted"
+    old_data = json.loads(old_config.read_text())
+    assert old_data["llm"]["default_model"] == "gpt-4o-old", "Old config should be unchanged"
+
+
 # Run with: pytest tests/test_unified_config.py -v --cov=mcp_server.unified_config --cov-report=term
