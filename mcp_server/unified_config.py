@@ -318,14 +318,52 @@ class ResilienceConfig(BaseModel):
 
 
 class SessionTrackingConfig(BaseModel):
-    """Session tracking configuration for automatic JSONL monitoring"""
+    """Session tracking configuration for automatic JSONL monitoring.
 
-    enabled: bool = False
-    watch_path: Optional[str] = None  # Defaults to ~/.claude/projects/
-    inactivity_timeout: int = 300  # 5 minutes
-    check_interval: int = 60  # Check for inactive sessions every minute
-    auto_summarize: bool = True  # Automatically summarize closed sessions
-    store_in_graph: bool = True  # Store summaries in Graphiti graph
+    Configures the session tracking system that monitors Claude Code session files
+    (JSONL format) and automatically indexes them into the Graphiti knowledge graph.
+    """
+
+    enabled: bool = Field(
+        default=False,
+        description="Enable or disable session tracking (opt-in model)"
+    )
+    watch_path: Optional[str] = Field(
+        default=None,
+        description=(
+            "Path to directory containing Claude Code session files. "
+            "If None, defaults to ~/.claude/projects/. "
+            "Must be an absolute path (native OS format: C:\\\\ on Windows, / on Unix)."
+        )
+    )
+    inactivity_timeout: int = Field(
+        default=300,
+        description=(
+            "Inactivity timeout in seconds before a session is considered closed. "
+            "After this timeout, the session will be indexed into Graphiti."
+        )
+    )
+    check_interval: int = Field(
+        default=60,
+        description=(
+            "Interval in seconds to check for inactive sessions. "
+            "The file watcher checks for inactive sessions at this interval."
+        )
+    )
+    auto_summarize: bool = Field(
+        default=True,
+        description=(
+            "Automatically summarize closed sessions using Graphiti's LLM. "
+            "If False, sessions are stored as raw episodes without summarization."
+        )
+    )
+    store_in_graph: bool = Field(
+        default=True,
+        description=(
+            "Store session summaries in the Graphiti knowledge graph. "
+            "If False, sessions are logged but not persisted to Neo4j."
+        )
+    )
 
 
 # ============================================================================

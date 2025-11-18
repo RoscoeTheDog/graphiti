@@ -434,12 +434,12 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 ```json
 {
   "session_tracking": {
-    "enabled": true,
-    "watch_directories": [
-      "~/.claude/projects"
-    ],
-    "inactivity_timeout_minutes": 30,
-    "scan_interval_seconds": 2
+    "enabled": false,
+    "watch_path": null,
+    "inactivity_timeout": 300,
+    "check_interval": 60,
+    "auto_summarize": true,
+    "store_in_graph": true
   }
 }
 ```
@@ -448,17 +448,19 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable automatic session tracking (opt-out model) |
-| `watch_directories` | list[str] | `["~/.claude/projects"]` | Directories to monitor for JSONL session files |
-| `inactivity_timeout_minutes` | int | 30 | Minutes of inactivity before session is considered closed and indexed |
-| `scan_interval_seconds` | int | 2 | Seconds between file system scans for changes |
+| `enabled` | bool | `false` | Enable/disable automatic session tracking (opt-in model) |
+| `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
+| `inactivity_timeout` | int | 300 | **Seconds** of inactivity before session is considered closed and indexed (default: 5 minutes) |
+| `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
+| `auto_summarize` | bool | `true` | Automatically summarize closed sessions using Graphiti's LLM |
+| `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 
 ### Behavior
 
 **When enabled:**
-1. File watcher monitors `watch_directories` for new/modified `.jsonl` files
+1. File watcher monitors `watch_path` directory for new/modified `.jsonl` files
 2. Sessions are tracked in-memory with incremental message parsing
-3. After `inactivity_timeout_minutes` of no activity, session is closed and indexed
+3. After `inactivity_timeout` seconds of no activity, session is closed and indexed
 4. Filtered session content (93% token reduction) is added as an episode to Graphiti
 5. Graphiti automatically extracts entities, relationships, and enables semantic search
 
@@ -543,33 +545,33 @@ export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
 {
   "session_tracking": {
     "enabled": true,
-    "watch_directories": ["~/.claude/projects"],
-    "inactivity_timeout_minutes": 30,
-    "scan_interval_seconds": 2
+    "watch_path": "~/.claude/projects",
+    "inactivity_timeout": 300,
+    "check_interval": 60
   }
 }
 ```
 
-**High-Volume Environment** (faster session closure, lower CPU):
+**High-Volume Environment** (faster session closure, more frequent checks):
 ```json
 {
   "session_tracking": {
     "enabled": true,
-    "watch_directories": ["~/.claude/projects/active"],
-    "inactivity_timeout_minutes": 15,
-    "scan_interval_seconds": 5
+    "watch_path": "~/.claude/projects/active",
+    "inactivity_timeout": 180,
+    "check_interval": 30
   }
 }
 ```
 
-**Low-Resource System** (reduced frequency):
+**Low-Resource System** (longer timeout, less frequent checks):
 ```json
 {
   "session_tracking": {
     "enabled": true,
-    "watch_directories": ["~/.claude/projects"],
-    "inactivity_timeout_minutes": 60,
-    "scan_interval_seconds": 10
+    "watch_path": "~/.claude/projects",
+    "inactivity_timeout": 600,
+    "check_interval": 120
   }
 }
 ```

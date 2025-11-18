@@ -114,5 +114,14 @@
     "retry_backoff_base": 2,
     "episode_timeout": 60,
     "health_check_interval": 300
+  },
+
+  "session_tracking": {
+    "enabled": false,
+    "watch_path": null,
+    "inactivity_timeout": 300,
+    "check_interval": 60,
+    "auto_summarize": true,
+    "store_in_graph": true
   }
 }

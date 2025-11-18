@@ -296,6 +296,20 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ## Progress Log
 
+### 2025-11-18 11:03 - Story 2.3.2: in_progress → completed
+- ✅ **Configuration Schema Mismatch Fixes** - Synchronized graphiti.config.json and Pydantic models
+- **Changes**:
+  - Added `session_tracking` section to graphiti.config.json with correct field names
+  - Updated SessionTrackingConfig in unified_config.py with comprehensive Field() docstrings
+  - Fixed CONFIGURATION.md documentation to match Pydantic schema
+  - Changed field names: `watch_directories` → `watch_path`, `inactivity_timeout_minutes` → `inactivity_timeout` (seconds), `scan_interval_seconds` → `check_interval`
+  - Updated all examples in CONFIGURATION.md to use correct field names
+- **Testing**:
+  - Validated config loading from graphiti.config.json ✅
+  - Tested custom values load correctly ✅
+  - Verified JSON schema matches Pydantic models ✅
+- **Impact**: Config files now load without validation errors, documentation is accurate
+
 ### 2025-11-17 17:02 - Story 2.3.1: in_progress → completed
 - ✅ **Configuration Architecture Fix** - Migrated global config from `~/.claude/` to `~/.graphiti/`
 - **Code Changes**:
