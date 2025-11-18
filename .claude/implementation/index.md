@@ -97,9 +97,38 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 2.3: Configurable Filtering System (NEW - REMEDIATION)
 
-**Status**: unassigned
+**Status**: blocked
 
 **See**: [stories/2.3-configurable-filtering-system-new---remediation.md](stories/2.3-configurable-filtering-system-new---remediation.md)
+
+
+
+#### Story 2.3.1: Configuration Architecture Fix
+
+**Status**: unassigned
+**Parent**: Story 2.3
+
+**See**: [stories/2.3.1-config-architecture-fix.md](stories/2.3.1-config-architecture-fix.md)
+
+
+
+#### Story 2.3.2: Configuration Schema Mismatch Fixes
+
+**Status**: unassigned
+**Parent**: Story 2.3
+**Depends on**: Story 2.3.1
+
+**See**: [stories/2.3.2-config-schema-fixes.md](stories/2.3.2-config-schema-fixes.md)
+
+
+
+#### Story 2.3.3: Configuration Validator Implementation
+
+**Status**: unassigned
+**Parent**: Story 2.3
+**Depends on**: Story 2.3.2
+
+**See**: [stories/2.3.3-config-validator.md](stories/2.3.3-config-validator.md)
 
 
 
@@ -266,6 +295,17 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 ## Progress Log
+
+### 2025-11-17 16:55 - Sprint Index Updated (Story Registration)
+- 📋 **Registered Missing Substories**: Added Stories 2.3.1, 2.3.2, 2.3.3 to index.md
+- **Context**: Stories created in session s002 but never registered in sprint index
+- **Fix**: Added proper story entries with status, parent, and dependencies
+- **Status Updates**:
+  - Story 2.3: `unassigned` → `blocked` (requires 2.3.1-2.3.3 first)
+  - Story 2.3.1: `unassigned` (Config Architecture Fix - ready to start)
+  - Story 2.3.2: `unassigned` (depends on 2.3.1)
+  - Story 2.3.3: `unassigned` (depends on 2.3.2)
+- **Next**: Run `/sprint:NEXT` to auto-discover and claim Story 2.3.1
 
 ### 2025-11-13 (Session 3) - Alignment Audit and Story 4.3 Created
 - 🔍 **Alignment Audit Completed** - Reviewed version files, archived docs, and existing code
