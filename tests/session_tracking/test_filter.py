@@ -14,10 +14,11 @@ from graphiti_core.session_tracking.types import (
 )
 
 
+@pytest.mark.asyncio
 class TestSessionFilter:
     """Test session filtering functionality."""
 
-    def test_filter_preserves_user_messages(self):
+    async def test_filter_preserves_user_messages(self):
         """Test that user messages are preserved fully."""
         filter_obj = SessionFilter()
 
@@ -30,14 +31,14 @@ class TestSessionFilter:
             tokens=TokenUsage(input_tokens=10, output_tokens=0),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert filtered.content == message.content
         assert filtered.uuid == message.uuid
         assert filtered.role == MessageRole.USER
         assert len(filtered.tool_calls) == 0
 
-    def test_filter_preserves_assistant_text(self):
+    async def test_filter_preserves_assistant_text(self):
         """Test that assistant text content is preserved."""
         filter_obj = SessionFilter()
 
@@ -50,12 +51,12 @@ class TestSessionFilter:
             tokens=TokenUsage(input_tokens=20, output_tokens=15),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert filtered.content == message.content
         assert filtered.role == MessageRole.ASSISTANT
 
-    def test_filter_summarizes_tool_calls(self):
+    async def test_filter_summarizes_tool_calls(self):
         """Test that tool calls are summarized."""
         filter_obj = SessionFilter()
 
@@ -75,7 +76,7 @@ class TestSessionFilter:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert len(filtered.tool_calls) == 1
         assert filtered.tool_calls[0].result_summary is not None
@@ -83,7 +84,7 @@ class TestSessionFilter:
         assert filtered.tool_calls[0].tool_name == "Read"
         assert filtered.tool_calls[0].parameters == tool_call.parameters
 
-    def test_read_tool_summarization(self):
+    async def test_read_tool_summarization(self):
         """Test Read tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -98,7 +99,7 @@ class TestSessionFilter:
         assert "Read" in summary
         assert "main.py" in summary or "..." in summary
 
-    def test_write_tool_summarization(self):
+    async def test_write_tool_summarization(self):
         """Test Write tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -113,7 +114,7 @@ class TestSessionFilter:
         assert "Wrote" in summary
         assert "output.txt" in summary or "..." in summary
 
-    def test_edit_tool_summarization(self):
+    async def test_edit_tool_summarization(self):
         """Test Edit tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -128,7 +129,7 @@ class TestSessionFilter:
         assert "Edited" in summary
         assert "file.py" in summary or "..." in summary
 
-    def test_bash_tool_summarization(self):
+    async def test_bash_tool_summarization(self):
         """Test Bash tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -142,7 +143,7 @@ class TestSessionFilter:
 
         assert "Executed" in summary
 
-    def test_glob_tool_summarization(self):
+    async def test_glob_tool_summarization(self):
         """Test Glob tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -157,7 +158,7 @@ class TestSessionFilter:
         assert "Glob" in summary
         assert "**/*.py" in summary
 
-    def test_grep_tool_summarization(self):
+    async def test_grep_tool_summarization(self):
         """Test Grep tool result summarization."""
         filter_obj = SessionFilter()
 
@@ -172,7 +173,7 @@ class TestSessionFilter:
         assert "Grep" in summary
         assert "TODO" in summary
 
-    def test_mcp_serena_tool_summarization(self):
+    async def test_mcp_serena_tool_summarization(self):
         """Test Serena MCP tool summarization."""
         filter_obj = SessionFilter()
 
@@ -187,7 +188,7 @@ class TestSessionFilter:
         assert "Serena" in summary
         assert "find_symbol" in summary
 
-    def test_mcp_claude_context_tool_summarization(self):
+    async def test_mcp_claude_context_tool_summarization(self):
         """Test Claude Context MCP tool summarization."""
         filter_obj = SessionFilter()
 
@@ -202,7 +203,7 @@ class TestSessionFilter:
         assert "Claude Context" in summary
         assert "search_code" in summary
 
-    def test_mcp_graphiti_tool_summarization(self):
+    async def test_mcp_graphiti_tool_summarization(self):
         """Test Graphiti MCP tool summarization."""
         filter_obj = SessionFilter()
 
@@ -217,7 +218,7 @@ class TestSessionFilter:
         assert "Graphiti" in summary
         assert "add_memory" in summary
 
-    def test_error_status_summarization(self):
+    async def test_error_status_summarization(self):
         """Test error status handling in summarization."""
         filter_obj = SessionFilter()
 
@@ -233,7 +234,7 @@ class TestSessionFilter:
         assert "Error" in summary
         assert "File not found" in summary
 
-    def test_is_mcp_tool(self):
+    async def test_is_mcp_tool(self):
         """Test MCP tool detection."""
         filter_obj = SessionFilter()
 
@@ -242,7 +243,7 @@ class TestSessionFilter:
         assert not filter_obj._is_mcp_tool("Read")
         assert not filter_obj._is_mcp_tool("Write")
 
-    def test_truncate_path(self):
+    async def test_truncate_path(self):
         """Test path truncation."""
         filter_obj = SessionFilter()
 
@@ -254,7 +255,7 @@ class TestSessionFilter:
         assert len(truncated) <= 30
         assert "..." in truncated
 
-    def test_truncate_command(self):
+    async def test_truncate_command(self):
         """Test command truncation."""
         filter_obj = SessionFilter()
 
@@ -266,7 +267,7 @@ class TestSessionFilter:
         assert len(truncated) <= 30
         assert "..." in truncated
 
-    def test_filter_conversation_extracts_mcp_tools(self):
+    async def test_filter_conversation_extracts_mcp_tools(self):
         """Test that MCP tools are extracted from conversation."""
         filter_obj = SessionFilter()
 
@@ -309,13 +310,13 @@ class TestSessionFilter:
             total_tokens=TokenUsage(input_tokens=80, output_tokens=150),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         assert len(filtered_context.mcp_tools_used) == 2
         assert "mcp__serena__find_symbol" in filtered_context.mcp_tools_used
         assert "mcp__graphiti-memory__add_memory" in filtered_context.mcp_tools_used
 
-    def test_filter_conversation_tracks_file_modifications(self):
+    async def test_filter_conversation_tracks_file_modifications(self):
         """Test that file modifications are tracked."""
         filter_obj = SessionFilter()
 
@@ -358,13 +359,13 @@ class TestSessionFilter:
             total_tokens=TokenUsage(input_tokens=80, output_tokens=150),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         assert len(filtered_context.files_modified) == 2
         assert "/path/to/file1.txt" in filtered_context.files_modified
         assert "/path/to/file2.py" in filtered_context.files_modified
 
-    def test_filter_conversation_calculates_statistics(self):
+    async def test_filter_conversation_calculates_statistics(self):
         """Test that filtering statistics are calculated correctly."""
         filter_obj = SessionFilter()
 
@@ -400,7 +401,7 @@ class TestSessionFilter:
             total_tokens=TokenUsage(input_tokens=110, output_tokens=500),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         assert stats["messages_processed"] == 2
         assert stats["tool_calls_filtered"] == 1
@@ -408,7 +409,7 @@ class TestSessionFilter:
         assert stats["filtered_tokens"] < stats["original_tokens"]
         assert stats["reduction_percent"] > 0
 
-    def test_preserve_tool_results_option(self):
+    async def test_preserve_tool_results_option(self):
         """Test that preserve_tool_results disables filtering."""
         filter_obj = SessionFilter(preserve_tool_results=True)
 
@@ -428,12 +429,12 @@ class TestSessionFilter:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         # Should preserve original message
         assert filtered == message
 
-    def test_token_reduction_calculation(self):
+    async def test_token_reduction_calculation(self):
         """Test token reduction percentage calculation."""
         filter_obj = SessionFilter()
 
@@ -449,7 +450,7 @@ class TestSessionFilter:
         reduction = filter_obj._calculate_reduction_percent(0, 0)
         assert reduction == 0.0
 
-    def test_statistics_tracking(self):
+    async def test_statistics_tracking(self):
         """Test that statistics are tracked correctly."""
         filter_obj = SessionFilter()
 
@@ -477,7 +478,7 @@ class TestSessionFilter:
             total_tokens=TokenUsage(input_tokens=50, output_tokens=100),
         )
 
-        filter_obj.filter_conversation(context)
+        await filter_obj.filter_conversation(context)
 
         stats = filter_obj.get_statistics()
         assert stats["messages_processed"] >= 1
@@ -489,7 +490,7 @@ class TestSessionFilter:
         assert stats["messages_processed"] == 0
         assert stats["tool_calls_filtered"] == 0
 
-    def test_multiple_tool_calls_in_message(self):
+    async def test_multiple_tool_calls_in_message(self):
         """Test filtering message with multiple tool calls."""
         filter_obj = SessionFilter()
 
@@ -521,14 +522,14 @@ class TestSessionFilter:
             tokens=TokenUsage(input_tokens=200, output_tokens=1000),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert len(filtered.tool_calls) == 3
         for tool_call in filtered.tool_calls:
             assert tool_call.result_summary is not None
             assert len(tool_call.result_summary) > 0
 
-    def test_empty_conversation(self):
+    async def test_empty_conversation(self):
         """Test filtering empty conversation."""
         filter_obj = SessionFilter()
 
@@ -538,13 +539,13 @@ class TestSessionFilter:
             total_tokens=TokenUsage(),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         assert len(filtered_context.messages) == 0
         assert stats["messages_processed"] == 0
         assert stats["reduction_percent"] == 0.0
 
-    def test_conversation_with_only_user_messages(self):
+    async def test_conversation_with_only_user_messages(self):
         """Test filtering conversation with only user messages."""
         filter_obj = SessionFilter()
 
@@ -573,7 +574,7 @@ class TestSessionFilter:
             total_tokens=TokenUsage(input_tokens=25, output_tokens=0),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         assert len(filtered_context.messages) == 2
         assert all(msg.role == MessageRole.USER for msg in filtered_context.messages)
@@ -581,10 +582,11 @@ class TestSessionFilter:
         assert stats["tool_calls_filtered"] == 0
 
 
+@pytest.mark.asyncio
 class TestTokenReduction:
     """Test token reduction functionality."""
 
-    def test_achieves_90_percent_reduction(self):
+    async def test_achieves_90_percent_reduction(self):
         """Test that filtering achieves 90%+ token reduction on realistic data."""
         filter_obj = SessionFilter()
 
@@ -645,7 +647,7 @@ class TestTokenReduction:
             total_tokens=TokenUsage(input_tokens=275, output_tokens=3500),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         # Verify significant reduction (targeting 90%+)
         # Note: Actual reduction depends on token estimation accuracy
@@ -653,7 +655,7 @@ class TestTokenReduction:
         assert stats["filtered_tokens"] < stats["original_tokens"]
         assert stats["tool_calls_filtered"] == 2
 
-    def test_minimal_reduction_without_tool_calls(self):
+    async def test_minimal_reduction_without_tool_calls(self):
         """Test that conversations without tool calls have minimal reduction."""
         filter_obj = SessionFilter()
 
@@ -682,7 +684,7 @@ class TestTokenReduction:
             total_tokens=TokenUsage(input_tokens=30, output_tokens=30),
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         # Should have minimal or no reduction
         assert stats["reduction_percent"] < 10

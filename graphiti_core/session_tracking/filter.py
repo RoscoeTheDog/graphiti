@@ -24,6 +24,7 @@ from graphiti_core.session_tracking.types import (
     TokenUsage,
 )
 from graphiti_core.session_tracking.filter_config import ContentMode, FilterConfig
+from graphiti_core.session_tracking.message_summarizer import MessageSummarizer
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,8 @@ class SessionFilter:
     def __init__(
             self,
             config: Optional[FilterConfig] = None,
-            preserve_tool_results: bool = False
+            preserve_tool_results: bool = False,
+            summarizer: Optional[MessageSummarizer] = None
         ):
         """Initialize the filter.
 
@@ -58,6 +60,8 @@ class SessionFilter:
                    If None, uses default FilterConfig settings.
             preserve_tool_results: DEPRECATED. If True, sets config to preserve all content.
                                   Use FilterConfig(tool_content=ContentMode.FULL) instead.
+            summarizer: Optional MessageSummarizer for ContentMode.SUMMARY support.
+                       If None, SUMMARY mode falls back to FULL mode.
         """
         # Handle backward compatibility
         if preserve_tool_results and config is None:
@@ -72,6 +76,7 @@ class SessionFilter:
             )
 
         self.config = config or FilterConfig()
+        self.summarizer = summarizer
         self._stats = {
             "original_tokens": 0,
             "filtered_tokens": 0,
@@ -79,7 +84,7 @@ class SessionFilter:
             "tool_calls_filtered": 0,
         }
 
-    def filter_conversation(
+    async def filter_conversation(
         self, context: ConversationContext
     ) -> Tuple[ConversationContext, Dict[str, int]]:
         """Filter a conversation context for summarization.
@@ -89,6 +94,10 @@ class SessionFilter:
 
         Returns:
             Tuple of (filtered context, statistics)
+
+        Notes:
+            This method is async to support LLM-based summarization when
+            ContentMode.SUMMARY is configured for user/agent messages.
         """
         logger.info(
             f"Filtering conversation {context.session_id} with {len(context.messages)} messages"
@@ -99,7 +108,7 @@ class SessionFilter:
         files_modified: Set[str] = set()
 
         for message in context.messages:
-            filtered_msg = self._filter_message(message)
+            filtered_msg = await self._filter_message(message)
             filtered_messages.append(filtered_msg)
 
             # Track MCP tools and file modifications
@@ -145,7 +154,7 @@ class SessionFilter:
 
         return filtered_context, stats
 
-    def _filter_message(self, message: SessionMessage) -> SessionMessage:
+    async def _filter_message(self, message: SessionMessage) -> SessionMessage:
         """Filter a single message based on configuration.
 
         Args:
@@ -153,6 +162,10 @@ class SessionFilter:
 
         Returns:
             Filtered message according to FilterConfig settings
+
+        Notes:
+            This method is async to support LLM-based summarization when
+            ContentMode.SUMMARY is configured for user/agent messages.
         """
         self._stats["messages_processed"] += 1
 
@@ -171,8 +184,39 @@ class SessionFilter:
                     tokens=TokenUsage(input=5, output=0, total=5),
                     metadata=message.metadata
                 )
-            # ContentMode.SUMMARY will be implemented when LLM summarization is added
-            else:
+            elif self.config.user_messages == ContentMode.SUMMARY:
+                # Use MessageSummarizer for LLM-based summarization
+                if self.summarizer:
+                    try:
+                        summary = await self.summarizer.summarize(
+                            message.content, context="user message"
+                        )
+                        return SessionMessage(
+                            uuid=message.uuid,
+                            session_id=message.session_id,
+                            role=message.role,
+                            timestamp=message.timestamp,
+                            content=summary,
+                            tool_calls=None,
+                            tokens=TokenUsage(
+                                input=len(summary) // 4,  # Rough estimate
+                                output=0,
+                                total=len(summary) // 4
+                            ),
+                            metadata=message.metadata
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to summarize user message, falling back to FULL: {e}"
+                        )
+                        return message  # Fallback to FULL on error
+                else:
+                    logger.debug(
+                        "ContentMode.SUMMARY requested but no summarizer provided, "
+                        "falling back to FULL"
+                    )
+                    return message  # Fallback to FULL
+            else:  # ContentMode.FULL
                 return message
 
         # ASSISTANT messages: Apply agent_messages and tool_content config
@@ -182,8 +226,24 @@ class SessionFilter:
             if self.config.agent_messages == ContentMode.OMIT:
                 content = "[Agent message omitted]"
             elif self.config.agent_messages == ContentMode.SUMMARY:
-                # TODO: LLM summarization for agent messages (Story 2.3 - ContentMode.SUMMARY support)
-                content = message.content  # Keep full for now
+                # Use MessageSummarizer for LLM-based summarization
+                if self.summarizer and content:
+                    try:
+                        content = await self.summarizer.summarize(
+                            content, context="agent response"
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to summarize agent message, falling back to FULL: {e}"
+                        )
+                        # Keep original content on error (fallback to FULL)
+                else:
+                    if not self.summarizer:
+                        logger.debug(
+                            "ContentMode.SUMMARY requested but no summarizer provided, "
+                            "falling back to FULL"
+                        )
+                    # Keep original content (fallback to FULL)
 
             # Handle tool calls
             filtered_tool_calls = None

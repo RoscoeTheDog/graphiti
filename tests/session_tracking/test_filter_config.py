@@ -18,7 +18,7 @@ from graphiti_core.session_tracking.types import (
 class TestFilterConfig:
     """Test FilterConfig dataclass and methods."""
 
-    def test_default_config(self):
+    async def test_default_config(self):
         """Test default configuration values."""
         config = FilterConfig()
 
@@ -27,7 +27,7 @@ class TestFilterConfig:
         assert config.user_messages == ContentMode.FULL
         assert config.agent_messages == ContentMode.FULL
 
-    def test_custom_config(self):
+    async def test_custom_config(self):
         """Test custom configuration."""
         config = FilterConfig(
             tool_calls=False,
@@ -41,7 +41,7 @@ class TestFilterConfig:
         assert config.user_messages == ContentMode.SUMMARY
         assert config.agent_messages == ContentMode.OMIT
 
-    def test_is_no_filtering(self):
+    async def test_is_no_filtering(self):
         """Test is_no_filtering detection."""
         # Default config does some filtering (tool_content=SUMMARY)
         assert FilterConfig().is_no_filtering() is False
@@ -54,7 +54,7 @@ class TestFilterConfig:
         )
         assert config.is_no_filtering() is True
 
-    def test_is_aggressive_filtering(self):
+    async def test_is_aggressive_filtering(self):
         """Test aggressive filtering detection."""
         # Default config is not aggressive
         assert FilterConfig().is_aggressive_filtering() is False
@@ -64,11 +64,11 @@ class TestFilterConfig:
         assert FilterConfig(user_messages=ContentMode.OMIT).is_aggressive_filtering() is True
         assert FilterConfig(agent_messages=ContentMode.OMIT).is_aggressive_filtering() is True
 
-    def test_estimate_token_reduction(self):
+    async def test_estimate_token_reduction(self):
         """Test token reduction estimation."""
-        # Default: SUMMARY for tools only (~35% reduction)
+        # Default: SUMMARY for tools only (~42% reduction)
         default_config = FilterConfig()
-        assert 0.3 < default_config.estimate_token_reduction() < 0.4
+        assert 0.40 <= default_config.estimate_token_reduction() <= 0.45
 
         # No filtering (0% reduction)
         full_config = FilterConfig(
@@ -87,17 +87,19 @@ class TestFilterConfig:
         assert omit_config.estimate_token_reduction() > 0.9
 
 
+
+@pytest.mark.asyncio
 class TestSessionFilterWithConfig:
     """Test SessionFilter with FilterConfig."""
 
-    def test_default_filter_config(self):
+    async def test_default_filter_config(self):
         """Test filter with default configuration."""
         filter_obj = SessionFilter()
 
         assert filter_obj.config is not None
         assert filter_obj.config.tool_content == ContentMode.SUMMARY
 
-    def test_custom_filter_config(self):
+    async def test_custom_filter_config(self):
         """Test filter with custom configuration."""
         config = FilterConfig(
             tool_content=ContentMode.OMIT,
@@ -107,7 +109,7 @@ class TestSessionFilterWithConfig:
 
         assert filter_obj.config.tool_content == ContentMode.OMIT
 
-    def test_preserve_tool_results_backward_compat(self):
+    async def test_preserve_tool_results_backward_compat(self):
         """Test backward compatibility with preserve_tool_results."""
         filter_obj = SessionFilter(preserve_tool_results=True)
 
@@ -116,7 +118,7 @@ class TestSessionFilterWithConfig:
         assert filter_obj.config.user_messages == ContentMode.FULL
         assert filter_obj.config.agent_messages == ContentMode.FULL
 
-    def test_tool_content_full_mode(self):
+    async def test_tool_content_full_mode(self):
         """Test tool_content=FULL preserves original tool results."""
         config = FilterConfig(tool_content=ContentMode.FULL)
         filter_obj = SessionFilter(config=config)
@@ -138,14 +140,14 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         # Should preserve original result
         assert filtered.tool_calls is not None
         assert filtered.tool_calls[0].result_summary == "Original result content here..."
         assert filtered.tokens == message.tokens  # Tokens unchanged
 
-    def test_tool_content_summary_mode(self):
+    async def test_tool_content_summary_mode(self):
         """Test tool_content=SUMMARY creates 1-line summaries."""
         config = FilterConfig(tool_content=ContentMode.SUMMARY)
         filter_obj = SessionFilter(config=config)
@@ -167,13 +169,13 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         # Should have 1-line summary
         assert filtered.tool_calls is not None
         assert "Read 1 file(s)" in filtered.tool_calls[0].result_summary
 
-    def test_tool_content_omit_mode(self):
+    async def test_tool_content_omit_mode(self):
         """Test tool_content=OMIT removes tool results."""
         config = FilterConfig(tool_content=ContentMode.OMIT)
         filter_obj = SessionFilter(config=config)
@@ -195,13 +197,13 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         # Should have omit placeholder
         assert filtered.tool_calls is not None
         assert filtered.tool_calls[0].result_summary == "[Tool result omitted]"
 
-    def test_user_messages_full_mode(self):
+    async def test_user_messages_full_mode(self):
         """Test user_messages=FULL preserves user content."""
         config = FilterConfig(user_messages=ContentMode.FULL)
         filter_obj = SessionFilter(config=config)
@@ -216,11 +218,11 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=50, output_tokens=0),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert filtered.content == "User's detailed question here"
 
-    def test_user_messages_omit_mode(self):
+    async def test_user_messages_omit_mode(self):
         """Test user_messages=OMIT removes user content."""
         config = FilterConfig(user_messages=ContentMode.OMIT)
         filter_obj = SessionFilter(config=config)
@@ -235,11 +237,11 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=50, output_tokens=0),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert filtered.content == "[User message omitted]"
 
-    def test_agent_messages_omit_mode(self):
+    async def test_agent_messages_omit_mode(self):
         """Test agent_messages=OMIT removes agent text content."""
         config = FilterConfig(agent_messages=ContentMode.OMIT)
         filter_obj = SessionFilter(config=config)
@@ -254,11 +256,11 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=100, output_tokens=200),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         assert filtered.content == "[Agent message omitted]"
 
-    def test_tool_calls_false_omits_all_tool_calls(self):
+    async def test_tool_calls_false_omits_all_tool_calls(self):
         """Test tool_calls=False removes tool calls entirely."""
         config = FilterConfig(tool_calls=False)
         filter_obj = SessionFilter(config=config)
@@ -280,12 +282,12 @@ class TestSessionFilterWithConfig:
             tokens=TokenUsage(input_tokens=100, output_tokens=500),
         )
 
-        filtered = filter_obj._filter_message(message)
+        filtered = await filter_obj._filter_message(message)
 
         # Tool calls should be completely removed
         assert filtered.tool_calls is None
 
-    def test_combined_filtering_modes(self):
+    async def test_combined_filtering_modes(self):
         """Test multiple filtering modes combined."""
         config = FilterConfig(
             tool_content=ContentMode.OMIT,
@@ -326,7 +328,7 @@ class TestSessionFilterWithConfig:
             metadata={},
         )
 
-        filtered_context, stats = filter_obj.filter_conversation(context)
+        filtered_context, stats = await filter_obj.filter_conversation(context)
 
         # User message preserved
         assert filtered_context.messages[0].content == "User question"

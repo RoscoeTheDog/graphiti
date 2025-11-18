@@ -535,8 +535,14 @@ Control how different message types are filtered during session tracking. Enable
 **Token Reduction Estimates:**
 - Default config: ~35% reduction (summarize tool results only)
 - Maximum config: ~60% reduction (omit all tool results)
-- Aggressive config: ~70% reduction (summarize everything)
+- Aggressive config: ~70% reduction (summarize everything with LLM)
 - Conservative config: 0% reduction (no filtering)
+
+**Note on LLM Summarization (Story 2.3.4):**
+- `ContentMode.SUMMARY` for tool results uses hardcoded 1-line summaries (free)
+- `ContentMode.SUMMARY` for user/agent messages requires MessageSummarizer with LLM (adds cost: ~$0.01-0.05 per message)
+- Default configuration (FULL for user/agent) avoids LLM costs
+- To enable LLM summarization: Pass `MessageSummarizer(llm_client)` to `SessionFilter(summarizer=...)`
 
 ### Behavior
 

@@ -15,8 +15,10 @@ Core components:
 """
 
 from .filter import SessionFilter
+from .filter_config import ContentMode, FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
+from .message_summarizer import MessageSummarizer
 from .parser import JSONLParser
 from .path_resolver import ClaudePathResolver
 from .session_manager import ActiveSession, SessionManager
@@ -38,6 +40,10 @@ __all__ = [
     "ClaudePathResolver",
     # Filtering
     "SessionFilter",
+    "FilterConfig",
+    "ContentMode",
+    # Message summarization (NEW - Story 2.3.4)
+    "MessageSummarizer",
     # Indexing (NEW - Story 4 refactoring)
     "SessionIndexer",
     # Optional handoff export (NEW - Story 4 refactoring)
