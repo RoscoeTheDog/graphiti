@@ -453,6 +453,26 @@ class GraphitiConfig(BaseModel):
             return cls._default_config()
 
     @classmethod
+    def validate_file(cls, config_path: str | Path) -> "ValidationResult":
+        """Validate configuration file without loading it.
+
+        Args:
+            config_path: Path to config file to validate
+
+        Returns:
+            ValidationResult with validation errors/warnings
+
+        Example:
+            result = GraphitiConfig.validate_file("./graphiti.config.json")
+            if not result.valid:
+                print(f"Config has {len(result.errors)} errors")
+        """
+        from mcp_server.config_validator import ConfigValidator
+
+        validator = ConfigValidator()
+        return validator.validate_all(Path(config_path))
+
+    @classmethod
     def _default_config(cls) -> "GraphitiConfig":
         """Return default configuration"""
         return cls(

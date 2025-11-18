@@ -1,0 +1,662 @@
+{
+  "$defs": {
+    "AnthropicProviderConfig": {
+      "description": "Anthropic provider configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "ANTHROPIC_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        }
+      },
+      "title": "AnthropicProviderConfig",
+      "type": "object"
+    },
+    "AzureOpenAIProviderConfig": {
+      "description": "Azure OpenAI provider configuration",
+      "properties": {
+        "endpoint_env": {
+          "default": "AZURE_OPENAI_ENDPOINT",
+          "title": "Endpoint Env",
+          "type": "string"
+        },
+        "api_key_env": {
+          "default": "AZURE_OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "api_version": {
+          "default": "2025-01-01-preview",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "deployment_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deployment Name"
+        },
+        "use_managed_identity": {
+          "default": false,
+          "title": "Use Managed Identity",
+          "type": "boolean"
+        }
+      },
+      "title": "AzureOpenAIProviderConfig",
+      "type": "object"
+    },
+    "DatabaseConfig": {
+      "description": "Database backend configuration",
+      "properties": {
+        "backend": {
+          "default": "neo4j",
+          "enum": [
+            "neo4j",
+            "falkordb"
+          ],
+          "title": "Backend",
+          "type": "string"
+        },
+        "neo4j": {
+          "$ref": "#/$defs/Neo4jConfig"
+        },
+        "falkordb": {
+          "$ref": "#/$defs/FalkorDBConfig"
+        }
+      },
+      "title": "DatabaseConfig",
+      "type": "object"
+    },
+    "EmbedderAzureOpenAIConfig": {
+      "description": "Azure OpenAI embedder configuration",
+      "properties": {
+        "endpoint_env": {
+          "default": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
+          "title": "Endpoint Env",
+          "type": "string"
+        },
+        "api_key_env": {
+          "default": "AZURE_OPENAI_EMBEDDING_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "api_version": {
+          "default": "2023-05-15",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "deployment_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deployment Name"
+        },
+        "use_managed_identity": {
+          "default": false,
+          "title": "Use Managed Identity",
+          "type": "boolean"
+        }
+      },
+      "title": "EmbedderAzureOpenAIConfig",
+      "type": "object"
+    },
+    "EmbedderConfig": {
+      "description": "Embedder configuration",
+      "properties": {
+        "provider": {
+          "default": "openai",
+          "enum": [
+            "openai",
+            "azure_openai"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "default": "text-embedding-3-small",
+          "title": "Model",
+          "type": "string"
+        },
+        "dimensions": {
+          "default": 1536,
+          "title": "Dimensions",
+          "type": "integer"
+        },
+        "batch_size": {
+          "default": 100,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "openai": {
+          "$ref": "#/$defs/EmbedderOpenAIConfig"
+        },
+        "azure_openai": {
+          "$ref": "#/$defs/EmbedderAzureOpenAIConfig"
+        }
+      },
+      "title": "EmbedderConfig",
+      "type": "object"
+    },
+    "EmbedderOpenAIConfig": {
+      "description": "OpenAI embedder configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        }
+      },
+      "title": "EmbedderOpenAIConfig",
+      "type": "object"
+    },
+    "FalkorDBConfig": {
+      "description": "FalkorDB database configuration",
+      "properties": {
+        "uri": {
+          "default": "redis://localhost:6379",
+          "title": "Uri",
+          "type": "string"
+        },
+        "user": {
+          "default": "default",
+          "title": "User",
+          "type": "string"
+        },
+        "password_env": {
+          "default": "FALKORDB_PASSWORD",
+          "title": "Password Env",
+          "type": "string"
+        },
+        "database": {
+          "default": "graphiti",
+          "title": "Database",
+          "type": "string"
+        },
+        "pool_size": {
+          "default": 50,
+          "title": "Pool Size",
+          "type": "integer"
+        }
+      },
+      "title": "FalkorDBConfig",
+      "type": "object"
+    },
+    "LLMConfig": {
+      "description": "LLM provider configuration",
+      "properties": {
+        "provider": {
+          "default": "openai",
+          "enum": [
+            "openai",
+            "azure_openai",
+            "anthropic"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "default_model": {
+          "default": "gpt-4.1-mini",
+          "title": "Default Model",
+          "type": "string"
+        },
+        "small_model": {
+          "default": "gpt-4.1-nano",
+          "title": "Small Model",
+          "type": "string"
+        },
+        "temperature": {
+          "default": 0.0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "semaphore_limit": {
+          "default": 10,
+          "title": "Semaphore Limit",
+          "type": "integer"
+        },
+        "max_retries": {
+          "default": 3,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "timeout": {
+          "default": 60,
+          "title": "Timeout",
+          "type": "integer"
+        },
+        "openai": {
+          "$ref": "#/$defs/OpenAIProviderConfig"
+        },
+        "azure_openai": {
+          "$ref": "#/$defs/AzureOpenAIProviderConfig"
+        },
+        "anthropic": {
+          "$ref": "#/$defs/AnthropicProviderConfig"
+        }
+      },
+      "title": "LLMConfig",
+      "type": "object"
+    },
+    "LoggingConfig": {
+      "description": "Logging configuration",
+      "properties": {
+        "level": {
+          "default": "INFO",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "log_filter_decisions": {
+          "default": true,
+          "title": "Log Filter Decisions",
+          "type": "boolean"
+        },
+        "log_llm_calls": {
+          "default": false,
+          "title": "Log Llm Calls",
+          "type": "boolean"
+        },
+        "log_database_queries": {
+          "default": false,
+          "title": "Log Database Queries",
+          "type": "boolean"
+        },
+        "log_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log File"
+        },
+        "format": {
+          "default": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "title": "LoggingConfig",
+      "type": "object"
+    },
+    "MCPServerConfig": {
+      "description": "MCP server configuration",
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Host"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        },
+        "enable_cors": {
+          "default": false,
+          "title": "Enable Cors",
+          "type": "boolean"
+        },
+        "allowed_origins": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Origins",
+          "type": "array"
+        }
+      },
+      "title": "MCPServerConfig",
+      "type": "object"
+    },
+    "Neo4jConfig": {
+      "description": "Neo4j database configuration",
+      "properties": {
+        "uri": {
+          "default": "bolt://localhost:7687",
+          "title": "Uri",
+          "type": "string"
+        },
+        "user": {
+          "default": "neo4j",
+          "title": "User",
+          "type": "string"
+        },
+        "password_env": {
+          "default": "NEO4J_PASSWORD",
+          "title": "Password Env",
+          "type": "string"
+        },
+        "database": {
+          "default": "neo4j",
+          "title": "Database",
+          "type": "string"
+        },
+        "pool_size": {
+          "default": 50,
+          "title": "Pool Size",
+          "type": "integer"
+        },
+        "connection_timeout": {
+          "default": 30,
+          "title": "Connection Timeout",
+          "type": "integer"
+        },
+        "max_connection_lifetime": {
+          "default": 3600,
+          "title": "Max Connection Lifetime",
+          "type": "integer"
+        }
+      },
+      "title": "Neo4jConfig",
+      "type": "object"
+    },
+    "OpenAIProviderConfig": {
+      "description": "OpenAI provider configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization"
+        }
+      },
+      "title": "OpenAIProviderConfig",
+      "type": "object"
+    },
+    "PerformanceConfig": {
+      "description": "Performance tuning configuration",
+      "properties": {
+        "use_parallel_runtime": {
+          "default": true,
+          "title": "Use Parallel Runtime",
+          "type": "boolean"
+        },
+        "enable_caching": {
+          "default": true,
+          "title": "Enable Caching",
+          "type": "boolean"
+        },
+        "cache_ttl_seconds": {
+          "default": 3600,
+          "title": "Cache Ttl Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "PerformanceConfig",
+      "type": "object"
+    },
+    "ProjectConfig": {
+      "description": "Project-specific configuration",
+      "properties": {
+        "default_group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Group Id"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        },
+        "enable_entity_types": {
+          "default": true,
+          "title": "Enable Entity Types",
+          "type": "boolean"
+        },
+        "custom_entity_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Custom Entity Types",
+          "type": "array"
+        },
+        "max_reflexion_iterations": {
+          "default": 3,
+          "title": "Max Reflexion Iterations",
+          "type": "integer"
+        }
+      },
+      "title": "ProjectConfig",
+      "type": "object"
+    },
+    "ResilienceConfig": {
+      "description": "Resilience and error recovery configuration",
+      "properties": {
+        "max_retries": {
+          "default": 3,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "retry_backoff_base": {
+          "default": 2,
+          "title": "Retry Backoff Base",
+          "type": "integer"
+        },
+        "episode_timeout": {
+          "default": 60,
+          "title": "Episode Timeout",
+          "type": "integer"
+        },
+        "health_check_interval": {
+          "default": 300,
+          "title": "Health Check Interval",
+          "type": "integer"
+        }
+      },
+      "title": "ResilienceConfig",
+      "type": "object"
+    },
+    "SearchConfig": {
+      "description": "Search configuration",
+      "properties": {
+        "default_max_nodes": {
+          "default": 10,
+          "title": "Default Max Nodes",
+          "type": "integer"
+        },
+        "default_max_facts": {
+          "default": 10,
+          "title": "Default Max Facts",
+          "type": "integer"
+        },
+        "default_method": {
+          "default": "hybrid_rrf",
+          "enum": [
+            "hybrid_rrf",
+            "hybrid_node_distance",
+            "vector",
+            "text"
+          ],
+          "title": "Default Method",
+          "type": "string"
+        },
+        "vector_weight": {
+          "default": 0.7,
+          "title": "Vector Weight",
+          "type": "number"
+        },
+        "text_weight": {
+          "default": 0.3,
+          "title": "Text Weight",
+          "type": "number"
+        }
+      },
+      "title": "SearchConfig",
+      "type": "object"
+    },
+    "SessionTrackingConfig": {
+      "description": "Session tracking configuration for automatic JSONL monitoring.\n\nConfigures the session tracking system that monitors Claude Code session files\n(JSONL format) and automatically indexes them into the Graphiti knowledge graph.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable or disable session tracking (opt-in model)",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "watch_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to directory containing Claude Code session files. If None, defaults to ~/.claude/projects/. Must be an absolute path (native OS format: C:\\\\ on Windows, / on Unix).",
+          "title": "Watch Path"
+        },
+        "inactivity_timeout": {
+          "default": 300,
+          "description": "Inactivity timeout in seconds before a session is considered closed. After this timeout, the session will be indexed into Graphiti.",
+          "title": "Inactivity Timeout",
+          "type": "integer"
+        },
+        "check_interval": {
+          "default": 60,
+          "description": "Interval in seconds to check for inactive sessions. The file watcher checks for inactive sessions at this interval.",
+          "title": "Check Interval",
+          "type": "integer"
+        },
+        "auto_summarize": {
+          "default": true,
+          "description": "Automatically summarize closed sessions using Graphiti's LLM. If False, sessions are stored as raw episodes without summarization.",
+          "title": "Auto Summarize",
+          "type": "boolean"
+        },
+        "store_in_graph": {
+          "default": true,
+          "description": "Store session summaries in the Graphiti knowledge graph. If False, sessions are logged but not persisted to Neo4j.",
+          "title": "Store In Graph",
+          "type": "boolean"
+        }
+      },
+      "title": "SessionTrackingConfig",
+      "type": "object"
+    }
+  },
+  "description": "Root Graphiti configuration",
+  "properties": {
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "database": {
+      "$ref": "#/$defs/DatabaseConfig"
+    },
+    "llm": {
+      "$ref": "#/$defs/LLMConfig"
+    },
+    "embedder": {
+      "$ref": "#/$defs/EmbedderConfig"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectConfig"
+    },
+    "search": {
+      "$ref": "#/$defs/SearchConfig"
+    },
+    "logging": {
+      "$ref": "#/$defs/LoggingConfig"
+    },
+    "performance": {
+      "$ref": "#/$defs/PerformanceConfig"
+    },
+    "mcp_server": {
+      "$ref": "#/$defs/MCPServerConfig"
+    },
+    "resilience": {
+      "$ref": "#/$defs/ResilienceConfig"
+    },
+    "session_tracking": {
+      "$ref": "#/$defs/SessionTrackingConfig"
+    }
+  },
+  "title": "GraphitiConfig",
+  "type": "object"
+}

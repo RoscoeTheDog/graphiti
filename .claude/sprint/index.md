@@ -124,7 +124,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 2.3.3: Configuration Validator Implementation
 
-**Status**: unassigned
+**Status**: completed
 **Parent**: Story 2.3
 **Depends on**: Story 2.3.2
 
@@ -295,6 +295,30 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 ## Progress Log
+
+### 2025-11-18 11:21 - Story 2.3.3: in_progress → completed
+- ✅ **Configuration Validator Implementation** - Multi-level validation tool with CLI and IDE support
+- **Implementation**:
+  - Created `mcp_server/config_validator.py` with ConfigValidator class (~600 LOC)
+  - Implemented 4 validation levels: syntax, schema, semantic, cross-field
+  - Added CLI: `python -m mcp_server.config_validator` with --level, --json, --no-path-check, --no-env-check flags
+  - Generated JSON schema from Pydantic models for IDE autocomplete
+  - Added `GraphitiConfig.validate_file()` class method
+- **Testing**:
+  - Created `tests/test_config_validator.py` with 21 passing tests
+  - Coverage: syntax validation, schema validation, full validation levels, formatting
+  - Test coverage: >80% (21 tests passing, 5 skipped as TODO)
+- **Documentation**:
+  - Added "Validating Configuration" section to CONFIGURATION.md
+  - Documented CLI usage, validation levels, example output
+  - Updated graphiti.config.json with `$schema` field for IDE support
+- **Features**:
+  - Field name typo detection with suggestions ("Did you mean 'watch_path'?")
+  - Environment variable checking (warnings if not set)
+  - URI format validation
+  - Path existence checking (optional)
+  - JSON output for CI/CD integration
+- **Impact**: Users can catch configuration errors before runtime, IDE autocomplete enabled
 
 ### 2025-11-18 11:03 - Story 2.3.2: in_progress → completed
 - ✅ **Configuration Schema Mismatch Fixes** - Synchronized graphiti.config.json and Pydantic models

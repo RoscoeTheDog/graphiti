@@ -942,6 +942,85 @@ grep "episode_name" logs/graphiti_mcp.log
 
 ---
 
+## Validating Configuration
+
+### Configuration Validator
+
+Graphiti includes a configuration validator tool to catch errors before runtime:
+
+```bash
+# Validate default config file
+python -m mcp_server.config_validator
+
+# Validate specific file
+python -m mcp_server.config_validator ~/.graphiti/graphiti.config.json
+
+# Validation levels
+python -m mcp_server.config_validator --level syntax   # Fast: JSON syntax only
+python -m mcp_server.config_validator --level schema   # Moderate: Field names and types
+python -m mcp_server.config_validator --level semantic # Thorough: URI format, paths exist
+python -m mcp_server.config_validator --level full     # Complete: All checks (default)
+
+# Skip specific checks
+python -m mcp_server.config_validator --no-path-check  # Don't verify paths exist
+python -m mcp_server.config_validator --no-env-check   # Don't verify env vars set
+
+# JSON output (for CI/CD)
+python -m mcp_server.config_validator --json
+```
+
+### Validation Checks
+
+The validator performs four levels of validation:
+
+1. **Syntax**: Valid JSON format, no trailing commas
+2. **Schema**: Field names match Pydantic models, correct types
+3. **Semantic**: URIs well-formed, paths exist (optional), env vars set (optional)
+4. **Cross-field**: Database backend matches config, LLM provider has API key
+
+### Example Output
+
+**Valid config:**
+```
+[OK] Configuration valid: graphiti.config.json
+
+Schema: graphiti-config v1.0.0
+Database: neo4j (bolt://localhost:7687)
+LLM: openai (gpt-4.1-mini)
+Session Tracking: disabled
+
+No issues found.
+```
+
+**Invalid config:**
+```
+[ERROR] Configuration invalid: graphiti.config.json
+
+Issues found:
+
+[ERROR] session_tracking.watch_directories: Extra inputs are not permitted
+  → Did you mean 'watch_path'?
+
+[WARNING] database.neo4j.password_env: Environment variable NEO4J_PASSWORD not set
+  → Set environment variable: export NEO4J_PASSWORD='your-password'
+
+Summary: 1 error, 1 warning
+```
+
+### IDE Support
+
+The `graphiti.config.schema.json` file enables autocomplete and validation in IDEs:
+
+```json
+{
+  "$schema": "./graphiti.config.schema.json",
+  "version": "1.0.0",
+  ...
+}
+```
+
+---
+
 ## Additional Resources
 
 - [Unified Config Implementation Plan](implementation/plans/IMPLEMENTATION_PLAN_UNIFIED_CONFIG.md)
@@ -951,5 +1030,5 @@ grep "episode_name" logs/graphiti_mcp.log
 
 ---
 
-**Last Updated:** 2025-11-03
-**Version:** 2.0 (Unified Configuration)
+**Last Updated:** 2025-11-18
+**Version:** 2.1 (Added Configuration Validator)
