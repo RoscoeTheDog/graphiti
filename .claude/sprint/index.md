@@ -132,6 +132,16 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 
+#### Story 2.3.4: LLM Summarization for ContentMode.SUMMARY
+
+**Status**: unassigned
+**Parent**: Story 2.3
+**Depends on**: Story 2.3.3
+
+**See**: [stories/2.3.4-llm-summarization-for-contentmode-summary.md](stories/2.3.4-llm-summarization-for-contentmode-summary.md)
+
+
+
 ### Story 3: File Monitoring
 
 **Status**: completed
@@ -295,6 +305,21 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 ## Progress Log
+
+### 2025-11-18 12:30 - Story 2.3.4 Created (Enhancement)
+- 🆕 **Story 2.3.4: LLM Summarization for ContentMode.SUMMARY** - Enhancement to complete SUMMARY mode implementation
+- **Context**: Story 2.3 implemented ContentMode enum but only hardcoded tool result summaries
+- **Gap Identified**: ContentMode.SUMMARY for user/agent messages falls back to FULL (TODO comments in filter.py:185)
+- **Story Scope**:
+  - Create MessageSummarizer class (reuse Graphiti LLM client)
+  - Integrate into SessionFilter for user/agent message handling
+  - Add caching to avoid re-summarization
+  - Make opt-in (default remains ContentMode.FULL)
+- **Priority**: Low (enhancement, non-default config)
+- **Impact**: Users who want aggressive token reduction can enable SUMMARY mode for all message types
+- **Cost Tradeoff**: Adds ~$0.10/session LLM cost for aggressive summarization
+- **Default Config Unchanged**: Current behavior (FULL for user/agent) remains default
+- **Next**: Available for assignment after Story 5 (CLI Integration)
 
 ### 2025-11-18 11:21 - Story 2.3.3: in_progress → completed
 - ✅ **Configuration Validator Implementation** - Multi-level validation tool with CLI and IDE support
