@@ -11,5 +11,9 @@ dependencies = [
     "graphiti-core",
 ]
 
+[project.scripts]
+graphiti-mcp = "mcp_server.graphiti_mcp_server:main"
+graphiti-mcp-session-tracking = "mcp_server.session_tracking_cli:main"
+
 [tool.uv.sources]
 graphiti-core = { path = "../", editable = true }

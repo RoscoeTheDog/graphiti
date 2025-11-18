@@ -326,8 +326,8 @@ class SessionTrackingConfig(BaseModel):
     """
 
     enabled: bool = Field(
-        default=False,
-        description="Enable or disable session tracking (opt-in model)"
+        default=True,
+        description="Enable or disable session tracking (opt-out model, enabled by default)"
     )
     watch_path: Optional[str] = Field(
         default=None,

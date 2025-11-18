@@ -208,7 +208,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 5: CLI Integration
 
-**Status**: unassigned
+**Status**: completed
 
 **See**: [stories/5-cli-integration.md](stories/5-cli-integration.md)
 
@@ -216,7 +216,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 5.1: CLI Commands
 
-**Status**: unassigned
+**Status**: completed
 
 **See**: [stories/5.1-cli-commands.md](stories/5.1-cli-commands.md)
 
@@ -224,7 +224,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 5.2: Configuration Persistence
 
-**Status**: unassigned
+**Status**: completed
 
 **See**: [stories/5.2-configuration-persistence.md](stories/5.2-configuration-persistence.md)
 
@@ -305,6 +305,31 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 ## Progress Log
+
+### 2025-11-18 13:18 - Story 5: unassigned → completed
+- ✅ **CLI Integration** - Session tracking management commands with opt-out model
+- **Implementation**:
+  - Created `mcp_server/session_tracking_cli.py` with 3 commands (enable, disable, status) (~300 LOC)
+  - Changed default `SessionTrackingConfig.enabled` from `false` to `true` (opt-out model)
+  - Added CLI entry point `graphiti-mcp-session-tracking` to pyproject.toml
+  - Config discovery: project > global (~/.graphiti/graphiti.config.json)
+  - Auto-create global config if missing
+- **Testing**:
+  - Created `tests/test_session_tracking_cli.py` with 17 comprehensive tests
+  - Test coverage: Config discovery, enable/disable, status, error handling
+  - All tests passing (17/17)
+- **Documentation**:
+  - Updated CONFIGURATION.md with CLI commands section
+  - Changed all examples to show `enabled: true` (opt-out default)
+  - Added migration notes for users upgrading from v0.3.x
+- **Features**:
+  - `graphiti-mcp-session-tracking enable` - Enable session tracking
+  - `graphiti-mcp-session-tracking disable` - Disable session tracking
+  - `graphiti-mcp-session-tracking status` - Show configuration
+  - Platform-agnostic path handling (Windows/Unix)
+  - Preserves existing config values
+- **Impact**: Users can now manage session tracking via CLI, enabled by default for out-of-box experience
+- **Migration**: Users upgrading from v0.3.x will have session tracking enabled by default (run `disable` to opt-out)
 
 ### 2025-11-18 13:30 - Story 2.3.4: unassigned → completed
 - ✅ **LLM Summarization for ContentMode.SUMMARY** - Message-level summarization enhancement completed

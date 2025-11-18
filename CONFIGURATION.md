@@ -434,7 +434,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 ```json
 {
   "session_tracking": {
-    "enabled": false,
+    "enabled": true,
     "watch_path": null,
     "inactivity_timeout": 300,
     "check_interval": 60,
@@ -448,7 +448,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `enabled` | bool | `false` | Enable/disable automatic session tracking (opt-in model) |
+| `enabled` | bool | `true` | Enable/disable automatic session tracking (opt-out model, **enabled by default**) |
 | `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
 | `inactivity_timeout` | int | 300 | **Seconds** of inactivity before session is considered closed and indexed (default: 5 minutes) |
 | `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
@@ -463,7 +463,7 @@ Control how different message types are filtered during session tracking. Enable
 ```json
 {
   "session_tracking": {
-    "enabled": false,
+    "enabled": true,
     "filter": {
       "tool_calls": true,
       "tool_content": "summary",
@@ -568,12 +568,29 @@ New JSONL file detected
 
 Session tracking is **enabled by default** starting in v0.4.0. This provides automatic cross-session memory out-of-the-box.
 
-**To disable:**
-```bash
-# CLI command
-graphiti-mcp session-tracking disable
+### CLI Commands
 
-# Or set in config
+Manage session tracking configuration via the command line:
+
+**Enable session tracking:**
+```bash
+graphiti-mcp-session-tracking enable
+```
+
+**Disable session tracking:**
+```bash
+graphiti-mcp-session-tracking disable
+```
+
+**Check status:**
+```bash
+graphiti-mcp-session-tracking status
+```
+
+The CLI commands automatically update your `graphiti.config.json` file (project or global). Changes take effect on the next MCP server restart.
+
+**Manual configuration:**
+```json
 {
   "session_tracking": {
     "enabled": false
