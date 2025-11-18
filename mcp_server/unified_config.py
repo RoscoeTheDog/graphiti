@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
+from graphiti_core.session_tracking.filter_config import FilterConfig
 import logging
 
 logger = logging.getLogger(__name__)
@@ -362,6 +363,14 @@ class SessionTrackingConfig(BaseModel):
         description=(
             "Store session summaries in the Graphiti knowledge graph. "
             "If False, sessions are logged but not persisted to Neo4j."
+        )
+    )
+    filter: FilterConfig = Field(
+        default_factory=FilterConfig,
+        description=(
+            "Filtering configuration for session content. "
+            "Controls how messages and tool results are filtered for token reduction. "
+            "Default: summarize tool results (50%+ reduction), preserve user/agent messages."
         )
     )
 

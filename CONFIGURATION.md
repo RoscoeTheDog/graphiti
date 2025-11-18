@@ -454,6 +454,89 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 | `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
 | `auto_summarize` | bool | `true` | Automatically summarize closed sessions using Graphiti's LLM |
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
+| `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
+
+### Filtering Configuration
+
+Control how different message types are filtered during session tracking. Enables fine-grained control over token reduction vs information preservation.
+
+```json
+{
+  "session_tracking": {
+    "enabled": false,
+    "filter": {
+      "tool_calls": true,
+      "tool_content": "summary",
+      "user_messages": "full",
+      "agent_messages": "full"
+    }
+  }
+}
+```
+
+**Filter Fields:**
+
+| Field | Type | Options | Default | Description |
+|-------|------|---------|---------|-------------|
+| `tool_calls` | bool | true/false | `true` | Preserve tool call structure (names, parameters) |
+| `tool_content` | string | "full"/"summary"/"omit" | `"summary"` | How to handle tool result content |
+| `user_messages` | string | "full"/"summary"/"omit" | `"full"` | How to handle user message content |
+| `agent_messages` | string | "full"/"summary"/"omit" | `"full"` | How to handle agent text responses |
+
+**Content Modes:**
+- **`"full"`**: Preserve complete content (no filtering)
+- **`"summary"`**: Replace with concise 1-line summary (~70% reduction for tool results)
+- **`"omit"`**: Completely remove content, keep structure only (~95% reduction)
+
+**Filtering Presets:**
+
+```json
+// Default: Balanced (50%+ token reduction, preserves user/agent messages)
+{
+  "filter": {
+    "tool_calls": true,
+    "tool_content": "summary",
+    "user_messages": "full",
+    "agent_messages": "full"
+  }
+}
+
+// Maximum reduction: Omit all tool results (~60% reduction)
+{
+  "filter": {
+    "tool_calls": true,
+    "tool_content": "omit",
+    "user_messages": "full",
+    "agent_messages": "full"
+  }
+}
+
+// Conservative: Preserve everything (no filtering, highest memory accuracy)
+{
+  "filter": {
+    "tool_calls": true,
+    "tool_content": "full",
+    "user_messages": "full",
+    "agent_messages": "full"
+  }
+}
+
+// Aggressive: Summarize everything (~70% reduction)
+{
+  "filter": {
+    "tool_calls": true,
+    "tool_content": "summary",
+    "user_messages": "summary",
+    "agent_messages": "summary"
+  }
+}
+```
+
+**Token Reduction Estimates:**
+- Default config: ~35% reduction (summarize tool results only)
+- Maximum config: ~60% reduction (omit all tool results)
+- Aggressive config: ~70% reduction (summarize everything)
+- Conservative config: 0% reduction (no filtering)
 
 ### Behavior
 

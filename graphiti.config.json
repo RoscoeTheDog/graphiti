@@ -2,7 +2,6 @@
   "$schema": "./graphiti.config.schema.json",
   "description": "Unified Graphiti Configuration - All project settings in one place",
   "version": "1.0.0",
-
   "database": {
     "backend": "neo4j",
     "neo4j": {
@@ -22,7 +21,6 @@
       "pool_size": 50
     }
   },
-
   "llm": {
     "provider": "openai",
     "default_model": "gpt-4.1-mini",
@@ -31,13 +29,11 @@
     "semaphore_limit": 10,
     "max_retries": 3,
     "timeout": 60,
-
     "openai": {
       "api_key_env": "OPENAI_API_KEY",
       "base_url": null,
       "organization": null
     },
-
     "azure_openai": {
       "endpoint_env": "AZURE_OPENAI_ENDPOINT",
       "api_key_env": "AZURE_OPENAI_API_KEY",
@@ -45,23 +41,19 @@
       "deployment_name": null,
       "use_managed_identity": false
     },
-
     "anthropic": {
       "api_key_env": "ANTHROPIC_API_KEY",
       "base_url": null
     }
   },
-
   "embedder": {
     "provider": "openai",
     "model": "text-embedding-3-small",
     "dimensions": 1536,
     "batch_size": 100,
-
     "openai": {
       "api_key_env": "OPENAI_API_KEY"
     },
-
     "azure_openai": {
       "endpoint_env": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
       "api_key_env": "AZURE_OPENAI_EMBEDDING_API_KEY",
@@ -70,15 +62,17 @@
       "use_managed_identity": false
     }
   },
-
   "project": {
     "default_group_id": null,
     "namespace": null,
     "enable_entity_types": true,
-    "custom_entity_types": ["Requirement", "Preference", "Procedure"],
+    "custom_entity_types": [
+      "Requirement",
+      "Preference",
+      "Procedure"
+    ],
     "max_reflexion_iterations": 3
   },
-
   "search": {
     "default_max_nodes": 10,
     "default_max_facts": 10,
@@ -86,7 +80,6 @@
     "vector_weight": 0.7,
     "text_weight": 0.3
   },
-
   "logging": {
     "level": "INFO",
     "log_filter_decisions": true,
@@ -95,33 +88,35 @@
     "log_file": null,
     "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
   },
-
   "performance": {
     "use_parallel_runtime": true,
     "enable_caching": true,
     "cache_ttl_seconds": 3600
   },
-
   "mcp_server": {
     "host": null,
     "port": null,
     "enable_cors": false,
     "allowed_origins": []
   },
-
   "resilience": {
     "max_retries": 3,
     "retry_backoff_base": 2,
     "episode_timeout": 60,
     "health_check_interval": 300
   },
-
   "session_tracking": {
     "enabled": false,
     "watch_path": null,
     "inactivity_timeout": 300,
     "check_interval": 60,
     "auto_summarize": true,
-    "store_in_graph": true
+    "store_in_graph": true,
+    "filter": {
+      "tool_calls": true,
+      "tool_content": "summary",
+      "user_messages": "full",
+      "agent_messages": "full"
+    }
   }
 }

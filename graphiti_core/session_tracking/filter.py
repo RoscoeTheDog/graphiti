@@ -23,6 +23,7 @@ from graphiti_core.session_tracking.types import (
     ToolCallStatus,
     TokenUsage,
 )
+from graphiti_core.session_tracking.filter_config import ContentMode, FilterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +46,32 @@ class SessionFilter:
         "mcp__gptr-mcp__": "GPT Researcher: {operation}",
     }
 
-    def __init__(self, preserve_tool_results: bool = False):
+    def __init__(
+            self,
+            config: Optional[FilterConfig] = None,
+            preserve_tool_results: bool = False
+        ):
         """Initialize the filter.
 
         Args:
-            preserve_tool_results: If True, keep full tool results (disables filtering)
+            config: FilterConfig instance controlling filtering behavior.
+                   If None, uses default FilterConfig settings.
+            preserve_tool_results: DEPRECATED. If True, sets config to preserve all content.
+                                  Use FilterConfig(tool_content=ContentMode.FULL) instead.
         """
-        self.preserve_tool_results = preserve_tool_results
+        # Handle backward compatibility
+        if preserve_tool_results and config is None:
+            logger.warning(
+                "preserve_tool_results is deprecated. "
+                "Use FilterConfig(tool_content=ContentMode.FULL) instead."
+            )
+            config = FilterConfig(
+                tool_content=ContentMode.FULL,
+                user_messages=ContentMode.FULL,
+                agent_messages=ContentMode.FULL
+            )
+
+        self.config = config or FilterConfig()
         self._stats = {
             "original_tokens": 0,
             "filtered_tokens": 0,
@@ -126,40 +146,79 @@ class SessionFilter:
         return filtered_context, stats
 
     def _filter_message(self, message: SessionMessage) -> SessionMessage:
-        """Filter a single message.
+        """Filter a single message based on configuration.
 
         Args:
             message: Original message
 
         Returns:
-            Filtered message
+            Filtered message according to FilterConfig settings
         """
         self._stats["messages_processed"] += 1
 
-        # USER messages: Keep full content
+        # USER messages: Apply user_messages config
         if message.role == MessageRole.USER:
-            return message
-
-        # ASSISTANT messages: Keep content, filter tool results
-        if message.role == MessageRole.ASSISTANT:
-            if self.preserve_tool_results or not message.tool_calls:
+            if self.config.user_messages == ContentMode.FULL:
+                return message
+            elif self.config.user_messages == ContentMode.OMIT:
+                return SessionMessage(
+                    uuid=message.uuid,
+                    session_id=message.session_id,
+                    role=message.role,
+                    timestamp=message.timestamp,
+                    content="[User message omitted]",
+                    tool_calls=None,
+                    tokens=TokenUsage(input=5, output=0, total=5),
+                    metadata=message.metadata
+                )
+            # ContentMode.SUMMARY will be implemented when LLM summarization is added
+            else:
                 return message
 
-            # Filter tool calls - keep structure, summarize results
-            filtered_tool_calls: List[ToolCall] = []
-            for tool_call in message.tool_calls:
-                filtered_tool_calls.append(self._filter_tool_call(tool_call))
-                self._stats["tool_calls_filtered"] += 1
+        # ASSISTANT messages: Apply agent_messages and tool_content config
+        if message.role == MessageRole.ASSISTANT:
+            # Handle agent text content
+            content = message.content
+            if self.config.agent_messages == ContentMode.OMIT:
+                content = "[Agent message omitted]"
+            elif self.config.agent_messages == ContentMode.SUMMARY:
+                # TODO: LLM summarization for agent messages (Story 2.3 - ContentMode.SUMMARY support)
+                content = message.content  # Keep full for now
 
-            # Create filtered message (keep content, replace tool calls)
+            # Handle tool calls
+            filtered_tool_calls = None
+            tokens_modified = False
+            if message.tool_calls:
+                if self.config.tool_content == ContentMode.FULL:
+                    filtered_tool_calls = message.tool_calls
+                    # No filtering, keep original tokens
+                elif not self.config.tool_calls:
+                    # Omit tool calls entirely (tool_calls=False in config)
+                    filtered_tool_calls = None
+                    tokens_modified = True
+                else:
+                    # Keep tool structure, filter results based on tool_content mode
+                    filtered_tool_calls = []
+                    for tool_call in message.tool_calls:
+                        filtered_tool_calls.append(self._filter_tool_call(tool_call))
+                        self._stats["tool_calls_filtered"] += 1
+                    tokens_modified = True
+
+            # Determine tokens - only recalculate if we modified content or tool calls
+            if tokens_modified or self.config.agent_messages != ContentMode.FULL:
+                tokens = self._estimate_filtered_tokens(message, filtered_tool_calls) if filtered_tool_calls else message.tokens
+            else:
+                tokens = message.tokens
+
+            # Create filtered message
             return SessionMessage(
                 uuid=message.uuid,
                 session_id=message.session_id,
                 role=message.role,
                 timestamp=message.timestamp,
-                content=message.content,
+                content=content,
                 tool_calls=filtered_tool_calls,
-                tokens=self._estimate_filtered_tokens(message, filtered_tool_calls),
+                tokens=tokens,
                 metadata=message.metadata,
             )
 
@@ -167,21 +226,27 @@ class SessionFilter:
         return message
 
     def _filter_tool_call(self, tool_call: ToolCall) -> ToolCall:
-        """Filter a tool call - keep structure, summarize result.
+        """Filter a tool call based on tool_content configuration.
 
         Args:
             tool_call: Original tool call
 
         Returns:
-            Filtered tool call with summarized result
+            Filtered tool call according to tool_content mode
         """
-        summary = self._summarize_tool_result(tool_call)
+        # Determine result based on tool_content mode
+        if self.config.tool_content == ContentMode.FULL:
+            result_summary = tool_call.result_summary  # Keep original result
+        elif self.config.tool_content == ContentMode.OMIT:
+            result_summary = "[Tool result omitted]"
+        else:  # ContentMode.SUMMARY
+            result_summary = self._summarize_tool_result(tool_call)
 
         return ToolCall(
             tool_name=tool_call.tool_name,
             parameters=tool_call.parameters,  # Keep parameters for context
             status=tool_call.status,
-            result_summary=summary,  # Summarized result
+            result_summary=result_summary,
             execution_time_ms=tool_call.execution_time_ms,
             error_message=tool_call.error_message,
         )
