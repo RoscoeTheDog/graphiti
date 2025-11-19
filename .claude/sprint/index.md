@@ -390,6 +390,46 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **See**: [stories/16-testing-and-validation.md](stories/16-testing-and-validation.md)
 
+
+
+#### Story 16.1: Unit Test Validation
+
+**Status**: unassigned
+**Parent**: Story 16
+**Depends on**: Stories 9-15
+
+**See**: [stories/16.1-unit-test-validation.md](stories/16.1-unit-test-validation.md)
+
+
+
+#### Story 16.2: Integration Test Validation
+
+**Status**: unassigned
+**Parent**: Story 16
+**Depends on**: Story 16.1
+
+**See**: [stories/16.2-integration-test-validation.md](stories/16.2-integration-test-validation.md)
+
+
+
+#### Story 16.3: Performance and Security Validation
+
+**Status**: unassigned
+**Parent**: Story 16
+**Depends on**: Story 16.2
+
+**See**: [stories/16.3-performance-and-security-validation.md](stories/16.3-performance-and-security-validation.md)
+
+
+
+#### Story 16.4: Regression and Compliance Validation
+
+**Status**: unassigned
+**Parent**: Story 16
+**Depends on**: Story 16.3
+
+**See**: [stories/16.4-regression-and-compliance-validation.md](stories/16.4-regression-and-compliance-validation.md)
+
 ## Progress Log
 
 ### 2025-11-18 20:08 - Story 8: in_progress → completed
