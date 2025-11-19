@@ -1,0 +1,759 @@
+{
+  "generated": "2025-11-19T20:23:34.138183+00:00",
+  "version": "2.7.0",
+  "metadata": {
+    "total_stories": 44,
+    "auto_generated": true
+  },
+  "stories": {
+    "1": {
+      "title": "Foundation Infrastructure",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "1.1": {
+      "title": "Core Types Module",
+      "status": "completed",
+      "type": "substory",
+      "parent": "1",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "1.2": {
+      "title": "JSONL Parser",
+      "status": "completed",
+      "type": "substory",
+      "parent": "1",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "1.3": {
+      "title": "Path Resolution",
+      "status": "completed",
+      "type": "substory",
+      "parent": "1",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2": {
+      "title": "Smart Filtering",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.1": {
+      "title": "Filtering Logic",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.2": {
+      "title": "Tool Output Summarization",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.3": {
+      "title": "Configurable Filtering System",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.3.1": {
+      "title": "Configuration Architecture Fix (~/.graphiti/ Migration)",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2.3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.3.2": {
+      "title": "Configuration Schema Mismatch Fixes",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2.3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.3.3": {
+      "title": "Configuration Validator Implementation",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2.3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "2.3.4": {
+      "title": "LLM Summarization for ContentMode.SUMMARY",
+      "status": "completed",
+      "type": "substory",
+      "parent": "2.3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "3": {
+      "title": "File Monitoring",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "3.1": {
+      "title": "File Watcher",
+      "status": "completed",
+      "type": "substory",
+      "parent": "3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "3.2": {
+      "title": "Session Manager",
+      "status": "completed",
+      "type": "substory",
+      "parent": "3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "3.3": {
+      "title": "Configuration Integration",
+      "status": "completed",
+      "type": "substory",
+      "parent": "3",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "4": {
+      "title": "Graphiti Integration (REFACTORED)",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "4.1": {
+      "title": "Session Summarizer",
+      "status": "deprecated",
+      "type": "substory",
+      "parent": "4",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "4.2": {
+      "title": "Graphiti Storage Integration",
+      "status": "deprecated",
+      "type": "substory",
+      "parent": "4",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "4.3": {
+      "title": "Clean Up Refactoring Artifacts (NEW - ALIGNMENT REMEDIATION)",
+      "status": "completed",
+      "type": "substory",
+      "parent": "4",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "5": {
+      "title": "CLI Integration",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "5.1": {
+      "title": "CLI Commands",
+      "status": "completed",
+      "type": "substory",
+      "parent": "5",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "5.2": {
+      "title": "Configuration Persistence",
+      "status": "completed",
+      "type": "substory",
+      "parent": "5",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "6": {
+      "title": "MCP Tool Integration",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "6.1": {
+      "title": "MCP Tool Implementation",
+      "status": "completed",
+      "type": "substory",
+      "parent": "6",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "6.2": {
+      "title": "Runtime State Management",
+      "status": "completed",
+      "type": "substory",
+      "parent": "6",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "7": {
+      "title": "Testing & Validation",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "7.1": {
+      "title": "Integration Testing",
+      "status": "completed",
+      "type": "substory",
+      "parent": "7",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "7.2": {
+      "title": "Cost Validation",
+      "status": "deprecated",
+      "type": "substory",
+      "parent": "7",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "7.3": {
+      "title": "Performance Testing",
+      "status": "deprecated",
+      "type": "substory",
+      "parent": "7",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "7.4": {
+      "title": "Documentation",
+      "status": "completed",
+      "type": "substory",
+      "parent": "7",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "8": {
+      "title": "Refinement & Launch",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "9": {
+      "title": "Critical Bug Fix - Periodic Checker Implementation",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "10": {
+      "title": "Configuration Schema Changes - Safe Defaults & Simplification",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "11": {
+      "title": "Template System Implementation - Pluggable Summarization",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "12": {
+      "title": "Rolling Period Filter - Prevent Bulk Indexing",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "13": {
+      "title": "Manual Sync Command - Historical Data Indexing",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "14": {
+      "title": "Configuration Auto-Generation - First-Run Experience",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "15": {
+      "title": "Documentation Update - Comprehensive User Guide",
+      "status": "completed",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "16": {
+      "title": "Testing & Validation - Comprehensive Coverage",
+      "status": "unassigned",
+      "type": "leaf",
+      "parent": null,
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "16.1": {
+      "title": "Unit Test Validation",
+      "status": "unassigned",
+      "type": "substory",
+      "parent": "16",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "16.2": {
+      "title": "Integration Test Validation",
+      "status": "unassigned",
+      "type": "substory",
+      "parent": "16",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "16.3": {
+      "title": "Performance and Security Validation",
+      "status": "unassigned",
+      "type": "substory",
+      "parent": "16",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    },
+    "16.4": {
+      "title": "Regression and Compliance Validation",
+      "status": "unassigned",
+      "type": "substory",
+      "parent": "16",
+      "substories": [],
+      "dependencies": {
+        "requires": [],
+        "required_by": [],
+        "blocks": [],
+        "blocked_by": []
+      },
+      "architecture": {
+        "provides": [],
+        "consumes": []
+      }
+    }
+  },
+  "propagation_history": []
+}
