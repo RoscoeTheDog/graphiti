@@ -51,6 +51,7 @@ from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
 from graphiti_core.session_tracking.session_manager import SessionManager
 from graphiti_core.session_tracking.filter import SessionFilter
 from graphiti_core.session_tracking.indexer import SessionIndexer
+from graphiti_core.session_tracking.prompts import DEFAULT_TEMPLATES
 
 load_dotenv()
 
@@ -1934,6 +1935,26 @@ async def check_inactive_sessions_periodically(
         raise
 
 
+def ensure_default_templates_exist() -> None:
+    """Ensure default summarization templates exist in global config directory.
+
+    Creates ~/.graphiti/auto-tracking/templates/ directory and populates it with
+    default templates from graphiti_core.session_tracking.prompts if they don't exist.
+
+    This function is idempotent - safe to call multiple times.
+    """
+    templates_dir = Path.home() / ".graphiti" / "auto-tracking" / "templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+
+    for filename, content in DEFAULT_TEMPLATES.items():
+        template_path = templates_dir / filename
+        if not template_path.exists():
+            template_path.write_text(content, encoding="utf-8")
+            logger.info(f"Created default template: {template_path}")
+        else:
+            logger.debug(f"Template already exists: {template_path}")
+
+
 async def initialize_session_tracking() -> None:
     """Initialize session tracking system if enabled in configuration.
 
@@ -1963,6 +1984,9 @@ async def initialize_session_tracking() -> None:
             return
 
         logger.info("Initializing session tracking...")
+
+        # Ensure default templates exist
+        ensure_default_templates_exist()
 
         # Create path resolver
         watch_path = unified_config.session_tracking.watch_path

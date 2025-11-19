@@ -544,6 +544,85 @@ Control how different message types are filtered during session tracking. Enable
 - Default configuration (FULL for user/agent) avoids LLM costs
 - To enable LLM summarization: Pass `MessageSummarizer(llm_client)` to `SessionFilter(summarizer=...)`
 
+### Customizable Summarization Templates
+
+**New in v0.4.0** (Story 11) - Pluggable template system for LLM summarization prompts.
+
+When using LLM summarization (`ContentMode.SUMMARY` for user/agent messages), you can customize the prompts used by providing template files or inline prompts.
+
+**Template Resolution Hierarchy:**
+1. **Project templates** - `<project>/.graphiti/auto-tracking/templates/{template}.md`
+2. **Global templates** - `~/.graphiti/auto-tracking/templates/{template}.md`
+3. **Built-in templates** - Packaged with Graphiti (default prompts)
+4. **Inline prompts** - Pass prompt string directly (no .md extension)
+
+**Default Templates:**
+
+Three built-in templates are provided and automatically created in `~/.graphiti/auto-tracking/templates/` on first run:
+- `default-tool-content.md` - For tool result summarization
+- `default-user-messages.md` - For user message summarization
+- `default-agent-messages.md` - For agent response summarization
+
+**Template Variables:**
+- `{content}` - The message content to summarize
+- `{context}` - Optional context (e.g., "user message", "tool name")
+
+**Example Custom Template:**
+
+Create `~/.graphiti/auto-tracking/templates/custom-user-summary.md`:
+```markdown
+Summarize this user request concisely, focusing on intent and key requirements.
+
+**User request:**
+{content}
+
+**Context:** {context}
+
+**Summary (1-2 sentences):**
+```
+
+**Using Templates:**
+
+```python
+from graphiti_core.session_tracking.message_summarizer import MessageSummarizer
+
+# Use built-in template (by filename)
+summarizer = MessageSummarizer(llm_client)
+summary = await summarizer.summarize(
+    content="Long message here...",
+    template="default-user-messages.md"
+)
+
+# Use custom template (from ~/.graphiti/auto-tracking/templates/)
+summary = await summarizer.summarize(
+    content="Long message here...",
+    template="custom-user-summary.md"
+)
+
+# Use inline prompt (no .md extension)
+summary = await summarizer.summarize(
+    content="Long message here...",
+    template="Summarize concisely: {content}"
+)
+
+# Use absolute path
+summary = await summarizer.summarize(
+    content="Long message here...",
+    template="/path/to/custom-template.md"
+)
+```
+
+**Template Caching:**
+- Templates are resolved once and cached for the session
+- Reduces disk I/O for repeated summarizations
+- Cache is cleared when session changes
+
+**Benefits:**
+- **Customizable**: Tailor summarization style to your needs
+- **Hierarchical**: Override built-in templates without modifying code
+- **Flexible**: Use file-based templates or inline prompts
+- **Efficient**: Template resolution is cached to minimize overhead
+
 ### Behavior
 
 **When enabled:**
