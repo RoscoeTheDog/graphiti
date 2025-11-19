@@ -1,10 +1,10 @@
 # Story 15: Documentation Update - Comprehensive User Guide
 
-**Status**: in_progress
+**Status**: advisory_medium
 **Created**: 2025-11-18 23:01
-**Updated**: 2025-11-19 20:40 (Session s005 - CONFIGURATION.md critical fixes completed)
+**Updated**: 2025-11-19 20:45 (Session s005 - Marked advisory, created substory 15.1)
 **Claimed**: 2025-11-19 12:04 (Session 004)
-**Completed**: (pending - 8/21 ACs completed, see implementation notes)
+**Completed**: 2025-11-19 20:45 (Partial - 8/21 ACs, critical fixes done)
 **Priority**: HIGH
 **Estimated Effort**: 12 hours (Actual: ~2.5 hours per handoff)
 **Phase**: 7 (Week 3, Days 3-5)
@@ -610,3 +610,46 @@ See parent sprint `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`:
 - Documentation: Complete user and developer docs - **PARTIAL (8/21 ACs done)**
 - Examples: All examples tested and working - **PENDING**
 - Migration guide: Clear upgrade path - **EXISTS BUT NEEDS FIXES**
+
+---
+
+## Advisories
+
+### MEDIUM Priority (3)
+
+**ADV-15-001: Incomplete USER_GUIDE.md Updates**
+- **Category**: documentation
+- **Type**: incomplete_work
+- **Created**: 2025-11-19 20:45
+- **Context**:
+  - 0/7 acceptance criteria completed for SESSION_TRACKING_USER_GUIDE.md
+  - Uses outdated field names (watch_directories, inactivity_timeout_minutes, scan_interval_seconds)
+  - Missing sections: manual sync, troubleshooting, security best practices
+- **Reason**: Story marked advisory to unblock Story 16 (Testing & Validation)
+- **Suggested Action**: Complete in Story 15.1 substory or during Story 16.2 integration testing
+- **Status**: ACTIVE
+
+**ADV-15-002: Inaccurate MIGRATION.md Template References**
+- **Category**: documentation
+- **Type**: accuracy_issue
+- **Created**: 2025-11-19 20:45
+- **Context**:
+  - References Jinja2 templates but implementation uses Markdown (.md)
+  - Uses wrong field name (filter_config should be filter)
+  - Template syntax incorrect (shows Jinja2, should show {content})
+  - 0/4 acceptance criteria verified
+- **Reason**: Documentation written before final implementation details confirmed
+- **Suggested Action**: Update MIGRATION.md to match actual template system implementation
+- **Status**: ACTIVE
+
+**ADV-15-003: Documentation Examples Not Verified**
+- **Category**: testing
+- **type**: missing_validation
+- **Created**: 2025-11-19 20:45
+- **Context**:
+  - Quick start guide not tested on fresh install
+  - Migration examples not validated against actual system
+  - JSON examples validated syntactically but not functionally
+- **Reason**: Time constraints to unblock Story 16
+- **Suggested Action**: Test all examples during Story 16.2 integration testing phase
+- **Status**: ACTIVE

@@ -384,14 +384,28 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 15: Documentation Update - Comprehensive User Guide
 
-**Status**: completed
+**Status**: advisory_medium ⚠️
 **Claimed**: 2025-11-19 12:04
-**Completed**: 2025-11-19 (Updated 2025-11-19 12:12 per handoff s004)
+**Completed**: 2025-11-19 20:45 (Partial - 8/21 ACs, critical CONFIGURATION.md fixes done)
 **Priority**: HIGH
 **Phase**: 7 (Week 3, Days 2-4) - MOVED FROM DAYS 3-5
 **Depends on**: Stories 9, 10, 11, 12, 13, 14
+**Advisories**: 3 total (3 MEDIUM)
+  - ⚠️ ADV-15-001: Incomplete USER_GUIDE.md updates (0/7 ACs)
+  - ⚠️ ADV-15-002: Inaccurate MIGRATION.md template references
+  - ⚠️ ADV-15-003: Documentation examples not verified
 
 **See**: [stories/15-documentation-update.md](stories/15-documentation-update.md)
+
+
+
+#### Story 15.1: Documentation Remediation - USER_GUIDE and MIGRATION Fixes
+
+**Status**: unassigned
+**Parent**: Story 15
+**Depends on**: Story 15 (advisory_medium)
+
+**See**: [stories/15.1-documentation-remediation.md](stories/15.1-documentation-remediation.md)
 
 
 
@@ -408,7 +422,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 #### Story 16.1: Unit Test Validation
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 12:24
+**Completed**: 2025-11-19 12:33
 **Parent**: Story 16
 **Depends on**: Stories 9, 10, 11, 12, 13, 14, 15
 
