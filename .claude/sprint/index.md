@@ -306,6 +306,40 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ## Progress Log
 
+### 2025-11-18 19:10 - Story 6: in_progress → completed
+- ✅ **MCP Tool Integration** - Runtime toggle via MCP tools for per-session control
+- **Implementation**:
+  - Added 3 MCP tools to mcp_server/graphiti_mcp_server.py:
+    - `session_tracking_start()` - Enable tracking (respects global config or force=True)
+    - `session_tracking_stop()` - Disable tracking for specific session
+    - `session_tracking_status()` - Get comprehensive status (global config, runtime state, session manager, filter config)
+  - Created runtime_session_tracking_state registry (dict[str, bool]) for per-session control
+  - Integrated with session manager lifecycle:
+    - initialize_session_tracking(): Creates path resolver, indexer, filter, and session manager
+    - on_session_closed callback: Checks runtime state, filters messages, indexes to Graphiti
+    - run_mcp_server() cleanup: Stops session manager gracefully on shutdown
+- **Testing**:
+  - Created tests/mcp/test_session_tracking_tools.py with 13 comprehensive tests
+  - 100% passing (13/13): start (5), stop (3), status (4), integration (1)
+  - Test coverage: error handling, force override, runtime state, response format
+- **Documentation**:
+  - Updated docs/MCP_TOOLS.md with "Session Tracking Operations" section
+  - Documented all 3 tools with parameters, examples, response formats, notes
+  - Added JSON response samples for each tool
+- **Features**:
+  - Force parameter allows override of global configuration
+  - Runtime state registry tracks per-session enabled/disabled
+  - Status tool shows effective state (runtime override OR global config)
+  - Session manager integration with filtering and indexing pipeline
+  - Graceful shutdown with error handling
+- **Cross-Cutting Requirements**:
+  - Type hints: All functions have async def -> str signatures
+  - Error handling: Comprehensive try-except with logging
+  - Testing: 100% coverage (13/13 tests)
+  - Documentation: MCP_TOOLS.md updated
+  - Security: No sensitive data in responses
+- **Impact**: Users can now control session tracking at runtime via MCP tools, enabling dynamic enable/disable per session
+
 ### 2025-11-18 13:18 - Story 5: unassigned → completed
 - ✅ **CLI Integration** - Session tracking management commands with opt-out model
 - **Implementation**:

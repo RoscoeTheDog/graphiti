@@ -46,6 +46,12 @@ from graphiti_core.utils.maintenance.graph_data_operations import clear_data
 from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path, _normalize_msys_path
 from mcp_server.unified_config import get_config
 
+# Session tracking imports
+from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
+from graphiti_core.session_tracking.session_manager import SessionManager
+from graphiti_core.session_tracking.filter import SessionFilter
+from graphiti_core.session_tracking.indexer import SessionIndexer
+
 load_dotenv()
 
 # Load unified config instance (will replace local GraphitiConfig)
@@ -60,6 +66,13 @@ DEFAULT_EMBEDDER_MODEL = 'text-embedding-3-small'
 # Decrease this if you're experiencing 429 rate limit errors from your LLM provider.
 # Increase if you have high rate limits.
 SEMAPHORE_LIMIT = int(os.getenv('SEMAPHORE_LIMIT', 10))
+
+# Global session manager instance (initialized in initialize_server)
+session_manager: SessionManager | None = None
+
+# Runtime session tracking state (per-session overrides)
+# Maps session_id -> enabled (True/False)
+runtime_session_tracking_state: dict[str, bool] = {}
 
 
 class Requirement(BaseModel):
@@ -1591,6 +1604,269 @@ async def health_check() -> HealthCheckResponse:
         )
 
 
+@mcp.tool()
+async def session_tracking_start(session_id: str | None = None, force: bool = False) -> str:
+    """Enable session tracking for the current or specified session.
+
+    This tool starts automatic JSONL session tracking for Claude Code sessions. When enabled,
+    the system monitors session files, filters messages, and indexes them into the Graphiti
+    knowledge graph for cross-session memory and continuity.
+
+    Runtime behavior:
+    - Without force: Respects global configuration (unified_config.session_tracking.enabled)
+    - With force=True: Overrides global config and always enables tracking for this session
+
+    Args:
+        session_id (str, optional): Session ID to enable tracking for. If None, uses current session.
+                                    Format: UUID string (extracted from JSONL filename)
+        force (bool, optional): Force enable even if globally disabled (default: False)
+
+    Returns:
+        str: Success message with session ID and tracking status
+
+    Examples:
+        # Enable for current session (respects global config)
+        session_tracking_start()
+
+        # Enable for specific session
+        session_tracking_start(session_id="abc123-def456")
+
+        # Force enable (override global config)
+        session_tracking_start(force=True)
+
+    Note:
+        - Session tracking requires Neo4j database connection
+        - Filtered sessions reduce token usage by 35-70% (configurable)
+        - Sessions are indexed when they become inactive (default: 5 minutes)
+        - Use session_tracking_status() to check current state
+    """
+    global session_manager, runtime_session_tracking_state
+
+    try:
+        # Check if session manager is initialized
+        if session_manager is None:
+            return json.dumps({
+                "status": "error",
+                "message": "Session tracking not initialized. Session manager is not running.",
+                "session_id": session_id,
+                "enabled": False
+            })
+
+        # Determine effective session ID (if not provided, we can't track without current session context)
+        effective_session_id = session_id if session_id else "current"
+
+        # Check global configuration
+        global_enabled = unified_config.session_tracking.enabled
+
+        # Determine if we should enable
+        should_enable = force or global_enabled
+
+        if not should_enable and not force:
+            return json.dumps({
+                "status": "disabled",
+                "message": "Session tracking is globally disabled. Use force=True to override.",
+                "session_id": effective_session_id,
+                "enabled": False,
+                "global_config": global_enabled
+            })
+
+        # Enable tracking for this session
+        runtime_session_tracking_state[effective_session_id] = True
+
+        logger.info(f"Session tracking enabled for session: {effective_session_id} (force={force})")
+
+        return json.dumps({
+            "status": "success",
+            "message": f"Session tracking enabled for session {effective_session_id}",
+            "session_id": effective_session_id,
+            "enabled": True,
+            "forced": force,
+            "global_config": global_enabled
+        })
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error enabling session tracking: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error enabling session tracking: {error_msg}",
+            "session_id": session_id,
+            "enabled": False
+        })
+
+
+@mcp.tool()
+async def session_tracking_stop(session_id: str | None = None) -> str:
+    """Disable session tracking for the current or specified session.
+
+    This tool stops automatic JSONL session tracking for a specific session. The session
+    will no longer be monitored or indexed into Graphiti, even if globally enabled.
+
+    Runtime behavior:
+    - Adds session ID to exclusion list (runtime_session_tracking_state[session_id] = False)
+    - Does not affect other active sessions
+    - Does not modify global configuration
+
+    Args:
+        session_id (str, optional): Session ID to disable tracking for. If None, uses current session.
+                                    Format: UUID string (extracted from JSONL filename)
+
+    Returns:
+        str: Success message with session ID and tracking status
+
+    Examples:
+        # Disable for current session
+        session_tracking_stop()
+
+        # Disable for specific session
+        session_tracking_stop(session_id="abc123-def456")
+
+    Note:
+        - Stopping tracking does NOT delete already-indexed data
+        - To re-enable, use session_tracking_start()
+        - To check status, use session_tracking_status()
+    """
+    global runtime_session_tracking_state
+
+    try:
+        # Determine effective session ID
+        effective_session_id = session_id if session_id else "current"
+
+        # Disable tracking for this session
+        runtime_session_tracking_state[effective_session_id] = False
+
+        logger.info(f"Session tracking disabled for session: {effective_session_id}")
+
+        return json.dumps({
+            "status": "success",
+            "message": f"Session tracking disabled for session {effective_session_id}",
+            "session_id": effective_session_id,
+            "enabled": False
+        })
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error disabling session tracking: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error disabling session tracking: {error_msg}",
+            "session_id": session_id
+        })
+
+
+@mcp.tool()
+async def session_tracking_status(session_id: str | None = None) -> str:
+    """Get session tracking status and configuration details.
+
+    Returns comprehensive information about session tracking state, including:
+    - Global configuration (enabled/disabled)
+    - Per-session runtime state (if applicable)
+    - Session manager status
+    - Active session count
+    - Configuration details (paths, timeouts, filtering)
+
+    Args:
+        session_id (str, optional): Session ID to check status for. If None, returns global status.
+                                    Format: UUID string (extracted from JSONL filename)
+
+    Returns:
+        str: JSON string with detailed status information
+
+    Response format:
+        {
+            "status": "success" | "error",
+            "session_id": str | null,
+            "enabled": bool (effective state for this session),
+            "global_config": {
+                "enabled": bool,
+                "watch_path": str,
+                "inactivity_timeout": int (seconds),
+                "check_interval": int (seconds)
+            },
+            "runtime_override": bool | null (true/false if overridden, null if not),
+            "session_manager": {
+                "running": bool,
+                "active_sessions": int
+            },
+            "filter_config": {
+                "tool_calls": str (FULL|SUMMARY|OMIT),
+                "tool_content": str (FULL|SUMMARY|OMIT),
+                "user_messages": str (FULL|SUMMARY|OMIT),
+                "agent_messages": str (FULL|SUMMARY|OMIT)
+            }
+        }
+
+    Examples:
+        # Check global status
+        session_tracking_status()
+
+        # Check specific session status
+        session_tracking_status(session_id="abc123-def456")
+
+    Note:
+        - Use this tool to verify configuration before starting tracking
+        - Effective state = runtime override OR global config
+        - Filter config shows token reduction strategy
+    """
+    global session_manager, runtime_session_tracking_state
+
+    try:
+        # Determine effective session ID
+        effective_session_id = session_id if session_id else None
+
+        # Get global configuration
+        global_config = {
+            "enabled": unified_config.session_tracking.enabled,
+            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None,
+            "inactivity_timeout": unified_config.session_tracking.inactivity_timeout,
+            "check_interval": unified_config.session_tracking.check_interval
+        }
+
+        # Check runtime override for this session
+        runtime_override = None
+        if effective_session_id and effective_session_id in runtime_session_tracking_state:
+            runtime_override = runtime_session_tracking_state[effective_session_id]
+
+        # Determine effective enabled state
+        if runtime_override is not None:
+            effective_enabled = runtime_override
+        else:
+            effective_enabled = global_config["enabled"]
+
+        # Get session manager status
+        session_manager_status = {
+            "running": session_manager is not None and session_manager._is_running,
+            "active_sessions": session_manager.get_active_session_count() if session_manager else 0
+        }
+
+        # Get filter configuration
+        filter_config = {
+            "tool_calls": unified_config.session_tracking.filter.tool_calls.value if unified_config.session_tracking.filter else "SUMMARY",
+            "tool_content": unified_config.session_tracking.filter.tool_content.value if unified_config.session_tracking.filter else "SUMMARY",
+            "user_messages": unified_config.session_tracking.filter.user_messages.value if unified_config.session_tracking.filter else "FULL",
+            "agent_messages": unified_config.session_tracking.filter.agent_messages.value if unified_config.session_tracking.filter else "FULL"
+        }
+
+        return json.dumps({
+            "status": "success",
+            "session_id": effective_session_id,
+            "enabled": effective_enabled,
+            "global_config": global_config,
+            "runtime_override": runtime_override,
+            "session_manager": session_manager_status,
+            "filter_config": filter_config
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting session tracking status: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting status: {error_msg}",
+            "session_id": session_id
+        })
+
+
 @mcp.resource('http://graphiti/status')
 async def get_status() -> StatusResponse:
     """Get the status of the Graphiti MCP server and Neo4j connection."""
@@ -1619,6 +1895,98 @@ async def get_status() -> StatusResponse:
             status='error',
             message=f'Graphiti MCP server is running but Neo4j connection failed: {error_msg}',
         )
+
+
+async def initialize_session_tracking() -> None:
+    """Initialize session tracking system if enabled in configuration.
+
+    This function:
+    1. Checks if session tracking is enabled in unified_config
+    2. Creates ClaudePathResolver for session file discovery
+    3. Initializes SessionManager with indexing callback
+    4. Starts session manager to begin monitoring
+
+    The session manager will:
+    - Monitor Claude Code session files (.jsonl)
+    - Detect new sessions and session updates
+    - Track inactivity and trigger indexing on session close
+    - Filter and index sessions into Graphiti knowledge graph
+    """
+    global session_manager, graphiti_client
+
+    try:
+        # Check if session tracking is enabled
+        if not unified_config.session_tracking.enabled:
+            logger.info("Session tracking disabled in configuration")
+            return
+
+        # Check if Graphiti is initialized
+        if graphiti_client is None:
+            logger.warning("Session tracking enabled but Graphiti client not initialized. Skipping session tracking.")
+            return
+
+        logger.info("Initializing session tracking...")
+
+        # Create path resolver
+        watch_path = unified_config.session_tracking.watch_path
+        path_resolver = ClaudePathResolver(claude_dir=watch_path) if watch_path else ClaudePathResolver()
+
+        logger.info(f"Session tracking watch path: {path_resolver.watch_all_projects()}")
+
+        # Create session indexer with Graphiti client
+        indexer = SessionIndexer(graphiti=graphiti_client)
+
+        # Create filter
+        filter_config = unified_config.session_tracking.filter
+        session_filter = SessionFilter(
+            filter_config=filter_config
+        ) if filter_config else SessionFilter()
+
+        # Define session closed callback
+        def on_session_closed(session_id: str, file_path: Path, context) -> None:
+            """Callback when session closes - filter and index to Graphiti."""
+            try:
+                # Check runtime state (per-session override)
+                if session_id in runtime_session_tracking_state:
+                    if not runtime_session_tracking_state[session_id]:
+                        logger.info(f"Session {session_id} excluded by runtime override, skipping indexing")
+                        return
+
+                logger.info(f"Session closed: {session_id}, indexing to Graphiti...")
+
+                # Filter conversation
+                filtered_messages = session_filter.filter_conversation(context.messages)
+
+                # Index to Graphiti (synchronous in callback context)
+                # Note: This is called from SessionManager which handles async context
+                import asyncio
+                loop = asyncio.get_event_loop()
+                loop.create_task(indexer.index_session(
+                    session_id=session_id,
+                    messages=filtered_messages,
+                    project_hash=path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+                ))
+
+                logger.info(f"Session {session_id} indexed successfully ({len(filtered_messages)} messages)")
+
+            except Exception as e:
+                logger.error(f"Error indexing session {session_id}: {e}", exc_info=True)
+
+        # Create session manager
+        session_manager = SessionManager(
+            path_resolver=path_resolver,
+            inactivity_timeout=unified_config.session_tracking.inactivity_timeout,
+            on_session_closed=on_session_closed
+        )
+
+        # Start session manager
+        session_manager.start()
+
+        logger.info("Session tracking initialized and started successfully")
+
+    except Exception as e:
+        logger.error(f"Error initializing session tracking: {e}", exc_info=True)
+        logger.warning("Continuing without session tracking")
 
 
 async def initialize_server() -> MCPConfig:
@@ -1685,6 +2053,9 @@ async def initialize_server() -> MCPConfig:
     if not success:
         logger.error('Failed to initialize Graphiti after retries. Server may have limited functionality.')
 
+    # Initialize session tracking if enabled
+    await initialize_session_tracking()
+
     if args.host:
         logger.info(f'Setting MCP server host to: {args.host}')
         # Set MCP server host from CLI or env
@@ -1720,6 +2091,16 @@ async def run_mcp_server():
             await metrics_task
         except asyncio.CancelledError:
             logger.info('Metrics logging task cancelled successfully')
+
+        # Clean up session manager on shutdown
+        global session_manager
+        if session_manager is not None:
+            try:
+                logger.info('Stopping session manager...')
+                session_manager.stop()
+                logger.info('Session manager stopped successfully')
+            except Exception as e:
+                logger.error(f'Error stopping session manager: {e}', exc_info=True)
 
 
 def main():

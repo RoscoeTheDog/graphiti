@@ -215,6 +215,158 @@ health_check()
 
 ---
 
+### Session Tracking Operations
+
+#### `session_tracking_start`
+Enable session tracking for the current or specified Claude Code session.
+
+**Description**: Start automatic JSONL session tracking for Claude Code sessions. When enabled, the system monitors session files, filters messages, and indexes them into the Graphiti knowledge graph for cross-session memory and continuity.
+
+**Parameters**:
+- `session_id` (string, optional): Session ID to enable tracking for. If None, uses current session.
+  - Format: UUID string (extracted from JSONL filename)
+- `force` (bool, optional): Force enable even if globally disabled (default: False)
+
+**Runtime Behavior**:
+- Without `force`: Respects global configuration (`session_tracking.enabled`)
+- With `force=True`: Overrides global config and always enables tracking
+
+**Returns**: JSON string with status and configuration details
+
+**Example Usage**:
+```python
+# Enable for current session (respects global config)
+session_tracking_start()
+
+# Enable for specific session
+session_tracking_start(session_id="abc123-def456")
+
+# Force enable (override global config)
+session_tracking_start(force=True)
+```
+
+**Response Format**:
+```json
+{
+  "status": "success",
+  "message": "Session tracking enabled for session abc123-def456",
+  "session_id": "abc123-def456",
+  "enabled": true,
+  "forced": false,
+  "global_config": true
+}
+```
+
+**Notes**:
+- Requires Neo4j database connection
+- Filtered sessions reduce token usage by 35-70% (configurable)
+- Sessions are indexed when they become inactive (default: 5 minutes)
+- Use `session_tracking_status()` to check current state
+
+---
+
+#### `session_tracking_stop`
+Disable session tracking for the current or specified Claude Code session.
+
+**Description**: Stop automatic JSONL session tracking for a specific session. The session will no longer be monitored or indexed into Graphiti, even if globally enabled.
+
+**Parameters**:
+- `session_id` (string, optional): Session ID to disable tracking for. If None, uses current session.
+  - Format: UUID string (extracted from JSONL filename)
+
+**Runtime Behavior**:
+- Adds session ID to exclusion list
+- Does not affect other active sessions
+- Does not modify global configuration
+
+**Returns**: JSON string with status
+
+**Example Usage**:
+```python
+# Disable for current session
+session_tracking_stop()
+
+# Disable for specific session
+session_tracking_stop(session_id="abc123-def456")
+```
+
+**Response Format**:
+```json
+{
+  "status": "success",
+  "message": "Session tracking disabled for session abc123-def456",
+  "session_id": "abc123-def456",
+  "enabled": false
+}
+```
+
+**Notes**:
+- Stopping tracking does NOT delete already-indexed data
+- To re-enable, use `session_tracking_start()`
+- To check status, use `session_tracking_status()`
+
+---
+
+#### `session_tracking_status`
+Get session tracking status and configuration details.
+
+**Description**: Returns comprehensive information about session tracking state, including global configuration, per-session runtime state, session manager status, active session count, and filtering configuration.
+
+**Parameters**:
+- `session_id` (string, optional): Session ID to check status for. If None, returns global status.
+  - Format: UUID string (extracted from JSONL filename)
+
+**Returns**: JSON string with detailed status information
+
+**Example Usage**:
+```python
+# Check global status
+session_tracking_status()
+
+# Check specific session status
+session_tracking_status(session_id="abc123-def456")
+```
+
+**Response Format**:
+```json
+{
+  "status": "success",
+  "session_id": "abc123-def456",
+  "enabled": true,
+  "global_config": {
+    "enabled": true,
+    "watch_path": "/home/user/.claude/projects",
+    "inactivity_timeout": 300,
+    "check_interval": 60
+  },
+  "runtime_override": null,
+  "session_manager": {
+    "running": true,
+    "active_sessions": 3
+  },
+  "filter_config": {
+    "tool_calls": "SUMMARY",
+    "tool_content": "SUMMARY",
+    "user_messages": "FULL",
+    "agent_messages": "FULL"
+  }
+}
+```
+
+**Response Fields**:
+- `enabled`: Effective state for this session (runtime override OR global config)
+- `global_config`: Global configuration from `graphiti.config.json`
+- `runtime_override`: Per-session override (true/false if set, null if not)
+- `session_manager`: Session manager runtime status
+- `filter_config`: Content filtering strategy (see CONFIGURATION.md)
+
+**Notes**:
+- Use this tool to verify configuration before starting tracking
+- Effective state = runtime override OR global config
+- Filter config shows token reduction strategy
+
+---
+
 ## Resilience Features
 
 The MCP server includes automatic recovery and monitoring:
