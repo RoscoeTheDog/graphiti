@@ -305,24 +305,36 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 
+### Story 10: Configuration Schema Changes - Safe Defaults & Simplification
+
+**Status**: unassigned
+**Priority**: CRITICAL (REORDERED - WAS HIGH)
+**Phase**: 1 (Week 1, Days 1-2) - MOVED FROM PHASE 2
+**Depends on**: None (was Story 9, now first)
+
+**See**: [stories/10-configuration-schema-changes.md](stories/10-configuration-schema-changes.md)
+
+
+
+### Story 12: Rolling Period Filter - Prevent Bulk Indexing
+
+**Status**: unassigned
+**Priority**: CRITICAL (REORDERED - WAS HIGH)
+**Phase**: 2 (Week 1, Days 3-4) - MOVED FROM PHASE 4
+**Depends on**: Story 10
+
+**See**: [stories/12-rolling-period-filter.md](stories/12-rolling-period-filter.md)
+
+
+
 ### Story 9: Critical Bug Fix - Periodic Checker Implementation
 
 **Status**: unassigned
 **Priority**: CRITICAL
-**Phase**: 1 (Week 1, Days 1-2)
+**Phase**: 3 (Week 1, Day 5) - MOVED FROM PHASE 1
+**Depends on**: Story 10, Story 12 (was none, now safe defaults required)
 
 **See**: [stories/9-critical-bug-fix-periodic-checker.md](stories/9-critical-bug-fix-periodic-checker.md)
-
-
-
-### Story 10: Configuration Schema Changes - Safe Defaults & Simplification
-
-**Status**: unassigned
-**Priority**: HIGH
-**Phase**: 2 (Week 1, Days 3-4)
-**Depends on**: Story 9
-
-**See**: [stories/10-configuration-schema-changes.md](stories/10-configuration-schema-changes.md)
 
 
 
@@ -330,21 +342,10 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Priority**: HIGH
-**Phase**: 3 (Week 1, Day 5 - Week 2, Day 1)
+**Phase**: 4 (Week 2, Days 1-2) - MOVED FROM PHASE 3
 **Depends on**: Story 10
 
 **See**: [stories/11-template-system-implementation.md](stories/11-template-system-implementation.md)
-
-
-
-### Story 12: Rolling Period Filter - Prevent Bulk Indexing
-
-**Status**: unassigned
-**Priority**: HIGH
-**Phase**: 4 (Week 2, Days 2-3)
-**Depends on**: Story 10
-
-**See**: [stories/12-rolling-period-filter.md](stories/12-rolling-period-filter.md)
 
 
 
@@ -352,7 +353,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Priority**: MEDIUM
-**Phase**: 5 (Week 2, Days 4-5)
+**Phase**: 5 (Week 2, Days 3-4) - UNCHANGED
 **Depends on**: Story 12
 
 **See**: [stories/13-manual-sync-command.md](stories/13-manual-sync-command.md)
@@ -363,7 +364,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Priority**: MEDIUM
-**Phase**: 6 (Week 3, Days 1-2)
+**Phase**: 6 (Week 2, Day 5 - Week 3, Day 1) - MOVED FROM WEEK 3 DAYS 1-2
 **Depends on**: Story 11
 
 **See**: [stories/14-config-auto-generation.md](stories/14-config-auto-generation.md)
@@ -374,8 +375,8 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Priority**: HIGH
-**Phase**: 7 (Week 3, Days 3-5)
-**Depends on**: Stories 9-14
+**Phase**: 7 (Week 3, Days 2-4) - MOVED FROM DAYS 3-5
+**Depends on**: Stories 9, 10, 11, 12, 13, 14
 
 **See**: [stories/15-documentation-update.md](stories/15-documentation-update.md)
 
@@ -385,8 +386,8 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Priority**: CRITICAL
-**Phase**: 8 (Week 3, Day 5 - Week 4, Days 1-2)
-**Depends on**: Stories 9-15
+**Phase**: 8 (Week 3, Days 4-5 - Week 4, Days 1-2) - MOVED FROM DAY 5
+**Depends on**: Stories 9, 10, 11, 12, 13, 14, 15
 
 **See**: [stories/16-testing-and-validation.md](stories/16-testing-and-validation.md)
 
@@ -396,7 +397,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 **Status**: unassigned
 **Parent**: Story 16
-**Depends on**: Stories 9-15
+**Depends on**: Stories 9, 10, 11, 12, 13, 14, 15
 
 **See**: [stories/16.1-unit-test-validation.md](stories/16.1-unit-test-validation.md)
 
@@ -431,6 +432,49 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 **See**: [stories/16.4-regression-and-compliance-validation.md](stories/16.4-regression-and-compliance-validation.md)
 
 ## Progress Log
+
+### 2025-11-18 23:40 - Stories 9-16 Reordered (Safety-First Sequencing)
+- 🔒 **CRITICAL SAFETY FIX**: Reordered Stories 9-16 to prevent unintended LLM costs
+- **Problem Identified**: Original order (Story 9 first) would enable periodic checker BEFORE safe defaults implemented
+  - Risk: MCP server startup → discovers ALL historical JSONL files → auto-indexes → $10-$100+ unexpected LLM costs
+  - Current defaults (from Story 5): `enabled: true`, `keep_length_days: None` (no time filter)
+- **New Execution Order** (Safe Defaults First):
+  1. **Story 10**: Configuration Schema Changes (Phase 1)
+     - Change `enabled: false` (opt-in, not opt-out)
+     - Set `keep_length_days: 7` (rolling window)
+     - Priority: CRITICAL (was HIGH)
+  2. **Story 12**: Rolling Period Filter (Phase 2)
+     - Implement time-based discovery filtering
+     - Prevents bulk historical indexing
+     - Priority: CRITICAL (was HIGH)
+  3. **Story 9**: Periodic Checker Implementation (Phase 3)
+     - NOW SAFE: Respects `enabled: false` default
+     - NOW SAFE: Rolling window limits scope
+     - Depends on: Story 10, Story 12 (was none)
+  4. **Story 11**: Template System (Phase 4)
+  5. **Story 13**: Manual Sync (Phase 5)
+  6. **Story 14**: Config Auto-Gen (Phase 6)
+  7. **Story 15**: Documentation (Phase 7)
+  8. **Story 16**: Testing (Phase 8) with 4 substories
+- **Impact**: Prevents foot-gun by design, aligns with security best practices (opt-in model)
+- **Timeline**: Unchanged (still 3 weeks)
+
+### 2025-11-18 23:30 - Story 16 Sharded (Workload Remediation)
+- 🔧 **Story 16: Testing & Validation** - Sharded into 4 substories per audit Check 14 (workload complexity)
+- **Reason**: Workload score ~9.5 exceeded 8.0 threshold (MUST_SHARD category)
+- **Complexity Factors**:
+  - Multi-File Modification: 4.0x (8+ test files)
+  - Cross-Platform Testing: 1.5x (Windows + Unix)
+  - Integration Scope: 2.5x (full workflow validation)
+  - External Integration: 1.3x (Graphiti, MCP, CLI)
+- **Sharding Strategy**: Natural test category boundaries
+  - **Story 16.1**: Unit Test Validation (~25 tests, 4 hours)
+  - **Story 16.2**: Integration Test Validation (~15 tests, 4 hours)
+  - **Story 16.3**: Performance & Security Validation (~18 tests, 4 hours)
+  - **Story 16.4**: Regression & Compliance Validation (~20 tests, 4 hours)
+- **Total**: 4 substories, ~78 new tests, 16 hours estimated (unchanged from parent)
+- **Dependencies**: Sequential (16.1 → 16.2 → 16.3 → 16.4)
+- **Impact**: Story 16 now executable incrementally, single-session capacity respected
 
 ### 2025-11-18 20:08 - Story 8: in_progress → completed
 - ✅ **Refinement & Launch** - Sprint v1.0.0 release preparation complete
