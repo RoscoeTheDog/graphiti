@@ -1,6 +1,7 @@
 """Integration tests for session file monitoring."""
 
 import json
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -354,6 +355,215 @@ def test_multiple_concurrent_sessions(temp_claude_dir: Path):
 
         # Verify all sessions were discovered
         assert session_manager.get_active_session_count() == 3
+
+    finally:
+        session_manager.stop()
+
+
+def test_rolling_period_filter_recent_sessions(temp_claude_dir: Path):
+    """Test that rolling period filter discovers only recent sessions."""
+    projects_dir = temp_claude_dir / "projects"
+    project_hash = "test-project"
+    sessions_dir = projects_dir / project_hash / "sessions"
+    sessions_dir.mkdir(parents=True)
+
+    # Create old session (10 days ago)
+    old_session = sessions_dir / "old-session.jsonl"
+    old_session.write_text('{"uuid": "msg-001", "sessionId": "old-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "old"}]}}\n')
+    old_time = time.time() - (10 * 24 * 60 * 60)  # 10 days ago
+    os.utime(old_session, (old_time, old_time))
+
+    # Create recent session (3 days ago)
+    recent_session = sessions_dir / "recent-session.jsonl"
+    recent_session.write_text('{"uuid": "msg-001", "sessionId": "recent-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "recent"}]}}\n')
+    recent_time = time.time() - (3 * 24 * 60 * 60)  # 3 days ago
+    os.utime(recent_session, (recent_time, recent_time))
+
+    # Create very recent session (1 hour ago)
+    very_recent_session = sessions_dir / "very-recent-session.jsonl"
+    very_recent_session.write_text('{"uuid": "msg-001", "sessionId": "very-recent-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "very recent"}]}}\n')
+    very_recent_time = time.time() - (1 * 60 * 60)  # 1 hour ago
+    os.utime(very_recent_session, (very_recent_time, very_recent_time))
+
+    # Create session manager with 7-day rolling window
+    path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
+    session_manager = SessionManager(
+        path_resolver=path_resolver,
+        inactivity_timeout=10,
+        keep_length_days=7  # Only discover sessions modified in last 7 days
+    )
+
+    session_manager.start()
+
+    try:
+        # Give time for discovery
+        time.sleep(0.5)
+
+        # Verify only recent sessions were discovered (2 out of 3)
+        assert session_manager.get_active_session_count() == 2
+        assert session_manager.is_session_active("recent-session")
+        assert session_manager.is_session_active("very-recent-session")
+        assert not session_manager.is_session_active("old-session")
+
+    finally:
+        session_manager.stop()
+
+
+def test_rolling_period_filter_null_discovers_all(temp_claude_dir: Path):
+    """Test that null keep_length_days discovers all sessions (no filter)."""
+    projects_dir = temp_claude_dir / "projects"
+    project_hash = "test-project"
+    sessions_dir = projects_dir / project_hash / "sessions"
+    sessions_dir.mkdir(parents=True)
+
+    # Create old session (30 days ago)
+    old_session = sessions_dir / "old-session.jsonl"
+    old_session.write_text('{"uuid": "msg-001", "sessionId": "old-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "old"}]}}\n')
+    old_time = time.time() - (30 * 24 * 60 * 60)  # 30 days ago
+    os.utime(old_session, (old_time, old_time))
+
+    # Create recent session (1 day ago)
+    recent_session = sessions_dir / "recent-session.jsonl"
+    recent_session.write_text('{"uuid": "msg-001", "sessionId": "recent-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "recent"}]}}\n')
+    recent_time = time.time() - (1 * 24 * 60 * 60)  # 1 day ago
+    os.utime(recent_session, (recent_time, recent_time))
+
+    # Create session manager with null keep_length_days (discover all)
+    path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
+    session_manager = SessionManager(
+        path_resolver=path_resolver,
+        inactivity_timeout=10,
+        keep_length_days=None  # Discover all sessions, no filter
+    )
+
+    session_manager.start()
+
+    try:
+        # Give time for discovery
+        time.sleep(0.5)
+
+        # Verify both sessions were discovered (all sessions)
+        assert session_manager.get_active_session_count() == 2
+        assert session_manager.is_session_active("old-session")
+        assert session_manager.is_session_active("recent-session")
+
+    finally:
+        session_manager.stop()
+
+
+def test_rolling_period_filter_all_old_sessions(temp_claude_dir: Path):
+    """Test rolling period filter when all sessions are older than window."""
+    projects_dir = temp_claude_dir / "projects"
+    project_hash = "test-project"
+    sessions_dir = projects_dir / project_hash / "sessions"
+    sessions_dir.mkdir(parents=True)
+
+    # Create multiple old sessions (all > 7 days)
+    for i in range(3):
+        old_session = sessions_dir / f"old-session-{i}.jsonl"
+        old_session.write_text(f'{{"uuid": "msg-001", "sessionId": "old-session-{i}", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {{"role": "user", "content": [{{"type": "text", "text": "old"}}]}}}}\n')
+        old_time = time.time() - ((10 + i) * 24 * 60 * 60)  # 10-12 days ago
+        os.utime(old_session, (old_time, old_time))
+
+    # Create session manager with 7-day window
+    path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
+    session_manager = SessionManager(
+        path_resolver=path_resolver,
+        inactivity_timeout=10,
+        keep_length_days=7
+    )
+
+    session_manager.start()
+
+    try:
+        # Give time for discovery
+        time.sleep(0.5)
+
+        # Verify no sessions were discovered (all filtered out)
+        assert session_manager.get_active_session_count() == 0
+
+    finally:
+        session_manager.stop()
+
+
+def test_rolling_period_filter_edge_case_exact_cutoff(temp_claude_dir: Path):
+    """Test rolling period filter with session exactly at cutoff time."""
+    projects_dir = temp_claude_dir / "projects"
+    project_hash = "test-project"
+    sessions_dir = projects_dir / project_hash / "sessions"
+    sessions_dir.mkdir(parents=True)
+
+    # Create session exactly 7 days ago (should be included, cutoff is <, not <=)
+    cutoff_time = time.time() - (7 * 24 * 60 * 60)
+    edge_session = sessions_dir / "edge-session.jsonl"
+    edge_session.write_text('{"uuid": "msg-001", "sessionId": "edge-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "edge"}]}}\n')
+    os.utime(edge_session, (cutoff_time + 1, cutoff_time + 1))  # 1 second after cutoff
+
+    # Create session exactly 1 second before cutoff (should be filtered)
+    old_edge_session = sessions_dir / "old-edge-session.jsonl"
+    old_edge_session.write_text('{"uuid": "msg-001", "sessionId": "old-edge-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "old edge"}]}}\n')
+    os.utime(old_edge_session, (cutoff_time - 1, cutoff_time - 1))  # 1 second before cutoff
+
+    # Create session manager with 7-day window
+    path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
+    session_manager = SessionManager(
+        path_resolver=path_resolver,
+        inactivity_timeout=10,
+        keep_length_days=7
+    )
+
+    session_manager.start()
+
+    try:
+        # Give time for discovery
+        time.sleep(0.5)
+
+        # Verify only edge_session was discovered (within window)
+        assert session_manager.get_active_session_count() == 1
+        assert session_manager.is_session_active("edge-session")
+        assert not session_manager.is_session_active("old-edge-session")
+
+    finally:
+        session_manager.stop()
+
+
+def test_rolling_period_filter_default_7_days(temp_claude_dir: Path):
+    """Test that default keep_length_days is 7 days."""
+    projects_dir = temp_claude_dir / "projects"
+    project_hash = "test-project"
+    sessions_dir = projects_dir / project_hash / "sessions"
+    sessions_dir.mkdir(parents=True)
+
+    # Create old session (10 days ago)
+    old_session = sessions_dir / "old-session.jsonl"
+    old_session.write_text('{"uuid": "msg-001", "sessionId": "old-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "old"}]}}\n')
+    old_time = time.time() - (10 * 24 * 60 * 60)
+    os.utime(old_session, (old_time, old_time))
+
+    # Create recent session (3 days ago)
+    recent_session = sessions_dir / "recent-session.jsonl"
+    recent_session.write_text('{"uuid": "msg-001", "sessionId": "recent-session", "timestamp": "2025-11-13T10:00:00Z", "type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "recent"}]}}\n')
+    recent_time = time.time() - (3 * 24 * 60 * 60)
+    os.utime(recent_session, (recent_time, recent_time))
+
+    # Create session manager without keep_length_days (should default to 7)
+    path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
+    session_manager = SessionManager(
+        path_resolver=path_resolver,
+        inactivity_timeout=10
+        # keep_length_days not specified, should default to 7
+    )
+
+    session_manager.start()
+
+    try:
+        # Give time for discovery
+        time.sleep(0.5)
+
+        # Verify default filtering applied (only recent session discovered)
+        assert session_manager.get_active_session_count() == 1
+        assert session_manager.is_session_active("recent-session")
+        assert not session_manager.is_session_active("old-session")
 
     finally:
         session_manager.stop()

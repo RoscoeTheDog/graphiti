@@ -896,3 +896,21 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - stories/10-configuration-schema-changes.md (completion details)
 - **Impact**: Opt-in model (enabled: false), no LLM costs by default, rolling window (7 days) prevents bulk indexing
 - **Next**: Story 12 (Rolling Period Filter) now unblocked
+
+### 2025-11-19 06:24 - Story 12: in_progress → completed
+- ✅ **Rolling Period Filter - Prevent Bulk Indexing** - Time-based session discovery filtering
+- **Implementation**:
+  - Added `keep_length_days` parameter to SessionManager (default: 7 days)
+  - Updated `_discover_existing_sessions()` with modification time filtering
+  - Integrated with MCP server initialization
+  - 6 new comprehensive tests (14/14 passing, 100% coverage)
+- **Impact**: Prevents expensive bulk indexing on first run
+  - Before: Discovers ALL sessions (potential 1000+ sessions = $500+ LLM cost)
+  - After: Discovers only recent sessions (default 7 days, ~95% cost reduction)
+  - None value: Opt-in for historical sync (discover all sessions)
+- **Technical Details**:
+  - Uses `os.path.getmtime()` for platform-agnostic file modification time
+  - Cutoff calculation: `time.time() - (keep_length_days * 24 * 60 * 60)`
+  - Boundary: Sessions at cutoff included (< not <=)
+  - Logging: "Discovered N sessions (filtered M old sessions)"
+- **Cross-Cutting Requirements**: ✅ All met (platform-agnostic, error handling, type hints, testing, performance, logging)

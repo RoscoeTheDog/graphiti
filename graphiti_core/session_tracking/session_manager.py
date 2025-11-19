@@ -9,8 +9,10 @@ Platform Handling:
 """
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
@@ -60,6 +62,7 @@ class SessionManager:
         self,
         path_resolver: ClaudePathResolver,
         inactivity_timeout: int = 300,  # 5 minutes
+        keep_length_days: Optional[int] = 7,  # Rolling window (days)
         on_session_closed: Optional[Callable[[str, Path, ConversationContext], None]] = None,
     ):
         """Initialize session manager.
@@ -67,10 +70,12 @@ class SessionManager:
         Args:
             path_resolver: Path resolver for Claude directories
             inactivity_timeout: Seconds of inactivity before closing session
+            keep_length_days: Only auto-discover sessions modified within last N days (None = all sessions)
             on_session_closed: Callback when session closes (session_id, file_path, context)
         """
         self.path_resolver = path_resolver
         self.inactivity_timeout = inactivity_timeout
+        self.keep_length_days = keep_length_days
         self.on_session_closed = on_session_closed
 
         # Active session registry
@@ -175,15 +180,39 @@ class SessionManager:
         """Discover existing session files and start tracking them.
 
         This scans the projects directory for existing .jsonl files.
+        Applies rolling period filter based on keep_length_days config.
         """
-        logger.info("Discovering existing sessions...")
+        # Calculate cutoff time for rolling window
+        cutoff_time: Optional[float] = None
+        if self.keep_length_days is not None:
+            cutoff_time = time.time() - (self.keep_length_days * 24 * 60 * 60)
+            cutoff_dt = datetime.fromtimestamp(cutoff_time)
+            logger.info(
+                f"Discovering sessions modified in last {self.keep_length_days} days "
+                f"(cutoff: {cutoff_dt})"
+            )
+        else:
+            logger.info("Discovering all sessions (no rolling window filter)")
 
         projects = self.path_resolver.list_all_projects()
         discovered_count = 0
+        filtered_count = 0
 
         for project_hash, sessions_dir in projects.items():
             try:
                 for session_file in sessions_dir.glob("*.jsonl"):
+                    # Check modification time against rolling window
+                    if cutoff_time is not None:
+                        try:
+                            file_mtime = os.path.getmtime(session_file)
+                            if file_mtime < cutoff_time:
+                                filtered_count += 1
+                                continue  # Skip old sessions
+                        except OSError as e:
+                            logger.warning(f"Could not get modification time for {session_file}: {e}")
+                            continue
+
+                    # Session is within window or no filter, discover it
                     session_id = self.path_resolver.extract_session_id_from_path(session_file)
 
                     if session_id and session_id not in self.active_sessions:
@@ -196,7 +225,13 @@ class SessionManager:
                     exc_info=True
                 )
 
-        logger.info(f"Discovered {discovered_count} existing sessions")
+        # Log summary
+        if filtered_count > 0:
+            logger.info(
+                f"Discovered {discovered_count} sessions (filtered {filtered_count} old sessions)"
+            )
+        else:
+            logger.info(f"Discovered {discovered_count} sessions")
 
     def _handle_session_created(self, file_path: Path) -> None:
         """Handle new session file created.

@@ -1976,6 +1976,7 @@ async def initialize_session_tracking() -> None:
         session_manager = SessionManager(
             path_resolver=path_resolver,
             inactivity_timeout=unified_config.session_tracking.inactivity_timeout,
+            keep_length_days=unified_config.session_tracking.keep_length_days,
             on_session_closed=on_session_closed
         )
 
