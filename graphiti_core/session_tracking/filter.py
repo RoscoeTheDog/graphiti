@@ -23,7 +23,7 @@ from graphiti_core.session_tracking.types import (
     ToolCallStatus,
     TokenUsage,
 )
-from graphiti_core.session_tracking.filter_config import ContentMode, FilterConfig
+from graphiti_core.session_tracking.filter_config import FilterConfig
 from graphiti_core.session_tracking.message_summarizer import MessageSummarizer
 
 logger = logging.getLogger(__name__)
@@ -59,20 +59,20 @@ class SessionFilter:
             config: FilterConfig instance controlling filtering behavior.
                    If None, uses default FilterConfig settings.
             preserve_tool_results: DEPRECATED. If True, sets config to preserve all content.
-                                  Use FilterConfig(tool_content=ContentMode.FULL) instead.
-            summarizer: Optional MessageSummarizer for ContentMode.SUMMARY support.
-                       If None, SUMMARY mode falls back to FULL mode.
+                                  Use FilterConfig(tool_content=True) instead.
+            summarizer: Optional MessageSummarizer for template/inline prompt support.
+                       If None, template/prompt mode falls back to full content.
         """
         # Handle backward compatibility
         if preserve_tool_results and config is None:
             logger.warning(
                 "preserve_tool_results is deprecated. "
-                "Use FilterConfig(tool_content=ContentMode.FULL) instead."
+                "Use FilterConfig(tool_content=True) instead."
             )
             config = FilterConfig(
-                tool_content=ContentMode.FULL,
-                user_messages=ContentMode.FULL,
-                agent_messages=ContentMode.FULL
+                tool_content=True,
+                user_messages=True,
+                agent_messages=True
             )
 
         self.config = config or FilterConfig()
@@ -97,7 +97,7 @@ class SessionFilter:
 
         Notes:
             This method is async to support LLM-based summarization when
-            ContentMode.SUMMARY is configured for user/agent messages.
+            template or inline prompt is configured for user/agent messages.
         """
         logger.info(
             f"Filtering conversation {context.session_id} with {len(context.messages)} messages"
@@ -165,15 +165,15 @@ class SessionFilter:
 
         Notes:
             This method is async to support LLM-based summarization when
-            ContentMode.SUMMARY is configured for user/agent messages.
+            template or inline prompt is configured for user/agent messages.
         """
         self._stats["messages_processed"] += 1
 
         # USER messages: Apply user_messages config
         if message.role == MessageRole.USER:
-            if self.config.user_messages == ContentMode.FULL:
+            if self.config.user_messages is True:
                 return message
-            elif self.config.user_messages == ContentMode.OMIT:
+            elif self.config.user_messages is False:
                 return SessionMessage(
                     uuid=message.uuid,
                     session_id=message.session_id,
@@ -184,8 +184,8 @@ class SessionFilter:
                     tokens=TokenUsage(input=5, output=0, total=5),
                     metadata=message.metadata
                 )
-            elif self.config.user_messages == ContentMode.SUMMARY:
-                # Use MessageSummarizer for LLM-based summarization
+            elif isinstance(self.config.user_messages, str):
+                # Template or inline prompt - use MessageSummarizer
                 if self.summarizer:
                     try:
                         summary = await self.summarizer.summarize(
@@ -207,26 +207,24 @@ class SessionFilter:
                         )
                     except Exception as e:
                         logger.warning(
-                            f"Failed to summarize user message, falling back to FULL: {e}"
+                            f"Failed to summarize user message, falling back to full content: {e}"
                         )
-                        return message  # Fallback to FULL on error
+                        return message  # Fallback to full content on error
                 else:
                     logger.debug(
-                        "ContentMode.SUMMARY requested but no summarizer provided, "
-                        "falling back to FULL"
+                        "Template/prompt requested but no summarizer provided, "
+                        "falling back to full content"
                     )
-                    return message  # Fallback to FULL
-            else:  # ContentMode.FULL
-                return message
+                    return message  # Fallback to full content
 
         # ASSISTANT messages: Apply agent_messages and tool_content config
         if message.role == MessageRole.ASSISTANT:
             # Handle agent text content
             content = message.content
-            if self.config.agent_messages == ContentMode.OMIT:
+            if self.config.agent_messages is False:
                 content = "[Agent message omitted]"
-            elif self.config.agent_messages == ContentMode.SUMMARY:
-                # Use MessageSummarizer for LLM-based summarization
+            elif isinstance(self.config.agent_messages, str):
+                # Template or inline prompt - use MessageSummarizer
                 if self.summarizer and content:
                     try:
                         content = await self.summarizer.summarize(
@@ -234,22 +232,22 @@ class SessionFilter:
                         )
                     except Exception as e:
                         logger.warning(
-                            f"Failed to summarize agent message, falling back to FULL: {e}"
+                            f"Failed to summarize agent message, falling back to full content: {e}"
                         )
-                        # Keep original content on error (fallback to FULL)
+                        # Keep original content on error (fallback to full content)
                 else:
                     if not self.summarizer:
                         logger.debug(
-                            "ContentMode.SUMMARY requested but no summarizer provided, "
-                            "falling back to FULL"
+                            "Template/prompt requested but no summarizer provided, "
+                            "falling back to full content"
                         )
-                    # Keep original content (fallback to FULL)
+                    # Keep original content (fallback to full content)
 
             # Handle tool calls
             filtered_tool_calls = None
             tokens_modified = False
             if message.tool_calls:
-                if self.config.tool_content == ContentMode.FULL:
+                if self.config.tool_content is True:
                     filtered_tool_calls = message.tool_calls
                     # No filtering, keep original tokens
                 elif not self.config.tool_calls:
@@ -265,7 +263,7 @@ class SessionFilter:
                     tokens_modified = True
 
             # Determine tokens - only recalculate if we modified content or tool calls
-            if tokens_modified or self.config.agent_messages != ContentMode.FULL:
+            if tokens_modified or self.config.agent_messages is not True:
                 tokens = self._estimate_filtered_tokens(message, filtered_tool_calls) if filtered_tool_calls else message.tokens
             else:
                 tokens = message.tokens
@@ -295,11 +293,11 @@ class SessionFilter:
             Filtered tool call according to tool_content mode
         """
         # Determine result based on tool_content mode
-        if self.config.tool_content == ContentMode.FULL:
+        if self.config.tool_content is True:
             result_summary = tool_call.result_summary  # Keep original result
-        elif self.config.tool_content == ContentMode.OMIT:
+        elif self.config.tool_content is False:
             result_summary = "[Tool result omitted]"
-        else:  # ContentMode.SUMMARY
+        else:  # Template or inline prompt (str)
             result_summary = self._summarize_tool_result(tool_call)
 
         return ToolCall(

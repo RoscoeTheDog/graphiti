@@ -1,7 +1,9 @@
 # Story 10: Configuration Schema Changes - Safe Defaults & Simplification
 
-**Status**: unassigned
+**Status**: error
 **Created**: 2025-11-18 23:01
+**Claimed**: 2025-11-18 23:55
+**Error**: 2025-11-19 00:04
 **Priority**: HIGH
 **Estimated Effort**: 6 hours
 **Phase**: 2 (Week 1, Days 3-4)
@@ -165,3 +167,95 @@ See parent sprint `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`:
 - Validation: Pydantic validators for new fields
 - Testing: >80% coverage with migration tests
 - Documentation: Updated config examples
+
+## Implementation Progress
+
+### Completed
+- [x] FilterConfig: Removed ContentMode enum, updated to `bool | str` type system
+- [x] SessionTrackingConfig: Changed defaults to opt-in model (enabled: false, auto_summarize: false)
+- [x] SessionTrackingConfig: Increased inactivity_timeout from 300 to 900 seconds
+- [x] SessionTrackingConfig: Added `keep_length_days` parameter with validation
+- [x] graphiti.config.json: Updated with new defaults
+
+### Remaining Work
+- [ ] **CRITICAL**: Update filter.py to work with `bool | str` instead of ContentMode enum
+  - Lines 26, 62-63, 70, 73-76, 100, 168, 174-304 reference ContentMode
+  - Need to refactor comparison logic: `== ContentMode.FULL` → `is True`
+  - Need to handle string values (templates/prompts) - requires new logic
+  - Estimated: 2-3 hours
+- [ ] Update test_filter_config.py to work with new type system
+  - Remove ContentMode imports
+  - Update all test assertions to use `True`, `False`, or string values
+  - Estimated: 1-2 hours
+- [ ] Update test_unified_config.py for keep_length_days validation
+  - Test null value accepted
+  - Test positive integers accepted
+  - Test zero/negative rejected
+  - Estimated: 30 minutes
+
+## Blockers
+
+**Cannot complete story until filter.py is refactored** - The existing filtering logic is tightly coupled to ContentMode enum. Needs careful refactoring to:
+1. Interpret `True` as "preserve full content"
+2. Interpret `False` as "omit content"  
+3. Interpret strings as either template paths or inline prompts
+4. Maintain backward compatibility with existing behavior
+
+**Risk**: Breaking existing functionality if not done carefully.
+
+## Next Steps
+
+1. Refactor filter.py content mode handling
+2. Update all tests
+3. Run full test suite
+4. Verify backward compatibility
+5. Update documentation
+
+
+## Remediation Plan
+
+**Root Cause**: Schema changes (FilterConfig using `bool | str`) are complete, but runtime logic (filter.py) still uses ContentMode enum comparisons. This creates an import error that blocks all session tracking tests.
+
+**Fix Required**:
+
+1. **Refactor filter.py** (CRITICAL - 2-3 hours):
+   - Remove `from graphiti_core.session_tracking.filter_config import ContentMode`
+   - Replace all enum comparisons with type-based logic:
+     ```python
+     # OLD
+     if self.config.user_messages == ContentMode.FULL:
+         return message
+     elif self.config.user_messages == ContentMode.OMIT:
+         return omitted_message
+     elif self.config.user_messages == ContentMode.SUMMARY:
+         return summarized_message
+     
+     # NEW
+     if self.config.user_messages is True:  # bool True = FULL
+         return message
+     elif self.config.user_messages is False:  # bool False = OMIT
+         return omitted_message
+     elif isinstance(self.config.user_messages, str):  # str = SUMMARY (template or inline prompt)
+         return await self._apply_template_or_prompt(self.config.user_messages, message)
+     ```
+   - Implement template/inline prompt handling (NEW functionality)
+   - Update backward compatibility logic (preserve_tool_results parameter)
+
+2. **Update test_filter_config.py** (HIGH - 1-2 hours):
+   - Remove `ContentMode` imports
+   - Replace enum values with bool/str: `ContentMode.FULL` → `True`, `ContentMode.OMIT` → `False`, `ContentMode.SUMMARY` → `"default-tool-content.md"`
+   - Update all assertions to match new types
+
+3. **Add keep_length_days tests** (MEDIUM - 30 min):
+   - test_unified_config.py: Add validation tests for new parameter
+
+4. **Integration testing** (MEDIUM - 1 hour):
+   - Run full test suite
+   - Verify backward compatibility
+   - Test all filter config combinations
+
+**Action**: Story cannot be completed without filter.py refactoring. Split into substory or continue in next session.
+
+**Dependencies**: None (this work is blocking Story 9, 11, 12)
+
+**Estimated Completion**: 4-6 hours additional work
