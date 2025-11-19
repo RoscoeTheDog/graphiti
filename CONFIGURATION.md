@@ -434,7 +434,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 ```json
 {
   "session_tracking": {
-    "enabled": true,
+    "enabled": false,
     "watch_path": null,
     "inactivity_timeout": 300,
     "check_interval": 60,
@@ -448,7 +448,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable automatic session tracking (opt-out model, **enabled by default**) |
+| `enabled` | bool | `false` | Enable/disable automatic session tracking (opt-in model for security, **disabled by default**) |
 | `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
 | `inactivity_timeout` | int | 300 | **Seconds** of inactivity before session is considered closed and indexed (default: 5 minutes) |
 | `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
@@ -463,12 +463,12 @@ Control how different message types are filtered during session tracking. Enable
 ```json
 {
   "session_tracking": {
-    "enabled": true,
+    "enabled": false,
     "filter": {
       "tool_calls": true,
-      "tool_content": "summary",
-      "user_messages": "full",
-      "agent_messages": "full"
+      "tool_content": "default-tool-content.md",
+      "user_messages": true,
+      "agent_messages": true
     }
   }
 }
@@ -479,14 +479,14 @@ Control how different message types are filtered during session tracking. Enable
 | Field | Type | Options | Default | Description |
 |-------|------|---------|---------|-------------|
 | `tool_calls` | bool | true/false | `true` | Preserve tool call structure (names, parameters) |
-| `tool_content` | string | "full"/"summary"/"omit" | `"summary"` | How to handle tool result content |
-| `user_messages` | string | "full"/"summary"/"omit" | `"full"` | How to handle user message content |
-| `agent_messages` | string | "full"/"summary"/"omit" | `"full"` | How to handle agent text responses |
+| `tool_content` | bool \| str | true/false/"template.md" | `"default-tool-content.md"` | Tool result content: `true` (full), `false` (omit), or template path for summarization |
+| `user_messages` | bool \| str | true/false/"template.md" | `true` | User message content: `true` (full), `false` (omit), or template path for summarization |
+| `agent_messages` | bool \| str | true/false/"template.md" | `true` | Agent message content: `true` (full), `false` (omit), or template path for summarization |
 
-**Content Modes:**
-- **`"full"`**: Preserve complete content (no filtering)
-- **`"summary"`**: Replace with concise 1-line summary (~70% reduction for tool results)
-- **`"omit"`**: Completely remove content, keep structure only (~95% reduction)
+**Filter Value Types:**
+- **`true`**: Preserve complete content (no filtering)
+- **`false`**: Omit content completely, keep structure only (~95% reduction)
+- **`"template-file.md"`**: Use custom template for LLM-based summarization (~70% reduction, adds LLM cost)
 
 **Filtering Presets:**
 
@@ -495,9 +495,9 @@ Control how different message types are filtered during session tracking. Enable
 {
   "filter": {
     "tool_calls": true,
-    "tool_content": "summary",
-    "user_messages": "full",
-    "agent_messages": "full"
+    "tool_content": "default-tool-content.md",
+    "user_messages": true,
+    "agent_messages": true
   }
 }
 
@@ -505,9 +505,9 @@ Control how different message types are filtered during session tracking. Enable
 {
   "filter": {
     "tool_calls": true,
-    "tool_content": "omit",
-    "user_messages": "full",
-    "agent_messages": "full"
+    "tool_content": false,
+    "user_messages": true,
+    "agent_messages": true
   }
 }
 
@@ -515,19 +515,19 @@ Control how different message types are filtered during session tracking. Enable
 {
   "filter": {
     "tool_calls": true,
-    "tool_content": "full",
-    "user_messages": "full",
-    "agent_messages": "full"
+    "tool_content": true,
+    "user_messages": true,
+    "agent_messages": true
   }
 }
 
-// Aggressive: Summarize everything (~70% reduction)
+// Aggressive: Summarize everything (~70% reduction, requires LLM cost)
 {
   "filter": {
     "tool_calls": true,
-    "tool_content": "summary",
-    "user_messages": "summary",
-    "agent_messages": "summary"
+    "tool_content": "default-tool-content.md",
+    "user_messages": "default-user-messages.md",
+    "agent_messages": "default-agent-messages.md"
   }
 }
 ```
@@ -538,11 +538,12 @@ Control how different message types are filtered during session tracking. Enable
 - Aggressive config: ~70% reduction (summarize everything with LLM)
 - Conservative config: 0% reduction (no filtering)
 
-**Note on LLM Summarization (Story 2.3.4):**
-- `ContentMode.SUMMARY` for tool results uses hardcoded 1-line summaries (free)
-- `ContentMode.SUMMARY` for user/agent messages requires MessageSummarizer with LLM (adds cost: ~$0.01-0.05 per message)
-- Default configuration (FULL for user/agent) avoids LLM costs
-- To enable LLM summarization: Pass `MessageSummarizer(llm_client)` to `SessionFilter(summarizer=...)`
+**Note on Template-Based Summarization:**
+- **Template paths** (e.g., `"default-tool-content.md"`) trigger LLM-based summarization
+- **Cost**: ~$0.01-0.05 per message when using templates for user/agent messages
+- **Default configuration** (`true` for user/agent messages) avoids LLM costs
+- **Built-in templates**: `default-tool-content.md`, `default-user-messages.md`, `default-agent-messages.md`
+- **Custom templates**: Place in `.graphiti/auto-tracking/templates/` (see Template System section below)
 
 ### Customizable Summarization Templates
 
