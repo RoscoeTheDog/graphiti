@@ -33,7 +33,7 @@ This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0
 **v1.0.0 System:**
 ```json
 {
-  "filter_config": {
+  "filter": {
     "user_messages": "full",      // Enum: "full" | "summary" | "omit"
     "agent_messages": "full",
     "tool_calls": "summary",
@@ -45,7 +45,7 @@ This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0
 **v1.1.0 System:**
 ```json
 {
-  "filter_config": {
+  "filter": {
     "user_messages": true,                    // bool | string (template path)
     "agent_messages": true,
     "tool_calls": "templates/tool_summary",
@@ -72,9 +72,9 @@ This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0
 
 ```json
 {
-  "filter_config": {
-    "tool_calls": "templates/tool_summary.j2",
-    "tool_content": "templates/custom_filter.j2"
+  "filter": {
+    "tool_calls": "templates/tool_summary.md",
+    "tool_content": "templates/custom_filter.md"
   }
 }
 ```
@@ -124,13 +124,13 @@ This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0
 
 ```bash
 # Sync last 7 days (default)
-graphiti-mcp session-tracking sync
+graphiti-mcp-session-tracking sync
 
 # Sync specific date range
-graphiti-mcp session-tracking sync --days 30
+graphiti-mcp-session-tracking sync --days 30
 
 # Sync all unindexed sessions (expensive!)
-graphiti-mcp session-tracking sync --days 0
+graphiti-mcp-session-tracking sync --days 0
 ```
 
 **Use Cases:**
@@ -153,7 +153,7 @@ graphiti-mcp session-tracking sync --days 0
 **Steps:**
 1. Enable session tracking:
    ```bash
-   graphiti-mcp session-tracking enable
+   graphiti-mcp-session-tracking enable
    ```
 
 2. Update `graphiti.config.json`:
@@ -161,7 +161,7 @@ graphiti-mcp session-tracking sync --days 0
    {
      "session_tracking": {
        "enabled": true,
-       "filter_config": {
+       "filter": {
          "user_messages": true,
          "agent_messages": true,
          "tool_calls": true,
@@ -174,7 +174,7 @@ graphiti-mcp session-tracking sync --days 0
 3. (Optional) Sync old sessions:
    ```bash
    # Be cautious with --days value (costs $$)
-   graphiti-mcp session-tracking sync --days 7
+   graphiti-mcp-session-tracking sync --days 7
    ```
 
 **Before:**
@@ -182,7 +182,7 @@ graphiti-mcp session-tracking sync --days 0
 {
   "session_tracking": {
     "enabled": true,  // Auto-enabled in v1.0.0
-    "filter_config": {
+    "filter": {
       "user_messages": "full",
       "agent_messages": "full",
       "tool_calls": "summary",
@@ -197,7 +197,7 @@ graphiti-mcp session-tracking sync --days 0
 {
   "session_tracking": {
     "enabled": true,  // Must explicitly enable in v1.1.0
-    "filter_config": {
+    "filter": {
       "user_messages": true,      // "full" → true
       "agent_messages": true,
       "tool_calls": true,          // "summary" → true (or template path)
@@ -219,7 +219,7 @@ graphiti-mcp session-tracking sync --days 0
 **Steps:**
 1. Enable session tracking:
    ```bash
-   graphiti-mcp session-tracking enable
+   graphiti-mcp-session-tracking enable
    ```
 
 2. Update `graphiti.config.json` with optimizations:
@@ -228,10 +228,10 @@ graphiti-mcp session-tracking sync --days 0
      "session_tracking": {
        "enabled": true,
        "keep_length_days": 90,  // 3-month rolling window
-       "filter_config": {
+       "filter": {
          "user_messages": true,
          "agent_messages": true,
-         "tool_calls": "templates/tool_summary.j2",
+         "tool_calls": "templates/tool_summary.md",
          "tool_content": false
        }
      }
@@ -241,15 +241,15 @@ graphiti-mcp session-tracking sync --days 0
 3. Create custom template (optional):
    ```bash
    mkdir -p templates
-   cat > templates/tool_summary.j2 << 'EOF'
-   Tool: {{ tool_name }}
-   {% if result.success %}✅{% else %}❌{% endif %}
+   cat > templates/tool_summary.md << 'EOF'
+   Tool: {tool_name}
+   ✅❌
    EOF
    ```
 
 4. Sync recent sessions only:
    ```bash
-   graphiti-mcp session-tracking sync --days 30
+   graphiti-mcp-session-tracking sync --days 30
    ```
 
 **Before:**
@@ -257,7 +257,7 @@ graphiti-mcp session-tracking sync --days 0
 {
   "session_tracking": {
     "enabled": true,
-    "filter_config": {
+    "filter": {
       "user_messages": "full",
       "agent_messages": "full",
       "tool_calls": "summary",
@@ -273,10 +273,10 @@ graphiti-mcp session-tracking sync --days 0
   "session_tracking": {
     "enabled": true,
     "keep_length_days": 90,
-    "filter_config": {
+    "filter": {
       "user_messages": true,
       "agent_messages": true,
-      "tool_calls": "templates/tool_summary.j2",
+      "tool_calls": "templates/tool_summary.md",
       "tool_content": false
     }
   }
@@ -310,10 +310,10 @@ graphiti-mcp session-tracking sync --days 0
      "session_tracking": {
        "enabled": false,  // Disabled by default
        "keep_length_days": 30,
-       "filter_config": {
+       "filter": {
          "user_messages": false,              // Exclude user messages
-         "agent_messages": "templates/minimal.j2",
-         "tool_calls": "templates/tool_summary.j2",
+         "agent_messages": "templates/minimal.md",
+         "tool_calls": "templates/tool_summary.md",
          "tool_content": false
        }
      }
@@ -322,7 +322,7 @@ graphiti-mcp session-tracking sync --days 0
 
 4. Custom minimal template:
    ```bash
-   cat > templates/minimal.j2 << 'EOF'
+   cat > templates/minimal.md << 'EOF'
    Summary: Task completed successfully
    EOF
    ```
@@ -332,7 +332,7 @@ graphiti-mcp session-tracking sync --days 0
 {
   "session_tracking": {
     "enabled": true,
-    "filter_config": {
+    "filter": {
       "user_messages": "full",
       "agent_messages": "full",
       "tool_calls": "summary",
@@ -348,10 +348,10 @@ graphiti-mcp session-tracking sync --days 0
   "session_tracking": {
     "enabled": false,  // Opt-in only when needed
     "keep_length_days": 30,
-    "filter_config": {
+    "filter": {
       "user_messages": false,              // Maximum privacy
-      "agent_messages": "templates/minimal.j2",
-      "tool_calls": "templates/tool_summary.j2",
+      "agent_messages": "templates/minimal.md",
+      "tool_calls": "templates/tool_summary.md",
       "tool_content": false
     }
   }
@@ -371,7 +371,7 @@ graphiti-mcp session-tracking sync --days 0
 |-------|------|----------|----------|
 | `true` | bool | Include full content | High-fidelity indexing |
 | `false` | bool | Exclude entirely | Privacy, cost reduction |
-| `"templates/custom.j2"` | str | Custom Jinja2 template | Flexible summarization |
+| `"templates/custom.md"` | str | Custom Jinja2 template | Flexible summarization |
 
 ### Retention Configuration
 
@@ -392,8 +392,8 @@ graphiti-mcp session-tracking sync --days 0
 
 **Solution:**
 ```bash
-graphiti-mcp session-tracking enable
-graphiti-mcp session-tracking status  # Verify enabled
+graphiti-mcp-session-tracking enable
+graphiti-mcp-session-tracking status  # Verify enabled
 ```
 
 ---
@@ -414,7 +414,7 @@ graphiti-mcp session-tracking status  # Verify enabled
 **Mapping:**
 - `"full"` → `true`
 - `"omit"` → `false`
-- `"summary"` → `true` or `"templates/custom.j2"`
+- `"summary"` → `true` or `"templates/custom.md"`
 
 ---
 
@@ -462,8 +462,8 @@ graphiti-mcp session-tracking status  # Verify enabled
    "tool_calls": true
 
    # Or create template
-   cat > templates/tool_summary.j2 << 'EOF'
-   {{ tool_name }}: {{ result.status }}
+   cat > templates/tool_summary.md << 'EOF'
+   {tool_name}: {status}
    EOF
    ```
 
@@ -483,7 +483,7 @@ pip install graphiti-mcp==1.0.0
 {
   "session_tracking": {
     "enabled": true,
-    "filter_config": {
+    "filter": {
       "user_messages": "full",
       "agent_messages": "full",
       "tool_calls": "summary",
@@ -508,7 +508,7 @@ After migrating, verify everything works:
 
 **Test 1: Verify tracking is enabled**
 ```bash
-graphiti-mcp session-tracking status
+graphiti-mcp-session-tracking status
 # Expected: "enabled": true
 ```
 

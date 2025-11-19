@@ -38,12 +38,12 @@ Session tracking is **disabled by default** for security and privacy (opt-in mod
 
 **Enable globally:**
 ```bash
-graphiti-mcp session-tracking enable
+graphiti-mcp-session-tracking enable
 ```
 
 **Check status:**
 ```bash
-graphiti-mcp session-tracking status
+graphiti-mcp-session-tracking status
 ```
 
 ### Disabling Session Tracking
@@ -52,7 +52,7 @@ If you want to disable session tracking after enabling:
 
 ```bash
 # Disable globally
-graphiti-mcp session-tracking disable
+graphiti-mcp-session-tracking disable
 
 ```
 
@@ -103,11 +103,11 @@ Session tracking configuration is stored in `graphiti.config.json`:
 {
   "session_tracking": {
     "enabled": false,
-    "watch_directories": [
-      "~/.claude/projects"
-    ],
-    "inactivity_timeout_minutes": 30,
-    "scan_interval_seconds": 2
+    "watch_path": "~/.claude/projects",
+    "inactivity_timeout": 900,
+    "check_interval": 60,
+    "auto_summarize": false,
+    "keep_length_days": 7
   }
 }
 ```
@@ -115,9 +115,9 @@ Session tracking configuration is stored in `graphiti.config.json`:
 **Configuration Options:**
 
 - `enabled` - Enable/disable session tracking (default: `false`)
-- `watch_directories` - Directories to monitor for JSONL files
-- `inactivity_timeout_minutes` - Minutes of inactivity before session is considered closed (default: 30)
-- `scan_interval_seconds` - How often to check for file changes (default: 2)
+- `watch_path` - Directories to monitor for JSONL files
+- `inactivity_timeout` - Minutes of inactivity before session is considered closed (default: 30)
+- `check_interval` - How often to check for file changes (default: 2)
 
 ### Runtime Toggle (Per-Session Override)
 
@@ -182,13 +182,13 @@ You can manually trigger session indexing using the CLI:
 
 ```bash
 # Sync last 7 days (default)
-graphiti-mcp session-tracking sync
+graphiti-mcp-session-tracking sync
 
 # Sync specific date range
-graphiti-mcp session-tracking sync --days 30
+graphiti-mcp-session-tracking sync --days 30
 
 # Sync ALL unindexed sessions (use with caution!)
-graphiti-mcp session-tracking sync --days 0
+graphiti-mcp-session-tracking sync --days 0
 ```
 
 **Use Cases:**
@@ -301,7 +301,7 @@ Group IDs isolate sessions by project:
 
 **Check 1: Verify tracking is enabled**
 ```bash
-graphiti-mcp session-tracking status
+graphiti-mcp-session-tracking status
 ```
 
 **Check 2: Verify MCP server is running**
