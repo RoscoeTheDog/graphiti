@@ -2,7 +2,7 @@
 Message summarization for session tracking content modes.
 
 This module provides LLM-based summarization for user and agent messages
-when ContentMode.SUMMARY is configured in the filtering system.
+when string template or prompt is configured in the filtering system.
 """
 
 import hashlib
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class MessageSummarizer:
-    """LLM-based message summarizer for ContentMode.SUMMARY.
+    """LLM-based message summarizer for string template or prompt.
 
     Uses Graphiti's existing LLM client to generate concise summaries of
     user and agent messages. Includes caching to avoid re-summarizing

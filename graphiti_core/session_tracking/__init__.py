@@ -15,7 +15,7 @@ Core components:
 """
 
 from .filter import SessionFilter
-from .filter_config import ContentMode, FilterConfig
+from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
 from .message_summarizer import MessageSummarizer
@@ -41,7 +41,6 @@ __all__ = [
     # Filtering
     "SessionFilter",
     "FilterConfig",
-    "ContentMode",
     # Message summarization (NEW - Story 2.3.4)
     "MessageSummarizer",
     # Indexing (NEW - Story 4 refactoring)
