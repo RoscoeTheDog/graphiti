@@ -845,3 +845,29 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - ✅ Platform tests - via test_path_resolver.py (Windows + Unix path normalization)
   - ✅ >80% coverage - 97% pass rate (96/99 tests)
 - **Impact**: Integration testing complete through existing comprehensive test suite (no duplication needed)
+
+### 2025-11-19 00:12 - Story 10: unassigned → in_progress → error (Partial Completion)
+- ⚠️ **Story 10: Configuration Schema Changes** - Partial completion, blocking issue identified
+- **Completed** (57% progress):
+  - ✅ FilterConfig: Removed ContentMode enum, implemented bool|str type system
+  - ✅ SessionTrackingConfig: Changed defaults to opt-in (enabled: false, auto_summarize: false)
+  - ✅ SessionTrackingConfig: Increased inactivity_timeout 300→900 seconds
+  - ✅ SessionTrackingConfig: Added keep_length_days parameter with validation
+  - ✅ graphiti.config.json: Updated example configuration
+- **Blocking Issue** (CRITICAL):
+  - ❌ filter.py still imports ContentMode (removed in schema changes)
+  - ❌ ImportError blocks all session tracking tests
+  - ❌ 300+ lines in filter.py require refactoring
+- **Remediation Plan Created**:
+  - Estimated: 4-6 hours additional work
+  - filter.py refactoring: 2-3 hours (replace enum comparisons with type-based logic)
+  - test_filter_config.py updates: 1-2 hours (remove ContentMode, use bool/str)
+  - test_unified_config.py updates: 30 min (add keep_length_days tests)
+  - Integration testing: 1 hour
+- **Files Modified** (uncommitted): filter_config.py, unified_config.py, graphiti.config.json, story file
+- **Impact**: Blocks Stories 9, 11, 12 (all depend on safe defaults)
+- **Next Steps**: 
+  - Option A: Complete filter.py refactoring to finish Story 10
+  - Option B: Use /sprint:REMEDIATE --analyze for comprehensive cleanup
+  - Option C: Rollback schema changes and defer story
+- **Handoff**: .claude/handoff/story-10-partial-completion-2025-11-19-0012.md

@@ -326,22 +326,23 @@ class SessionTrackingConfig(BaseModel):
     """
 
     enabled: bool = Field(
-        default=True,
-        description="Enable or disable session tracking (opt-out model, enabled by default)"
+        default=False,
+        description="Enable or disable session tracking (opt-in model, disabled by default for security)"
     )
     watch_path: Optional[str] = Field(
         default=None,
         description=(
             "Path to directory containing Claude Code session files. "
             "If None, defaults to ~/.claude/projects/. "
-            "Must be an absolute path (native OS format: C:\\\\ on Windows, / on Unix)."
+            "Must be an absolute path (native OS format: C:\\ on Windows, / on Unix)."
         )
     )
     inactivity_timeout: int = Field(
-        default=300,
+        default=900,
         description=(
             "Inactivity timeout in seconds before a session is considered closed. "
-            "After this timeout, the session will be indexed into Graphiti."
+            "After this timeout, the session will be indexed into Graphiti. "
+            "Default: 900 seconds (15 minutes) to accommodate long-running operations."
         )
     )
     check_interval: int = Field(
@@ -352,10 +353,10 @@ class SessionTrackingConfig(BaseModel):
         )
     )
     auto_summarize: bool = Field(
-        default=True,
+        default=False,
         description=(
             "Automatically summarize closed sessions using Graphiti's LLM. "
-            "If False, sessions are stored as raw episodes without summarization."
+            "If False, sessions are stored as raw episodes without summarization (no LLM costs)."
         )
     )
     store_in_graph: bool = Field(
@@ -365,14 +366,47 @@ class SessionTrackingConfig(BaseModel):
             "If False, sessions are logged but not persisted to Neo4j."
         )
     )
+    keep_length_days: Optional[int] = Field(
+        default=7,
+        description=(
+            "Rolling window filter for session discovery in days. "
+            "Only sessions modified within the last N days will be indexed. "
+            "Set to null to index all sessions (not recommended, may cause bulk LLM costs)."
+        )
+    )
     filter: FilterConfig = Field(
         default_factory=FilterConfig,
         description=(
             "Filtering configuration for session content. "
             "Controls how messages and tool results are filtered for token reduction. "
-            "Default: summarize tool results (50%+ reduction), preserve user/agent messages."
+            "Default: template-based tool summarization, preserve user/agent messages."
         )
     )
+
+    @field_validator('keep_length_days')
+    def validate_keep_length_days(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("keep_length_days must be > 0 or null")
+        return v
+
+
+    )
+    filter: FilterConfig = Field(
+        default_factory=FilterConfig,
+        description=(
+            "Filtering configuration for session content. "
+            "Controls how messages and tool results are filtered for token reduction. "
+            "Default: template-based tool summarization, preserve user/agent messages."
+        )
+    )
+
+    @field_validator('keep_length_days')
+    def validate_keep_length_days(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("keep_length_days must be > 0 or null")
+        return v
+
+
 
 
 # ============================================================================
