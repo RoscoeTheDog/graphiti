@@ -181,7 +181,7 @@ class SessionFilter:
                     timestamp=message.timestamp,
                     content="[User message omitted]",
                     tool_calls=None,
-                    tokens=TokenUsage(input=5, output=0, total=5),
+                    tokens=TokenUsage(input_tokens=5, output_tokens=0),
                     metadata=message.metadata
                 )
             elif isinstance(self.config.user_messages, str):

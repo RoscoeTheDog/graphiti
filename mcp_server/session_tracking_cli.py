@@ -242,9 +242,9 @@ def cmd_sync(args: argparse.Namespace) -> None:
             sys.exit(1)
 
         # Display table
-        print("
+        print("""
 📊 Session Sync Summary
-")
+""")
         print(f"  Mode:             {'DRY RUN (preview)' if data['dry_run'] else 'ACTUAL SYNC'}")
         print(f"  Sessions found:   {data['sessions_found']}")
         print(f"  Estimated cost:   {data['estimated_cost']}")

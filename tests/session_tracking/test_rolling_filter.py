@@ -23,9 +23,11 @@ class TestRollingPeriodFilter:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
 
-            # Create 3 session files with different modification times
-            sessions_dir = claude_dir / "sessions"
-            sessions_dir.mkdir()
+            # Create proper directory structure: projects/<project_hash>/sessions/
+            projects_dir = claude_dir / "projects"
+            project_hash = path_resolver.get_project_hash("/fake/project/path")
+            sessions_dir = projects_dir / project_hash / "sessions"
+            sessions_dir.mkdir(parents=True)
 
             # Old session (10 days ago)
             old_session = sessions_dir / "session1.jsonl"
@@ -70,9 +72,11 @@ class TestRollingPeriodFilter:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
 
-            # Create 3 session files with different modification times
-            sessions_dir = claude_dir / "sessions"
-            sessions_dir.mkdir()
+            # Create proper directory structure: projects/<project_hash>/sessions/
+            projects_dir = claude_dir / "projects"
+            project_hash = path_resolver.get_project_hash("/fake/project/path")
+            sessions_dir = projects_dir / project_hash / "sessions"
+            sessions_dir.mkdir(parents=True)
 
             # Old session (10 days ago) - should be filtered
             old_session = sessions_dir / "session1.jsonl"
@@ -117,25 +121,32 @@ class TestRollingPeriodFilter:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
 
-            sessions_dir = claude_dir / "sessions"
-            sessions_dir.mkdir()
+            # Create proper directory structure: projects/<project_hash>/sessions/
+            projects_dir = claude_dir / "projects"
+            project_hash = path_resolver.get_project_hash("/fake/project/path")
+            sessions_dir = projects_dir / project_hash / "sessions"
+            sessions_dir.mkdir(parents=True)
 
-            # Session exactly at 7-day boundary
+            # Calculate consistent cutoff time to avoid race conditions
+            current_time = time.time()
+            cutoff = current_time - (7 * 24 * 60 * 60)
+
+            # Session exactly at 7-day boundary (just after cutoff to ensure inclusion)
             boundary_session = sessions_dir / "boundary.jsonl"
             boundary_session.write_text('{"message": "boundary"}\n')
-            boundary_time = time.time() - (7 * 24 * 60 * 60)  # Exactly 7 days ago
+            boundary_time = cutoff + 1  # 1 second after cutoff
             os.utime(boundary_session, (boundary_time, boundary_time))
 
-            # Session just before boundary (6.9 days)
+            # Session before boundary (6.9 days - well within window)
             before_session = sessions_dir / "before.jsonl"
             before_session.write_text('{"message": "before"}\n')
-            before_time = time.time() - (6.9 * 24 * 60 * 60)
+            before_time = current_time - (6.9 * 24 * 60 * 60)
             os.utime(before_session, (before_time, before_time))
 
-            # Session just after boundary (7.1 days)
+            # Session after boundary (7.1 days - should be filtered)
             after_session = sessions_dir / "after.jsonl"
             after_session.write_text('{"message": "after"}\n')
-            after_time = time.time() - (7.1 * 24 * 60 * 60)
+            after_time = cutoff - 1  # 1 second before cutoff
             os.utime(after_session, (after_time, after_time))
 
             manager = SessionManager(
@@ -179,8 +190,11 @@ class TestRollingPeriodFilter:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
 
-            sessions_dir = claude_dir / "sessions"
-            sessions_dir.mkdir()
+            # Create proper directory structure: projects/<project_hash>/sessions/
+            projects_dir = claude_dir / "projects"
+            project_hash = path_resolver.get_project_hash("/fake/project/path")
+            sessions_dir = projects_dir / project_hash / "sessions"
+            sessions_dir.mkdir(parents=True)
 
             # Create old and new sessions
             old_session = sessions_dir / "old.jsonl"
@@ -212,8 +226,11 @@ class TestRollingPeriodFilter:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
 
-            sessions_dir = claude_dir / "sessions"
-            sessions_dir.mkdir()
+            # Create proper directory structure: projects/<project_hash>/sessions/
+            projects_dir = claude_dir / "projects"
+            project_hash = path_resolver.get_project_hash("/fake/project/path")
+            sessions_dir = projects_dir / project_hash / "sessions"
+            sessions_dir.mkdir(parents=True)
 
             # Create file with old modification time
             session = sessions_dir / "session.jsonl"

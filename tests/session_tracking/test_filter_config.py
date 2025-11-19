@@ -197,12 +197,12 @@ class TestSessionFilterWithBoolStrConfig:
             timestamp=datetime.now(),
         )
 
-        context = ConversationContext(messages=[message])
-        filtered = await filter_obj.filter_conversation(context)
+        context = ConversationContext(session_id="test-session", messages=[message])
+        filtered, stats = await filter_obj.filter_conversation(context)
 
         # Tool result should be omitted
         assert len(filtered.messages) == 1
-        assert filtered.messages[0].tool_calls[0].result_summary == ""  # Empty (omitted)
+        assert filtered.messages[0].tool_calls[0].result_summary == "[Tool result omitted]"
 
     async def test_filter_with_preserve_tool_content(self):
         """Test filter with tool_content=True (preserve)."""
@@ -226,8 +226,8 @@ class TestSessionFilterWithBoolStrConfig:
             timestamp=datetime.now(),
         )
 
-        context = ConversationContext(messages=[message])
-        filtered = await filter_obj.filter_conversation(context)
+        context = ConversationContext(session_id="test-session", messages=[message])
+        filtered, stats = await filter_obj.filter_conversation(context)
 
         # Tool result should be preserved
         assert len(filtered.messages) == 1
@@ -248,12 +248,12 @@ class TestSessionFilterWithBoolStrConfig:
             timestamp=datetime.now(),
         )
 
-        context = ConversationContext(messages=[message])
-        filtered = await filter_obj.filter_conversation(context)
+        context = ConversationContext(session_id="test-session", messages=[message])
+        filtered, stats = await filter_obj.filter_conversation(context)
 
-        # User message content should be empty
+        # User message content should be omitted
         assert len(filtered.messages) == 1
-        assert filtered.messages[0].content == ""
+        assert filtered.messages[0].content == "[User message omitted]"
 
     async def test_filter_with_omit_agent_messages(self):
         """Test filter with agent_messages=False (omit)."""
@@ -270,12 +270,12 @@ class TestSessionFilterWithBoolStrConfig:
             timestamp=datetime.now(),
         )
 
-        context = ConversationContext(messages=[message])
-        filtered = await filter_obj.filter_conversation(context)
+        context = ConversationContext(session_id="test-session", messages=[message])
+        filtered, stats = await filter_obj.filter_conversation(context)
 
-        # Agent message content should be empty
+        # Agent message content should be omitted
         assert len(filtered.messages) == 1
-        assert filtered.messages[0].content == ""
+        assert filtered.messages[0].content == "[Agent message omitted]"
 
     async def test_filter_resolution_logic(self):
         """Test that filter correctly interprets bool|str values."""
