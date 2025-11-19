@@ -304,6 +304,92 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 
 
+
+### Story 9: Critical Bug Fix - Periodic Checker Implementation
+
+**Status**: unassigned
+**Priority**: CRITICAL
+**Phase**: 1 (Week 1, Days 1-2)
+
+**See**: [stories/9-critical-bug-fix-periodic-checker.md](stories/9-critical-bug-fix-periodic-checker.md)
+
+
+
+### Story 10: Configuration Schema Changes - Safe Defaults & Simplification
+
+**Status**: unassigned
+**Priority**: HIGH
+**Phase**: 2 (Week 1, Days 3-4)
+**Depends on**: Story 9
+
+**See**: [stories/10-configuration-schema-changes.md](stories/10-configuration-schema-changes.md)
+
+
+
+### Story 11: Template System Implementation - Pluggable Summarization
+
+**Status**: unassigned
+**Priority**: HIGH
+**Phase**: 3 (Week 1, Day 5 - Week 2, Day 1)
+**Depends on**: Story 10
+
+**See**: [stories/11-template-system-implementation.md](stories/11-template-system-implementation.md)
+
+
+
+### Story 12: Rolling Period Filter - Prevent Bulk Indexing
+
+**Status**: unassigned
+**Priority**: HIGH
+**Phase**: 4 (Week 2, Days 2-3)
+**Depends on**: Story 10
+
+**See**: [stories/12-rolling-period-filter.md](stories/12-rolling-period-filter.md)
+
+
+
+### Story 13: Manual Sync Command - Historical Data Indexing
+
+**Status**: unassigned
+**Priority**: MEDIUM
+**Phase**: 5 (Week 2, Days 4-5)
+**Depends on**: Story 12
+
+**See**: [stories/13-manual-sync-command.md](stories/13-manual-sync-command.md)
+
+
+
+### Story 14: Configuration Auto-Generation - First-Run Experience
+
+**Status**: unassigned
+**Priority**: MEDIUM
+**Phase**: 6 (Week 3, Days 1-2)
+**Depends on**: Story 11
+
+**See**: [stories/14-config-auto-generation.md](stories/14-config-auto-generation.md)
+
+
+
+### Story 15: Documentation Update - Comprehensive User Guide
+
+**Status**: unassigned
+**Priority**: HIGH
+**Phase**: 7 (Week 3, Days 3-5)
+**Depends on**: Stories 9-14
+
+**See**: [stories/15-documentation-update.md](stories/15-documentation-update.md)
+
+
+
+### Story 16: Testing & Validation - Comprehensive Coverage
+
+**Status**: unassigned
+**Priority**: CRITICAL
+**Phase**: 8 (Week 3, Day 5 - Week 4, Days 1-2)
+**Depends on**: Stories 9-15
+
+**See**: [stories/16-testing-and-validation.md](stories/16-testing-and-validation.md)
+
 ## Progress Log
 
 ### 2025-11-18 20:08 - Story 8: in_progress → completed
