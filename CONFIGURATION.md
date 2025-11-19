@@ -436,10 +436,17 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
   "session_tracking": {
     "enabled": false,
     "watch_path": null,
-    "inactivity_timeout": 300,
+    "inactivity_timeout": 900,
     "check_interval": 60,
-    "auto_summarize": true,
-    "store_in_graph": true
+    "auto_summarize": false,
+    "store_in_graph": true,
+    "keep_length_days": 7,
+    "filter": {
+      "tool_calls": true,
+      "tool_content": "default-tool-content.md",
+      "user_messages": true,
+      "agent_messages": true
+    }
   }
 }
 ```
@@ -450,12 +457,12 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 |-------|------|---------|-------------|
 | `enabled` | bool | `false` | Enable/disable automatic session tracking (opt-in model for security, **disabled by default**) |
 | `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
-| `inactivity_timeout` | int | 300 | **Seconds** of inactivity before session is considered closed and indexed (default: 5 minutes) |
+| `inactivity_timeout` | int | 900 | **Seconds** of inactivity before session is considered closed and indexed (default: 15 minutes) |
 | `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
-| `auto_summarize` | bool | `true` | Automatically summarize closed sessions using Graphiti's LLM |
+| `auto_summarize` | bool | `false` | Automatically summarize closed sessions using Graphiti's LLM (disabled by default to avoid LLM costs) |
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 | `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
-| `keep_length_days` | int\|null | `null` | **Days** to retain sessions in rolling window. If null, keeps all sessions indefinitely. Set to limit storage/costs (e.g., 90 for 3-month retention). **New in v1.1.0** |
+| `keep_length_days` | int\|null | 7 | **Days** to retain sessions in rolling window (default: 7 days). If null, discovers all sessions (use with caution - may cause bulk LLM costs). **New in v1.1.0** |
 
 ### Filtering Configuration
 
@@ -772,8 +779,10 @@ export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
-    "inactivity_timeout": 300,
-    "check_interval": 60
+    "inactivity_timeout": 900,
+    "check_interval": 60,
+    "auto_summarize": false,
+    "keep_length_days": 7
   }
 }
 ```
@@ -784,8 +793,9 @@ export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects/active",
-    "inactivity_timeout": 180,
-    "check_interval": 30
+    "inactivity_timeout": 300,
+    "check_interval": 30,
+    "keep_length_days": 7
   }
 }
 ```
@@ -796,8 +806,9 @@ export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
-    "inactivity_timeout": 600,
-    "check_interval": 120
+    "inactivity_timeout": 1800,
+    "check_interval": 120,
+    "keep_length_days": 7
   }
 }
 ```

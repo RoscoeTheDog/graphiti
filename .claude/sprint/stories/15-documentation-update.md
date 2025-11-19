@@ -1,10 +1,10 @@
 # Story 15: Documentation Update - Comprehensive User Guide
 
-**Status**: completed
+**Status**: in_progress
 **Created**: 2025-11-18 23:01
-**Updated**: 2025-11-19 12:12 (Marked complete per handoff s004)
+**Updated**: 2025-11-19 20:40 (Session s005 - CONFIGURATION.md critical fixes completed)
 **Claimed**: 2025-11-19 12:04 (Session 004)
-**Completed**: 2025-11-19 (6/6 tasks complete per handoff s004)
+**Completed**: (pending - 8/21 ACs completed, see implementation notes)
 **Priority**: HIGH
 **Estimated Effort**: 12 hours (Actual: ~2.5 hours per handoff)
 **Phase**: 7 (Week 3, Days 3-5)
@@ -539,9 +539,74 @@ Auto-migration recommended: Update config to new format for clarity and to avoid
 - `CONFIGURATION.md` (existing)
 - `docs/SESSION_TRACKING_USER_GUIDE.md` (existing)
 
+## Implementation Notes (Session s005 - 2025-11-19 20:40)
+
+### What Was Completed (8/21 ACs)
+
+**CONFIGURATION.md Updates** (8/8 ACs):
+- ✅ Documented all 12 session_tracking parameters (8 SessionTrackingConfig + 4 FilterConfig)
+- ✅ Explained `bool | str` type system in Filter Value Types section
+- ✅ Documented template system with hierarchy (4-level resolution)
+- ✅ Documented file structure (`.graphiti/auto-tracking/templates/`)
+- ✅ Added configuration examples (Default, High-Volume, Low-Resource, Disabled)
+- ✅ **CRITICAL FIX**: Corrected default values to match implementation:
+  - `inactivity_timeout`: 300 → 900 seconds (15 min)
+  - `auto_summarize`: true → false (no LLM costs by default)
+  - `keep_length_days`: null → 7 days (rolling window)
+- ✅ Validated JSON examples (all valid)
+- ✅ All parameter descriptions now accurate (verified against unified_config.py)
+
+### What Remains (13/21 ACs)
+
+**SESSION_TRACKING_USER_GUIDE.md Updates** (0/7 ACs completed):
+- ❌ Update quick start to reflect opt-in model - **Partially done but uses outdated field names**
+- ❌ Add template customization section - **Present but references Jinja2 instead of Markdown**
+- ❌ Add manual sync documentation - **Missing**
+- ❌ Add troubleshooting section - **Missing**
+- ❌ Add cost analysis section - **Present but outdated**
+- ❌ Add security best practices - **Missing**
+- ❌ Test: All examples work as documented - **Not verified**
+
+**Issues Found in USER_GUIDE.md**:
+1. Uses old field names: `watch_directories` → should be `watch_path`
+2. Uses old field names: `inactivity_timeout_minutes` → should be `inactivity_timeout` (seconds)
+3. Uses old field names: `scan_interval_seconds` → should be `check_interval`
+4. CLI command format: `graphiti-mcp session-tracking` → should be `graphiti-mcp-session-tracking`
+
+**SESSION_TRACKING_MIGRATION.md Updates** (0/4 ACs completed):
+- ❌ Document breaking changes from v1.0.0 to v1.1.0 - **Present but has inaccuracies**
+- ❌ Provide before/after migration examples - **Present**
+- ❌ Add FAQ section for common migration issues - **Present as troubleshooting**
+- ❌ Add version compatibility table - **Present**
+
+**Issues Found in MIGRATION.md**:
+1. References Jinja2 templates (`tool_summary.j2`) but implementation uses Markdown (`.md`)
+2. Uses `filter_config` field name but actual implementation uses `filter`
+3. CLI command format inconsistent with actual implementation
+4. Template placeholder syntax incorrect (should be `{content}`, not Jinja2)
+
+**Verification Tasks** (0/2 ACs completed):
+- ❌ Test: Quick start guide successful on fresh install
+- ❌ Test: Migration examples accurate
+
+### Recommendation
+
+**Option 1**: Complete remaining 13 ACs in Story 15 (estimated 4-6 hours)
+**Option 2**: Mark Story 15 partially complete, create Story 15.1 substory for remaining work
+**Option 3**: Defer to Story 16.2 (Integration Testing) verification phase
+
+Given the substantial work remaining and the critical nature of Story 16 (Testing & Validation), recommend **Option 2** to unblock Story 16 while ensuring documentation quality.
+
+### Files Modified
+
+1. `CONFIGURATION.md` - Lines 435-814
+   - Fixed default values (inactivity_timeout, auto_summarize, keep_length_days)
+   - Updated all configuration examples
+   - Verified JSON validity
+
 ## Cross-Cutting Requirements
 
 See parent sprint `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`:
-- Documentation: Complete user and developer docs
-- Examples: All examples tested and working
-- Migration guide: Clear upgrade path
+- Documentation: Complete user and developer docs - **PARTIAL (8/21 ACs done)**
+- Examples: All examples tested and working - **PENDING**
+- Migration guide: Clear upgrade path - **EXISTS BUT NEEDS FIXES**
