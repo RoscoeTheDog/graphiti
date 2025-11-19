@@ -206,6 +206,71 @@ def cmd_status(args: argparse.Namespace) -> None:
     print()
 
 
+
+
+def cmd_sync(args: argparse.Namespace) -> None:
+    """Execute sync command."""
+    import asyncio
+    from mcp_server.manual_sync import session_tracking_sync_history
+    from mcp_server.graphiti_mcp_server import session_manager, graphiti_client, unified_config
+
+    # Validate dangerous operations
+    if args.days == 0 and not args.confirm:
+        print("❌ Error: --days 0 (all history) requires --confirm flag")
+        print("   This could index thousands of sessions and cost hundreds of dollars!")
+        sys.exit(1)
+
+    # Call MCP tool
+    try:
+        result_json = asyncio.run(
+            session_tracking_sync_history(
+                session_manager=session_manager,
+                graphiti_client=graphiti_client,
+                unified_config=unified_config,
+                project=args.project,
+                days=args.days,
+                max_sessions=args.max_sessions,
+                dry_run=args.dry_run,
+            )
+        )
+
+        # Parse and display results
+        data = json.loads(result_json)
+
+        if data.get("status") == "error":
+            print(f"❌ Error: {data['error']}")
+            sys.exit(1)
+
+        # Display table
+        print("
+📊 Session Sync Summary
+")
+        print(f"  Mode:             {'DRY RUN (preview)' if data['dry_run'] else 'ACTUAL SYNC'}")
+        print(f"  Sessions found:   {data['sessions_found']}")
+        print(f"  Estimated cost:   {data['estimated_cost']}")
+        if not data['dry_run']:
+            print(f"  Sessions indexed: {data['sessions_indexed']}")
+            print(f"  Actual cost:      {data['actual_cost']}")
+
+        if data['dry_run']:
+            print("
+💡 Tip: Run with --no-dry-run to perform actual sync")
+
+        # Show sample sessions
+        if "sessions" in data and data["sessions"]:
+            print("
+📄 Sample Sessions (first 10):
+")
+            for session in data["sessions"]:
+                print(f"  {session['path']}")
+                print(f"    Modified: {session['modified']}, Messages: {session['messages']}")
+
+        print()
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        sys.exit(1)
+
 def main() -> None:
     """Main entry point for session tracking CLI."""
     parser = argparse.ArgumentParser(
@@ -235,6 +300,49 @@ def main() -> None:
         help="Show session tracking status"
     )
     status_parser.set_defaults(func=cmd_status)
+
+
+    # Sync command
+    sync_parser = subparsers.add_parser(
+        "sync",
+        help="Manually sync historical sessions to Graphiti"
+    )
+    sync_parser.add_argument(
+        "--project",
+        type=str,
+        default=None,
+        help="Specific project path (default: all projects)"
+    )
+    sync_parser.add_argument(
+        "--days",
+        type=int,
+        default=7,
+        help="Days to look back (0 = all history, requires --confirm)"
+    )
+    sync_parser.add_argument(
+        "--max-sessions",
+        type=int,
+        default=100,
+        help="Maximum sessions to sync (safety limit)"
+    )
+    sync_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=True,
+        help="Preview mode (default)"
+    )
+    sync_parser.add_argument(
+        "--no-dry-run",
+        dest="dry_run",
+        action="store_false",
+        help="Perform actual sync (not preview)"
+    )
+    sync_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Required for --days 0 (all history)"
+    )
+    sync_parser.set_defaults(func=cmd_sync)
 
     # Parse arguments
     args = parser.parse_args()

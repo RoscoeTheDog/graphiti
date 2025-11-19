@@ -367,6 +367,92 @@ session_tracking_status(session_id="abc123-def456")
 
 ---
 
+#### `session_tracking_sync_history`
+Manually sync historical sessions to Graphiti beyond the automatic rolling window.
+
+**Description**: This tool allows users to index historical sessions that fall outside the automatic rolling window discovery. Useful for one-time imports, catching up on missed sessions, or backfilling historical data.
+
+**Parameters**:
+- `project` (string, optional): Project path to sync. If None, syncs all projects in watch_path
+- `days` (int, optional): Number of days to look back (default: 7). Set to 0 for all history (requires `--confirm` in CLI)
+- `max_sessions` (int, optional): Maximum sessions to sync (safety limit, default: 100)
+- `dry_run` (bool, optional): Preview mode without actual indexing (default: True)
+
+**Runtime Behavior**:
+- **Dry-run mode** (default): Returns preview with session list and cost estimate
+- **Actual sync mode**: Parses, filters, and indexes sessions to Graphiti
+
+**Returns**: JSON string with sync results
+
+**Example Usage**:
+```python
+# Preview last 7 days (default)
+session_tracking_sync_history()
+
+# Preview last 30 days
+session_tracking_sync_history(days=30)
+
+# Actually sync last 7 days
+session_tracking_sync_history(dry_run=False)
+
+# Sync specific project
+session_tracking_sync_history(project="/path/to/project", dry_run=False)
+```
+
+**Dry-Run Response Format**:
+```json
+{
+  "status": "success",
+  "dry_run": true,
+  "sessions_found": 15,
+  "estimated_cost": "$2.55",
+  "estimated_tokens": 52500,
+  "sessions": [
+    {
+      "path": "/home/user/.claude/projects/abc123/sessions/def456.jsonl",
+      "modified": "2025-11-18T14:30:00",
+      "messages": 42
+    }
+  ],
+  "message": "Run with dry_run=False to perform actual sync"
+}
+```
+
+**Actual Sync Response Format**:
+```json
+{
+  "status": "success",
+  "dry_run": false,
+  "sessions_found": 15,
+  "sessions_indexed": 15,
+  "estimated_cost": "$2.55",
+  "actual_cost": "$2.55"
+}
+```
+
+**Notes**:
+- Cost estimation: ~$0.17 per session, ~3500 tokens average
+- Safety limit prevents accidentally indexing thousands of sessions
+- Dry-run mode enabled by default for safety
+- Sessions are sorted by modification time (newest first)
+- Max sessions limit (default 100) prevents runaway costs
+- Time filter uses file modification time
+- Uses same filtering and indexing pipeline as automatic tracking
+
+**CLI Alternative**:
+```bash
+# Preview sync (dry-run by default)
+graphiti-mcp session-tracking sync --days 30
+
+# Actually sync
+graphiti-mcp session-tracking sync --days 30 --no-dry-run
+
+# Sync all history (requires confirmation)
+graphiti-mcp session-tracking sync --days 0 --no-dry-run --confirm
+```
+
+---
+
 ## Resilience Features
 
 The MCP server includes automatic recovery and monitoring:

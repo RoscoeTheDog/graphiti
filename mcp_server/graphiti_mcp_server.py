@@ -52,6 +52,7 @@ from graphiti_core.session_tracking.session_manager import SessionManager
 from graphiti_core.session_tracking.filter import SessionFilter
 from graphiti_core.session_tracking.indexer import SessionIndexer
 from graphiti_core.session_tracking.prompts import DEFAULT_TEMPLATES
+from mcp_server.manual_sync import session_tracking_sync_history as _session_tracking_sync_history
 
 load_dotenv()
 
@@ -1869,6 +1870,43 @@ async def session_tracking_status(session_id: str | None = None) -> str:
             "message": f"Error getting status: {error_msg}",
             "session_id": session_id
         })
+
+
+
+async def session_tracking_sync_history(
+    project: str | None = None,
+    days: int = 7,
+    max_sessions: int = 100,
+    dry_run: bool = True,
+) -> str:
+    """Manually sync historical sessions to Graphiti.
+
+    This tool allows users to index historical sessions beyond the automatic
+    rolling window. Useful for one-time imports or catching up on missed sessions.
+
+    Args:
+        project: Project path to sync (None = all projects in watch_path)
+        days: Number of days to look back (0 = all history, use with caution)
+        max_sessions: Maximum sessions to sync (safety limit, default 100)
+        dry_run: Preview mode without actual indexing (default: True)
+
+    Returns:
+        JSON string with sync results
+
+    Examples:
+        Preview last 7 days: await session_tracking_sync_history()
+        Actually sync: await session_tracking_sync_history(dry_run=False)
+    """
+    global session_manager, graphiti_client
+    return await _session_tracking_sync_history(
+        session_manager=session_manager,
+        graphiti_client=graphiti_client,
+        unified_config=unified_config,
+        project=project,
+        days=days,
+        max_sessions=max_sessions,
+        dry_run=dry_run,
+    )
 
 
 @mcp.resource('http://graphiti/status')

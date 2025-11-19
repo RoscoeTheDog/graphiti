@@ -1,6 +1,8 @@
 # Story 13: Manual Sync Command - Historical Data Indexing
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 07:03
+**Completed**: 2025-11-19 07:23
 **Created**: 2025-11-18 23:01
 **Priority**: MEDIUM
 **Estimated Effort**: 10 hours
