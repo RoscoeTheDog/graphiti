@@ -318,7 +318,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 12: Rolling Period Filter - Prevent Bulk Indexing
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 06:17
+**Completed**: 2025-11-19 06:24
 **Priority**: CRITICAL (REORDERED - WAS HIGH)
 **Phase**: 2 (Week 1, Days 3-4) - MOVED FROM PHASE 4
 **Depends on**: Story 10
@@ -329,7 +331,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 9: Critical Bug Fix - Periodic Checker Implementation
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 06:28
+**Completed**: 2025-11-19 06:41
 **Priority**: CRITICAL
 **Phase**: 3 (Week 1, Day 5) - MOVED FROM PHASE 1
 **Depends on**: Story 10, Story 12 (was none, now safe defaults required)
@@ -432,6 +436,19 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 **See**: [stories/16.4-regression-and-compliance-validation.md](stories/16.4-regression-and-compliance-validation.md)
 
 ## Progress Log
+### 2025-11-19 06:41 - Story 9: in_progress → completed
+- ✅ **Critical Bug Fix - Periodic Checker Implementation**
+- **Problem Fixed**: Sessions never closed due to inactivity (no periodic scheduler calling check_inactive_sessions())
+- **Implementation**:
+  - Added  async function (mcp_server/graphiti_mcp_server.py:1903-1934)
+  - Added global  variable for lifecycle management
+  - Updated  to start periodic checker with asyncio.create_task()
+  - Updated shutdown logic to cancel checker task before stopping session manager
+  - Comprehensive test suite: 4 tests (all passing)
+- **Impact**: Sessions now properly close after inactivity_timeout + check_interval
+- **Example**: 5-minute timeout + 1-minute interval = session closes at 6 minutes
+- **Memory Impact**: Prevents indefinite accumulation of "active" sessions in registry
+- **Dependencies**: Uses Story 10's check_interval config parameter (default: 60s)
 
 ### 2025-11-18 23:40 - Stories 9-16 Reordered (Safety-First Sequencing)
 - 🔒 **CRITICAL SAFETY FIX**: Reordered Stories 9-16 to prevent unintended LLM costs
