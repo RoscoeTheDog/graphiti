@@ -390,21 +390,6 @@ class SessionTrackingConfig(BaseModel):
         return v
 
 
-    )
-    filter: FilterConfig = Field(
-        default_factory=FilterConfig,
-        description=(
-            "Filtering configuration for session content. "
-            "Controls how messages and tool results are filtered for token reduction. "
-            "Default: template-based tool summarization, preserve user/agent messages."
-        )
-    )
-
-    @field_validator('keep_length_days')
-    def validate_keep_length_days(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("keep_length_days must be > 0 or null")
-        return v
 
 
 
