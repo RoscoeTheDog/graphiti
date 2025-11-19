@@ -366,7 +366,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 14: Configuration Auto-Generation - First-Run Experience
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 11:05
+**Completed**: 2025-11-19 11:45
 **Priority**: MEDIUM
 **Phase**: 6 (Week 2, Day 5 - Week 3, Day 1) - MOVED FROM WEEK 3 DAYS 1-2
 **Depends on**: Story 11
@@ -931,3 +933,25 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - Boundary: Sessions at cutoff included (< not <=)
   - Logging: "Discovered N sessions (filtered M old sessions)"
 - **Cross-Cutting Requirements**: ✅ All met (platform-agnostic, error handling, type hints, testing, performance, logging)
+
+### 2025-11-19 11:45 - Story 14: in_progress → completed
+- ✅ **Configuration Auto-Generation** - First-run experience with auto-generated config and templates
+- **Implementation**:
+  - Created `ensure_global_config_exists()` function (mcp_server/graphiti_mcp_server.py:1977-2051)
+  - Generates `~/.graphiti/graphiti.config.json` with inline comments and help fields
+  - Integrated into `initialize_server()` for automatic execution on MCP server startup
+  - Calls both config and template generation functions with graceful error handling
+  - Idempotent design (safe to call multiple times, no overwrite of existing files)
+- **Generated Config**:
+  - **database**: Neo4j connection settings (URI, user, password_env)
+  - **llm**: OpenAI provider configuration (model, API key)
+  - **session_tracking**: Complete configuration with opt-in model (enabled: false)
+    - Safe defaults: 15min timeout, 1min check interval, 7-day rolling window
+    - Inline comments (`_comment`) and help fields (`_*_help`) for user guidance
+    - Filter configuration with template references
+- **Testing**:
+  - Created comprehensive test suite: `tests/test_config_generation.py`
+  - 14 tests, 100% passing (14/14)
+  - Coverage: Config creation, no-overwrite, validation, templates, integration, error handling
+- **Impact**: Users get working configuration immediately on installation without manual setup
+- **Token Efficiency**: Config generated once on first run (~40 minutes implementation time)

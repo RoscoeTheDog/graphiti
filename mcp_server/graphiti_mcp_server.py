@@ -1973,6 +1973,84 @@ async def check_inactive_sessions_periodically(
         raise
 
 
+
+def ensure_global_config_exists() -> Path:
+    """Ensure global configuration file exists with sensible defaults.
+
+    Creates ~/.graphiti/graphiti.config.json if it doesn't exist.
+    Includes inline comments (_comment and _*_help fields) to guide users.
+
+    Returns:
+        Path to config file
+    """
+    config_path = Path.home() / ".graphiti" / "graphiti.config.json"
+
+    if config_path.exists():
+        logger.debug(f"Config file already exists: {config_path}")
+        return config_path
+
+    # Create directory
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Generate config with inline comments
+    default_config = {
+        "_comment": "Graphiti MCP Server Configuration (auto-generated)",
+        "_docs": "https://github.com/getzep/graphiti/blob/main/CONFIGURATION.md",
+        "database": {
+            "_comment": "Required: Configure your Neo4j connection",
+            "uri": "bolt://localhost:7687",
+            "user": "neo4j",
+            "password_env": "NEO4J_PASSWORD",
+        },
+        "llm": {
+            "_comment": "Required: Configure your OpenAI API key",
+            "provider": "openai",
+            "default_model": "gpt-4.1-mini",
+            "small_model": "gpt-4.1-nano",
+            "openai": {
+                "api_key_env": "OPENAI_API_KEY",
+            },
+        },
+        "session_tracking": {
+            "_comment": "Session tracking is DISABLED by default for security",
+            "_docs": "See docs/SESSION_TRACKING_USER_GUIDE.md",
+            "enabled": False,
+            "_enabled_help": "Set to true to enable session tracking (opt-in)",
+            "watch_path": None,
+            "_watch_path_help": "null = ~/.claude/projects/ | Set to specific project path",
+            "inactivity_timeout": 900,
+            "_inactivity_timeout_help": "Seconds before session closed (900 = 15 minutes, handles long operations)",
+            "check_interval": 60,
+            "_check_interval_help": "Seconds between inactivity checks (60 = 1 minute, responsive)",
+            "auto_summarize": False,
+            "_auto_summarize_help": "Use LLM to summarize sessions (costs money, set to true to enable)",
+            "store_in_graph": True,
+            "_store_in_graph_help": "Store in Neo4j graph (required for cross-session memory)",
+            "keep_length_days": 7,
+            "_keep_length_days_help": "Track sessions from last N days (7 = safe, null = all)",
+            "filter": {
+                "_comment": "Message filtering for token reduction",
+                "tool_calls": True,
+                "_tool_calls_help": "Preserve tool structure (recommended: true)",
+                "tool_content": "default-tool-content.md",
+                "_tool_content_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+                "user_messages": True,
+                "_user_messages_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+                "agent_messages": True,
+                "_agent_messages_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+            },
+        },
+    }
+
+    # Write config
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(default_config, f, indent=2)
+
+    logger.info(f"Created default config: {config_path}")
+    logger.info("Please update database credentials and OpenAI API key in environment variables!")
+
+    return config_path
+
 def ensure_default_templates_exist() -> None:
     """Ensure default summarization templates exist in global config directory.
 
@@ -2099,6 +2177,14 @@ async def initialize_session_tracking() -> None:
 async def initialize_server() -> MCPConfig:
     """Parse CLI arguments and initialize the Graphiti server configuration."""
     global config
+
+    # Ensure config and templates exist (auto-generate if missing)
+    try:
+        ensure_global_config_exists()
+        ensure_default_templates_exist()
+    except Exception as e:
+        logger.error(f"Failed to auto-generate config/templates: {e}", exc_info=True)
+        # Continue - user may have config in project directory
 
     parser = argparse.ArgumentParser(
         description='Run the Graphiti MCP server with optional LLM client'
