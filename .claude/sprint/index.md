@@ -98,6 +98,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 #### Story 2.3: Configurable Filtering System (NEW - REMEDIATION)
 
 **Status**: completed
+**Updated**: 2025-11-19 12:12 (Status verified - was incorrectly marked "blocked" in story file)
 
 **See**: [stories/2.3-configurable-filtering-system-new---remediation.md](stories/2.3-configurable-filtering-system-new---remediation.md)
 
@@ -344,7 +345,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 11: Template System Implementation - Pluggable Summarization
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 06:49
+**Completed**: 2025-11-19 06:57
 **Priority**: HIGH
 **Phase**: 4 (Week 2, Days 1-2) - MOVED FROM PHASE 3
 **Depends on**: Story 10
@@ -355,7 +358,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 13: Manual Sync Command - Historical Data Indexing
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 07:03
+**Completed**: 2025-11-19 07:23
 **Priority**: MEDIUM
 **Phase**: 5 (Week 2, Days 3-4) - UNCHANGED
 **Depends on**: Story 12
@@ -379,7 +384,9 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 15: Documentation Update - Comprehensive User Guide
 
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-19 12:04
+**Completed**: 2025-11-19 (Updated 2025-11-19 12:12 per handoff s004)
 **Priority**: HIGH
 **Phase**: 7 (Week 3, Days 2-4) - MOVED FROM DAYS 3-5
 **Depends on**: Stories 9, 10, 11, 12, 13, 14
