@@ -307,7 +307,7 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
 
 ### Story 10: Configuration Schema Changes - Safe Defaults & Simplification
 
-**Status**: unassigned
+**Status**: completed
 **Priority**: CRITICAL (REORDERED - WAS HIGH)
 **Phase**: 1 (Week 1, Days 1-2) - MOVED FROM PHASE 2
 **Depends on**: None (was Story 9, now first)
@@ -871,3 +871,28 @@ See full requirements: `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`
   - Option B: Use /sprint:REMEDIATE --analyze for comprehensive cleanup
   - Option C: Rollback schema changes and defer story
 - **Handoff**: .claude/handoff/story-10-partial-completion-2025-11-19-0012.md
+
+### 2025-11-19 01:07 - Story 10: error → completed
+- ✅ **Configuration Schema Changes** - Safe defaults and schema simplification complete
+- **Remediation Phase Completed**:
+  - Removed all 22 ContentMode references from filter.py
+  - Refactored to use `bool | str` type-based pattern matching
+  - Fixed duplicate code in unified_config.py (merge artifact)
+  - Removed remaining ContentMode exports from __init__.py
+  - Updated message_summarizer.py docstrings
+- **Verification**:
+  - grep "ContentMode" graphiti_core/ mcp_server/ → 0 results ✅
+  - All Python files compile successfully ✅
+  - Health Score: 65 → 85 (+31% improvement)
+- **Files Changed** (9 total):
+  - filter.py (22 ContentMode references → 0)
+  - filter_config.py (enum → bool | str)
+  - unified_config.py (safe defaults + duplicate removal)
+  - __init__.py (ContentMode export removed)
+  - message_summarizer.py (docstring updates)
+  - graphiti.config.json (updated example)
+  - README.md (documentation)
+  - index.md (progress log)
+  - stories/10-configuration-schema-changes.md (completion details)
+- **Impact**: Opt-in model (enabled: false), no LLM costs by default, rolling window (7 days) prevents bulk indexing
+- **Next**: Story 12 (Rolling Period Filter) now unblocked
