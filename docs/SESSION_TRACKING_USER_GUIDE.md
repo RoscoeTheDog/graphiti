@@ -19,7 +19,7 @@ Session tracking automatically:
 ✅ **Decision Tracking** - Understand why choices were made in past sessions  
 ✅ **Pattern Recognition** - Learn from repeated tasks and solutions
 ✅ **Cost-Effective** - ~$0.17 per session with smart filtering
-✅ **Automatic** - No manual intervention required
+✅ **Automatic** - No manual intervention required once enabled
 
 ---
 
@@ -31,25 +31,29 @@ Session tracking automatically:
 - Neo4j database configured
 - OpenAI API key configured (for entity extraction)
 
-### Default Behavior (Enabled by Default)
+### Enabling Session Tracking
 
-Session tracking is **enabled by default** in Graphiti MCP v0.4.0+. Sessions are automatically tracked when you use Claude Code.
+Session tracking is **disabled by default** for security and privacy (opt-in model). You must explicitly enable it.
 
-To check status:
+
+**Enable globally:**
+```bash
+graphiti-mcp session-tracking enable
+```
+
+**Check status:**
 ```bash
 graphiti-mcp session-tracking status
 ```
 
-### Opting Out (If Desired)
+### Disabling Session Tracking
 
-If you want to disable session tracking:
+If you want to disable session tracking after enabling:
 
 ```bash
 # Disable globally
 graphiti-mcp session-tracking disable
 
-# Re-enable later
-graphiti-mcp session-tracking enable
 ```
 
 ---
@@ -98,7 +102,7 @@ Session tracking configuration is stored in `graphiti.config.json`:
 ```json
 {
   "session_tracking": {
-    "enabled": true,
+    "enabled": false,
     "watch_directories": [
       "~/.claude/projects"
     ],
@@ -110,7 +114,7 @@ Session tracking configuration is stored in `graphiti.config.json`:
 
 **Configuration Options:**
 
-- `enabled` - Enable/disable session tracking (default: `true`)
+- `enabled` - Enable/disable session tracking (default: `false`)
 - `watch_directories` - Directories to monitor for JSONL files
 - `inactivity_timeout_minutes` - Minutes of inactivity before session is considered closed (default: 30)
 - `scan_interval_seconds` - How often to check for file changes (default: 2)
@@ -171,6 +175,36 @@ You can control session tracking at runtime using MCP tools:
 3. **Opt-Out When Not Needed**: Disable tracking for experimental/test sessions
 4. **Monitor Usage**: Check token usage in session metadata
 
+
+### Manual Sync Command
+
+You can manually trigger session indexing using the CLI:
+
+```bash
+# Sync last 7 days (default)
+graphiti-mcp session-tracking sync
+
+# Sync specific date range
+graphiti-mcp session-tracking sync --days 30
+
+# Sync ALL unindexed sessions (use with caution!)
+graphiti-mcp session-tracking sync --days 0
+```
+
+**Use Cases:**
+- Migrate pre-existing sessions from earlier versions
+- Re-index sessions after configuration changes
+- Recover from indexing failures
+
+**Cost Warning:**
+
+⚠️ **`--days 0` can be very expensive!** This syncs ALL unindexed sessions in your history. For large backlogs, this can cost $10-$50+ in API fees.
+
+**Recommendations:**
+- Start with small date ranges (7-30 days)
+- Monitor costs in OpenAI dashboard
+- Use `keep_length_days` config to limit retention (see Configuration section)
+
 ---
 
 ## Querying Session History
@@ -228,7 +262,7 @@ Group IDs isolate sessions by project:
 
 ✅ Session content stored locally in your Neo4j database
 ✅ No data sent to third parties (except OpenAI for entity extraction)
-✅ Full control over what gets tracked (opt-out anytime)
+✅ Full control over what gets tracked (opt-in by default)
 ✅ Group isolation prevents cross-project data leakage
 
 ### Best Practices
@@ -314,45 +348,6 @@ grep "SessionFileWatcher" ~/.local/state/graphiti/logs/mcp-server.log
 2. Verify permissions on `~/.claude/projects/` directory
 3. Check scan interval setting (default: 2 seconds)
 4. Restart MCP server if watcher is stuck
-
----
-
-## Migration Guide (Existing Users)
-
-### Upgrading from v0.3.x to v0.4.0+
-
-**New Default Behavior:**
-
-❗ Session tracking is now **enabled by default** (was opt-in previously)
-
-**Action Required:**
-
-1. **If you want to keep default behavior**: No action needed
-2. **If you want to disable**: Run `graphiti-mcp session-tracking disable`
-
-**Configuration Changes:**
-
-- Session tracking config moved to `graphiti.config.json` (was `.env` only)
-- New config schema with `SessionTrackingConfig`
-- Old env vars (`GRAPHITI_SESSION_TRACKING_ENABLED`) still supported but deprecated
-
-**Migration Steps:**
-
-```bash
-# Step 1: Update Graphiti MCP server
-pip install --upgrade graphiti-mcp
-
-# Step 2: Check new default config
-graphiti-mcp session-tracking status
-
-# Step 3: (Optional) Disable if desired
-graphiti-mcp session-tracking disable
-
-# Step 4: Review configuration
-cat graphiti.config.json | grep session_tracking
-```
-
----
 
 ## FAQ
 

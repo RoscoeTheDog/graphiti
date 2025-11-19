@@ -455,6 +455,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 | `auto_summarize` | bool | `true` | Automatically summarize closed sessions using Graphiti's LLM |
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 | `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
+| `keep_length_days` | int\|null | `null` | **Days** to retain sessions in rolling window. If null, keeps all sessions indefinitely. Set to limit storage/costs (e.g., 90 for 3-month retention). **New in v1.1.0** |
 
 ### Filtering Configuration
 
@@ -623,6 +624,45 @@ summary = await summarizer.summarize(
 - **Hierarchical**: Override built-in templates without modifying code
 - **Flexible**: Use file-based templates or inline prompts
 - **Efficient**: Template resolution is cached to minimize overhead
+
+### Rolling Retention (keep_length_days)
+
+**New in v1.1.0** - Control how long sessions are retained in the knowledge graph.
+
+**Configuration:**
+```json
+{
+  "session_tracking": {
+    "keep_length_days": 90  // Retain last 90 days only
+  }
+}
+```
+
+**Behavior:**
+- `null` (default): Keep all sessions indefinitely
+- `90`: Retain only sessions from last 90 days
+- Older sessions are automatically pruned during indexing
+
+**Cost Comparison (50 sessions/month):**
+
+| Retention Period | Total Sessions Stored | Neo4j Storage | Monthly API Cost | Total Monthly Cost |
+|------------------|----------------------|---------------|------------------|--------------------|
+| 30 days | ~50 | ~100 MB | ~$8.50 | ~$8.50 |
+| 90 days | ~150 | ~300 MB | ~$8.50 | ~$8.50 |
+| 180 days | ~300 | ~600 MB | ~$8.50 | ~$8.50 |
+| Unlimited (null) | 500+ | 1+ GB | ~$8.50 | ~$8.50+ |
+
+**Notes:**
+- API costs are for indexing NEW sessions (constant per month)
+- Storage costs increase with unlimited retention
+- Query performance degrades with large graphs (1000+ episodes)
+- Recommended: 90-180 days for optimal cost/performance balance
+
+**Use Cases:**
+- **30 days**: Short-term projects, privacy-focused
+- **90 days**: Standard development work (recommended)
+- **180 days**: Long-running projects with historical context needs
+- **Unlimited**: Archive/research purposes (monitor storage costs)
 
 ### Behavior
 
