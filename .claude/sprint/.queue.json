@@ -523,7 +523,7 @@
     },
     "13": {
       "id": "13",
-      "status": "completed",
+      "status": "stub",
       "story_type": "implementation",
       "title": "Manual Sync Command - Historical Data Indexing",
       "parent": null,
@@ -584,7 +584,7 @@
     },
     "16": {
       "id": "16",
-      "status": "completed",
+      "status": "superseded",
       "story_type": "implementation",
       "title": "Testing & Validation - Comprehensive Coverage",
       "parent": null,
@@ -727,7 +727,7 @@
     "-7": {
       "type": "validation",
       "title": "Validate Story 7",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -736,7 +736,7 @@
     "-8": {
       "type": "validation",
       "title": "Validate Story 8",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -745,7 +745,7 @@
     "-9": {
       "type": "validation",
       "title": "Validate Story 9",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -754,7 +754,7 @@
     "-10": {
       "type": "validation",
       "title": "Validate Story 10",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -763,7 +763,7 @@
     "-11": {
       "type": "validation",
       "title": "Validate Story 11",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -772,7 +772,7 @@
     "-12": {
       "type": "validation",
       "title": "Validate Story 12",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -781,7 +781,7 @@
     "-13": {
       "type": "validation",
       "title": "Validate Story 13",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -790,7 +790,7 @@
     "-14": {
       "type": "validation",
       "title": "Validate Story 14",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -799,7 +799,7 @@
     "-15": {
       "type": "validation",
       "title": "Validate Story 15",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
@@ -808,7 +808,7 @@
     "-16": {
       "type": "validation",
       "title": "Validate Story 16",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],

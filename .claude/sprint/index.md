@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-11-27 09:35:26
+**Generated**: 2025-11-27 12:30:40
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 61
-- **Completion**: 77.0%
+- **Completion**: 90.2%
 
 ### By Status
 
-- completed: 47
-- superseded: 4
-- unassigned: 10
+- completed: 55
+- stub: 1
+- superseded: 5
 
 ### By Type
 
@@ -51,34 +51,34 @@
 **Status**: completed | **Type**: validation
 
 ### Story -7: Validate Story 7
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -8: Validate Story 8
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -9: Validate Story 9
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -10: Validate Story 10
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -11: Validate Story 11
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -12: Validate Story 12
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -13: Validate Story 13
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -14: Validate Story 14
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -15: Validate Story 15
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -16: Validate Story 16
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ---
 
