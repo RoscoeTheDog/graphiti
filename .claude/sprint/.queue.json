@@ -700,7 +700,7 @@
     "-4": {
       "type": "validation",
       "title": "Validate Story 4",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
