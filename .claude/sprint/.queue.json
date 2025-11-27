@@ -691,7 +691,7 @@
     "-3": {
       "type": "validation",
       "title": "Validate Story 3",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
