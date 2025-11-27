@@ -22,7 +22,11 @@
     "-13",
     "-14",
     "-15",
-    "-16"
+    "-16",
+    "20",
+    "17",
+    "18",
+    "19"
   ],
   "stories": {
     "1": {
@@ -813,6 +817,65 @@
       "children": [],
       "blocks": [],
       "file": "stories/-16-validate-story-16.md"
+    },
+    "17": {
+      "id": "17",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "LLM Availability Layer",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "18",
+        "19"
+      ],
+      "blocked_by": [
+        "20"
+      ],
+      "file": "stories/17-llm-availability-layer.md"
+    },
+    "18": {
+      "id": "18",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "MCP Tools Error Handling",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "17",
+        "20"
+      ],
+      "file": "stories/18-mcp-tools-error-handling.md"
+    },
+    "19": {
+      "id": "19",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "Session Tracking Resilience",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "17",
+        "20"
+      ],
+      "file": "stories/19-session-tracking-resilience.md"
+    },
+    "20": {
+      "id": "20",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "Unified LLM Configuration",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "17",
+        "18",
+        "19"
+      ],
+      "blocked_by": [],
+      "file": "stories/20-unified-llm-configuration.md"
     }
   }
 }
