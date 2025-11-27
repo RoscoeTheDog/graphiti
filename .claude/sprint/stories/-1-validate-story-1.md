@@ -1,9 +1,9 @@
 # Validation Story -1: Validate Story 1
 
-**Status**: unassigned
+**Status**: completed
 **Priority**: P0
 **Assigned**: agent
-**Created**: 2025-11-26T10:33:29.715365+00:00
+**Created**: 2025-11-27T04:09:30.852952+00:00
 **Validation Target**: Story 1
 
 ---
@@ -21,7 +21,7 @@ This validation story performs all quality checks and auto-repairs issues where 
 **Story**: 1
 **Title**: Foundation Infrastructure
 **Status**: completed
-**File**: stories/1-untitled.md
+**File**: stories/1-foundation-infrastructure.md
 
 ---
 
@@ -62,12 +62,20 @@ This validation story performs all quality checks and auto-repairs issues where 
   - Verify dependencies satisfied
   - Auto-fix: Already handled by ordering (informational only)
 
-- [ ] **(P0) AC--1.9**: Calculate quality score
+- [ ] **(P0) AC--1.9**: Execute Check I: Code implementation validation
+  - Verify code exists for all P0 acceptance criteria
+  - Verify semantic alignment (code matches AC descriptions)
+  - Verify implementation recency (code modified recently)
+  - Verify test coverage references actual implementation
+  - Auto-fix: Cannot fix missing code (create remediation stories)
+
+- [ ] **(P0) AC--1.10**: Calculate quality score
   - Generate validation report
   - Determine pass/fail status
 
-- [ ] **(P0) AC--1.10**: Auto-repair or block
+- [ ] **(P0) AC--1.11**: Auto-repair or block
   - Apply auto-fixes where possible
+  - Create remediation stories for code implementation failures
   - Block with user options if cannot auto-repair
   - Mark validation story: completed or blocked
 
@@ -83,7 +91,11 @@ When this validation story is executed, use the validation execution helper:
 cat ~/.claude/resources/commands/sprint/execute-validation-story.md
 ```
 
-Follow the helper's instructions to execute checks A-H sequentially.
+Follow the helper's instructions to execute checks A-I sequentially.
+
+**Two-Phase Validation**:
+- **Phase 1**: Structure validation (Checks A-H)
+- **Phase 2**: Code implementation validation (Check I) - only runs if Phase 1 passes
 
 ---
 
@@ -99,6 +111,7 @@ Follow the helper's instructions to execute checks A-H sequentially.
 | F: Hierarchy | ❌ No | Report issues, block for manual fix |
 | G: Advisory Alignment | ✅ Yes | Propagate advisory resolutions to parent |
 | H: Dependencies | ℹ️ Info | Already fixed in ordering (informational) |
+| I: Code Implementation | 🔧 Remediation | Create remediation stories for missing/misaligned code |
 
 ---
 
