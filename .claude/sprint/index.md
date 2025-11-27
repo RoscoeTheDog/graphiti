@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-11-26 20:14:37
+**Generated**: 2025-11-26 20:18:31
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 61
-- **Completion**: 68.9%
+- **Completion**: 70.5%
 
 ### By Status
 
-- completed: 42
+- completed: 43
 - superseded: 4
-- unassigned: 15
+- unassigned: 14
 
 ### By Type
 
@@ -36,7 +36,7 @@
 **Status**: completed | **Type**: validation
 
 ### Story -2: Validate Story 2
-**Status**: unassigned | **Type**: validation
+**Status**: completed | **Type**: validation
 
 ### Story -3: Validate Story 3
 **Status**: unassigned | **Type**: validation
