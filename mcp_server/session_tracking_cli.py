@@ -253,14 +253,11 @@ def cmd_sync(args: argparse.Namespace) -> None:
             print(f"  Actual cost:      {data['actual_cost']}")
 
         if data['dry_run']:
-            print("
-💡 Tip: Run with --no-dry-run to perform actual sync")
+            print("\n💡 Tip: Run with --no-dry-run to perform actual sync")
 
         # Show sample sessions
         if "sessions" in data and data["sessions"]:
-            print("
-📄 Sample Sessions (first 10):
-")
+            print("\n📄 Sample Sessions (first 10):\n")
             for session in data["sessions"]:
                 print(f"  {session['path']}")
                 print(f"    Modified: {session['modified']}, Messages: {session['messages']}")

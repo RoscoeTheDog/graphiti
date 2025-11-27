@@ -709,7 +709,7 @@
     "-5": {
       "type": "validation",
       "title": "Validate Story 5",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [],
       "blocks": [],
