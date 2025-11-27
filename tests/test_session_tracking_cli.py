@@ -48,8 +48,11 @@ class TestConfigDiscovery:
         # result is relative Path("graphiti.config.json"), resolve to compare
         assert result.resolve() == project_config.resolve()
 
-    def test_find_config_file_global_fallback(self, tmp_path):
+    def test_find_config_file_global_fallback(self, tmp_path, monkeypatch):
         """Global config used when no project config exists"""
+        # Change to temp directory without project config to isolate from project root
+        monkeypatch.chdir(tmp_path)
+
         global_config_dir = tmp_path / ".graphiti"
         global_config_dir.mkdir()
         global_config = global_config_dir / "graphiti.config.json"
@@ -60,8 +63,11 @@ class TestConfigDiscovery:
 
         assert result == global_config
 
-    def test_find_config_file_none_when_missing(self, tmp_path):
+    def test_find_config_file_none_when_missing(self, tmp_path, monkeypatch):
         """Returns None when no config file exists"""
+        # Change to temp directory to isolate from project root's graphiti.config.json
+        monkeypatch.chdir(tmp_path)
+
         with patch("mcp_server.session_tracking_cli.Path.home", return_value=tmp_path):
             result = find_config_file()
 
@@ -240,9 +246,12 @@ class TestDisableCommand:
         captured = capsys.readouterr()
         assert "disabled" in captured.out.lower()
 
-    def test_disable_no_config_shows_warning(self, tmp_path, capsys):
+    def test_disable_no_config_shows_warning(self, tmp_path, capsys, monkeypatch):
         """Disable shows warning when no config exists"""
         from argparse import Namespace
+
+        # Change to temp directory to isolate from project root's graphiti.config.json
+        monkeypatch.chdir(tmp_path)
 
         with patch("mcp_server.session_tracking_cli.Path.home", return_value=tmp_path):
             args = Namespace()
@@ -256,9 +265,12 @@ class TestDisableCommand:
 class TestStatusCommand:
     """Test session-tracking status command"""
 
-    def test_status_no_config(self, tmp_path, capsys):
+    def test_status_no_config(self, tmp_path, capsys, monkeypatch):
         """Status shows default disabled when no config exists"""
         from argparse import Namespace
+
+        # Change to temp directory to isolate from project root's graphiti.config.json
+        monkeypatch.chdir(tmp_path)
 
         with patch("mcp_server.session_tracking_cli.Path.home", return_value=tmp_path):
             args = Namespace()
