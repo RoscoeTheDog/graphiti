@@ -10,6 +10,7 @@ import logging
 import logging.handlers
 import os
 import sys
+import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1078,6 +1079,7 @@ async def add_memory(
     source_description: str = '',
     uuid: str | None = None,
     filepath: str | None = None,
+    wait_for_completion: bool | None = None,
 ) -> str:
     """Add an episode to memory and optionally export to file.
 
@@ -1100,6 +1102,9 @@ async def add_memory(
         uuid (str, optional): Optional UUID for the episode
         filepath (str, optional): Optional file path to export episode. Supports path variables:
                                  {date}, {timestamp}, {time}, {hash}. If provided, saves episode_body to file.
+        wait_for_completion (bool, optional): If True, block until processing completes.
+                                             If False, return immediately after queueing.
+                                             Defaults to config value (mcp_tools.wait_for_completion_default).
 
     Examples:
         # Adding plain text content (graph only)
@@ -1158,6 +1163,13 @@ async def add_memory(
         - QUEUE_RETRY: Queue for retry when LLM recovers (batch operations)
     """
     global graphiti_client, episode_queues, queue_workers
+
+    start_time = time.perf_counter()
+
+    # Resolve wait_for_completion from config if not provided
+    should_wait = wait_for_completion
+    if should_wait is None:
+        should_wait = unified_config.mcp_tools.wait_for_completion_default
 
     if graphiti_client is None:
         response = create_error(
@@ -1224,9 +1236,15 @@ async def add_memory(
                 logger.info(f"Episode '{name}' queued for retry when LLM recovers (QUEUE_RETRY mode)")
 
         # =================================================================
-        # Episode Processing Function
+        # Episode Processing (with wait_for_completion support - AC-18.8, AC-18.9)
         # =================================================================
+
+        # Create an Event for synchronization if waiting
+        processing_complete: asyncio.Event | None = asyncio.Event() if should_wait else None
+        processing_result: dict[str, Any] = {"success": False, "error": None, "episode_id": None}
+
         async def process_episode():
+            nonlocal processing_result
             try:
                 logger.info(f"Processing queued episode '{name}' for group_id: {group_id_str}")
                 # Use all entity types if use_custom_entities is enabled, otherwise use empty dict
@@ -1235,7 +1253,7 @@ async def add_memory(
                 # If degraded due to LLM unavailability and using STORE_RAW mode,
                 # we store the episode but skip LLM-dependent processing
                 # The Graphiti client will handle this internally based on store_raw_episode_content flag
-                await client.add_episode(
+                result = await client.add_episode(
                     name=name,
                     episode_body=episode_body,
                     source=source_type,
@@ -1245,14 +1263,20 @@ async def add_memory(
                     reference_time=datetime.now(timezone.utc),
                     entity_types=entity_types,
                 )
-                logger.info(f"Episode '{name}' added successfully")
 
+                processing_result["success"] = True
+                processing_result["episode_id"] = str(result.uuid) if hasattr(result, 'uuid') else None
                 logger.info(f"Episode '{name}' processed successfully")
+
             except Exception as e:
                 error_msg = str(e)
+                processing_result["error"] = error_msg
                 logger.error(
                     f"Error processing episode '{name}' for group_id {group_id_str}: {error_msg}"
                 )
+            finally:
+                if processing_complete:
+                    processing_complete.set()
 
         # Initialize queue for this group_id if it doesn't exist
         if group_id_str not in episode_queues:
@@ -1264,6 +1288,37 @@ async def add_memory(
         # Start a worker for this queue if one isn't already running
         if not queue_workers.get(group_id_str, False):
             asyncio.create_task(process_episode_queue(group_id_str))
+
+        # =================================================================
+        # Wait for Completion (if requested - AC-18.8, AC-18.9)
+        # =================================================================
+        if should_wait and processing_complete:
+            try:
+                # Wait with timeout to prevent indefinite blocking
+                timeout = unified_config.mcp_tools.timeout_seconds
+                await asyncio.wait_for(processing_complete.wait(), timeout=float(timeout))
+            except asyncio.TimeoutError:
+                processing_time_ms = (time.perf_counter() - start_time) * 1000
+                response = create_timeout_error(
+                    operation="add_memory",
+                    timeout_seconds=timeout,
+                    suggestion=(
+                        f"Episode processing timed out after {timeout}s. "
+                        "The operation may still complete in the background. "
+                        "Consider using wait_for_completion=false for long operations."
+                    )
+                )
+                return format_response(response)
+
+            # Check processing result after waiting
+            if not processing_result["success"]:
+                response = create_error(
+                    category=ErrorCategory.INTERNAL,
+                    message=f"Episode processing failed: {processing_result['error']}",
+                    recoverable=True,
+                    suggestion="Check the error message and retry."
+                )
+                return format_response(response)
 
         # =================================================================
         # Optional File Export
@@ -1309,6 +1364,8 @@ async def add_memory(
         # =================================================================
         # Build Response (Story 18: AC-18.1, AC-18.2, AC-18.3)
         # =================================================================
+        processing_time_ms = (time.perf_counter() - start_time) * 1000
+
         if is_degraded:
             # Degraded response (AC-18.2)
             limitations = ["Entity extraction skipped (LLM unavailable)"]
@@ -1319,6 +1376,8 @@ async def add_memory(
                 reason=degradation_reason or DegradationReason.LLM_UNAVAILABLE,
                 message=f"Episode '{name}' stored with degraded functionality",
                 limitations=limitations,
+                episode_id=processing_result.get("episode_id") if should_wait else None,
+                processing_time_ms=processing_time_ms,
                 episode_name=name,
                 group_id=group_id_str,
                 saved_to=file_saved_path,
@@ -1330,14 +1389,28 @@ async def add_memory(
 
         else:
             # Success response (AC-18.1)
-            if file_saved_path:
-                msg = f"Episode '{name}' queued successfully\nSaved to {file_saved_path}"
+            if should_wait:
+                # Synchronous: processing completed
+                msg = f"Episode '{name}' added successfully"
+                if file_saved_path:
+                    msg += f"\nSaved to {file_saved_path}"
+                response = create_success(
+                    message=msg,
+                    episode_id=processing_result.get("episode_id"),
+                    processing_time_ms=processing_time_ms,
+                )
+                result = format_response(response)
             else:
-                msg = f"Episode '{name}' queued successfully"
+                # Asynchronous: just queued
+                if file_saved_path:
+                    msg = f"Episode '{name}' queued successfully\nSaved to {file_saved_path}"
+                else:
+                    msg = f"Episode '{name}' queued successfully"
+                result = msg
 
             if file_warnings:
-                msg += f"\nWarning: {file_warnings[0]}"
-            return msg
+                result += f"\nWarning: {file_warnings[0]}"
+            return result
 
     except Exception as e:
         error_msg = str(e)

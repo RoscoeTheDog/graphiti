@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-11-28 00:00:27
+**Generated**: 2025-11-28 00:27:33
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 70
-- **Completion**: 88.6%
+- **Completion**: 90.0%
 
 ### By Status
 
-- completed: 62
+- completed: 63
 - stub: 1
 - superseded: 5
-- unassigned: 2
+- unassigned: 1
 
 ### By Type
 
@@ -109,7 +109,7 @@
   - Dependencies: Story 18
 
   ### Story 18.3: Wait For Completion Remediation
-  **Status**: unassigned | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 18
 
 ### Story 19: Session Tracking Resilience
