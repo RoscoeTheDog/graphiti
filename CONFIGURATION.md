@@ -586,6 +586,23 @@ Defines how MCP tools respond when the LLM backend is unavailable (circuit break
 
 **Note**: `STORE_RAW` and `QUEUE_RETRY` require session tracking resilience configuration for proper queue management.
 
+### Response Types (Story 18)
+
+MCP tools return structured responses with explicit status indicators:
+
+| Status | Description | When Used |
+|--------|-------------|-----------|
+| `success` | Full processing completed | Normal operation with LLM available |
+| `degraded` | Partial success with limitations | LLM unavailable, `STORE_RAW` mode |
+| `queued` | Operation queued for later | LLM unavailable, `QUEUE_RETRY` mode |
+| `error` | Operation failed | Any error condition |
+
+**Error Responses** include:
+- `category`: Error type (e.g., `llm_unavailable`, `database_connection`, `validation`)
+- `recoverable`: Boolean indicating if retry may succeed
+- `suggestion`: Actionable recovery suggestion
+- `retry_after_seconds`: Optional wait time before retry
+
 ---
 
 ## Session Tracking Configuration

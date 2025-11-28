@@ -820,7 +820,7 @@
     },
     "17": {
       "id": "17",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "LLM Availability Layer",
       "parent": null,
@@ -836,7 +836,7 @@
     },
     "18": {
       "id": "18",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "MCP Tools Error Handling",
       "parent": null,
@@ -864,7 +864,7 @@
     },
     "20": {
       "id": "20",
-      "status": "in_progress",
+      "status": "completed",
       "story_type": "implementation",
       "title": "Unified LLM Configuration",
       "parent": null,

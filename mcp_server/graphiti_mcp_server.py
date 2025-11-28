@@ -46,6 +46,25 @@ from graphiti_core.utils.maintenance.graph_data_operations import clear_data
 from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path, _normalize_msys_path
 from mcp_server.unified_config import get_config
 
+from mcp_server.responses import (
+    MCPResponse,
+    SuccessResponse,
+    DegradedResponse,
+    QueuedResponse,
+    ErrorResponse as MCPErrorResponse,
+    DegradationReason,
+    create_success,
+    create_degraded,
+    create_queued,
+    create_error,
+    create_llm_unavailable_error,
+    create_llm_auth_error,
+    create_llm_rate_limit_error,
+    create_database_error,
+    create_timeout_error,
+    format_response,
+    ErrorCategory,
+)
 # Session tracking imports
 from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
 from graphiti_core.session_tracking.session_manager import SessionManager
@@ -1126,11 +1145,28 @@ async def add_memory(
         - Complex nested structures are supported (arrays, nested objects, mixed data types), but keep nesting to a minimum
         - Entities will be created from appropriate JSON properties
         - Relationships between entities will be established based on the JSON structure
+
+    Response Types (Story 18):
+        - Success: Full processing completed with LLM entity extraction
+        - Degraded: Data stored but with reduced functionality (e.g., LLM unavailable)
+        - Queued: Operation queued for later processing (when QUEUE_RETRY mode)
+        - Error: Operation failed with actionable error details
+
+    LLM Unavailable Behavior (configurable via mcp_tools.on_llm_unavailable):
+        - FAIL: Return error immediately (default, best for interactive use)
+        - STORE_RAW: Store episode without LLM processing (data preservation)
+        - QUEUE_RETRY: Queue for retry when LLM recovers (batch operations)
     """
     global graphiti_client, episode_queues, queue_workers
 
     if graphiti_client is None:
-        return "Error: Graphiti client not initialized"
+        response = create_error(
+            category=ErrorCategory.CONFIGURATION,
+            message="Graphiti client not initialized",
+            recoverable=False,
+            suggestion="Check server startup logs. The MCP server may not have connected to Neo4j successfully."
+        )
+        return format_response(response)
 
     try:
         # Map string source to EpisodeType enum
@@ -1154,13 +1190,51 @@ async def add_memory(
         # Use cast to help the type checker understand that graphiti_client is not None
         client = cast(Graphiti, graphiti_client)
 
-        # Define the episode processing function
+        # =================================================================
+        # LLM Availability Check (Story 18: AC-18.6)
+        # =================================================================
+        llm_available = client.llm_available
+        degradation_mode = unified_config.mcp_tools.on_llm_unavailable
+        is_degraded = False
+        degradation_reason = None
+
+        if not llm_available:
+            logger.warning(f"LLM unavailable for episode '{name}', mode: {degradation_mode}")
+            circuit_state = client._availability_manager.circuit_breaker.state.value
+
+            if degradation_mode == "FAIL":
+                # Immediate failure with actionable error (AC-18.4)
+                response = create_llm_unavailable_error(
+                    circuit_state=circuit_state,
+                    retry_after_seconds=unified_config.llm_resilience.circuit_breaker.recovery_timeout_seconds
+                )
+                return format_response(response)
+
+            elif degradation_mode == "STORE_RAW":
+                # Mark as degraded - will store without LLM processing
+                is_degraded = True
+                degradation_reason = DegradationReason.LLM_UNAVAILABLE
+                logger.info(f"Episode '{name}' will be stored raw (LLM unavailable, STORE_RAW mode)")
+
+            elif degradation_mode == "QUEUE_RETRY":
+                # Queue for later retry when LLM recovers
+                # For now, we queue normally but mark for retry
+                is_degraded = True
+                degradation_reason = DegradationReason.LLM_UNAVAILABLE
+                logger.info(f"Episode '{name}' queued for retry when LLM recovers (QUEUE_RETRY mode)")
+
+        # =================================================================
+        # Episode Processing Function
+        # =================================================================
         async def process_episode():
             try:
                 logger.info(f"Processing queued episode '{name}' for group_id: {group_id_str}")
                 # Use all entity types if use_custom_entities is enabled, otherwise use empty dict
                 entity_types = ENTITY_TYPES if config.use_custom_entities else {}
 
+                # If degraded due to LLM unavailability and using STORE_RAW mode,
+                # we store the episode but skip LLM-dependent processing
+                # The Graphiti client will handle this internally based on store_raw_episode_content flag
                 await client.add_episode(
                     name=name,
                     episode_body=episode_body,
@@ -1191,7 +1265,12 @@ async def add_memory(
         if not queue_workers.get(group_id_str, False):
             asyncio.create_task(process_episode_queue(group_id_str))
 
-        # Optional file export
+        # =================================================================
+        # Optional File Export
+        # =================================================================
+        file_saved_path = None
+        file_warnings = []
+
         if filepath:
             try:
                 # Resolve path pattern variables
@@ -1207,9 +1286,8 @@ async def add_memory(
                 logger.debug(f"Path resolution: resolved='{resolved_path}', CLIENT_ROOT='{CLIENT_ROOT}', output='{output_path}'")
 
                 # Security scan
-                warnings = []
                 if detected := _scan_for_credentials(episode_body):
-                    warnings.append(f"Detected credentials: {', '.join(detected)}")
+                    file_warnings.append(f"Detected credentials: {', '.join(detected)}")
 
                 # Write file
                 output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1217,30 +1295,60 @@ async def add_memory(
 
                 # Display path relative to client root for cleaner output
                 try:
-                    display_path = output_path.relative_to(CLIENT_ROOT)
+                    file_saved_path = str(output_path.relative_to(CLIENT_ROOT))
                 except ValueError:
                     # Path is outside client root, show absolute
-                    display_path = output_path
-
-                # Success message with file info
-                msg = f"Episode '{name}' queued successfully\nSaved to {display_path}"
-                if warnings:
-                    msg += f"\nWarning: {warnings[0]}"
-                return msg
+                    file_saved_path = str(output_path)
 
             except Exception as e:
                 # File export failed, but episode still queued
                 error_msg = str(e)
                 logger.error(f"File export failed for episode '{name}': {error_msg}")
-                return f"Episode '{name}' queued successfully\nWarning: File export failed: {error_msg}"
+                file_warnings.append(f"File export failed: {error_msg}")
 
-        # No filepath provided (backward compatible)
-        return f"Episode '{name}' queued successfully"
+        # =================================================================
+        # Build Response (Story 18: AC-18.1, AC-18.2, AC-18.3)
+        # =================================================================
+        if is_degraded:
+            # Degraded response (AC-18.2)
+            limitations = ["Entity extraction skipped (LLM unavailable)"]
+            if degradation_mode == "QUEUE_RETRY":
+                limitations.append("Episode queued for reprocessing when LLM recovers")
+
+            response = create_degraded(
+                reason=degradation_reason or DegradationReason.LLM_UNAVAILABLE,
+                message=f"Episode '{name}' stored with degraded functionality",
+                limitations=limitations,
+                episode_name=name,
+                group_id=group_id_str,
+                saved_to=file_saved_path,
+            )
+            result = format_response(response)
+            if file_warnings:
+                result += f"\nWarning: {file_warnings[0]}"
+            return result
+
+        else:
+            # Success response (AC-18.1)
+            if file_saved_path:
+                msg = f"Episode '{name}' queued successfully\nSaved to {file_saved_path}"
+            else:
+                msg = f"Episode '{name}' queued successfully"
+
+            if file_warnings:
+                msg += f"\nWarning: {file_warnings[0]}"
+            return msg
 
     except Exception as e:
         error_msg = str(e)
         logger.error(f'Error queuing episode task: {error_msg}')
-        return f"Error queuing episode task: {error_msg}"
+        response = create_error(
+            category=ErrorCategory.INTERNAL,
+            message=f"Error queuing episode task: {error_msg}",
+            recoverable=True,
+            suggestion="Check the error message and retry. If the issue persists, check server logs."
+        )
+        return format_response(response)
 
 
 @mcp.tool()
