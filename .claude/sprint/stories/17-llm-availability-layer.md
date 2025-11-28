@@ -5,7 +5,7 @@ description: LLM Availability Layer - Health checks, error classification, circu
 # Story 17: LLM Availability Layer
 
 **Type**: Implementation
-**Status**: unassigned
+**Status**: complete
 **Parent**: None (top-level)
 **Created**: 2025-11-27
 **Priority**: P0
@@ -23,28 +23,28 @@ Implement a foundational LLM availability layer that provides health monitoring,
 ## Acceptance Criteria
 
 ### Health Monitoring
-- [ ] **(P0) AC-17.1**: Implement `LLMHealthMonitor` class with periodic health checks
-- [ ] **(P0) AC-17.2**: Validate LLM credentials on Graphiti client initialization
-- [ ] **(P0) AC-17.3**: Add `health_check()` method to all LLM clients (OpenAI, Anthropic, Gemini, Groq)
-- [ ] **(P1) AC-17.4**: Track health check history (last N checks, success rate)
+- [x] **(P0) AC-17.1**: Implement `LLMHealthMonitor` class with periodic health checks
+- [x] **(P0) AC-17.2**: Validate LLM credentials on Graphiti client initialization
+- [x] **(P0) AC-17.3**: Add `health_check()` method to all LLM clients (OpenAI, Anthropic, Gemini, Groq)
+- [x] **(P1) AC-17.4**: Track health check history (last N checks, success rate)
 
 ### Error Classification
-- [ ] **(P0) AC-17.5**: Create `LLMErrorClassifier` that distinguishes transient vs permanent errors
-- [ ] **(P0) AC-17.6**: Classify errors by type:
+- [x] **(P0) AC-17.5**: Create `LLMErrorClassifier` that distinguishes transient vs permanent errors
+- [x] **(P0) AC-17.6**: Classify errors by type:
   - `PERMANENT`: Invalid API key (401), account suspended, model not available
   - `TRANSIENT`: Rate limit (429), network timeout, server error (5xx), connection refused
-- [ ] **(P0) AC-17.7**: Add structured error types: `LLMUnavailableError`, `LLMAuthenticationError`, `LLMRateLimitError`
+- [x] **(P0) AC-17.7**: Add structured error types: `LLMUnavailableError`, `LLMAuthenticationError`, `LLMRateLimitError`
 
 ### Circuit Breaker
-- [ ] **(P1) AC-17.8**: Implement circuit breaker pattern to prevent cascading failures
-- [ ] **(P1) AC-17.9**: Configurable failure threshold (default: 5 consecutive failures)
-- [ ] **(P1) AC-17.10**: Configurable recovery timeout (default: 300 seconds)
-- [ ] **(P1) AC-17.11**: Circuit states: CLOSED (normal), OPEN (failing), HALF_OPEN (testing recovery)
+- [x] **(P1) AC-17.8**: Implement circuit breaker pattern to prevent cascading failures
+- [x] **(P1) AC-17.9**: Configurable failure threshold (default: 5 consecutive failures)
+- [x] **(P1) AC-17.10**: Configurable recovery timeout (default: 300 seconds)
+- [x] **(P1) AC-17.11**: Circuit states: CLOSED (normal), OPEN (failing), HALF_OPEN (testing recovery)
 
 ### Integration
-- [ ] **(P0) AC-17.12**: Wrap all extraction operations (extract_nodes, extract_edges) with error handling
-- [ ] **(P0) AC-17.13**: Expose `llm_available` property on Graphiti client
-- [ ] **(P1) AC-17.14**: Add MCP tool `llm_health_check()` for explicit health queries
+- [x] **(P0) AC-17.12**: Wrap all extraction operations (extract_nodes, extract_edges) with error handling
+- [x] **(P0) AC-17.13**: Expose `llm_available` property on Graphiti client
+- [x] **(P1) AC-17.14**: Add MCP tool `llm_health_check()` for explicit health queries
 
 ---
 

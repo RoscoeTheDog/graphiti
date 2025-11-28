@@ -14,9 +14,53 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from .availability import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitState,
+    HealthCheckConfig,
+    HealthCheckResult,
+    LLMAvailabilityConfig,
+    LLMAvailabilityManager,
+    LLMError,
+    LLMErrorClassifier,
+    LLMErrorType,
+    LLMHealthMonitor,
+)
 from .client import LLMClient
 from .config import LLMConfig
-from .errors import RateLimitError
+from .errors import (
+    EmptyResponseError,
+    LLMAuthenticationError,
+    LLMRateLimitError,
+    LLMUnavailableError,
+    RateLimitError,
+    RefusalError,
+)
 from .openai_client import OpenAIClient
 
-__all__ = ['LLMClient', 'OpenAIClient', 'LLMConfig', 'RateLimitError']
+__all__ = [
+    # Client
+    'LLMClient',
+    'OpenAIClient',
+    'LLMConfig',
+    # Errors
+    'RateLimitError',
+    'RefusalError',
+    'EmptyResponseError',
+    'LLMUnavailableError',
+    'LLMAuthenticationError',
+    'LLMRateLimitError',
+    # Availability
+    'LLMAvailabilityManager',
+    'LLMAvailabilityConfig',
+    'LLMHealthMonitor',
+    'HealthCheckConfig',
+    'HealthCheckResult',
+    'CircuitBreaker',
+    'CircuitBreakerConfig',
+    'CircuitState',
+    'LLMErrorClassifier',
+    'LLMError',
+    'LLMErrorType',
+]

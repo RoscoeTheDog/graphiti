@@ -41,7 +41,13 @@ from graphiti_core.helpers import (
     validate_excluded_entity_types,
     validate_group_id,
 )
-from graphiti_core.llm_client import LLMClient, OpenAIClient
+from graphiti_core.llm_client import (
+    LLMAvailabilityConfig,
+    LLMAvailabilityManager,
+    LLMClient,
+    LLMUnavailableError,
+    OpenAIClient,
+)
 from graphiti_core.nodes import (
     CommunityNode,
     EntityNode,
@@ -231,8 +237,89 @@ class Graphiti:
             tracer=self.tracer,
         )
 
+        # Initialize LLM availability manager (AC-17.1, AC-17.13)
+        self._availability_manager = LLMAvailabilityManager()
+        self._availability_manager.set_health_check_fn(self.llm_client.health_check)
+        self._availability_manager.set_provider(self._get_provider_type(self.llm_client))
+
         # Capture telemetry event
         self._capture_initialization_telemetry()
+
+    @property
+    def llm_available(self) -> bool:
+        """
+        Check if the LLM is currently available (AC-17.13).
+
+        This property checks the circuit breaker state and health monitor
+        to determine if the LLM service is available for requests.
+
+        Returns
+        -------
+        bool
+            True if the LLM is available, False otherwise.
+        """
+        return self._availability_manager.circuit_breaker.is_available
+
+    async def llm_health_check(self) -> dict:
+        """
+        Perform an LLM health check (AC-17.3, AC-17.14).
+
+        This method performs a health check on the configured LLM client
+        and returns detailed status information.
+
+        Returns
+        -------
+        dict
+            A dictionary containing health status information:
+            - available: bool - Whether the LLM is available
+            - circuit_state: str - Current circuit breaker state
+            - health_status: dict - Health check details including:
+                - healthy: bool
+                - success_rate: float
+                - last_check: str or None
+        """
+        result = await self._availability_manager.health_monitor.check_health()
+        return {
+            **self._availability_manager.get_status(),
+            'last_check_result': {
+                'healthy': result.healthy,
+                'latency_ms': result.latency_ms,
+                'error': str(result.error) if result.error else None,
+                'timestamp': result.timestamp.isoformat(),
+            },
+        }
+
+    async def validate_llm_credentials(self) -> bool:
+        """
+        Validate LLM credentials on initialization (AC-17.2).
+
+        This method validates that the configured LLM API credentials
+        are valid by performing a minimal API call.
+
+        Returns
+        -------
+        bool
+            True if credentials are valid, False otherwise.
+
+        Raises
+        ------
+        LLMAuthenticationError
+            If credentials are invalid or account is suspended.
+        """
+        return await self.llm_client.validate_credentials()
+
+    async def start_llm_monitoring(self) -> None:
+        """
+        Start background LLM health monitoring.
+
+        This method starts periodic health checks on the LLM service.
+        The interval and other settings are configured via LLMAvailabilityConfig.
+        """
+        await self._availability_manager.start()
+
+    async def stop_llm_monitoring(self) -> None:
+        """Stop background LLM health monitoring."""
+        await self._availability_manager.stop()
 
     def _capture_initialization_telemetry(self):
         """Capture telemetry event for Graphiti initialization."""

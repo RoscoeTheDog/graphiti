@@ -37,3 +37,35 @@ class EmptyResponseError(Exception):
     def __init__(self, message: str):
         self.message = message
         super().__init__(self.message)
+
+
+class LLMUnavailableError(Exception):
+    """Exception raised when LLM is unavailable (circuit breaker open or health check failed)."""
+
+    def __init__(
+        self, message: str = "LLM is currently unavailable", retryable: bool = True
+    ):
+        self.message = message
+        self.retryable = retryable
+        super().__init__(self.message)
+
+
+class LLMAuthenticationError(Exception):
+    """Exception raised when LLM authentication fails (invalid API key, suspended account)."""
+
+    def __init__(self, message: str = "LLM authentication failed"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class LLMRateLimitError(Exception):
+    """Exception raised when LLM rate limit is exceeded (transient, retryable)."""
+
+    def __init__(
+        self,
+        message: str = "LLM rate limit exceeded",
+        retry_after: float | None = None,
+    ):
+        self.message = message
+        self.retry_after = retry_after
+        super().__init__(self.message)

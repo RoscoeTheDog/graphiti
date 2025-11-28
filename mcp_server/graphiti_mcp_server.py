@@ -1609,6 +1609,100 @@ async def health_check() -> HealthCheckResponse:
         )
 
 
+class LLMHealthCheckResponse(TypedDict):
+    """Response from LLM health check."""
+
+    status: str
+    available: bool
+    circuit_state: str
+    provider: str
+    healthy: bool
+    success_rate: float
+    latency_ms: float | None
+    last_check_timestamp: str | None
+    error: str | None
+
+
+@mcp.tool()
+async def llm_health_check() -> LLMHealthCheckResponse:
+    """Check the health of the LLM service (AC-17.14).
+
+    Performs a health check on the configured LLM (OpenAI, Azure, Anthropic, etc.)
+    and returns detailed status information including circuit breaker state.
+
+    This tool is useful for:
+    - Validating LLM API credentials
+    - Checking if the LLM service is responding
+    - Monitoring circuit breaker state
+    - Diagnosing LLM-related issues
+
+    Returns:
+        LLMHealthCheckResponse with:
+        - status: 'healthy' or 'unhealthy'
+        - available: Whether the LLM is available for requests
+        - circuit_state: Current circuit breaker state (closed/open/half_open)
+        - provider: LLM provider name (openai, anthropic, etc.)
+        - healthy: Result of the last health check
+        - success_rate: Recent success rate (0.0 to 1.0)
+        - latency_ms: Response time of last health check in milliseconds
+        - last_check_timestamp: ISO timestamp of last health check
+        - error: Error message if unhealthy
+    """
+    global graphiti_client
+
+    if graphiti_client is None:
+        return LLMHealthCheckResponse(
+            status='unhealthy',
+            available=False,
+            circuit_state='unknown',
+            provider='unknown',
+            healthy=False,
+            success_rate=0.0,
+            latency_ms=None,
+            last_check_timestamp=None,
+            error='Graphiti client not initialized',
+        )
+
+    try:
+        client = cast(Graphiti, graphiti_client)
+
+        # Perform health check and get status
+        health_result = await client.llm_health_check()
+
+        # Extract values from health result
+        is_available = health_result.get('available', False)
+        circuit_state = health_result.get('circuit_state', 'unknown')
+        health_status = health_result.get('health_status', {})
+        last_check_result = health_result.get('last_check_result', {})
+
+        return LLMHealthCheckResponse(
+            status='healthy' if last_check_result.get('healthy', False) else 'unhealthy',
+            available=is_available,
+            circuit_state=circuit_state,
+            provider=client._get_provider_type(client.llm_client),
+            healthy=last_check_result.get('healthy', False),
+            success_rate=health_status.get('success_rate', 0.0),
+            latency_ms=last_check_result.get('latency_ms'),
+            last_check_timestamp=last_check_result.get('timestamp'),
+            error=last_check_result.get('error'),
+        )
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'LLM health check failed: {error_msg}')
+
+        return LLMHealthCheckResponse(
+            status='unhealthy',
+            available=False,
+            circuit_state='unknown',
+            provider='unknown',
+            healthy=False,
+            success_rate=0.0,
+            latency_ms=None,
+            last_check_timestamp=None,
+            error=error_msg,
+        )
+
+
 @mcp.tool()
 async def session_tracking_start(session_id: str | None = None, force: bool = False) -> str:
     """Enable session tracking for the current or specified session.
