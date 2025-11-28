@@ -895,7 +895,7 @@
     },
     "19": {
       "id": "19",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "Session Tracking Resilience",
       "parent": null,

@@ -74,6 +74,20 @@ from graphiti_core.session_tracking.indexer import SessionIndexer
 from graphiti_core.session_tracking.prompts import DEFAULT_TEMPLATES
 from mcp_server.manual_sync import session_tracking_sync_history as _session_tracking_sync_history
 
+# Session tracking resilience imports (Story 19)
+from graphiti_core.session_tracking.resilient_indexer import (
+    ResilientSessionIndexer,
+    ResilientIndexerConfig,
+    OnLLMUnavailable,
+)
+from graphiti_core.session_tracking.retry_queue import FailedEpisode, RetryQueue
+from graphiti_core.session_tracking.status import (
+    SessionTrackingHealth,
+    SessionTrackingStatusAggregator,
+    DegradationLevel,
+    ServiceStatus,
+)
+
 load_dotenv()
 
 # Load unified config instance (will replace local GraphitiConfig)
@@ -98,6 +112,10 @@ _inactivity_checker_task: asyncio.Task | None = None
 # Runtime session tracking state (per-session overrides)
 # Maps session_id -> enabled (True/False)
 runtime_session_tracking_state: dict[str, bool] = {}
+
+# Session tracking resilience components (Story 19)
+resilient_indexer: ResilientSessionIndexer | None = None
+status_aggregator: SessionTrackingStatusAggregator | None = None
 
 
 class Requirement(BaseModel):
@@ -2147,6 +2165,254 @@ async def session_tracking_status(session_id: str | None = None) -> str:
         })
 
 
+@mcp.tool()
+async def session_tracking_health() -> str:
+    """Get comprehensive health status of the session tracking system (AC-19.10, AC-19.11).
+
+    This tool provides detailed health information including:
+    - Service status (running/stopped/degraded/error)
+    - LLM availability status
+    - Current degradation level (FULL=0, PARTIAL=1, RAW_ONLY=2)
+    - Processing queue status (pending, processing, completed today, failed today)
+    - Retry queue status (pending retries, permanent failures, next retry time)
+    - Recent failures (last 10 with details)
+    - Uptime and activity metrics
+
+    This tool is useful for:
+    - Monitoring session tracking health
+    - Diagnosing LLM availability issues
+    - Checking retry queue status
+    - Understanding current degradation level
+
+    Returns:
+        JSON string with comprehensive health information:
+        {
+            "status": "success" | "error",
+            "health": {
+                "service_status": "running" | "stopped" | "degraded" | "error",
+                "degradation_level": {
+                    "level": 0 | 1 | 2,
+                    "name": "FULL" | "PARTIAL" | "RAW_ONLY",
+                    "description": str
+                },
+                "llm_status": {
+                    "available": bool,
+                    "last_check": str | null,
+                    "provider": str | null,
+                    "circuit_state": str | null,
+                    "error": str | null,
+                    "success_rate": float | null
+                },
+                "queue_status": {
+                    "pending": int,
+                    "processing": int,
+                    "completed_today": int,
+                    "failed_today": int
+                },
+                "retry_queue": {
+                    "count": int,
+                    "pending_retries": int,
+                    "permanent_failures": int,
+                    "next_retry": str | null,
+                    "oldest_failure": str | null
+                },
+                "recent_failures": [
+                    {
+                        "episode_id": str,
+                        "session_id": str,
+                        "error": str,
+                        "retry_count": int,
+                        "next_retry": str | null,
+                        "failed_at": str | null
+                    }
+                ],
+                "uptime_seconds": int | null,
+                "started_at": str | null,
+                "last_activity": str | null,
+                "active_sessions": int
+            }
+        }
+
+    Examples:
+        # Get full health status
+        session_tracking_health()
+
+    Note:
+        - Use this tool to monitor session tracking health proactively
+        - Degradation level indicates current processing capability
+        - Check retry_queue.pending_retries to see queued episodes awaiting LLM recovery
+    """
+    global session_manager, resilient_indexer, status_aggregator
+
+    try:
+        # Create status aggregator if not exists
+        if status_aggregator is None:
+            aggregator = SessionTrackingStatusAggregator()
+            if session_manager:
+                aggregator.set_session_manager(session_manager)
+            if resilient_indexer:
+                aggregator.set_retry_queue(resilient_indexer.retry_queue)
+        else:
+            aggregator = status_aggregator
+
+        # Get health status
+        health = await aggregator.get_health()
+
+        # If we have a resilient indexer, get its degradation level
+        if resilient_indexer:
+            health.degradation_level = resilient_indexer.get_degradation_level()
+
+        return json.dumps({
+            "status": "success",
+            "health": health.to_dict()
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting session tracking health: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting health: {error_msg}"
+        })
+
+
+@mcp.tool()
+async def get_failed_episodes(
+    include_permanent: bool = True,
+    limit: int = 50,
+) -> str:
+    """Get failed episodes from the retry queue (AC-19.12).
+
+    This tool retrieves information about episodes that failed during processing
+    and are either awaiting retry or have permanently failed.
+
+    Args:
+        include_permanent: Include permanently failed episodes (default: True)
+        limit: Maximum number of episodes to return (default: 50, max: 100)
+
+    Returns:
+        JSON string with failed episodes:
+        {
+            "status": "success" | "error",
+            "total_count": int,
+            "returned_count": int,
+            "episodes": [
+                {
+                    "episode_id": str,
+                    "session_id": str,
+                    "session_file": str,
+                    "group_id": str,
+                    "error_type": str,
+                    "error_message": str,
+                    "failed_at": str,
+                    "retry_count": int,
+                    "next_retry_at": str | null,
+                    "permanent_failure": bool,
+                    "last_retry_at": str | null,
+                    "created_at": str,
+                    "metadata": dict
+                }
+            ],
+            "stats": {
+                "queue_size": int,
+                "pending_retries": int,
+                "permanent_failures": int,
+                "total_added": int,
+                "total_retried": int,
+                "total_succeeded": int,
+                "total_failed_permanently": int
+            }
+        }
+
+    Examples:
+        # Get all failed episodes
+        get_failed_episodes()
+
+        # Get only episodes awaiting retry (exclude permanent failures)
+        get_failed_episodes(include_permanent=False)
+
+        # Get top 10 failed episodes
+        get_failed_episodes(limit=10)
+
+    Note:
+        - Episodes with permanent_failure=True have exhausted all retries
+        - Use session_tracking_health() for aggregate status
+        - Episodes are sorted by failed_at (most recent first)
+    """
+    global resilient_indexer
+
+    try:
+        # Clamp limit
+        limit = min(max(1, limit), 100)
+
+        if resilient_indexer is None:
+            return json.dumps({
+                "status": "success",
+                "message": "Resilient indexer not initialized - no retry queue available",
+                "total_count": 0,
+                "returned_count": 0,
+                "episodes": [],
+                "stats": {
+                    "queue_size": 0,
+                    "pending_retries": 0,
+                    "permanent_failures": 0,
+                    "total_added": 0,
+                    "total_retried": 0,
+                    "total_succeeded": 0,
+                    "total_failed_permanently": 0
+                }
+            }, indent=2)
+
+        # Get failed episodes
+        episodes = await resilient_indexer.get_failed_episodes(
+            include_permanent=include_permanent,
+            limit=limit
+        )
+
+        # Get queue stats
+        stats = resilient_indexer.retry_queue.get_stats()
+
+        # Convert episodes to dict
+        episode_dicts = []
+        for ep in episodes:
+            episode_dicts.append({
+                "episode_id": ep.episode_id,
+                "session_id": ep.session_id,
+                "session_file": ep.session_file,
+                "group_id": ep.group_id,
+                "error_type": ep.error_type,
+                "error_message": ep.error_message,
+                "failed_at": ep.failed_at.isoformat() if ep.failed_at else None,
+                "retry_count": ep.retry_count,
+                "next_retry_at": ep.next_retry_at.isoformat() if ep.next_retry_at else None,
+                "permanent_failure": ep.permanent_failure,
+                "last_retry_at": ep.last_retry_at.isoformat() if ep.last_retry_at else None,
+                "created_at": ep.created_at.isoformat() if ep.created_at else None,
+                "metadata": ep.metadata,
+            })
+
+        # Get total count
+        all_episodes = await resilient_indexer.retry_queue.get_all()
+        if not include_permanent:
+            all_episodes = [ep for ep in all_episodes if not ep.permanent_failure]
+        total_count = len(all_episodes)
+
+        return json.dumps({
+            "status": "success",
+            "total_count": total_count,
+            "returned_count": len(episode_dicts),
+            "episodes": episode_dicts,
+            "stats": stats
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting failed episodes: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting failed episodes: {error_msg}"
+        })
+
 
 async def session_tracking_sync_history(
     project: str | None = None,
@@ -2353,15 +2619,17 @@ async def initialize_session_tracking() -> None:
     1. Checks if session tracking is enabled in unified_config
     2. Creates ClaudePathResolver for session file discovery
     3. Initializes SessionManager with indexing callback
-    4. Starts session manager to begin monitoring
+    4. Creates ResilientSessionIndexer with retry queue (Story 19)
+    5. Starts session manager to begin monitoring
 
     The session manager will:
     - Monitor Claude Code session files (.jsonl)
     - Detect new sessions and session updates
     - Track inactivity and trigger indexing on session close
     - Filter and index sessions into Graphiti knowledge graph
+    - Handle LLM failures with graceful degradation (Story 19)
     """
-    global session_manager, graphiti_client
+    global session_manager, graphiti_client, resilient_indexer, status_aggregator
 
     try:
         # Check if session tracking is enabled
@@ -2385,8 +2653,51 @@ async def initialize_session_tracking() -> None:
 
         logger.info(f"Session tracking watch path: {path_resolver.watch_all_projects()}")
 
-        # Create session indexer with Graphiti client
-        indexer = SessionIndexer(graphiti=graphiti_client)
+        # Get resilience configuration
+        resilience_config = unified_config.session_tracking.resilience
+
+        # Map string config to enum
+        on_llm_unavailable_map = {
+            "FAIL": OnLLMUnavailable.FAIL,
+            "STORE_RAW": OnLLMUnavailable.STORE_RAW,
+            "STORE_RAW_AND_RETRY": OnLLMUnavailable.STORE_RAW_AND_RETRY,
+        }
+        on_llm_unavailable = on_llm_unavailable_map.get(
+            resilience_config.on_llm_unavailable,
+            OnLLMUnavailable.STORE_RAW_AND_RETRY
+        )
+
+        # Determine retry queue path
+        retry_queue_path = None
+        if resilience_config.retry_queue.persist_to_disk:
+            # Store retry queue in .graphiti directory
+            retry_queue_path = Path.home() / ".graphiti" / "retry_queue.json"
+            retry_queue_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Create resilient indexer config (Story 19)
+        resilient_config = ResilientIndexerConfig(
+            on_llm_unavailable=on_llm_unavailable,
+            retry_queue_path=retry_queue_path,
+            max_retries=resilience_config.retry_queue.max_retries,
+            retry_delays=resilience_config.retry_queue.retry_delays_seconds,
+            max_queue_size=resilience_config.retry_queue.max_queue_size,
+            auto_recovery_interval=60,  # Check every 60 seconds
+        )
+
+        # Create resilient session indexer
+        resilient_indexer = ResilientSessionIndexer(
+            graphiti=graphiti_client,
+            config=resilient_config,
+        )
+
+        # Start resilient indexer (loads retry queue, starts processor)
+        await resilient_indexer.start()
+        logger.info(f"Resilient session indexer started (mode: {on_llm_unavailable.value})")
+
+        # Create status aggregator
+        status_aggregator = SessionTrackingStatusAggregator()
+        status_aggregator.set_retry_queue(resilient_indexer.retry_queue)
+        status_aggregator.mark_started()
 
         # Create filter
         filter_config = unified_config.session_tracking.filter
@@ -2394,9 +2705,9 @@ async def initialize_session_tracking() -> None:
             filter_config=filter_config
         ) if filter_config else SessionFilter()
 
-        # Define session closed callback
+        # Define session closed callback with resilience
         def on_session_closed(session_id: str, file_path: Path, context) -> None:
-            """Callback when session closes - filter and index to Graphiti."""
+            """Callback when session closes - filter and index to Graphiti with resilience."""
             try:
                 # Check runtime state (per-session override)
                 if session_id in runtime_session_tracking_state:
@@ -2409,20 +2720,29 @@ async def initialize_session_tracking() -> None:
                 # Filter conversation
                 filtered_messages = session_filter.filter_conversation(context.messages)
 
-                # Index to Graphiti (synchronous in callback context)
-                # Note: This is called from SessionManager which handles async context
+                # Format filtered content
+                filtered_content = "\n\n".join([
+                    f"[{msg.role}]: {msg.content}" for msg in filtered_messages
+                ])
+
+                # Get project hash as group_id
+                group_id = path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+
+                # Index to Graphiti using resilient indexer (handles degradation)
                 import asyncio
                 loop = asyncio.get_event_loop()
-                loop.create_task(indexer.index_session(
+                loop.create_task(resilient_indexer.index_session(
                     session_id=session_id,
-                    messages=filtered_messages,
-                    project_hash=path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+                    filtered_content=filtered_content,
+                    group_id=group_id,
+                    session_file=str(file_path),
                 ))
 
-                logger.info(f"Session {session_id} indexed successfully ({len(filtered_messages)} messages)")
+                logger.info(f"Session {session_id} indexing initiated ({len(filtered_messages)} messages)")
 
             except Exception as e:
                 logger.error(f"Error indexing session {session_id}: {e}", exc_info=True)
+                # Session isolation: error in one session doesn't affect others (AC-19.3)
 
         # Create session manager
         session_manager = SessionManager(
@@ -2431,6 +2751,9 @@ async def initialize_session_tracking() -> None:
             keep_length_days=unified_config.session_tracking.keep_length_days,
             on_session_closed=on_session_closed
         )
+
+        # Connect session manager to status aggregator
+        status_aggregator.set_session_manager(session_manager)
 
         # Start session manager
         session_manager.start()
@@ -2561,7 +2884,7 @@ async def run_mcp_server():
             logger.info('Metrics logging task cancelled successfully')
 
         # Clean up session manager and inactivity checker on shutdown
-        global session_manager, _inactivity_checker_task
+        global session_manager, _inactivity_checker_task, resilient_indexer
 
         # Cancel inactivity checker task first
         if _inactivity_checker_task is not None:
@@ -2580,6 +2903,15 @@ async def run_mcp_server():
                 logger.info('Session manager stopped successfully')
             except Exception as e:
                 logger.error(f'Error stopping session manager: {e}', exc_info=True)
+
+        # Stop resilient indexer (Story 19 - persists retry queue)
+        if resilient_indexer is not None:
+            try:
+                logger.info('Stopping resilient indexer...')
+                await resilient_indexer.stop()
+                logger.info('Resilient indexer stopped successfully')
+            except Exception as e:
+                logger.error(f'Error stopping resilient indexer: {e}', exc_info=True)
 
 
 def main():

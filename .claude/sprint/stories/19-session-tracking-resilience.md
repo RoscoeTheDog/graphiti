@@ -5,9 +5,10 @@ description: Session Tracking Resilience - Retry queue, status dashboard, auto-r
 # Story 19: Session Tracking Resilience
 
 **Type**: Implementation
-**Status**: unassigned
+**Status**: completed
 **Parent**: None (top-level)
 **Created**: 2025-11-27
+**Completed**: 2025-11-28
 **Priority**: P0
 
 ---
@@ -25,34 +26,34 @@ Implement resilience features for the background session tracking service. Unlik
 ## Acceptance Criteria
 
 ### Graceful Degradation
-- [ ] **(P0) AC-19.1**: Always store raw episode text even if LLM extraction fails
-- [ ] **(P0) AC-19.2**: Mark failed episodes with `needs_reprocessing = true`
-- [ ] **(P0) AC-19.3**: Continue processing other sessions even if one fails
-- [ ] **(P1) AC-19.4**: Implement degradation levels:
+- [x] **(P0) AC-19.1**: Always store raw episode text even if LLM extraction fails
+- [x] **(P0) AC-19.2**: Mark failed episodes with `needs_reprocessing = true`
+- [x] **(P0) AC-19.3**: Continue processing other sessions even if one fails
+- [x] **(P1) AC-19.4**: Implement degradation levels:
   - Level 0: Full Processing (LLM available)
   - Level 1: Partial Processing (store raw + queue retry)
   - Level 2: Raw Storage Only (LLM unavailable)
 
 ### Retry Queue
-- [ ] **(P0) AC-19.5**: Implement persistent retry queue for failed episodes
-- [ ] **(P0) AC-19.6**: Exponential backoff for retries (5min, 15min, 45min, 2hr, 6hr)
-- [ ] **(P0) AC-19.7**: Configurable max retries (default: 5)
-- [ ] **(P0) AC-19.8**: Configurable max queue size (default: 1000)
-- [ ] **(P1) AC-19.9**: Automatic retry when LLM becomes available (health check triggers)
+- [x] **(P0) AC-19.5**: Implement persistent retry queue for failed episodes
+- [x] **(P0) AC-19.6**: Exponential backoff for retries (5min, 15min, 45min, 2hr, 6hr)
+- [x] **(P0) AC-19.7**: Configurable max retries (default: 5)
+- [x] **(P0) AC-19.8**: Configurable max queue size (default: 1000)
+- [x] **(P1) AC-19.9**: Automatic retry when LLM becomes available (health check triggers)
 
 ### Status Dashboard (MCP Tool)
-- [ ] **(P0) AC-19.10**: Implement `session_tracking_health()` MCP tool returning:
+- [x] **(P0) AC-19.10**: Implement `session_tracking_health()` MCP tool returning:
   - Service status (running/stopped/degraded)
   - LLM status (available/unavailable, last check time)
   - Queue status (pending, processing, completed today, failed today)
   - Retry queue (count, next retry time, oldest failure)
-- [ ] **(P0) AC-19.11**: Include recent failures list with error type and retry count
-- [ ] **(P1) AC-19.12**: Add `get_failed_episodes()` tool for detailed failure info
+- [x] **(P0) AC-19.11**: Include recent failures list with error type and retry count
+- [x] **(P1) AC-19.12**: Add `get_failed_episodes()` tool for detailed failure info
 
 ### Auto-Recovery
-- [ ] **(P1) AC-19.13**: Monitor LLM health in background
-- [ ] **(P1) AC-19.14**: Automatically process retry queue when LLM recovers
-- [ ] **(P1) AC-19.15**: Log recovery events for debugging
+- [x] **(P1) AC-19.13**: Monitor LLM health in background
+- [x] **(P1) AC-19.14**: Automatically process retry queue when LLM recovers
+- [x] **(P1) AC-19.15**: Log recovery events for debugging
 
 ### Notifications (Optional)
 - [ ] **(P2) AC-19.16**: Configurable notification on permanent failure
