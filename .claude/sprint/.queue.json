@@ -859,7 +859,7 @@
     },
     "18.1": {
       "id": "18.1",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "remediation",
       "title": "Add episode_id and processing_time_ms to Response Types",
       "parent": "18",

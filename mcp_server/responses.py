@@ -109,6 +109,8 @@ class SuccessResponse:
     status: Literal[ResponseStatus.SUCCESS] = ResponseStatus.SUCCESS
     message: str = "Operation completed successfully"
     data: dict[str, Any] | None = None
+    episode_id: str | None = None
+    processing_time_ms: float | None = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
@@ -120,6 +122,10 @@ class SuccessResponse:
         }
         if self.data:
             result["data"] = self.data
+        if self.episode_id:
+            result["episode_id"] = self.episode_id
+        if self.processing_time_ms is not None:
+            result["processing_time_ms"] = self.processing_time_ms
         return result
 
     def to_string(self) -> str:
@@ -144,6 +150,8 @@ class DegradedResponse:
     reason: DegradationReason = DegradationReason.LLM_UNAVAILABLE
     data: dict[str, Any] | None = None
     limitations: list[str] | None = None
+    episode_id: str | None = None
+    processing_time_ms: float | None = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
@@ -158,6 +166,10 @@ class DegradedResponse:
             result["data"] = self.data
         if self.limitations:
             result["limitations"] = self.limitations
+        if self.episode_id:
+            result["episode_id"] = self.episode_id
+        if self.processing_time_ms is not None:
+            result["processing_time_ms"] = self.processing_time_ms
         return result
 
     def to_string(self) -> str:
@@ -248,15 +260,27 @@ class ErrorResponse:
 MCPResponse = SuccessResponse | DegradedResponse | QueuedResponse | ErrorResponse
 
 
-def create_success(message: str = "Operation completed successfully", **data) -> SuccessResponse:
+def create_success(
+    message: str = "Operation completed successfully",
+    episode_id: str | None = None,
+    processing_time_ms: float | None = None,
+    **data,
+) -> SuccessResponse:
     """Create a success response with optional data."""
-    return SuccessResponse(message=message, data=data if data else None)
+    return SuccessResponse(
+        message=message,
+        data=data if data else None,
+        episode_id=episode_id,
+        processing_time_ms=processing_time_ms,
+    )
 
 
 def create_degraded(
     reason: DegradationReason,
     message: str | None = None,
     limitations: list[str] | None = None,
+    episode_id: str | None = None,
+    processing_time_ms: float | None = None,
     **data,
 ) -> DegradedResponse:
     """Create a degraded response."""
@@ -267,6 +291,8 @@ def create_degraded(
         reason=reason,
         data=data if data else None,
         limitations=limitations,
+        episode_id=episode_id,
+        processing_time_ms=processing_time_ms,
     )
 
 

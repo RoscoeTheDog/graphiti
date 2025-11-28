@@ -278,7 +278,7 @@ class TestFactoryFunctions:
         response = create_success("Episode added", episode_id="123", count=5)
         assert isinstance(response, SuccessResponse)
         assert response.message == "Episode added"
-        assert response.data["episode_id"] == "123"
+        assert response.episode_id == "123"  # Now a direct field, not in data
         assert response.data["count"] == 5
 
     def test_create_degraded(self):
@@ -291,7 +291,7 @@ class TestFactoryFunctions:
         assert isinstance(response, DegradedResponse)
         assert response.reason == DegradationReason.LLM_UNAVAILABLE
         assert response.limitations == ["Entity extraction skipped"]
-        assert response.data["episode_id"] == "456"
+        assert response.episode_id == "456"  # Now a direct field, not in data
 
     def test_create_queued(self):
         """Test create_queued factory function."""
@@ -439,3 +439,130 @@ class TestEnums:
         assert ErrorCategory.VALIDATION.value == "validation"
         assert ErrorCategory.TIMEOUT.value == "timeout"
         assert ErrorCategory.INTERNAL.value == "internal"
+
+
+class TestResponseFieldsAC18_2:
+    """Tests for AC-18.2 response fields (episode_id, processing_time_ms)."""
+
+    def test_success_response_with_episode_id(self):
+        """Test success response with episode_id field."""
+        response = SuccessResponse(
+            message="Episode added",
+            episode_id="ep-123",
+            processing_time_ms=150.5
+        )
+        assert response.episode_id == "ep-123"
+        assert response.processing_time_ms == 150.5
+
+    def test_success_response_to_dict_with_fields(self):
+        """Test success response serialization includes new fields."""
+        response = SuccessResponse(
+            message="Episode added",
+            episode_id="ep-123",
+            processing_time_ms=150.5
+        )
+        result = response.to_dict()
+        assert result["episode_id"] == "ep-123"
+        assert result["processing_time_ms"] == 150.5
+
+    def test_success_response_to_dict_excludes_none_fields(self):
+        """Test success response serialization excludes None fields."""
+        response = SuccessResponse(message="Test")
+        result = response.to_dict()
+        assert "episode_id" not in result
+        assert "processing_time_ms" not in result
+
+    def test_degraded_response_with_episode_id(self):
+        """Test degraded response with episode_id field."""
+        response = DegradedResponse(
+            message="Stored raw",
+            episode_id="ep-456",
+            processing_time_ms=200.0
+        )
+        assert response.episode_id == "ep-456"
+        assert response.processing_time_ms == 200.0
+
+    def test_degraded_response_to_dict_with_fields(self):
+        """Test degraded response serialization includes new fields."""
+        response = DegradedResponse(
+            message="Stored raw",
+            episode_id="ep-456",
+            processing_time_ms=200.0
+        )
+        result = response.to_dict()
+        assert result["episode_id"] == "ep-456"
+        assert result["processing_time_ms"] == 200.0
+
+    def test_degraded_response_to_dict_excludes_none_fields(self):
+        """Test degraded response serialization excludes None fields."""
+        response = DegradedResponse(message="Test")
+        result = response.to_dict()
+        assert "episode_id" not in result
+        assert "processing_time_ms" not in result
+
+    def test_create_success_factory_with_new_fields(self):
+        """Test create_success factory function with new fields."""
+        response = create_success(
+            "Episode added",
+            episode_id="ep-789",
+            processing_time_ms=100.0,
+            extra_data="value"
+        )
+        assert response.episode_id == "ep-789"
+        assert response.processing_time_ms == 100.0
+        assert response.data["extra_data"] == "value"
+
+    def test_create_degraded_factory_with_new_fields(self):
+        """Test create_degraded factory function with new fields."""
+        response = create_degraded(
+            reason=DegradationReason.LLM_UNAVAILABLE,
+            episode_id="ep-101",
+            processing_time_ms=250.0
+        )
+        assert response.episode_id == "ep-101"
+        assert response.processing_time_ms == 250.0
+
+    def test_processing_time_ms_zero_is_serialized(self):
+        """Test that processing_time_ms=0 is serialized (not treated as None)."""
+        response = SuccessResponse(
+            message="Fast operation",
+            processing_time_ms=0.0
+        )
+        result = response.to_dict()
+        assert result["processing_time_ms"] == 0.0
+
+    def test_all_response_fields_in_success(self):
+        """Test all fields together in success response."""
+        response = SuccessResponse(
+            message="Complete success",
+            data={"key": "value"},
+            episode_id="ep-full",
+            processing_time_ms=500.0
+        )
+        result = response.to_dict()
+        assert result["status"] == "success"
+        assert result["message"] == "Complete success"
+        assert result["data"] == {"key": "value"}
+        assert result["episode_id"] == "ep-full"
+        assert result["processing_time_ms"] == 500.0
+        assert "timestamp" in result
+
+    def test_all_response_fields_in_degraded(self):
+        """Test all fields together in degraded response."""
+        response = DegradedResponse(
+            message="Degraded operation",
+            reason=DegradationReason.STORED_RAW,
+            data={"key": "value"},
+            limitations=["No LLM processing"],
+            episode_id="ep-degraded",
+            processing_time_ms=300.0
+        )
+        result = response.to_dict()
+        assert result["status"] == "degraded"
+        assert result["message"] == "Degraded operation"
+        assert result["reason"] == "stored_raw"
+        assert result["data"] == {"key": "value"}
+        assert result["limitations"] == ["No LLM processing"]
+        assert result["episode_id"] == "ep-degraded"
+        assert result["processing_time_ms"] == 300.0
+        assert "timestamp" in result
