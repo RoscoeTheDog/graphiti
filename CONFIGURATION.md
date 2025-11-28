@@ -14,10 +14,12 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 8. [Project Configuration](#project-configuration)
 9. [Search Configuration](#search-configuration)
 10. [Resilience Configuration](#resilience-configuration)
-11. [Session Tracking Configuration](#session-tracking-configuration) ⭐ New in v0.4.0
-12. [Environment Variable Overrides](#environment-variable-overrides)
-13. [Complete Examples](#complete-examples)
-14. [Troubleshooting](#troubleshooting)
+11. [LLM Resilience Configuration](#llm-resilience-configuration) ⭐ New in v1.0.0
+12. [MCP Tools Configuration](#mcp-tools-configuration) ⭐ New in v1.0.0
+13. [Session Tracking Configuration](#session-tracking-configuration)
+14. [Environment Variable Overrides](#environment-variable-overrides)
+15. [Complete Examples](#complete-examples)
+16. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -423,6 +425,169 @@ export GRAPHITI_HEALTH_CHECK_INTERVAL=600
 
 ---
 
+## LLM Resilience Configuration
+
+**New in v1.0.0** - Comprehensive LLM operation resilience with health checks, retry policies, and circuit breaker patterns.
+
+The LLM resilience system provides robust handling of LLM API failures, rate limits, and timeouts, ensuring graceful degradation and automatic recovery.
+
+### Configuration
+
+```json
+{
+  "llm_resilience": {
+    "health_check": {
+      "enabled": true,
+      "interval_seconds": 60,
+      "on_startup": true,
+      "timeout_seconds": 10
+    },
+    "retry": {
+      "max_attempts": 4,
+      "initial_delay_seconds": 5,
+      "max_delay_seconds": 120,
+      "exponential_base": 2,
+      "retry_on_rate_limit": true,
+      "retry_on_timeout": true
+    },
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 5,
+      "recovery_timeout_seconds": 300,
+      "half_open_max_calls": 3
+    }
+  }
+}
+```
+
+### Health Check Configuration
+
+Periodic health checks verify LLM provider availability before operations.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `true` | Enable periodic health checks |
+| `interval_seconds` | int | `60` | Seconds between health check probes |
+| `on_startup` | bool | `true` | Run health check on MCP server startup |
+| `timeout_seconds` | int | `10` | Timeout for individual health check requests |
+
+### Retry Policy Configuration
+
+Exponential backoff retry for transient LLM failures.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `max_attempts` | int | `4` | Maximum retry attempts before failure |
+| `initial_delay_seconds` | float | `5` | Initial delay before first retry |
+| `max_delay_seconds` | float | `120` | Maximum delay cap for exponential backoff |
+| `exponential_base` | float | `2` | Base for exponential backoff calculation |
+| `retry_on_rate_limit` | bool | `true` | Retry on HTTP 429 rate limit errors |
+| `retry_on_timeout` | bool | `true` | Retry on timeout errors |
+
+**Retry Delay Calculation**: `min(initial_delay * (exponential_base ^ attempt), max_delay)`
+
+### Circuit Breaker Configuration
+
+Prevents cascading failures by temporarily disabling LLM calls after repeated failures.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `true` | Enable circuit breaker pattern |
+| `failure_threshold` | int | `5` | Consecutive failures before circuit opens |
+| `recovery_timeout_seconds` | int | `300` | Seconds before attempting recovery (half-open state) |
+| `half_open_max_calls` | int | `3` | Test calls allowed in half-open state |
+
+**Circuit States**:
+- **CLOSED**: Normal operation, all calls pass through
+- **OPEN**: Circuit tripped, all calls fail immediately (fast-fail)
+- **HALF-OPEN**: Recovery testing, limited calls allowed
+
+### Example Configurations
+
+**High Availability (aggressive retry)**:
+```json
+{
+  "llm_resilience": {
+    "health_check": {
+      "enabled": true,
+      "interval_seconds": 30,
+      "on_startup": true
+    },
+    "retry": {
+      "max_attempts": 6,
+      "initial_delay_seconds": 2,
+      "max_delay_seconds": 60
+    },
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 10,
+      "recovery_timeout_seconds": 120
+    }
+  }
+}
+```
+
+**Cost-Sensitive (conservative retry)**:
+```json
+{
+  "llm_resilience": {
+    "health_check": {
+      "enabled": true,
+      "interval_seconds": 300,
+      "on_startup": false
+    },
+    "retry": {
+      "max_attempts": 2,
+      "initial_delay_seconds": 10,
+      "max_delay_seconds": 60
+    },
+    "circuit_breaker": {
+      "enabled": false
+    }
+  }
+}
+```
+
+---
+
+## MCP Tools Configuration
+
+**New in v1.0.0** - Control MCP tool behavior during LLM unavailability.
+
+Defines how MCP tools respond when the LLM backend is unavailable (circuit breaker open, health check failed, etc.).
+
+### Configuration
+
+```json
+{
+  "mcp_tools": {
+    "on_llm_unavailable": "FAIL",
+    "wait_for_completion_default": true,
+    "timeout_seconds": 60
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `on_llm_unavailable` | str | `"FAIL"` | Behavior when LLM is unavailable (see modes below) |
+| `wait_for_completion_default` | bool | `true` | Default for `add_memory` wait_for_completion parameter |
+| `timeout_seconds` | int | `60` | Default timeout for MCP tool operations |
+
+### LLM Unavailable Modes
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `FAIL` | Return error immediately | Production systems requiring explicit error handling |
+| `STORE_RAW` | Store raw episode without LLM processing | Data preservation priority |
+| `QUEUE_RETRY` | Queue for later processing when LLM recovers | Best-effort processing |
+
+**Note**: `STORE_RAW` and `QUEUE_RETRY` require session tracking resilience configuration for proper queue management.
+
+---
+
 ## Session Tracking Configuration
 
 **New in v0.4.0** - Automatic session tracking for Claude Code conversations.
@@ -821,6 +986,66 @@ export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
   }
 }
 ```
+
+### Session Tracking Resilience
+
+**New in v1.0.0** - Handles LLM unavailability during session summarization.
+
+When LLM services are unavailable (rate limits, outages), session tracking can gracefully degrade and retry later.
+
+```json
+{
+  "session_tracking": {
+    "resilience": {
+      "on_llm_unavailable": "STORE_RAW_AND_RETRY",
+      "retry_queue": {
+        "max_retries": 5,
+        "retry_delays_seconds": [300, 900, 2700, 7200, 21600],
+        "max_queue_size": 1000,
+        "persist_to_disk": true
+      },
+      "notifications": {
+        "on_permanent_failure": true,
+        "notification_method": "log",
+        "webhook_url": null
+      }
+    }
+  }
+}
+```
+
+**Resilience Fields:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `on_llm_unavailable` | str | `"STORE_RAW_AND_RETRY"` | Action when LLM unavailable (see modes below) |
+| `retry_queue` | object | See below | Retry queue configuration |
+| `notifications` | object | See below | Failure notification settings |
+
+**LLM Unavailable Modes:**
+
+| Mode | Behavior |
+|------|----------|
+| `STORE_RAW_AND_RETRY` | Store raw session, queue for LLM processing later (default, recommended) |
+| `STORE_RAW_ONLY` | Store raw session without queueing for retry |
+| `FAIL` | Fail immediately, do not store |
+
+**Retry Queue Fields:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `max_retries` | int | `5` | Maximum retry attempts per session |
+| `retry_delays_seconds` | list | `[300, 900, ...]` | Delay between retries (exponential backoff) |
+| `max_queue_size` | int | `1000` | Maximum sessions in retry queue |
+| `persist_to_disk` | bool | `true` | Persist queue across server restarts |
+
+**Notification Fields:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `on_permanent_failure` | bool | `true` | Notify on permanent failures |
+| `notification_method` | str | `"log"` | Notification method: "log" or "webhook" |
+| `webhook_url` | str\|null | `null` | Webhook URL for notifications (if method is "webhook") |
 
 ### Documentation
 
@@ -1267,5 +1492,5 @@ The `graphiti.config.schema.json` file enables autocomplete and validation in ID
 
 ---
 
-**Last Updated:** 2025-11-18
-**Version:** 2.1 (Added Configuration Validator)
+**Last Updated:** 2025-11-27
+**Version:** 3.0 (Added LLM Resilience Configuration, MCP Tools Configuration)

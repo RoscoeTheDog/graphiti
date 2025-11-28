@@ -46,6 +46,33 @@
       "base_url": null
     }
   },
+  "llm_resilience": {
+    "health_check": {
+      "enabled": true,
+      "interval_seconds": 60,
+      "on_startup": true,
+      "timeout_seconds": 10
+    },
+    "retry": {
+      "max_attempts": 4,
+      "initial_delay_seconds": 5,
+      "max_delay_seconds": 120,
+      "exponential_base": 2,
+      "retry_on_rate_limit": true,
+      "retry_on_timeout": true
+    },
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 5,
+      "recovery_timeout_seconds": 300,
+      "half_open_max_calls": 3
+    }
+  },
+  "mcp_tools": {
+    "on_llm_unavailable": "FAIL",
+    "wait_for_completion_default": true,
+    "timeout_seconds": 60
+  },
   "embedder": {
     "provider": "openai",
     "model": "text-embedding-3-small",
@@ -118,6 +145,20 @@
       "tool_content": "default-tool-content.md",
       "user_messages": true,
       "agent_messages": true
+    },
+    "resilience": {
+      "on_llm_unavailable": "STORE_RAW_AND_RETRY",
+      "retry_queue": {
+        "max_retries": 5,
+        "retry_delays_seconds": [300, 900, 2700, 7200, 21600],
+        "max_queue_size": 1000,
+        "persist_to_disk": true
+      },
+      "notifications": {
+        "on_permanent_failure": true,
+        "notification_method": "log",
+        "webhook_url": null
+      }
     }
   }
 }

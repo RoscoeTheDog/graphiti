@@ -864,7 +864,7 @@
     },
     "20": {
       "id": "20",
-      "status": "unassigned",
+      "status": "in_progress",
       "story_type": "implementation",
       "title": "Unified LLM Configuration",
       "parent": null,

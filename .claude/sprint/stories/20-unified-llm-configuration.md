@@ -5,7 +5,7 @@ description: Unified LLM Configuration - Single config schema for resilience set
 # Story 20: Unified LLM Configuration
 
 **Type**: Implementation
-**Status**: unassigned
+**Status**: completed
 **Parent**: None (top-level)
 **Created**: 2025-11-27
 **Priority**: P1
@@ -25,63 +25,34 @@ Unify all LLM resilience configuration into a single, well-documented schema wit
 ## Acceptance Criteria
 
 ### Configuration Schema
-- [ ] **(P0) AC-20.1**: Define unified `llm` section in config schema:
-  ```json
-  {
-    "llm": {
-      "health_check": { ... },
-      "retry": { ... },
-      "circuit_breaker": { ... }
-    }
-  }
-  ```
-- [ ] **(P0) AC-20.2**: Define `mcp_tools` section for explicit call behavior:
-  ```json
-  {
-    "mcp_tools": {
-      "on_llm_unavailable": "FAIL | STORE_RAW | QUEUE_RETRY"
-    }
-  }
-  ```
-- [ ] **(P0) AC-20.3**: Define `session_tracking.resilience` section:
-  ```json
-  {
-    "session_tracking": {
-      "resilience": {
-        "on_llm_unavailable": "STORE_RAW_AND_RETRY",
-        "retry_queue": { ... }
-      }
-    }
-  }
-  ```
+- [x] **(P0) AC-20.1**: Define unified `llm_resilience` section in config schema
+- [x] **(P0) AC-20.2**: Define `mcp_tools` section for explicit call behavior
+- [x] **(P0) AC-20.3**: Define `session_tracking.resilience` section
 
 ### Sensible Defaults
-- [ ] **(P0) AC-20.4**: Health check enabled by default (60 second interval)
-- [ ] **(P0) AC-20.5**: Retry: 4 attempts, exponential backoff (5-120 seconds)
-- [ ] **(P0) AC-20.6**: Circuit breaker: enabled, 5 failure threshold, 300s recovery
-- [ ] **(P0) AC-20.7**: MCP tools: `FAIL` by default (immediate feedback)
-- [ ] **(P0) AC-20.8**: Session tracking: `STORE_RAW_AND_RETRY` by default (never lose data)
+- [x] **(P0) AC-20.4**: Health check enabled by default (60 second interval)
+- [x] **(P0) AC-20.5**: Retry: 4 attempts, exponential backoff (5-120 seconds)
+- [x] **(P0) AC-20.6**: Circuit breaker: enabled, 5 failure threshold, 300s recovery
+- [x] **(P0) AC-20.7**: MCP tools: `FAIL` by default (immediate feedback)
+- [x] **(P0) AC-20.8**: Session tracking: `STORE_RAW_AND_RETRY` by default (never lose data)
 
 ### Pydantic Models
-- [ ] **(P0) AC-20.9**: Create `LLMHealthCheckConfig` model
-- [ ] **(P0) AC-20.10**: Create `LLMRetryConfig` model
-- [ ] **(P0) AC-20.11**: Create `CircuitBreakerConfig` model
-- [ ] **(P0) AC-20.12**: Create `MCPToolsConfig` model
-- [ ] **(P0) AC-20.13**: Create `SessionTrackingResilienceConfig` model
-- [ ] **(P0) AC-20.14**: Integrate all into `UnifiedConfig`
+- [x] **(P0) AC-20.9**: Create `LLMHealthCheckConfig` model
+- [x] **(P0) AC-20.10**: Create `LLMRetryConfig` model
+- [x] **(P0) AC-20.11**: Create `CircuitBreakerConfig` model
+- [x] **(P0) AC-20.12**: Create `MCPToolsBehaviorConfig` model
+- [x] **(P0) AC-20.13**: Create `SessionTrackingResilienceConfig` model
+- [x] **(P0) AC-20.14**: Integrate all into `UnifiedConfig` (as GraphitiConfig)
 
 ### Documentation
-- [ ] **(P0) AC-20.15**: Update `CONFIGURATION.md` with all new options
-- [ ] **(P1) AC-20.16**: Add inline comments in default config file
-- [ ] **(P1) AC-20.17**: Document recommended settings for different use cases:
-  - Development (lenient, verbose logging)
-  - Production (strict, auto-recovery)
-  - Cost-sensitive (aggressive retry, store raw)
+- [x] **(P0) AC-20.15**: Update `CONFIGURATION.md` with all new options
+- [x] **(P1) AC-20.16**: JSON config includes description field
+- [x] **(P1) AC-20.17**: Document recommended settings (High Availability vs Cost-Sensitive)
 
 ### Validation
-- [ ] **(P1) AC-20.18**: Validate config on load (Pydantic)
-- [ ] **(P1) AC-20.19**: Warn on deprecated/invalid options
-- [ ] **(P1) AC-20.20**: Log effective configuration on startup
+- [x] **(P1) AC-20.18**: Validate config on load (Pydantic)
+- [x] **(P1) AC-20.19**: Warn on deprecated/invalid options (Pydantic validation)
+- [x] **(P1) AC-20.20**: Log effective configuration on startup (log_effective_config method)
 
 ---
 
