@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-11-27 23:33:06
+**Generated**: 2025-11-28 00:00:27
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 70
-- **Completion**: 87.1%
+- **Completion**: 88.6%
 
 ### By Status
 
-- completed: 61
+- completed: 62
 - stub: 1
 - superseded: 5
-- unassigned: 3
+- unassigned: 2
 
 ### By Type
 
@@ -105,7 +105,7 @@
   - Dependencies: Story 18
 
   ### Story 18.2: Error Factories Remediation
-  **Status**: unassigned | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 18
 
   ### Story 18.3: Wait For Completion Remediation

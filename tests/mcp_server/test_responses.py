@@ -26,6 +26,8 @@ from mcp_server.responses import (
     create_llm_unavailable_error,
     create_llm_auth_error,
     create_llm_rate_limit_error,
+    create_network_error,
+    create_quota_error,
     create_database_error,
     create_validation_error,
     create_timeout_error,
@@ -363,6 +365,43 @@ class TestPreDefinedErrors:
         assert response.error.details["operation"] == "add_episode"
         assert response.error.details["timeout_seconds"] == 60.0
 
+    def test_create_network_error(self):
+        """Test network error factory (AC-18.5)."""
+        response = create_network_error(provider="openai")
+        assert response.error.category == ErrorCategory.LLM_NETWORK
+        assert response.error.recoverable is True
+        assert "Cannot reach LLM provider" in response.error.message
+        assert "openai" in response.error.message
+        assert "network connection" in response.error.suggestion.lower()
+
+    def test_create_network_error_with_retry(self):
+        """Test network error with retry time."""
+        response = create_network_error(retry_after_seconds=30.0)
+        assert response.error.retry_after_seconds == 30.0
+        assert "30" in response.error.suggestion
+
+    def test_create_quota_error(self):
+        """Test quota exceeded error factory (AC-18.5)."""
+        response = create_quota_error(provider="openai")
+        assert response.error.category == ErrorCategory.LLM_QUOTA_EXCEEDED
+        assert response.error.recoverable is False
+        assert "quota exceeded" in response.error.message.lower()
+        assert "billing" in response.error.suggestion.lower()
+        assert "platform.openai.com" in response.error.suggestion
+
+    def test_create_quota_error_anthropic(self):
+        """Test quota error with Anthropic provider."""
+        response = create_quota_error(provider="anthropic")
+        assert "console.anthropic.com" in response.error.suggestion
+
+    def test_create_quota_error_custom_url(self):
+        """Test quota error with custom billing URL."""
+        response = create_quota_error(
+            provider="custom",
+            provider_url="https://custom.ai/billing"
+        )
+        assert "custom.ai/billing" in response.error.suggestion
+
 
 class TestUtilityFunctions:
     """Tests for utility functions."""
@@ -435,6 +474,8 @@ class TestEnums:
         """Test ErrorCategory enum values."""
         assert ErrorCategory.LLM_UNAVAILABLE.value == "llm_unavailable"
         assert ErrorCategory.LLM_AUTHENTICATION.value == "llm_authentication"
+        assert ErrorCategory.LLM_NETWORK.value == "llm_network"
+        assert ErrorCategory.LLM_QUOTA_EXCEEDED.value == "llm_quota_exceeded"
         assert ErrorCategory.DATABASE_CONNECTION.value == "database_connection"
         assert ErrorCategory.VALIDATION.value == "validation"
         assert ErrorCategory.TIMEOUT.value == "timeout"

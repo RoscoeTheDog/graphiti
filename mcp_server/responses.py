@@ -58,6 +58,8 @@ class ErrorCategory(Enum):
     LLM_UNAVAILABLE = "llm_unavailable"  # LLM service not available
     LLM_AUTHENTICATION = "llm_authentication"  # Invalid API key or credentials
     LLM_RATE_LIMIT = "llm_rate_limit"  # Rate limit exceeded
+    LLM_NETWORK = "llm_network"  # Cannot reach LLM provider (AC-18.5)
+    LLM_QUOTA_EXCEEDED = "llm_quota_exceeded"  # LLM quota exceeded (AC-18.5)
     DATABASE_CONNECTION = "database_connection"  # Cannot connect to database
     DATABASE_QUERY = "database_query"  # Database query failed
     VALIDATION = "validation"  # Input validation failed
@@ -391,6 +393,62 @@ def create_llm_rate_limit_error(retry_after_seconds: float | None = None) -> Err
         recoverable=True,
         suggestion=suggestion,
         retry_after_seconds=retry_after_seconds,
+    )
+
+
+def create_network_error(
+    provider: str | None = None,
+    retry_after_seconds: float | None = None,
+) -> ErrorResponse:
+    """Create LLM network error with recovery suggestions (AC-18.5)."""
+    provider_str = f" ({provider})" if provider else ""
+    suggestion = (
+        f"Cannot reach LLM provider{provider_str}. "
+        "Check your network connection and verify the provider service is operational. "
+        "If using a proxy, ensure it's correctly configured."
+    )
+    if retry_after_seconds:
+        suggestion += f" Retry after {retry_after_seconds} seconds."
+
+    return create_error(
+        category=ErrorCategory.LLM_NETWORK,
+        message=f"Cannot reach LLM provider{provider_str}",
+        recoverable=True,
+        suggestion=suggestion,
+        retry_after_seconds=retry_after_seconds,
+        provider=provider,
+    )
+
+
+def create_quota_error(
+    provider: str | None = None,
+    provider_url: str | None = None,
+) -> ErrorResponse:
+    """Create LLM quota exceeded error with recovery suggestions (AC-18.5)."""
+    provider_str = f" ({provider})" if provider else ""
+
+    # Default billing URLs for common providers
+    if provider_url is None:
+        if provider and provider.lower() == "openai":
+            provider_url = "https://platform.openai.com/account/billing"
+        elif provider and provider.lower() == "anthropic":
+            provider_url = "https://console.anthropic.com/settings/billing"
+        else:
+            provider_url = "your LLM provider's billing page"
+
+    suggestion = (
+        f"LLM quota exceeded{provider_str}. "
+        f"Check your billing and usage limits at {provider_url}. "
+        "You may need to upgrade your plan or wait for quota reset."
+    )
+
+    return create_error(
+        category=ErrorCategory.LLM_QUOTA_EXCEEDED,
+        message=f"LLM quota exceeded{provider_str}",
+        recoverable=False,  # User action required
+        suggestion=suggestion,
+        provider=provider,
+        provider_url=provider_url,
     )
 
 
