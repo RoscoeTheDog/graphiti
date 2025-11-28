@@ -23,9 +23,14 @@
     "-14",
     "-15",
     "-16",
+    "-17",
+    "-18",
     "20",
     "17",
     "18",
+    "18.1",
+    "18.2",
+    "18.3",
     "19"
   ],
   "stories": {
@@ -840,13 +845,53 @@
       "story_type": "implementation",
       "title": "MCP Tools Error Handling",
       "parent": null,
-      "children": [],
+      "children": [
+        "18.1",
+        "18.2",
+        "18.3"
+      ],
       "blocks": [],
       "blocked_by": [
         "17",
         "20"
       ],
       "file": "stories/18-mcp-tools-error-handling.md"
+    },
+    "18.1": {
+      "id": "18.1",
+      "status": "unassigned",
+      "story_type": "remediation",
+      "title": "Add episode_id and processing_time_ms to Response Types",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P0",
+      "file": "stories/18.1-response-fields-remediation.md"
+    },
+    "18.2": {
+      "id": "18.2",
+      "status": "unassigned",
+      "story_type": "remediation",
+      "title": "Add Network and Quota Error Factory Functions",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P1",
+      "file": "stories/18.2-error-factories-remediation.md"
+    },
+    "18.3": {
+      "id": "18.3",
+      "status": "unassigned",
+      "story_type": "remediation",
+      "title": "Implement wait_for_completion Parameter",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P1",
+      "file": "stories/18.3-wait-for-completion-remediation.md"
     },
     "19": {
       "id": "19",
@@ -876,6 +921,24 @@
       ],
       "blocked_by": [],
       "file": "stories/20-unified-llm-configuration.md"
+    },
+    "-18": {
+      "type": "validation",
+      "title": "Validate Story 18",
+      "status": "completed",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "file": "stories/-18-validate-story-18.md"
+    },
+    "-17": {
+      "type": "validation",
+      "title": "Validate Story 17",
+      "status": "completed",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "file": "stories/-17-validate-story-17.md"
     }
   }
 }

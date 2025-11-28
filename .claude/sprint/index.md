@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-11-27 22:57:17
+**Generated**: 2025-11-27 23:25:01
 
 ---
 
@@ -14,20 +14,20 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 65
-- **Completion**: 89.2%
+- **Total Stories**: 70
+- **Completion**: 85.7%
 
 ### By Status
 
-- completed: 58
+- completed: 60
 - stub: 1
 - superseded: 5
-- unassigned: 1
+- unassigned: 4
 
 ### By Type
 
-- unknown: 49
-- validation: 16
+- unknown: 52
+- validation: 18
 
 ---
 
@@ -81,6 +81,12 @@
 ### Story -16: Validate Story 16
 **Status**: completed | **Type**: validation
 
+### Story -17: Validate Story 17
+**Status**: completed | **Type**: validation
+
+### Story -18: Validate Story 18
+**Status**: completed | **Type**: validation
+
 ### Story 20: Unified Llm Configuration
 **Status**: completed | **Type**: unknown
 - Blocks: Story 17, Story 18, Story 19
@@ -93,6 +99,18 @@
 ### Story 18: Mcp Tools Error Handling
 **Status**: completed | **Type**: unknown
 - Dependencies: Story 17, Story 20
+
+  ### Story 18.1: Response Fields Remediation
+  **Status**: unassigned | **Type**: unknown
+  - Dependencies: Story 18
+
+  ### Story 18.2: Error Factories Remediation
+  **Status**: unassigned | **Type**: unknown
+  - Dependencies: Story 18
+
+  ### Story 18.3: Wait For Completion Remediation
+  **Status**: unassigned | **Type**: unknown
+  - Dependencies: Story 18
 
 ### Story 19: Session Tracking Resilience
 **Status**: unassigned | **Type**: unknown

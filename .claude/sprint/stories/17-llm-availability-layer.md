@@ -5,7 +5,7 @@ description: LLM Availability Layer - Health checks, error classification, circu
 # Story 17: LLM Availability Layer
 
 **Type**: Implementation
-**Status**: complete
+**Status**: completed
 **Parent**: None (top-level)
 **Created**: 2025-11-27
 **Priority**: P0
