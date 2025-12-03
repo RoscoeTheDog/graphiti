@@ -21,17 +21,41 @@
     "-12",
     "-13",
     "-14",
-    "-15",
     "-16",
-    "-17",
-    "-18",
+    "-15.d",
+    "-15.i",
+    "-15.t",
+    "-17.d",
+    "-17.i",
+    "-17.t",
+    "-18.d",
+    "-18.i",
+    "-18.t",
+    "-19.d",
+    "-19.i",
+    "-19.t",
+    "-20.d",
+    "-20.i",
+    "-20.t",
+    "-18.1.d",
+    "-18.1.i",
+    "-18.1.t",
+    "-18.2.d",
+    "-18.2.i",
+    "-18.2.t",
+    "-18.3.d",
+    "-18.3.i",
+    "-18.3.t",
     "20",
     "17",
     "18",
     "18.1",
     "18.2",
     "18.3",
-    "19"
+    "19",
+    "15.2.d",
+    "15.2.i",
+    "15.2.t"
   ],
   "stories": {
     "1": {
@@ -563,7 +587,8 @@
       "title": "Documentation Update - Comprehensive User Guide",
       "parent": null,
       "children": [
-        "15.1"
+        "15.1",
+        "15.2"
       ],
       "blocks": [
         "16"
@@ -805,15 +830,6 @@
       "blocks": [],
       "file": "stories/-14-validate-story-14.md"
     },
-    "-15": {
-      "type": "validation",
-      "title": "Validate Story 15",
-      "status": "completed",
-      "parent": null,
-      "children": [],
-      "blocks": [],
-      "file": "stories/-15-validate-story-15.md"
-    },
     "-16": {
       "type": "validation",
       "title": "Validate Story 16",
@@ -922,23 +938,661 @@
       "blocked_by": [],
       "file": "stories/20-unified-llm-configuration.md"
     },
-    "-18": {
+    "-15": {
       "type": "validation",
-      "title": "Validate Story 18",
+      "story_type": "validation",
+      "title": "Validate: Documentation Update - Comprehensive User Guide",
+      "status": "in_progress",
+      "validates": "15",
+      "children": [
+        "-15.d",
+        "-15.i",
+        "-15.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "completed",
+        "validation_implementation": "completed",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-15.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Documentation Update - Comprehensive User Guide",
       "status": "completed",
-      "parent": null,
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
       "children": [],
       "blocks": [],
-      "file": "stories/-18-validate-story-18.md"
+      "file": null
+    },
+    "-15.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Documentation Update - Comprehensive User Guide",
+      "status": "completed",
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-15.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Documentation Update - Comprehensive User Guide",
+      "status": "pending",
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     },
     "-17": {
       "type": "validation",
-      "title": "Validate Story 17",
-      "status": "completed",
-      "parent": null,
+      "story_type": "validation",
+      "title": "Validate: LLM Availability Layer",
+      "status": "unassigned",
+      "validates": "17",
+      "children": [
+        "-17.d",
+        "-17.i",
+        "-17.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-17.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: LLM Availability Layer",
+      "status": "unassigned",
+      "parent": "-17",
+      "validates": "17",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
       "children": [],
       "blocks": [],
-      "file": "stories/-17-validate-story-17.md"
+      "file": null
+    },
+    "-17.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: LLM Availability Layer",
+      "status": "pending",
+      "parent": "-17",
+      "validates": "17",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-17.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: LLM Availability Layer",
+      "status": "pending",
+      "parent": "-17",
+      "validates": "17",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: MCP Tools Error Handling",
+      "status": "unassigned",
+      "validates": "18",
+      "children": [
+        "-18.d",
+        "-18.i",
+        "-18.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-18.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: MCP Tools Error Handling",
+      "status": "unassigned",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: MCP Tools Error Handling",
+      "status": "pending",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: MCP Tools Error Handling",
+      "status": "pending",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Session Tracking Resilience",
+      "status": "unassigned",
+      "validates": "19",
+      "children": [
+        "-19.d",
+        "-19.i",
+        "-19.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-19.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Session Tracking Resilience",
+      "status": "unassigned",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Session Tracking Resilience",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Session Tracking Resilience",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-20": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Unified LLM Configuration",
+      "status": "unassigned",
+      "validates": "20",
+      "children": [
+        "-20.d",
+        "-20.i",
+        "-20.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-20.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Unified LLM Configuration",
+      "status": "unassigned",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-20.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Unified LLM Configuration",
+      "status": "pending",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-20.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Unified LLM Configuration",
+      "status": "pending",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add episode_id and processing_time_ms to Response Types",
+      "status": "unassigned",
+      "validates": "18.1",
+      "children": [
+        "-18.1.d",
+        "-18.1.i",
+        "-18.1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add episode_id and processing_time_ms to Response Types",
+      "status": "unassigned",
+      "parent": "-18.1",
+      "validates": "18.1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add episode_id and processing_time_ms to Response Types",
+      "status": "pending",
+      "parent": "-18.1",
+      "validates": "18.1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add episode_id and processing_time_ms to Response Types",
+      "status": "pending",
+      "parent": "-18.1",
+      "validates": "18.1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add Network and Quota Error Factory Functions",
+      "status": "unassigned",
+      "validates": "18.2",
+      "children": [
+        "-18.2.d",
+        "-18.2.i",
+        "-18.2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add Network and Quota Error Factory Functions",
+      "status": "unassigned",
+      "parent": "-18.2",
+      "validates": "18.2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add Network and Quota Error Factory Functions",
+      "status": "pending",
+      "parent": "-18.2",
+      "validates": "18.2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add Network and Quota Error Factory Functions",
+      "status": "pending",
+      "parent": "-18.2",
+      "validates": "18.2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Implement wait_for_completion Parameter",
+      "status": "unassigned",
+      "validates": "18.3",
+      "children": [
+        "-18.3.d",
+        "-18.3.i",
+        "-18.3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Implement wait_for_completion Parameter",
+      "status": "unassigned",
+      "parent": "-18.3",
+      "validates": "18.3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Implement wait_for_completion Parameter",
+      "status": "pending",
+      "parent": "-18.3",
+      "validates": "18.3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Implement wait_for_completion Parameter",
+      "status": "pending",
+      "parent": "-18.3",
+      "validates": "18.3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "15.2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Documentation Accuracy Remediation",
+      "status": "unassigned",
+      "parent": "15",
+      "children": [
+        "15.2.d",
+        "15.2.i",
+        "15.2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/15.2-documentation-accuracy-remediation.md",
+      "priority": "P1",
+      "blocking": false
+    },
+    "15.2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Documentation Accuracy Remediation",
+      "status": "unassigned",
+      "parent": "15.2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/15.2-plan.yaml"
+    },
+    "15.2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Documentation Accuracy Remediation",
+      "status": "pending",
+      "parent": "15.2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/15.2-plan.yaml"
+    },
+    "15.2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Documentation Accuracy Remediation",
+      "status": "pending",
+      "parent": "15.2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   }
 }
