@@ -1036,7 +1036,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: LLM Availability Layer",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-17",
       "validates": "17",
       "phase": "validation_discovery",
