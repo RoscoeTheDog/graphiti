@@ -1,0 +1,99 @@
+{
+  "story_id": "13.1",
+  "phase": "testing",
+  "story_title": "MCP Tool Wiring for Manual Sync",
+  "execution_date": "2025-12-04",
+  "status": "passed",
+  "summary": {
+    "total_tests": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0
+  },
+  "test_files": [
+    {
+      "file": "tests/mcp/test_session_tracking_tools.py",
+      "tests_run": 16,
+      "tests_passed": 16,
+      "duration_seconds": 1.86,
+      "test_classes": [
+        {
+          "class": "TestSessionTrackingStart",
+          "tests": 5,
+          "passed": 5
+        },
+        {
+          "class": "TestSessionTrackingStop",
+          "tests": 3,
+          "passed": 3
+        },
+        {
+          "class": "TestSessionTrackingStatus",
+          "tests": 4,
+          "passed": 4
+        },
+        {
+          "class": "TestIntegration",
+          "tests": 1,
+          "passed": 1
+        },
+        {
+          "class": "TestSessionTrackingSyncHistory",
+          "tests": 3,
+          "passed": 3,
+          "description": "MCP tool wrapper tests for sync_history"
+        }
+      ]
+    },
+    {
+      "file": "tests/session_tracking/test_manual_sync.py",
+      "tests_run": 13,
+      "tests_passed": 13,
+      "duration_seconds": 0.64,
+      "description": "Core manual sync logic tests"
+    }
+  ],
+  "testing_requirements_met": {
+    "tool_appears_in_mcp_list": true,
+    "dry_run_returns_preview": true,
+    "session_manager_none_returns_error": true,
+    "parameter_validation": true
+  },
+  "acceptance_criteria": {
+    "AC1": {
+      "description": "Add session_tracking_sync_history tool to mcp_server/graphiti_mcp_server.py",
+      "status": "VERIFIED",
+      "evidence": "@mcp.tool() decorator present at line 2417"
+    },
+    "AC2": {
+      "description": "Tool parameters: project, days, max_sessions, dry_run",
+      "status": "VERIFIED",
+      "evidence": "Parameters defined in function signature"
+    },
+    "AC3": {
+      "description": "Tool returns JSON response matching existing function signature",
+      "status": "VERIFIED",
+      "evidence": "Delegates to _session_tracking_sync_history"
+    },
+    "AC4": {
+      "description": "Tool validates session_manager is initialized before calling",
+      "status": "VERIFIED",
+      "evidence": "test_sync_history_not_initialized passes"
+    },
+    "AC5": {
+      "description": "Add unit test for MCP tool wrapper",
+      "status": "VERIFIED",
+      "evidence": "TestSessionTrackingSyncHistory class with 3 tests"
+    },
+    "AC6": {
+      "description": "Update MCP_TOOLS.md documentation",
+      "status": "VERIFIED",
+      "evidence": "Documentation exists at docs/MCP_TOOLS.md line 370"
+    }
+  },
+  "warnings": [
+    "PydanticDeprecatedSince20: class-based config deprecated (unrelated to story)",
+    "PytestConfigWarning: Unknown config option asyncio_default_fixture_loop_scope"
+  ],
+  "notes": "All testing requirements from Story 13.1 plan satisfied. Implementation verified complete."
+}

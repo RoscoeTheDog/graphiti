@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "sprint": {
     "id": "v1.0.0",
-    "status": "completed",
+    "status": "in_progress",
     "created": "2025-11-13T09:30:00Z",
     "branch": "sprint/v1.0.0/session-tracking-integration"
   },
@@ -839,7 +839,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Documentation Accuracy Remediation",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": "15",
       "children": [
         "15.2.d",
@@ -886,7 +886,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Documentation Accuracy Remediation",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "15.2",
       "phase": "testing",
       "phase_order": 3,
@@ -1347,7 +1347,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "MCP Tool Wiring for Manual Sync",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": "13",
       "children": [
         "13.1.d",
@@ -1392,7 +1392,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: MCP Tool Wiring for Manual Sync",
-      "status": "pending",
+      "status": "completed",
       "parent": "13.1",
       "phase": "testing",
       "phase_order": 3,
@@ -1409,7 +1409,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "CLI Command for Manual Sync",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": "13",
       "children": [
         "13.2.d",
@@ -1483,7 +1483,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Resilience Integration for Manual Sync",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": "13",
       "children": [
         "13.3.d",
@@ -1515,7 +1515,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Resilience Integration for Manual Sync",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "13.3",
       "phase": "implementation",
       "phase_order": 2,
