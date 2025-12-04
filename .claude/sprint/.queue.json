@@ -1502,7 +1502,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Resilience Integration for Manual Sync",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "13.3",
       "phase": "discovery",
       "phase_order": 1,
