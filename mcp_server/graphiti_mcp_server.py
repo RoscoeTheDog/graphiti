@@ -2414,6 +2414,7 @@ async def get_failed_episodes(
         })
 
 
+@mcp.tool()
 async def session_tracking_sync_history(
     project: str | None = None,
     days: int = 7,

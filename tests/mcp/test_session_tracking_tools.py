@@ -434,3 +434,93 @@ class TestIntegration:
             mcp_server.session_manager = original_manager
             mcp_server.unified_config = original_config
             mcp_server.runtime_session_tracking_state.clear()
+
+
+class TestSessionTrackingSyncHistory:
+    """Tests for session_tracking_sync_history() MCP tool wrapper."""
+
+    @pytest.mark.asyncio
+    async def test_sync_history_not_initialized(self):
+        """Test sync_history returns error when session_manager is None."""
+        # Store original values
+        original_manager = mcp_server.session_manager
+        original_client = mcp_server.graphiti_client
+        mcp_server.session_manager = None
+        mcp_server.graphiti_client = Mock()
+
+        try:
+            result = await mcp_server.session_tracking_sync_history()
+            result_dict = json.loads(result)
+
+            assert result_dict["status"] == "error"
+            assert "not initialized" in result_dict["error"].lower()
+        finally:
+            mcp_server.session_manager = original_manager
+            mcp_server.graphiti_client = original_client
+
+    @pytest.mark.asyncio
+    async def test_sync_history_dry_run_default(self):
+        """Test sync_history defaults to dry_run=True."""
+        # Mock session manager with minimal setup
+        mock_manager = Mock()
+        mock_manager.path_resolver = Mock()
+        mock_manager.path_resolver.list_all_projects.return_value = {}
+
+        original_manager = mcp_server.session_manager
+        original_client = mcp_server.graphiti_client
+        original_config = mcp_server.unified_config
+
+        mcp_server.session_manager = mock_manager
+        mcp_server.graphiti_client = Mock()
+
+        mock_config = Mock()
+        mock_config.session_tracking.filter = None
+        mcp_server.unified_config = mock_config
+
+        try:
+            result = await mcp_server.session_tracking_sync_history()
+            result_dict = json.loads(result)
+
+            assert result_dict["status"] == "success"
+            assert result_dict["dry_run"] is True
+            assert result_dict["sessions_found"] == 0  # No sessions in empty mock
+        finally:
+            mcp_server.session_manager = original_manager
+            mcp_server.graphiti_client = original_client
+            mcp_server.unified_config = original_config
+
+    @pytest.mark.asyncio
+    async def test_sync_history_parameters_passed(self):
+        """Test sync_history passes parameters correctly to underlying function."""
+        mock_manager = Mock()
+        mock_manager.path_resolver = Mock()
+        mock_manager.path_resolver.list_all_projects.return_value = {}
+
+        original_manager = mcp_server.session_manager
+        original_client = mcp_server.graphiti_client
+        original_config = mcp_server.unified_config
+
+        mcp_server.session_manager = mock_manager
+        mcp_server.graphiti_client = Mock()
+
+        mock_config = Mock()
+        mock_config.session_tracking.filter = None
+        mcp_server.unified_config = mock_config
+
+        try:
+            # Test with custom parameters
+            result = await mcp_server.session_tracking_sync_history(
+                project="/test/path",
+                days=30,
+                max_sessions=50,
+                dry_run=True,
+            )
+            result_dict = json.loads(result)
+
+            # Should succeed with dry_run (no actual indexing)
+            assert result_dict["status"] == "success"
+            assert result_dict["dry_run"] is True
+        finally:
+            mcp_server.session_manager = original_manager
+            mcp_server.graphiti_client = original_client
+            mcp_server.unified_config = original_config

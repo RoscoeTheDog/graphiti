@@ -1373,7 +1373,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: MCP Tool Wiring for Manual Sync",
-      "status": "pending",
+      "status": "completed",
       "parent": "13.1",
       "phase": "implementation",
       "phase_order": 2,
