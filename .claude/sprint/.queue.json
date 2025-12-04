@@ -839,7 +839,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Documentation Accuracy Remediation",
-      "status": "in_progress",
+      "status": "resolved",
       "parent": "15",
       "children": [
         "15.2.d",
@@ -886,7 +886,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Documentation Accuracy Remediation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "15.2",
       "phase": "testing",
       "phase_order": 3,
