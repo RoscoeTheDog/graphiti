@@ -2426,6 +2426,10 @@ async def session_tracking_sync_history(
     This tool allows users to index historical sessions beyond the automatic
     rolling window. Useful for one-time imports or catching up on missed sessions.
 
+    When resilience is enabled, sessions that fail to index are automatically
+    queued for retry instead of being lost. The response includes degradation
+    status showing current LLM availability.
+
     Args:
         project: Project path to sync (None = all projects in watch_path)
         days: Number of days to look back (0 = all history, use with caution)
@@ -2433,13 +2437,15 @@ async def session_tracking_sync_history(
         dry_run: Preview mode without actual indexing (default: True)
 
     Returns:
-        JSON string with sync results
+        JSON string with sync results including:
+        - sessions_found, sessions_indexed, estimated_cost, actual_cost
+        - When resilience enabled: degradation_level, sessions_queued_for_retry, llm_available
 
     Examples:
         Preview last 7 days: await session_tracking_sync_history()
         Actually sync: await session_tracking_sync_history(dry_run=False)
     """
-    global session_manager, graphiti_client
+    global session_manager, graphiti_client, resilient_indexer
     return await _session_tracking_sync_history(
         session_manager=session_manager,
         graphiti_client=graphiti_client,
@@ -2448,6 +2454,7 @@ async def session_tracking_sync_history(
         days=days,
         max_sessions=max_sessions,
         dry_run=dry_run,
+        resilient_indexer=resilient_indexer,
     )
 
 

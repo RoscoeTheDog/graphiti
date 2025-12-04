@@ -209,16 +209,31 @@ def cmd_status(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    """Execute sync command."""
+    """Execute sync command.
+
+    Uses resilient_indexer if available from MCP server for graceful degradation.
+    Failed sessions are queued for retry instead of being lost.
+    """
     import asyncio
     from mcp_server.manual_sync import session_tracking_sync_history
-    from mcp_server.graphiti_mcp_server import session_manager, graphiti_client, unified_config
+    from mcp_server.graphiti_mcp_server import (
+        session_manager,
+        graphiti_client,
+        unified_config,
+        resilient_indexer,  # Story 13.3: Resilience integration
+    )
 
     # Validate dangerous operations
     if args.days == 0 and not args.confirm:
         print("❌ Error: --days 0 (all history) requires --confirm flag")
         print("   This could index thousands of sessions and cost hundreds of dollars!")
         sys.exit(1)
+
+    # Progress callback for CLI
+    def progress_callback(current: int, total: int) -> None:
+        """Display progress during sync."""
+        if not args.quiet:
+            print(f"\r  Progress: {current}/{total} sessions", end="", flush=True)
 
     # Call MCP tool
     try:
@@ -231,8 +246,14 @@ def cmd_sync(args: argparse.Namespace) -> None:
                 days=args.days,
                 max_sessions=args.max_sessions,
                 dry_run=args.dry_run,
+                resilient_indexer=resilient_indexer,  # Story 13.3
+                progress_callback=progress_callback if not args.dry_run else None,
             )
         )
+
+        # Clear progress line if shown
+        if not args.dry_run and not args.quiet:
+            print()  # New line after progress
 
         # Parse and display results
         data = json.loads(result_json)
@@ -250,7 +271,20 @@ def cmd_sync(args: argparse.Namespace) -> None:
         print(f"  Estimated cost:   {data['estimated_cost']}")
         if not data['dry_run']:
             print(f"  Sessions indexed: {data['sessions_indexed']}")
+            print(f"  Sessions failed:  {data.get('sessions_failed', 0)}")
             print(f"  Actual cost:      {data['actual_cost']}")
+
+            # Display resilience status (Story 13.3)
+            if data.get('resilience_enabled'):
+                print(f"\n  Resilience:")
+                print(f"    Enabled:        ✅")
+                print(f"    LLM available:  {'✅' if data.get('llm_available') else '⚠️ No'}")
+                print(f"    Degradation:    {data.get('degradation_level', 'unknown')}")
+                queued = data.get('sessions_queued_for_retry', 0)
+                if queued > 0:
+                    print(f"    Queued retry:   {queued} sessions (will retry when LLM available)")
+            else:
+                print(f"\n  Resilience:       ❌ Not available (run from MCP server)")
 
         if data['dry_run']:
             print("\n💡 Tip: Run with --no-dry-run to perform actual sync")
@@ -338,6 +372,12 @@ def main() -> None:
         "--confirm",
         action="store_true",
         help="Required for --days 0 (all history)"
+    )
+    sync_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress progress output"
     )
     sync_parser.set_defaults(func=cmd_sync)
 
