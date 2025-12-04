@@ -210,9 +210,11 @@ class TestIndexSessionSync:
             )
 
             mock_filter = mock_filter_class.return_value
-            mock_filter.filter_conversation = AsyncMock(return_value=[
-                {"role": "user", "content": "test"}
-            ])
+            # Return Mock objects with .content attribute (not dicts)
+            mock_msg = Mock()
+            mock_msg.role = "user"
+            mock_msg.content = "test"
+            mock_filter.filter_conversation = AsyncMock(return_value=[mock_msg])
 
             mock_indexer = mock_indexer_class.return_value
             mock_indexer.index_session = AsyncMock()
@@ -256,15 +258,17 @@ class TestIndexSessionSync:
 
     @pytest.mark.asyncio
     async def test_index_session_no_client(self, sample_sessions, mock_unified_config):
-        """Test indexing fails when Graphiti client is None."""
+        """Test indexing fails when neither Graphiti client nor resilient indexer is provided."""
         sessions, _ = sample_sessions
         session = sessions[0]
 
-        with pytest.raises(RuntimeError, match="Graphiti client not initialized"):
+        # Updated error message after Story 13.3 resilience integration
+        with pytest.raises(RuntimeError, match="Either graphiti_client or resilient_indexer must be provided"):
             await index_session_sync(
                 session=session,
                 graphiti_client=None,
                 unified_config=mock_unified_config,
+                resilient_indexer=None,  # Explicitly pass None for both
             )
 
 
@@ -356,14 +360,30 @@ class TestSessionTrackingSyncHistory:
             "test_hash": sessions_dir
         }
 
-        # Make second session fail
+        # Make second session fail by returning error result (not raising exception)
+        # The resilience integration means index_session_sync returns a dict with success=False
         call_count = 0
 
         async def mock_index_with_failure(*args, **kwargs):
             nonlocal call_count
             call_count += 1
             if call_count == 2:
-                raise Exception("Test failure")
+                # Return failure result (simulating what happens with resilience)
+                return {
+                    "success": False,
+                    "degraded": False,
+                    "queued_for_retry": False,
+                    "degradation_level": "full",
+                    "error": "Test failure",
+                }
+            # Return success for other calls
+            return {
+                "success": True,
+                "degraded": False,
+                "queued_for_retry": False,
+                "degradation_level": "full",
+                "error": None,
+            }
 
         with patch('mcp_server.manual_sync.index_session_sync', side_effect=mock_index_with_failure):
             result_json = await session_tracking_sync_history(
