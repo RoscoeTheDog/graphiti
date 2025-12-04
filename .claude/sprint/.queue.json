@@ -1431,7 +1431,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: CLI Command for Manual Sync",
-      "status": "in_progress",
+      "status": "superseded",
       "parent": "13.2",
       "phase": "discovery",
       "phase_order": 1,
