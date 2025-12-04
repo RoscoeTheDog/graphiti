@@ -576,7 +576,13 @@
         "12"
       ],
       "file": "stories/13-manual-sync-command-historical-data-indexing.md",
-      "type": "implementation"
+      "type": "implementation",
+      "supersedes": [
+        "13.2",
+        "13.2.d",
+        "13.2.i",
+        "13.2.t"
+      ]
     },
     "14": {
       "id": "14",
@@ -1416,20 +1422,26 @@
         "testing": "pending"
       },
       "blocks": [],
-      "file": "stories/13.2-cli-command-for-manual-sync.md"
+      "file": "stories/13.2-cli-command-for-manual-sync.md",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:25.445032",
+      "superseded_reason": "Story 13 already implemented all CLI sync functionality in commit 865440f. Story 13.2 was created later as a duplicate requirement."
     },
     "13.2.d": {
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: CLI Command for Manual Sync",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": "13.2",
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
       "blocks": [],
       "file": null,
-      "artifact": "plans/13.2-plan.yaml"
+      "artifact": "plans/13.2-plan.yaml",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:36.254729",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
     },
     "13.2.i": {
       "type": "implementation",
@@ -1442,7 +1454,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/13.2-plan.yaml"
+      "requires_artifact": "plans/13.2-plan.yaml",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:39.276158",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
     },
     "13.2.t": {
       "type": "testing",
@@ -1459,7 +1474,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:42.393471",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
     },
     "13.3": {
       "type": "feature",
