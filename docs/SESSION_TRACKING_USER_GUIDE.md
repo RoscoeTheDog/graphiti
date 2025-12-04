@@ -103,7 +103,7 @@ Session tracking configuration is stored in `graphiti.config.json`:
 {
   "session_tracking": {
     "enabled": false,
-    "watch_path": "~/.claude/projects",
+    "watch_path": null,
     "inactivity_timeout": 900,
     "check_interval": 60,
     "auto_summarize": false,
@@ -116,8 +116,8 @@ Session tracking configuration is stored in `graphiti.config.json`:
 
 - `enabled` - Enable/disable session tracking (default: `false`)
 - `watch_path` - Directories to monitor for JSONL files
-- `inactivity_timeout` - Minutes of inactivity before session is considered closed (default: 30)
-- `check_interval` - How often to check for file changes (default: 2)
+- `inactivity_timeout` - Seconds of inactivity before session is considered closed (default: 900)
+- `check_interval` - How often to check for file changes in seconds (default: 60)
 
 ### Runtime Toggle (Per-Session Override)
 
@@ -346,7 +346,7 @@ grep "SessionFileWatcher" ~/.local/state/graphiti/logs/mcp-server.log
 **Solutions**:
 1. Check watch directory configuration in `graphiti.config.json`
 2. Verify permissions on `~/.claude/projects/` directory
-3. Check scan interval setting (default: 2 seconds)
+3. Check `check_interval` setting (default: 60 seconds)
 4. Restart MCP server if watcher is stuck
 
 ## FAQ

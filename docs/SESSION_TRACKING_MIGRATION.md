@@ -68,12 +68,12 @@ This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0
 
 **v1.0.0:** Fixed summarization logic in code
 
-**v1.1.0:** Configurable Jinja2 templates
+**v1.1.0:** Configurable Markdown templates
 
 ```json
 {
   "filter": {
-    "tool_calls": "templates/tool_summary.md",
+    "tool_calls": "default-tool-content.md",
     "tool_content": "templates/custom_filter.md"
   }
 }
@@ -231,7 +231,7 @@ graphiti-mcp-session-tracking sync --days 0
        "filter": {
          "user_messages": true,
          "agent_messages": true,
-         "tool_calls": "templates/tool_summary.md",
+         "tool_calls": "default-tool-content.md",
          "tool_content": false
        }
      }
@@ -241,9 +241,8 @@ graphiti-mcp-session-tracking sync --days 0
 3. Create custom template (optional):
    ```bash
    mkdir -p templates
-   cat > templates/tool_summary.md << 'EOF'
-   Tool: {tool_name}
-   ✅❌
+   cat > default-tool-content.md << 'EOF'
+   Summarize this tool result: {content}
    EOF
    ```
 
@@ -276,7 +275,7 @@ graphiti-mcp-session-tracking sync --days 0
     "filter": {
       "user_messages": true,
       "agent_messages": true,
-      "tool_calls": "templates/tool_summary.md",
+      "tool_calls": "default-tool-content.md",
       "tool_content": false
     }
   }
@@ -313,7 +312,7 @@ graphiti-mcp-session-tracking sync --days 0
        "filter": {
          "user_messages": false,              // Exclude user messages
          "agent_messages": "templates/minimal.md",
-         "tool_calls": "templates/tool_summary.md",
+         "tool_calls": "default-tool-content.md",
          "tool_content": false
        }
      }
@@ -351,7 +350,7 @@ graphiti-mcp-session-tracking sync --days 0
     "filter": {
       "user_messages": false,              // Maximum privacy
       "agent_messages": "templates/minimal.md",
-      "tool_calls": "templates/tool_summary.md",
+      "tool_calls": "default-tool-content.md",
       "tool_content": false
     }
   }
@@ -371,7 +370,7 @@ graphiti-mcp-session-tracking sync --days 0
 |-------|------|----------|----------|
 | `true` | bool | Include full content | High-fidelity indexing |
 | `false` | bool | Exclude entirely | Privacy, cost reduction |
-| `"templates/custom.md"` | str | Custom Jinja2 template | Flexible summarization |
+| `"template.md"` | str | Custom Markdown template with `{content}` placeholder | Flexible summarization |
 
 ### Retention Configuration
 
@@ -462,8 +461,8 @@ graphiti-mcp-session-tracking status  # Verify enabled
    "tool_calls": true
 
    # Or create template
-   cat > templates/tool_summary.md << 'EOF'
-   {tool_name}: {status}
+   cat > default-tool-content.md << 'EOF'
+   Summarize this tool result: {content}
    EOF
    ```
 
