@@ -860,7 +860,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Documentation Accuracy Remediation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "15.2",
       "phase": "discovery",
       "phase_order": 1,
