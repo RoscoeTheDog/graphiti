@@ -5,10 +5,13 @@ description: MCP Tools Error Handling - Immediate feedback for explicit tool inv
 # Story 18: MCP Tools Error Handling
 
 **Type**: Implementation
-**Status**: unassigned
+**Status**: completed
 **Parent**: None (top-level)
 **Created**: 2025-11-27
+**Completed**: 2025-11-28
 **Priority**: P0
+
+**Completion Notes**: Core implementation completed. Gaps found during validation led to remediation stories 18.1, 18.2, 18.3 which have all been implemented.
 
 ---
 
@@ -25,39 +28,39 @@ Implement proper error handling for explicit MCP tool invocations (`add_memory`,
 ## Acceptance Criteria
 
 ### Response Types
-- [ ] **(P0) AC-18.1**: Define structured response types:
+- [x] **(P0) AC-18.1**: Define structured response types:
   - `SuccessResponse`: Full processing completed
   - `DegradedResponse`: Partial success (raw stored, entities not extracted)
   - `QueuedResponse`: Queued for retry when LLM available
   - `ErrorResponse`: Complete failure with actionable message
-- [ ] **(P0) AC-18.2**: All responses include: status, message, episode_id, processing_time_ms
+- [x] **(P0) AC-18.2**: All responses include: status, message, episode_id, processing_time_ms *(Remediation 18.1)*
 
 ### Configurable Degradation Modes
-- [ ] **(P0) AC-18.3**: Add `on_llm_unavailable` config option for MCP tools:
+- [x] **(P0) AC-18.3**: Add `on_llm_unavailable` config option for MCP tools:
   - `FAIL` (default): Return error immediately, don't store
   - `STORE_RAW`: Store raw episode without entities, return degraded success
   - `QUEUE_RETRY`: Queue for background retry, return queued status
-- [ ] **(P0) AC-18.4**: Implement each degradation mode in `add_memory()`
+- [x] **(P0) AC-18.4**: Implement each degradation mode in `add_memory()`
 
 ### Error Messages
-- [ ] **(P0) AC-18.5**: Provide actionable error messages:
+- [x] **(P0) AC-18.5**: Provide actionable error messages: *(Remediation 18.2)*
   - Invalid API key: "LLM API key is invalid. Check your OPENAI_API_KEY."
   - Rate limit: "LLM rate limit exceeded. Retry in {seconds} seconds."
   - Network error: "Cannot reach LLM provider. Check network connection."
   - Quota exceeded: "LLM quota exceeded. Check billing at {provider_url}."
-- [ ] **(P0) AC-18.6**: Include `recoverable` boolean and `suggestion` field in errors
-- [ ] **(P1) AC-18.7**: Include `retry_after_seconds` for transient errors
+- [x] **(P0) AC-18.6**: Include `recoverable` boolean and `suggestion` field in errors
+- [x] **(P1) AC-18.7**: Include `retry_after_seconds` for transient errors
 
 ### Synchronous Processing Option
-- [ ] **(P1) AC-18.8**: Add `wait_for_completion` parameter to `add_memory()`
+- [x] **(P1) AC-18.8**: Add `wait_for_completion` parameter to `add_memory()` *(Remediation 18.3)*
   - `true`: Block until processing complete (current behavior for other tools)
   - `false`: Return immediately after queueing (current behavior)
-- [ ] **(P1) AC-18.9**: Default to `true` for better UX (explicit calls expect results)
+- [x] **(P1) AC-18.9**: Default to `true` for better UX (explicit calls expect results)
 
 ### Integration with Availability Layer
-- [ ] **(P0) AC-18.10**: Use `LLMErrorClassifier` from Story 17 for error classification
-- [ ] **(P0) AC-18.11**: Check `llm_available` before attempting extraction
-- [ ] **(P1) AC-18.12**: Respect circuit breaker state (don't attempt if OPEN)
+- [x] **(P0) AC-18.10**: Use `LLMErrorClassifier` from Story 17 for error classification
+- [x] **(P0) AC-18.11**: Check `llm_available` before attempting extraction
+- [x] **(P1) AC-18.12**: Respect circuit breaker state (don't attempt if OPEN)
 
 ---
 
