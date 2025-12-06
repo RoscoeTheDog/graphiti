@@ -355,7 +355,9 @@ grep "SessionFileWatcher" ~/.local/state/graphiti/logs/mcp-server.log
 A: No. File watching runs in background, with minimal overhead (<5%).
 
 **Q: Can I track sessions retroactively?**
-A: No. Only sessions created while tracking is enabled are indexed.
+A: Yes! Use the `session_tracking_sync_history` MCP tool to index historical sessions.
+By default, it previews the last 7 days (dry_run mode). Set `dry_run=False` to actually sync.
+See [MCP_TOOLS.md](MCP_TOOLS.md#session_tracking_sync_history) for full usage details.
 
 **Q: What happens if I delete a JSONL file?**
 A: The episode remains in the graph. Delete episodes explicitly via MCP tools.
