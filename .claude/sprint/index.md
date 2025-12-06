@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-05 17:06:23
+**Generated**: 2025-12-05 17:27:30
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 51.7%
+- **Completion**: 52.6%
 
 ### By Status
 
-- completed: 60
+- completed: 61
 - resolved: 4
 - superseded: 33
-- unassigned: 19
+- unassigned: 18
 
 ### By Type
 
@@ -60,7 +60,7 @@
   - Blocks: Story R2.i
 
   ### Story R2.i: Implementation: Remove session_tracking_start/stop MCP tools
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story R2, Story R2.d
   - Blocks: Story R2.t
 

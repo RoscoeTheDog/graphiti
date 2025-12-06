@@ -1688,7 +1688,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remove session_tracking_start/stop MCP tools",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R2",
       "phase": "implementation",
       "phase_order": 2,
