@@ -6,7 +6,26 @@
     "created": "2025-11-13T09:30:00Z",
     "branch": "sprint/v1.0.0/session-tracking-integration"
   },
-  "execution_queue": [],
+  "execution_queue": [
+    "R1.d",
+    "R1.i",
+    "R1.t",
+    "R2.d",
+    "R2.i",
+    "R2.t",
+    "R3.d",
+    "R3.i",
+    "R3.t",
+    "R4.d",
+    "R4.i",
+    "R4.t",
+    "R5.d",
+    "R5.i",
+    "R5.t",
+    "R6.d",
+    "R6.i",
+    "R6.t"
+  ],
   "stories": {
     "1": {
       "id": "1",
@@ -1510,6 +1529,390 @@
       "title": "Testing: Resilience Integration for Manual Sync",
       "status": "completed",
       "parent": "13.3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Update docs: retroactive sync capability in FAQ",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R1.d",
+        "R1.i",
+        "R1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R1-update-docs:-retroactive-sync-.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update docs: retroactive sync capability in FAQ",
+      "status": "unassigned",
+      "parent": "R1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R1-plan.yaml"
+    },
+    "R1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update docs: retroactive sync capability in FAQ",
+      "status": "pending",
+      "parent": "R1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R1-plan.yaml"
+    },
+    "R1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update docs: retroactive sync capability in FAQ",
+      "status": "pending",
+      "parent": "R1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Remove session_tracking_start/stop MCP tools",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R2.d",
+        "R2.i",
+        "R2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R2-remove-session_tracking_start/.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Remove session_tracking_start/stop MCP tools",
+      "status": "unassigned",
+      "parent": "R2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R2-plan.yaml"
+    },
+    "R2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Remove session_tracking_start/stop MCP tools",
+      "status": "pending",
+      "parent": "R2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R2-plan.yaml"
+    },
+    "R2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Remove session_tracking_start/stop MCP tools",
+      "status": "pending",
+      "parent": "R2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R3": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R3.d",
+        "R3.i",
+        "R3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R3-make-sync_history-mcp-tool-rea.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "unassigned",
+      "parent": "R3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R3-plan.yaml"
+    },
+    "R3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "pending",
+      "parent": "R3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R3-plan.yaml"
+    },
+    "R3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "pending",
+      "parent": "R3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R4": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Add CLI entry point for manual sync execution",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R4.d",
+        "R4.i",
+        "R4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R4-add-cli-entry-point-for-manual.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Add CLI entry point for manual sync execution",
+      "status": "unassigned",
+      "parent": "R4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R4-plan.yaml"
+    },
+    "R4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Add CLI entry point for manual sync execution",
+      "status": "pending",
+      "parent": "R4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R4-plan.yaml"
+    },
+    "R4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Add CLI entry point for manual sync execution",
+      "status": "pending",
+      "parent": "R4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R5": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Document circuit breaker restart behavior",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R5.d",
+        "R5.i",
+        "R5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R5-document-circuit-breaker-resta.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Document circuit breaker restart behavior",
+      "status": "unassigned",
+      "parent": "R5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R5-plan.yaml"
+    },
+    "R5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Document circuit breaker restart behavior",
+      "status": "pending",
+      "parent": "R5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R5-plan.yaml"
+    },
+    "R5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Document circuit breaker restart behavior",
+      "status": "pending",
+      "parent": "R5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R6": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Update MCP_TOOLS.md to reflect tool changes",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "R6.d",
+        "R6.i",
+        "R6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R6-update-mcp_tools.md-to-reflect.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "unassigned",
+      "parent": "R6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/R6-plan.yaml"
+    },
+    "R6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "pending",
+      "parent": "R6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/R6-plan.yaml"
+    },
+    "R6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "pending",
+      "parent": "R6",
       "phase": "testing",
       "phase_order": 3,
       "children": [],
