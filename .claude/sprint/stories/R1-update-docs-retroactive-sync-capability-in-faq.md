@@ -5,7 +5,7 @@ description: Update docs: retroactive sync capability in FAQ
 # Story R1: Update docs: retroactive sync capability in FAQ
 
 **Type**: Remediation
-**Status**: in_progress
+**Status**: completed
 **Parent**: None (top-level)
 **Created**: 2025-12-05T16:30:38.815018
 **Issue Type**: Documentation Inconsistency
@@ -40,17 +40,17 @@ This creates user confusion - the FAQ incorrectly tells users they cannot do som
 ## Remediation Steps
 
 1. [x] **Discovery**: Locate and verify the inconsistency (R1.d - completed)
-2. [ ] **Implementation**: Update FAQ answer to accurately reflect the capability (R1.i)
-3. [ ] **Testing**: Verify documentation renders correctly and cross-references are valid (R1.t)
+2. [x] **Implementation**: Update FAQ answer to accurately reflect the capability (R1.i - completed)
+3. [x] **Testing**: Verify documentation renders correctly and cross-references are valid (R1.t - completed)
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] FAQ question "Can I track sessions retroactively?" updated to say "Yes"
-- [ ] Answer references `session_tracking_sync_history` tool
-- [ ] Cross-reference to MCP_TOOLS.md is accurate and working
-- [ ] Documentation renders correctly in markdown preview
+- [x] FAQ question "Can I track sessions retroactively?" updated to say "Yes"
+- [x] Answer references `session_tracking_sync_history` tool
+- [x] Cross-reference to MCP_TOOLS.md is accurate and working
+- [x] Documentation renders correctly in markdown preview
 
 ---
 
