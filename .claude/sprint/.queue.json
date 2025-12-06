@@ -1652,7 +1652,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Remove session_tracking_start/stop MCP tools",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "R2.d",
@@ -1706,7 +1706,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Remove session_tracking_start/stop MCP tools",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R2",
       "phase": "testing",
       "phase_order": 3,
