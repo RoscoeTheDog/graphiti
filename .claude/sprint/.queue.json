@@ -1673,7 +1673,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Remove session_tracking_start/stop MCP tools",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R2",
       "phase": "discovery",
       "phase_order": 1,
@@ -1697,7 +1697,10 @@
         "R2.t"
       ],
       "file": null,
-      "requires_artifact": "plans/R2-plan.yaml"
+      "requires_artifact": "plans/R2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/R2-plan.yaml"
+      }
     },
     "R2.t": {
       "type": "testing",
