@@ -864,7 +864,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "15.2.i"
+      ],
       "file": null,
       "artifact": "plans/15.2-plan.yaml"
     },
@@ -877,7 +879,9 @@
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "15.2.t"
+      ],
       "file": null,
       "requires_artifact": "plans/15.2-plan.yaml"
     },
@@ -933,7 +937,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-20.i"
+      ],
       "file": null
     },
     "-20.i": {
@@ -949,7 +955,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-20.t"
+      ],
       "file": null
     },
     "-20.t": {
@@ -1007,7 +1015,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-19.i"
+      ],
       "file": null
     },
     "-19.i": {
@@ -1023,7 +1033,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-19.t"
+      ],
       "file": null
     },
     "-19.t": {
@@ -1081,7 +1093,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.3.i"
+      ],
       "file": null
     },
     "-18.3.i": {
@@ -1097,7 +1111,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.3.t"
+      ],
       "file": null
     },
     "-18.3.t": {
@@ -1155,7 +1171,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.2.i"
+      ],
       "file": null
     },
     "-18.2.i": {
@@ -1171,7 +1189,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.2.t"
+      ],
       "file": null
     },
     "-18.2.t": {
@@ -1229,7 +1249,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.1.i"
+      ],
       "file": null
     },
     "-18.1.i": {
@@ -1245,7 +1267,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.1.t"
+      ],
       "file": null
     },
     "-18.1.t": {
@@ -1303,7 +1327,9 @@
         "C"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.i"
+      ],
       "file": null
     },
     "-18.i": {
@@ -1319,7 +1345,9 @@
         "I"
       ],
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "-18.t"
+      ],
       "file": null
     },
     "-18.t": {
@@ -1370,7 +1398,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.1.i"
+      ],
       "file": null,
       "artifact": "plans/13.1-plan.yaml"
     },
@@ -1383,7 +1413,9 @@
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.1.t"
+      ],
       "file": null,
       "requires_artifact": "plans/13.1-plan.yaml"
     },
@@ -1435,7 +1467,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.2.i"
+      ],
       "file": null,
       "artifact": "plans/13.2-plan.yaml",
       "superseded_by": "13",
@@ -1451,7 +1485,9 @@
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.2.t"
+      ],
       "file": null,
       "requires_artifact": "plans/13.2-plan.yaml",
       "superseded_by": "13",
@@ -1506,7 +1542,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.3.i"
+      ],
       "file": null,
       "artifact": "plans/13.3-plan.yaml"
     },
@@ -1519,7 +1557,9 @@
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "13.3.t"
+      ],
       "file": null,
       "requires_artifact": "plans/13.3-plan.yaml"
     },
@@ -1570,7 +1610,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R1.i"
+      ],
       "file": null,
       "artifact": "plans/R1-plan.yaml"
     },
@@ -1583,7 +1625,9 @@
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R1.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R1-plan.yaml"
     },
@@ -1634,7 +1678,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R2.i"
+      ],
       "file": null,
       "artifact": "plans/R2-plan.yaml"
     },
@@ -1642,12 +1688,14 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remove session_tracking_start/stop MCP tools",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R2",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R2.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R2-plan.yaml"
     },
@@ -1655,7 +1703,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Remove session_tracking_start/stop MCP tools",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R2",
       "phase": "testing",
       "phase_order": 3,
@@ -1698,7 +1746,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R3.i"
+      ],
       "file": null,
       "artifact": "plans/R3-plan.yaml"
     },
@@ -1706,12 +1756,14 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Make sync_history MCP tool read-only (dry_run enforced)",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R3",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R3.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R3-plan.yaml"
     },
@@ -1719,7 +1771,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Make sync_history MCP tool read-only (dry_run enforced)",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R3",
       "phase": "testing",
       "phase_order": 3,
@@ -1762,7 +1814,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R4.i"
+      ],
       "file": null,
       "artifact": "plans/R4-plan.yaml"
     },
@@ -1770,12 +1824,14 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Add CLI entry point for manual sync execution",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R4",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R4.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R4-plan.yaml"
     },
@@ -1783,7 +1839,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Add CLI entry point for manual sync execution",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R4",
       "phase": "testing",
       "phase_order": 3,
@@ -1826,7 +1882,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R5.i"
+      ],
       "file": null,
       "artifact": "plans/R5-plan.yaml"
     },
@@ -1834,12 +1892,14 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Document circuit breaker restart behavior",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R5",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R5.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R5-plan.yaml"
     },
@@ -1847,7 +1907,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Document circuit breaker restart behavior",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R5",
       "phase": "testing",
       "phase_order": 3,
@@ -1890,7 +1950,9 @@
       "phase": "discovery",
       "phase_order": 1,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R6.i"
+      ],
       "file": null,
       "artifact": "plans/R6-plan.yaml"
     },
@@ -1898,12 +1960,14 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Update MCP_TOOLS.md to reflect tool changes",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R6",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
-      "blocks": [],
+      "blocks": [
+        "R6.t"
+      ],
       "file": null,
       "requires_artifact": "plans/R6-plan.yaml"
     },
@@ -1911,7 +1975,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Update MCP_TOOLS.md to reflect tool changes",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R6",
       "phase": "testing",
       "phase_order": 3,
