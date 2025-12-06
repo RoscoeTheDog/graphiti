@@ -1,0 +1,61 @@
+# Discovery Plan for Story R1: Update docs: retroactive sync capability in FAQ
+# Generated: 2025-12-05
+# Phase: discovery -> implementation
+
+story_id: R1
+title: "Update docs: retroactive sync capability in FAQ"
+type: remediation
+priority: P2
+
+discovery_summary:
+  issue: FAQ states retroactive tracking is not possible, but session_tracking_sync_history tool enables exactly this
+  root_cause: FAQ was written before Story 13 (Manual Sync) was implemented
+  severity: LOW (documentation inconsistency, not functional bug)
+  affected_users: Users reading FAQ may incorrectly believe they cannot sync historical sessions
+
+evidence:
+  current_faq:
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    line: 357-358
+    content: |
+      **Q: Can I track sessions retroactively?**
+      A: No. Only sessions created while tracking is enabled are indexed.
+
+  actual_capability:
+    tool: session_tracking_sync_history
+    location: mcp_server/manual_sync.py:30
+    mcp_location: mcp_server/graphiti_mcp_server.py:2418
+    documentation: docs/MCP_TOOLS.md:370-400
+    features:
+      - Index historical sessions beyond automatic rolling window
+      - Configurable lookback period (days parameter, default 7)
+      - All history option (days=0)
+      - Preview mode (dry_run=True) for cost estimation
+      - Actual sync (dry_run=False)
+      - Resilience integration for graceful degradation
+
+implementation_plan:
+  files_to_modify:
+    - path: docs/SESSION_TRACKING_USER_GUIDE.md
+      action: update
+      changes:
+        - description: Update FAQ answer for retroactive tracking
+          location: lines 357-358
+          old_content: |
+            **Q: Can I track sessions retroactively?**
+            A: No. Only sessions created while tracking is enabled are indexed.
+          new_content: |
+            **Q: Can I track sessions retroactively?**
+            A: Yes! Use the `session_tracking_sync_history` MCP tool to index historical sessions.
+            By default, it previews the last 7 days (dry_run mode). Set `dry_run=False` to actually sync.
+            See MCP_TOOLS.md for full usage details.
+
+testing_requirements:
+  - Verify FAQ update renders correctly in markdown preview
+  - Check cross-reference to MCP_TOOLS.md is accurate
+  - Ensure no broken links created
+
+dependencies: []
+
+estimated_tokens: 500
+estimated_time: 5 minutes

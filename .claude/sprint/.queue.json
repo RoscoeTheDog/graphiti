@@ -1557,7 +1557,7 @@
         "testing": "pending"
       },
       "blocks": [],
-      "file": "stories/R1-update-docs:-retroactive-sync-.md",
+      "file": "stories/R1-update-docs-retroactive-sync-capability-in-faq.md",
       "priority": "P2",
       "blocking": false
     },
@@ -1565,7 +1565,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Update docs: retroactive sync capability in FAQ",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R1",
       "phase": "discovery",
       "phase_order": 1,
