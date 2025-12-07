@@ -37,6 +37,7 @@ Add episodes to the knowledge graph and optionally export to file.
   - `{timestamp}` - Date and time (YYYY-MM-DD-HHMM)
   - `{time}` - Time only (HHMM)
   - `{hash}` - MD5 hash of episode name (8 chars)
+- `wait_for_completion` (bool, optional): If True, block until processing completes. If False, return immediately after queueing. Defaults to config value (`mcp_tools.wait_for_completion_default`).
 
 **Example Usage**:
 ```python
@@ -146,6 +147,25 @@ get_episodes(last_n=5)
 
 ---
 
+#### `get_entity_edge`
+Retrieve an entity edge from the graph by UUID.
+
+**Description**: Get detailed information about a specific relationship (edge) between entities in the knowledge graph.
+
+**Parameters**:
+- `uuid` (string, required): UUID of the entity edge to retrieve
+
+**Returns**: Dictionary with edge details including source node, target node, relationship type, and temporal metadata. Returns error if edge not found.
+
+**Example Usage**:
+```python
+# Get edge details
+get_entity_edge(uuid="edge-uuid-here")
+# Returns: {"uuid": "...", "source_node": {...}, "target_node": {...}, "relationship": "...", ...}
+```
+
+---
+
 ### Deletion Operations
 
 #### `delete_episode`
@@ -215,6 +235,38 @@ health_check()
 
 ---
 
+#### `llm_health_check`
+Check the health of the LLM service.
+
+**Description**: Performs a health check on the configured LLM (OpenAI, Azure, Anthropic, etc.) and returns detailed status information including circuit breaker state.
+
+**Parameters**: None
+
+**Returns**: LLMHealthCheckResponse with:
+- `status`: 'healthy' or 'unhealthy'
+- `available`: Whether the LLM is available for requests
+- `circuit_state`: Current circuit breaker state (closed/open/half_open)
+- `provider`: LLM provider name (openai, anthropic, etc.)
+- `healthy`: Result of the last health check
+- `success_rate`: Recent success rate (0.0 to 1.0)
+- `latency_ms`: Response time of last health check in milliseconds
+- `last_check_timestamp`: ISO timestamp of last health check
+- `error`: Error message if unhealthy
+
+**Example Usage**:
+```python
+llm_health_check()
+# Returns: {"status": "healthy", "available": true, "circuit_state": "closed", "provider": "openai", ...}
+```
+
+**Use Cases**:
+- Validating LLM API credentials
+- Checking if the LLM service is responding
+- Monitoring circuit breaker state
+- Diagnosing LLM-related issues
+
+---
+
 ### Session Tracking Operations
 
 > **Note**: Session tracking is controlled via configuration (`graphiti.config.json -> session_tracking.enabled`).
@@ -278,6 +330,73 @@ session_tracking_status(session_id="abc123-def456")
 - Use this tool to verify configuration before starting tracking
 - Effective state = runtime override OR global config
 - Filter config shows token reduction strategy
+
+---
+
+#### `session_tracking_health`
+Get comprehensive health status of the session tracking system.
+
+**Description**: Provides detailed health information about the session tracking system including service status, LLM availability, degradation level, processing queue status, retry queue status, and recent failures.
+
+**Parameters**: None
+
+**Returns**: JSON with comprehensive health information:
+- `service_status`: 'running', 'stopped', 'degraded', or 'error'
+- `degradation_level`: Current processing capability level:
+  - Level 0 (FULL): Full LLM processing available
+  - Level 1 (PARTIAL): Some features degraded
+  - Level 2 (RAW_ONLY): Raw storage only, no LLM processing
+- `llm_status`: LLM availability and circuit breaker state
+- `queue_status`: Processing queue metrics (pending, processing, completed, failed)
+- `retry_queue`: Retry queue status (pending retries, permanent failures, next retry time)
+- `recent_failures`: Last 10 failed episodes with details
+- `uptime_seconds`: Service uptime
+- `active_sessions`: Number of currently tracked sessions
+
+**Example Usage**:
+```python
+session_tracking_health()
+```
+
+**Response Format**:
+```json
+{
+  "status": "success",
+  "health": {
+    "service_status": "running",
+    "degradation_level": {
+      "level": 0,
+      "name": "FULL",
+      "description": "All features available"
+    },
+    "llm_status": {
+      "available": true,
+      "circuit_state": "closed",
+      "provider": "openai",
+      "success_rate": 0.98
+    },
+    "queue_status": {
+      "pending": 0,
+      "processing": 1,
+      "completed_today": 42,
+      "failed_today": 2
+    },
+    "retry_queue": {
+      "count": 2,
+      "pending_retries": 1,
+      "permanent_failures": 1,
+      "next_retry": "2025-12-07T14:30:00Z"
+    },
+    "active_sessions": 3
+  }
+}
+```
+
+**Use Cases**:
+- Monitoring session tracking health proactively
+- Diagnosing LLM availability issues
+- Checking retry queue status
+- Understanding current degradation level
 
 ---
 
@@ -349,6 +468,80 @@ graphiti-mcp session-tracking sync --days 30 --no-dry-run
 # Sync all history (requires confirmation for safety)
 graphiti-mcp session-tracking sync --days 0 --no-dry-run --confirm
 ```
+
+---
+
+#### `get_failed_episodes`
+Get failed episodes from the retry queue.
+
+**Description**: Retrieves information about episodes that failed during processing and are either awaiting retry or have permanently failed.
+
+**Parameters**:
+- `include_permanent` (bool, optional): Include permanently failed episodes (default: True)
+- `limit` (int, optional): Maximum number of episodes to return (default: 50, max: 100)
+
+**Returns**: JSON with failed episodes and retry queue statistics:
+- `total_count`: Total failed episodes matching criteria
+- `returned_count`: Number of episodes in this response
+- `episodes`: List of failed episode details
+- `stats`: Queue statistics (queue size, pending retries, permanent failures, totals)
+
+**Example Usage**:
+```python
+# Get all failed episodes
+get_failed_episodes()
+
+# Get only episodes awaiting retry (exclude permanent failures)
+get_failed_episodes(include_permanent=False)
+
+# Get top 10 failed episodes
+get_failed_episodes(limit=10)
+```
+
+**Response Format**:
+```json
+{
+  "status": "success",
+  "total_count": 5,
+  "returned_count": 5,
+  "episodes": [
+    {
+      "episode_id": "ep-123",
+      "session_id": "session-456",
+      "session_file": "/path/to/session.jsonl",
+      "group_id": "project-abc",
+      "error_type": "LLMUnavailable",
+      "error_message": "Rate limit exceeded",
+      "failed_at": "2025-12-07T10:30:00Z",
+      "retry_count": 2,
+      "next_retry_at": "2025-12-07T11:00:00Z",
+      "permanent_failure": false
+    }
+  ],
+  "stats": {
+    "queue_size": 5,
+    "pending_retries": 3,
+    "permanent_failures": 2,
+    "total_added": 10,
+    "total_retried": 5,
+    "total_succeeded": 3,
+    "total_failed_permanently": 2
+  }
+}
+```
+
+**Episode Fields**:
+- `episode_id`: Unique identifier for the episode
+- `session_id`: Session the episode belongs to
+- `error_type`: Type of error (e.g., LLMUnavailable, Timeout)
+- `retry_count`: Number of retry attempts so far
+- `next_retry_at`: When next retry is scheduled (null if permanent failure)
+- `permanent_failure`: Whether this episode has exhausted all retries
+
+**Notes**:
+- Episodes with `permanent_failure=True` have exhausted all retries
+- Use `session_tracking_health()` for aggregate status
+- Episodes are sorted by `failed_at` (most recent first)
 
 ---
 
@@ -471,8 +664,8 @@ See [claude-mcp-installer/instance/CLAUDE_INSTALL.md](../claude-mcp-installer/in
 
 ---
 
-**Last Updated:** 2025-11-06
-**Version:** 1.0
+**Last Updated:** 2025-12-07
+**Version:** 1.0.0
 
 ---
 

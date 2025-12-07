@@ -1963,7 +1963,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Update MCP_TOOLS.md to reflect tool changes",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R6",
       "phase": "implementation",
       "phase_order": 2,
