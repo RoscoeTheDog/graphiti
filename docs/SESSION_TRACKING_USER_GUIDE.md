@@ -119,28 +119,9 @@ Session tracking configuration is stored in `graphiti.config.json`:
 - `inactivity_timeout` - Seconds of inactivity before session is considered closed (default: 900)
 - `check_interval` - How often to check for file changes in seconds (default: 60)
 
-### Runtime Toggle (Per-Session Override)
+### Checking Status
 
-You can control session tracking at runtime using MCP tools:
-
-**Enable tracking for current session:**
-```json
-// MCP tool call
-{
-  "tool": "session_tracking_start",
-  "arguments": {
-    "force": true  // Override global config
-  }
-}
-```
-
-**Disable tracking for current session:**
-```json
-// MCP tool call
-{
-  "tool": "session_tracking_stop"
-}
-```
+Session tracking is controlled via configuration (`graphiti.config.json`). Use the status tool to check current state:
 
 **Check status:**
 ```json
@@ -149,6 +130,9 @@ You can control session tracking at runtime using MCP tools:
   "tool": "session_tracking_status"
 }
 ```
+
+> **Note**: Session tracking control is configuration-based only. To enable/disable tracking,
+> modify `graphiti.config.json -> session_tracking.enabled` and restart the MCP server.
 
 ---
 
@@ -178,18 +162,42 @@ You can control session tracking at runtime using MCP tools:
 
 ### Manual Sync Command
 
-You can manually trigger session indexing using the CLI:
+Manual session sync is a two-step process for safety:
+
+1. **Preview** (via MCP tool or CLI): See what would be indexed
+2. **Execute** (via CLI only): Perform actual indexing
+
+#### Step 1: Preview Sessions (MCP Tool or CLI)
+
+The `session_tracking_sync_history` MCP tool provides a **read-only preview**:
+
+```python
+# Via MCP tool - always preview only
+session_tracking_sync_history()           # Preview last 7 days
+session_tracking_sync_history(days=30)    # Preview last 30 days
+```
+
+Or use the CLI for preview:
+```bash
+graphiti-mcp session-tracking sync --days 7    # Preview (default)
+```
+
+#### Step 2: Execute Sync (CLI Only)
+
+To actually index sessions, use the CLI with `--no-dry-run`:
 
 ```bash
-# Sync last 7 days (default)
-graphiti-mcp-session-tracking sync
+# Actually sync last 7 days
+graphiti-mcp session-tracking sync --no-dry-run
 
 # Sync specific date range
-graphiti-mcp-session-tracking sync --days 30
+graphiti-mcp session-tracking sync --days 30 --no-dry-run
 
-# Sync ALL unindexed sessions (use with caution!)
-graphiti-mcp-session-tracking sync --days 0
+# Sync ALL sessions (requires confirmation)
+graphiti-mcp session-tracking sync --days 0 --no-dry-run --confirm
 ```
+
+> **Why CLI Only?** The MCP tool is intentionally read-only to prevent AI assistants from accidentally triggering expensive sync operations. Actual sync requires explicit user action via CLI.
 
 **Use Cases:**
 - Migrate pre-existing sessions from earlier versions
@@ -201,6 +209,7 @@ graphiti-mcp-session-tracking sync --days 0
 ⚠️ **`--days 0` can be very expensive!** This syncs ALL unindexed sessions in your history. For large backlogs, this can cost $10-$50+ in API fees.
 
 **Recommendations:**
+- Always preview first (MCP tool or CLI without `--no-dry-run`)
 - Start with small date ranges (7-30 days)
 - Monitor costs in OpenAI dashboard
 - Use `keep_length_days` config to limit retention (see Configuration section)
@@ -355,9 +364,11 @@ grep "SessionFileWatcher" ~/.local/state/graphiti/logs/mcp-server.log
 A: No. File watching runs in background, with minimal overhead (<5%).
 
 **Q: Can I track sessions retroactively?**
-A: Yes! Use the `session_tracking_sync_history` MCP tool to index historical sessions.
-By default, it previews the last 7 days (dry_run mode). Set `dry_run=False` to actually sync.
-See [MCP_TOOLS.md](MCP_TOOLS.md#session_tracking_sync_history) for full usage details.
+A: Yes! Use a two-step process:
+1. **Preview**: Use the `session_tracking_sync_history` MCP tool to see available sessions
+2. **Sync**: Use CLI command `graphiti-mcp session-tracking sync --no-dry-run` to actually index
+
+The MCP tool is read-only (preview only) for safety. See [MCP_TOOLS.md](MCP_TOOLS.md#session_tracking_sync_history) for details.
 
 **Q: What happens if I delete a JSONL file?**
 A: The episode remains in the graph. Delete episodes explicitly via MCP tools.

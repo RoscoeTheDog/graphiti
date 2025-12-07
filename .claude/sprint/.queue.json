@@ -1759,7 +1759,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Make sync_history MCP tool read-only (dry_run enforced)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R3",
       "phase": "implementation",
       "phase_order": 2,

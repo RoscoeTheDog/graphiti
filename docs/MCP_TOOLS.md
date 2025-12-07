@@ -217,95 +217,9 @@ health_check()
 
 ### Session Tracking Operations
 
-#### `session_tracking_start`
-Enable session tracking for the current or specified Claude Code session.
-
-**Description**: Start automatic JSONL session tracking for Claude Code sessions. When enabled, the system monitors session files, filters messages, and indexes them into the Graphiti knowledge graph for cross-session memory and continuity.
-
-**Parameters**:
-- `session_id` (string, optional): Session ID to enable tracking for. If None, uses current session.
-  - Format: UUID string (extracted from JSONL filename)
-- `force` (bool, optional): Force enable even if globally disabled (default: False)
-
-**Runtime Behavior**:
-- Without `force`: Respects global configuration (`session_tracking.enabled`)
-- With `force=True`: Overrides global config and always enables tracking
-
-**Returns**: JSON string with status and configuration details
-
-**Example Usage**:
-```python
-# Enable for current session (respects global config)
-session_tracking_start()
-
-# Enable for specific session
-session_tracking_start(session_id="abc123-def456")
-
-# Force enable (override global config)
-session_tracking_start(force=True)
-```
-
-**Response Format**:
-```json
-{
-  "status": "success",
-  "message": "Session tracking enabled for session abc123-def456",
-  "session_id": "abc123-def456",
-  "enabled": true,
-  "forced": false,
-  "global_config": true
-}
-```
-
-**Notes**:
-- Requires Neo4j database connection
-- Filtered sessions reduce token usage by 35-70% (configurable)
-- Sessions are indexed when they become inactive (default: 5 minutes)
-- Use `session_tracking_status()` to check current state
-
----
-
-#### `session_tracking_stop`
-Disable session tracking for the current or specified Claude Code session.
-
-**Description**: Stop automatic JSONL session tracking for a specific session. The session will no longer be monitored or indexed into Graphiti, even if globally enabled.
-
-**Parameters**:
-- `session_id` (string, optional): Session ID to disable tracking for. If None, uses current session.
-  - Format: UUID string (extracted from JSONL filename)
-
-**Runtime Behavior**:
-- Adds session ID to exclusion list
-- Does not affect other active sessions
-- Does not modify global configuration
-
-**Returns**: JSON string with status
-
-**Example Usage**:
-```python
-# Disable for current session
-session_tracking_stop()
-
-# Disable for specific session
-session_tracking_stop(session_id="abc123-def456")
-```
-
-**Response Format**:
-```json
-{
-  "status": "success",
-  "message": "Session tracking disabled for session abc123-def456",
-  "session_id": "abc123-def456",
-  "enabled": false
-}
-```
-
-**Notes**:
-- Stopping tracking does NOT delete already-indexed data
-- To re-enable, use `session_tracking_start()`
-- To check status, use `session_tracking_status()`
-
----
+> **Note**: Session tracking is controlled via configuration (`graphiti.config.json -> session_tracking.enabled`).
+> MCP tools are read-only for monitoring and diagnostics only.
+> The `session_tracking_start` and `session_tracking_stop` tools were removed in v1.0.0.
 
 #### `session_tracking_status`
 Get session tracking status and configuration details.
@@ -368,21 +282,21 @@ session_tracking_status(session_id="abc123-def456")
 ---
 
 #### `session_tracking_sync_history`
-Manually sync historical sessions to Graphiti beyond the automatic rolling window.
+Preview historical sessions available for sync to Graphiti (read-only).
 
-**Description**: This tool allows users to index historical sessions that fall outside the automatic rolling window discovery. Useful for one-time imports, catching up on missed sessions, or backfilling historical data.
+**Description**: This tool provides a **read-only preview** of historical sessions that could be indexed, showing session counts and cost estimates. It does NOT perform actual indexing.
+
+> **Important**: This MCP tool is read-only (preview mode only). To perform actual session indexing, use the CLI command:
+> ```bash
+> graphiti-mcp session-tracking sync --no-dry-run
+> ```
 
 **Parameters**:
-- `project` (string, optional): Project path to sync. If None, syncs all projects in watch_path
-- `days` (int, optional): Number of days to look back (default: 7). Set to 0 for all history (requires `--confirm` in CLI)
-- `max_sessions` (int, optional): Maximum sessions to sync (safety limit, default: 100)
-- `dry_run` (bool, optional): Preview mode without actual indexing (default: True)
+- `project` (string, optional): Project path to preview. If None, previews all projects in watch_path
+- `days` (int, optional): Number of days to look back (default: 7). Set to 0 for all history
+- `max_sessions` (int, optional): Maximum sessions to preview (safety limit, default: 100)
 
-**Runtime Behavior**:
-- **Dry-run mode** (default): Returns preview with session list and cost estimate
-- **Actual sync mode**: Parses, filters, and indexes sessions to Graphiti
-
-**Returns**: JSON string with sync results
+**Returns**: JSON string with preview results
 
 **Example Usage**:
 ```python
@@ -392,14 +306,11 @@ session_tracking_sync_history()
 # Preview last 30 days
 session_tracking_sync_history(days=30)
 
-# Actually sync last 7 days
-session_tracking_sync_history(dry_run=False)
-
-# Sync specific project
-session_tracking_sync_history(project="/path/to/project", dry_run=False)
+# Preview specific project
+session_tracking_sync_history(project="/path/to/project")
 ```
 
-**Dry-Run Response Format**:
+**Response Format**:
 ```json
 {
   "status": "success",
@@ -418,36 +329,24 @@ session_tracking_sync_history(project="/path/to/project", dry_run=False)
 }
 ```
 
-**Actual Sync Response Format**:
-```json
-{
-  "status": "success",
-  "dry_run": false,
-  "sessions_found": 15,
-  "sessions_indexed": 15,
-  "estimated_cost": "$2.55",
-  "actual_cost": "$2.55"
-}
-```
-
 **Notes**:
+- This MCP tool is intentionally read-only for safety
 - Cost estimation: ~$0.17 per session, ~3500 tokens average
-- Safety limit prevents accidentally indexing thousands of sessions
-- Dry-run mode enabled by default for safety
 - Sessions are sorted by modification time (newest first)
-- Max sessions limit (default 100) prevents runaway costs
+- Max sessions limit (default 100) prevents excessive previews
 - Time filter uses file modification time
-- Uses same filtering and indexing pipeline as automatic tracking
 
-**CLI Alternative**:
+**Performing Actual Sync (CLI Required)**:
+
+To actually index sessions to Graphiti, use the CLI:
 ```bash
 # Preview sync (dry-run by default)
 graphiti-mcp session-tracking sync --days 30
 
-# Actually sync
+# Perform actual sync
 graphiti-mcp session-tracking sync --days 30 --no-dry-run
 
-# Sync all history (requires confirmation)
+# Sync all history (requires confirmation for safety)
 graphiti-mcp session-tracking sync --days 0 --no-dry-run --confirm
 ```
 
