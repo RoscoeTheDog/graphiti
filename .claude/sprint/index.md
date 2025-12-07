@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:02:35
+**Generated**: 2025-12-07 15:10:12
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 55.2%
+- **Completion**: 56.0%
 
 ### By Status
 
-- completed: 64
-- resolved: 5
+- completed: 65
+- resolved: 6
 - superseded: 33
-- unassigned: 14
+- unassigned: 12
 
 ### By Type
 
@@ -79,7 +79,7 @@
   - Blocks: Story R3.t
 
   ### Story R3.t: Testing: Make sync_history MCP tool read-only (dry_run enforced)
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story R3, Story R3.i
 
   ### Story R4.d: Discovery: Add CLI entry point for manual sync execution

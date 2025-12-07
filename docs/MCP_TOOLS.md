@@ -325,7 +325,7 @@ session_tracking_sync_history(project="/path/to/project")
       "messages": 42
     }
   ],
-  "message": "Run with dry_run=False to perform actual sync"
+  "message": "To perform actual sync, use CLI: graphiti-mcp session-tracking sync --no-dry-run"
 }
 ```
 

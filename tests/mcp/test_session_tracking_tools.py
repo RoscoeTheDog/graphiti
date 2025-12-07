@@ -1,9 +1,12 @@
 """Tests for session tracking MCP tools.
 
-This module tests the three session tracking MCP tools:
-- session_tracking_start()
-- session_tracking_stop()
+This module tests the session tracking MCP tools:
 - session_tracking_status()
+- session_tracking_sync_history()
+
+NOTE: session_tracking_start() and session_tracking_stop() were removed in Story R2.
+Session tracking is now controlled via configuration (graphiti.config.json -> session_tracking.enabled).
+MCP tools are read-only for monitoring/diagnostics only.
 """
 
 import json
@@ -14,201 +17,6 @@ import pytest
 # Import the MCP server module
 # Note: This will import the module-level globals
 import mcp_server.graphiti_mcp_server as mcp_server
-
-
-class TestSessionTrackingStart:
-    """Tests for session_tracking_start() MCP tool."""
-
-    @pytest.mark.asyncio
-    async def test_start_without_session_manager(self):
-        """Test starting session tracking when session manager is not initialized."""
-        # Temporarily set session_manager to None
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = None
-
-        try:
-            result = await mcp_server.session_tracking_start()
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "error"
-            assert "not initialized" in result_dict["message"].lower()
-            assert result_dict["enabled"] is False
-        finally:
-            mcp_server.session_manager = original_manager
-
-    @pytest.mark.asyncio
-    async def test_start_with_global_enabled(self):
-        """Test starting session tracking when globally enabled."""
-        # Mock session manager
-        mock_manager = Mock()
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = mock_manager
-
-        # Mock global config
-        original_config = mcp_server.unified_config
-        mock_config = Mock()
-        mock_config.session_tracking.enabled = True
-        mcp_server.unified_config = mock_config
-
-        try:
-            result = await mcp_server.session_tracking_start(session_id="test-session")
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "success"
-            assert result_dict["enabled"] is True
-            assert result_dict["session_id"] == "test-session"
-            assert result_dict["forced"] is False
-            assert result_dict["global_config"] is True
-
-            # Check runtime state
-            assert mcp_server.runtime_session_tracking_state["test-session"] is True
-        finally:
-            mcp_server.session_manager = original_manager
-            mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
-
-    @pytest.mark.asyncio
-    async def test_start_with_global_disabled_without_force(self):
-        """Test starting session tracking when globally disabled without force."""
-        # Mock session manager
-        mock_manager = Mock()
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = mock_manager
-
-        # Mock global config
-        original_config = mcp_server.unified_config
-        mock_config = Mock()
-        mock_config.session_tracking.enabled = False
-        mcp_server.unified_config = mock_config
-
-        try:
-            result = await mcp_server.session_tracking_start(session_id="test-session", force=False)
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "disabled"
-            assert "globally disabled" in result_dict["message"].lower()
-            assert result_dict["enabled"] is False
-            assert result_dict["global_config"] is False
-        finally:
-            mcp_server.session_manager = original_manager
-            mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
-
-    @pytest.mark.asyncio
-    async def test_start_with_force_override(self):
-        """Test starting session tracking with force=True overrides global config."""
-        # Mock session manager
-        mock_manager = Mock()
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = mock_manager
-
-        # Mock global config (disabled)
-        original_config = mcp_server.unified_config
-        mock_config = Mock()
-        mock_config.session_tracking.enabled = False
-        mcp_server.unified_config = mock_config
-
-        try:
-            result = await mcp_server.session_tracking_start(session_id="test-session", force=True)
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "success"
-            assert result_dict["enabled"] is True
-            assert result_dict["forced"] is True
-            assert result_dict["global_config"] is False
-
-            # Check runtime state
-            assert mcp_server.runtime_session_tracking_state["test-session"] is True
-        finally:
-            mcp_server.session_manager = original_manager
-            mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
-
-    @pytest.mark.asyncio
-    async def test_start_without_session_id(self):
-        """Test starting session tracking without providing session_id."""
-        # Mock session manager
-        mock_manager = Mock()
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = mock_manager
-
-        # Mock global config
-        original_config = mcp_server.unified_config
-        mock_config = Mock()
-        mock_config.session_tracking.enabled = True
-        mcp_server.unified_config = mock_config
-
-        try:
-            result = await mcp_server.session_tracking_start()
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "success"
-            assert result_dict["session_id"] == "current"
-            assert result_dict["enabled"] is True
-
-            # Check runtime state
-            assert mcp_server.runtime_session_tracking_state["current"] is True
-        finally:
-            mcp_server.session_manager = original_manager
-            mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
-
-
-class TestSessionTrackingStop:
-    """Tests for session_tracking_stop() MCP tool."""
-
-    @pytest.mark.asyncio
-    async def test_stop_with_session_id(self):
-        """Test stopping session tracking for a specific session."""
-        result = await mcp_server.session_tracking_stop(session_id="test-session")
-        result_dict = json.loads(result)
-
-        assert result_dict["status"] == "success"
-        assert result_dict["session_id"] == "test-session"
-        assert result_dict["enabled"] is False
-
-        # Check runtime state
-        assert mcp_server.runtime_session_tracking_state["test-session"] is False
-
-        # Cleanup
-        mcp_server.runtime_session_tracking_state.clear()
-
-    @pytest.mark.asyncio
-    async def test_stop_without_session_id(self):
-        """Test stopping session tracking without providing session_id."""
-        result = await mcp_server.session_tracking_stop()
-        result_dict = json.loads(result)
-
-        assert result_dict["status"] == "success"
-        assert result_dict["session_id"] == "current"
-        assert result_dict["enabled"] is False
-
-        # Check runtime state
-        assert mcp_server.runtime_session_tracking_state["current"] is False
-
-        # Cleanup
-        mcp_server.runtime_session_tracking_state.clear()
-
-    @pytest.mark.asyncio
-    async def test_stop_multiple_sessions(self):
-        """Test stopping tracking for multiple sessions independently."""
-        # Stop first session
-        result1 = await mcp_server.session_tracking_stop(session_id="session-1")
-        result1_dict = json.loads(result1)
-
-        # Stop second session
-        result2 = await mcp_server.session_tracking_stop(session_id="session-2")
-        result2_dict = json.loads(result2)
-
-        assert result1_dict["status"] == "success"
-        assert result2_dict["status"] == "success"
-
-        # Check runtime state
-        assert mcp_server.runtime_session_tracking_state["session-1"] is False
-        assert mcp_server.runtime_session_tracking_state["session-2"] is False
-
-        # Cleanup
-        mcp_server.runtime_session_tracking_state.clear()
 
 
 class TestSessionTrackingStatus:
@@ -255,47 +63,6 @@ class TestSessionTrackingStatus:
         finally:
             mcp_server.session_manager = original_manager
             mcp_server.unified_config = original_config
-
-    @pytest.mark.asyncio
-    async def test_status_with_runtime_override(self):
-        """Test getting status with runtime override applied."""
-        # Mock session manager
-        mock_manager = Mock()
-        mock_manager._is_running = True
-        mock_manager.get_active_session_count.return_value = 1
-        original_manager = mcp_server.session_manager
-        mcp_server.session_manager = mock_manager
-
-        # Mock global config (enabled)
-        original_config = mcp_server.unified_config
-        mock_config = Mock()
-        mock_config.session_tracking.enabled = True
-        mock_config.session_tracking.watch_path = None
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
-        mock_config.session_tracking.filter = Mock()
-        mock_config.session_tracking.filter.tool_calls.value = "SUMMARY"
-        mock_config.session_tracking.filter.tool_content.value = "SUMMARY"
-        mock_config.session_tracking.filter.user_messages.value = "FULL"
-        mock_config.session_tracking.filter.agent_messages.value = "FULL"
-        mcp_server.unified_config = mock_config
-
-        # Set runtime override (disabled)
-        mcp_server.runtime_session_tracking_state["test-session"] = False
-
-        try:
-            result = await mcp_server.session_tracking_status(session_id="test-session")
-            result_dict = json.loads(result)
-
-            assert result_dict["status"] == "success"
-            assert result_dict["session_id"] == "test-session"
-            assert result_dict["enabled"] is False  # Runtime override takes precedence
-            assert result_dict["global_config"]["enabled"] is True
-            assert result_dict["runtime_override"] is False
-        finally:
-            mcp_server.session_manager = original_manager
-            mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
 
     @pytest.mark.asyncio
     async def test_status_without_session_manager(self):
@@ -355,7 +122,6 @@ class TestSessionTrackingStatus:
             assert "session_id" in result_dict
             assert "enabled" in result_dict
             assert "global_config" in result_dict
-            assert "runtime_override" in result_dict
             assert "session_manager" in result_dict
             assert "filter_config" in result_dict
 
@@ -376,13 +142,9 @@ class TestSessionTrackingStatus:
             mcp_server.session_manager = original_manager
             mcp_server.unified_config = original_config
 
-
-class TestIntegration:
-    """Integration tests for session tracking tools."""
-
     @pytest.mark.asyncio
-    async def test_start_stop_status_workflow(self):
-        """Test complete workflow: start -> status -> stop -> status."""
+    async def test_status_config_only_control(self):
+        """Test that status reflects config-only control (no runtime overrides)."""
         # Mock session manager
         mock_manager = Mock()
         mock_manager._is_running = True
@@ -390,7 +152,7 @@ class TestIntegration:
         original_manager = mcp_server.session_manager
         mcp_server.session_manager = mock_manager
 
-        # Mock global config
+        # Mock global config (enabled)
         original_config = mcp_server.unified_config
         mock_config = Mock()
         mock_config.session_tracking.enabled = True
@@ -405,35 +167,18 @@ class TestIntegration:
         mcp_server.unified_config = mock_config
 
         try:
-            session_id = "integration-test-session"
+            # Get status for a specific session
+            result = await mcp_server.session_tracking_status(session_id="test-session")
+            result_dict = json.loads(result)
 
-            # Step 1: Start tracking
-            start_result = await mcp_server.session_tracking_start(session_id=session_id)
-            start_dict = json.loads(start_result)
-            assert start_dict["status"] == "success"
-            assert start_dict["enabled"] is True
-
-            # Step 2: Check status (should show enabled)
-            status_result = await mcp_server.session_tracking_status(session_id=session_id)
-            status_dict = json.loads(status_result)
-            assert status_dict["enabled"] is True
-            assert status_dict["runtime_override"] is True
-
-            # Step 3: Stop tracking
-            stop_result = await mcp_server.session_tracking_stop(session_id=session_id)
-            stop_dict = json.loads(stop_result)
-            assert stop_dict["status"] == "success"
-            assert stop_dict["enabled"] is False
-
-            # Step 4: Check status again (should show disabled)
-            status_result2 = await mcp_server.session_tracking_status(session_id=session_id)
-            status_dict2 = json.loads(status_result2)
-            assert status_dict2["enabled"] is False
-            assert status_dict2["runtime_override"] is False
+            assert result_dict["status"] == "success"
+            assert result_dict["session_id"] == "test-session"
+            # Enabled should match config (no runtime override possible)
+            assert result_dict["enabled"] is True
+            assert result_dict["global_config"]["enabled"] is True
         finally:
             mcp_server.session_manager = original_manager
             mcp_server.unified_config = original_config
-            mcp_server.runtime_session_tracking_state.clear()
 
 
 class TestSessionTrackingSyncHistory:
@@ -491,7 +236,11 @@ class TestSessionTrackingSyncHistory:
 
     @pytest.mark.asyncio
     async def test_sync_history_parameters_passed(self):
-        """Test sync_history passes parameters correctly to underlying function."""
+        """Test sync_history passes parameters correctly to underlying function.
+
+        Note: dry_run parameter was removed from MCP tool signature in Story R3.
+        The MCP tool is now read-only (always dry_run=True internally).
+        """
         mock_manager = Mock()
         mock_manager.path_resolver = Mock()
         mock_manager.path_resolver.list_all_projects.return_value = {}
@@ -508,19 +257,92 @@ class TestSessionTrackingSyncHistory:
         mcp_server.unified_config = mock_config
 
         try:
-            # Test with custom parameters
+            # Test with custom parameters (dry_run removed - MCP tool is read-only)
             result = await mcp_server.session_tracking_sync_history(
                 project="/test/path",
                 days=30,
                 max_sessions=50,
-                dry_run=True,
             )
             result_dict = json.loads(result)
 
-            # Should succeed with dry_run (no actual indexing)
+            # Should succeed with dry_run=True (always read-only)
             assert result_dict["status"] == "success"
             assert result_dict["dry_run"] is True
         finally:
             mcp_server.session_manager = original_manager
             mcp_server.graphiti_client = original_client
             mcp_server.unified_config = original_config
+
+    @pytest.mark.asyncio
+    async def test_sync_history_always_read_only(self):
+        """Test that MCP tool is always read-only (Story R3 requirement).
+
+        The MCP tool no longer exposes dry_run parameter. It always operates
+        in read-only mode (dry_run=True internally). Actual sync requires CLI.
+        """
+        mock_manager = Mock()
+        mock_manager.path_resolver = Mock()
+        mock_manager.path_resolver.list_all_projects.return_value = {}
+
+        original_manager = mcp_server.session_manager
+        original_client = mcp_server.graphiti_client
+        original_config = mcp_server.unified_config
+
+        mcp_server.session_manager = mock_manager
+        mcp_server.graphiti_client = Mock()
+
+        mock_config = Mock()
+        mock_config.session_tracking.filter = None
+        mcp_server.unified_config = mock_config
+
+        try:
+            # Call MCP tool without any parameters
+            result = await mcp_server.session_tracking_sync_history()
+            result_dict = json.loads(result)
+
+            # Verify it's always dry_run=True
+            assert result_dict["dry_run"] is True
+            # In dry_run mode, response has sessions_found (not sessions_indexed)
+            assert "sessions_found" in result_dict
+            # sessions_indexed should NOT be present in dry_run mode
+            assert "sessions_indexed" not in result_dict
+
+            # Call with all available parameters - still should be read-only
+            result2 = await mcp_server.session_tracking_sync_history(
+                project="/some/project",
+                days=1,
+                max_sessions=10,
+            )
+            result_dict2 = json.loads(result2)
+
+            # Still read-only
+            assert result_dict2["dry_run"] is True
+            assert "sessions_indexed" not in result_dict2
+        finally:
+            mcp_server.session_manager = original_manager
+            mcp_server.graphiti_client = original_client
+            mcp_server.unified_config = original_config
+
+    @pytest.mark.asyncio
+    async def test_sync_history_no_dry_run_parameter(self):
+        """Test that MCP tool signature does not accept dry_run parameter.
+
+        Story R3 removed dry_run from the MCP tool to prevent AI assistants
+        from triggering actual indexing. Only CLI can perform actual sync.
+        """
+        import inspect
+
+        # Get the MCP tool function signature
+        sig = inspect.signature(mcp_server.session_tracking_sync_history)
+        param_names = list(sig.parameters.keys())
+
+        # Verify dry_run is NOT in the parameters
+        assert "dry_run" not in param_names, (
+            "dry_run parameter should not be exposed in MCP tool. "
+            "MCP tool should be read-only (Story R3)."
+        )
+
+        # Verify expected parameters are present
+        assert "project" in param_names
+        assert "days" in param_names
+        assert "max_sessions" in param_names
