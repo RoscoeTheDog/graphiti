@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:35:26
+**Generated**: 2025-12-07 15:42:58
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 60.3%
+- **Completion**: 61.2%
 
 ### By Status
 
-- completed: 70
+- completed: 71
 - resolved: 7
 - superseded: 33
-- unassigned: 6
+- unassigned: 5
 
 ### By Type
 
@@ -107,7 +107,7 @@
   - Blocks: Story R5.t
 
   ### Story R5.t: Testing: Document circuit breaker restart behavior
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story R5, Story R5.i
 
   ### Story R6.d: Discovery: Update MCP_TOOLS.md to reflect tool changes

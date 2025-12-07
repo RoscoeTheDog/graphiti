@@ -1910,7 +1910,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Document circuit breaker restart behavior",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R5",
       "phase": "testing",
       "phase_order": 3,
