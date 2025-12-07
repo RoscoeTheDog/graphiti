@@ -2767,7 +2767,25 @@ async def run_mcp_server():
 
 
 def main():
-    """Main function to run the Graphiti MCP server."""
+    """Main function to run the Graphiti MCP server.
+
+    Also supports subcommand routing for session-tracking CLI.
+    Usage: graphiti-mcp session-tracking <command> [options]
+    """
+    import sys
+
+    # Check for subcommand routing
+    if len(sys.argv) > 1 and sys.argv[0].endswith('graphiti-mcp'):
+        subcommand = sys.argv[1]
+        if subcommand == 'session-tracking':
+            # Delegate to session tracking CLI
+            # Remove 'session-tracking' from argv so argparse sees correct args
+            sys.argv = [sys.argv[0] + ' session-tracking'] + sys.argv[2:]
+            from mcp_server.session_tracking_cli import main as st_main
+            st_main()
+            return
+
+    # Run MCP server (original behavior)
     try:
         # Run everything in a single event loop
         asyncio.run(run_mcp_server())

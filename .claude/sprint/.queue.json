@@ -1827,7 +1827,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Add CLI entry point for manual sync execution",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R4",
       "phase": "implementation",
       "phase_order": 2,
