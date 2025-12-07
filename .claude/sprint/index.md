@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:10:12
+**Generated**: 2025-12-07 15:14:55
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 56.0%
+- **Completion**: 56.9%
 
 ### By Status
 
-- completed: 65
+- completed: 66
 - resolved: 6
 - superseded: 33
-- unassigned: 12
+- unassigned: 11
 
 ### By Type
 
@@ -83,7 +83,7 @@
   - Dependencies: Story R3, Story R3.i
 
   ### Story R4.d: Discovery: Add CLI entry point for manual sync execution
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story R4
   - Blocks: Story R4.i
 

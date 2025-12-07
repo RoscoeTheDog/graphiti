@@ -1812,7 +1812,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Add CLI entry point for manual sync execution",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R4",
       "phase": "discovery",
       "phase_order": 1,
