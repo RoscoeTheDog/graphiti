@@ -1744,7 +1744,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Make sync_history MCP tool read-only (dry_run enforced)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R3",
       "phase": "discovery",
       "phase_order": 1,
