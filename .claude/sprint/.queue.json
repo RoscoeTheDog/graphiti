@@ -1948,7 +1948,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Update MCP_TOOLS.md to reflect tool changes",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R6",
       "phase": "discovery",
       "phase_order": 1,

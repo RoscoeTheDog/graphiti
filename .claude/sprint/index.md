@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:42:58
+**Generated**: 2025-12-07 15:48:42
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 61.2%
+- **Completion**: 62.1%
 
 ### By Status
 
-- completed: 71
+- completed: 72
 - resolved: 7
 - superseded: 33
-- unassigned: 5
+- unassigned: 4
 
 ### By Type
 
@@ -111,7 +111,7 @@
   - Dependencies: Story R5, Story R5.i
 
   ### Story R6.d: Discovery: Update MCP_TOOLS.md to reflect tool changes
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story R6
   - Blocks: Story R6.i
 

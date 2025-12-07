@@ -1,0 +1,268 @@
+# Plan: R6 - Update MCP_TOOLS.md to reflect tool changes
+# Generated: 2025-12-07 (Discovery Phase R6.d)
+
+story_id: R6
+title: Update MCP_TOOLS.md to reflect tool changes
+type: documentation_remediation
+priority: P2
+
+discovery_summary:
+  context:
+    - Recent sprint stories R2-R5 made significant changes to MCP tools
+    - R2 removed session_tracking_start and session_tracking_stop tools
+    - R3 made session_tracking_sync_history read-only (dry_run enforced)
+    - R4 added CLI entry point for manual sync execution
+    - R5 documented circuit breaker restart behavior
+    - Several new tools were added in Stories 17-19 but never documented
+
+  audit_results:
+    tools_in_code: 14
+    tools_documented: 10
+    tools_missing_docs: 4
+    tools_with_outdated_docs: 1
+
+  current_tools_inventory:
+    documented_correct:
+      - name: add_memory
+        status: partial
+        issue: "Missing wait_for_completion parameter documentation"
+      - name: search_memory_nodes
+        status: complete
+      - name: search_memory_facts
+        status: complete
+      - name: delete_entity_edge
+        status: complete
+      - name: delete_episode
+        status: complete
+      - name: get_episodes
+        status: complete
+      - name: clear_graph
+        status: complete
+      - name: health_check
+        status: complete
+      - name: session_tracking_status
+        status: complete
+      - name: session_tracking_sync_history
+        status: complete (updated in R3)
+
+    missing_documentation:
+      - name: get_entity_edge
+        file: mcp_server/graphiti_mcp_server.py
+        line: 1637
+        description: "Get an entity edge from the graph memory by its UUID"
+        parameters:
+          - uuid (string, required): UUID of the entity edge to retrieve
+        returns: "dict with edge details or ErrorResponse"
+        priority: medium
+
+      - name: llm_health_check
+        file: mcp_server/graphiti_mcp_server.py
+        line: 1822
+        description: "Check the health of the LLM service"
+        parameters: none
+        returns: "LLMHealthCheckResponse with status, circuit state, provider info"
+        priority: high
+        related: "Stories 17-19 (resilience features)"
+
+      - name: session_tracking_health
+        file: mcp_server/graphiti_mcp_server.py
+        line: 2012
+        description: "Get comprehensive health status of the session tracking system"
+        parameters: none
+        returns: "JSON with service status, degradation level, queue status, failures"
+        priority: high
+        related: "Story 19 (session tracking resilience)"
+
+      - name: get_failed_episodes
+        file: mcp_server/graphiti_mcp_server.py
+        line: 2123
+        description: "Get failed episodes from the retry queue"
+        parameters:
+          - include_permanent (bool, optional): Include permanently failed episodes (default: True)
+          - limit (int, optional): Maximum episodes to return (default: 50, max: 100)
+        returns: "JSON with failed episodes list and retry queue stats"
+        priority: high
+        related: "Story 19 (session tracking resilience)"
+
+    removed_tools:
+      - name: session_tracking_start
+        removed_by: R2
+        verified_not_in_docs: true
+      - name: session_tracking_stop
+        removed_by: R2
+        verified_not_in_docs: true
+
+  documentation_gaps:
+    - category: "add_memory parameters"
+      description: "wait_for_completion parameter not documented"
+      location: "docs/MCP_TOOLS.md line 29"
+
+    - category: "metadata"
+      description: "Last Updated date is 2025-11-06, should be updated"
+      location: "docs/MCP_TOOLS.md line 474"
+
+    - category: "version"
+      description: "Version is 1.0, should reflect v1.0.0 release"
+      location: "docs/MCP_TOOLS.md line 475"
+
+implementation:
+  phase: R6.i
+
+  files_to_modify:
+    - path: docs/MCP_TOOLS.md
+      changes:
+        - location: "line 29 (add_memory parameters)"
+          action: add
+          description: |
+            Add wait_for_completion parameter:
+            - `wait_for_completion` (bool, optional): If True, block until processing completes.
+              If False, return immediately after queueing. Defaults to config value.
+
+        - location: "after line 144 (get_episodes)"
+          action: add
+          description: |
+            Add new section for get_entity_edge tool:
+            #### `get_entity_edge`
+            Get an entity edge from the graph memory by its UUID.
+            **Parameters**:
+            - `uuid` (string, required): UUID of the entity edge to retrieve
+            **Returns**: dict with edge details or error
+
+        - location: "after line 213 (health_check)"
+          action: add
+          description: |
+            Add new section for llm_health_check tool:
+            #### `llm_health_check`
+            Check the health of the LLM service including circuit breaker state.
+            **Parameters**: None
+            **Returns**: LLMHealthCheckResponse with status, circuit state, provider info
+
+        - location: "after session_tracking_status (around line 280)"
+          action: add
+          description: |
+            Add new section for session_tracking_health tool:
+            #### `session_tracking_health`
+            Get comprehensive health status of the session tracking system.
+            **Parameters**: None
+            **Returns**: JSON with service status, degradation level, queue status, failures
+
+        - location: "after session_tracking_sync_history (around line 350)"
+          action: add
+          description: |
+            Add new section for get_failed_episodes tool:
+            #### `get_failed_episodes`
+            Get failed episodes from the retry queue.
+            **Parameters**:
+            - `include_permanent` (bool, optional): Include permanently failed episodes (default: True)
+            - `limit` (int, optional): Maximum episodes to return (default: 50, max: 100)
+            **Returns**: JSON with failed episodes list and retry queue stats
+
+        - location: "line 474-475"
+          action: update
+          description: |
+            Update metadata:
+            **Last Updated:** 2025-12-07
+            **Version:** 1.0.0
+
+  structure_changes:
+    - section: "Resilience Features"
+      action: add
+      description: |
+        Create new section grouping resilience-related tools:
+        - llm_health_check
+        - session_tracking_health
+        - get_failed_episodes
+        Cross-reference with CONFIGURATION.md resilience section
+
+testing:
+  phase: R6.t
+
+  validation_steps:
+    - id: V1
+      description: All 14 MCP tools are documented
+      check: Count tool sections matches code count
+
+    - id: V2
+      description: add_memory has wait_for_completion parameter
+      check: Search for "wait_for_completion" in docs
+
+    - id: V3
+      description: get_entity_edge is documented
+      check: Search for "get_entity_edge" section
+
+    - id: V4
+      description: llm_health_check is documented
+      check: Search for "llm_health_check" section
+
+    - id: V5
+      description: session_tracking_health is documented
+      check: Search for "session_tracking_health" section
+
+    - id: V6
+      description: get_failed_episodes is documented
+      check: Search for "get_failed_episodes" section
+
+    - id: V7
+      description: No removed tools in docs
+      check: Grep for "session_tracking_start" and "session_tracking_stop" returns 0
+
+    - id: V8
+      description: Markdown renders correctly
+      check: Preview in markdown viewer
+
+    - id: V9
+      description: Cross-references are valid
+      check: Verify links to CONFIGURATION.md, README.md work
+
+acceptance_criteria:
+  - id: AC1
+    description: "All 14 current MCP tools are documented"
+    verification: Count tool sections
+
+  - id: AC2
+    description: "add_memory includes wait_for_completion parameter"
+    verification: Parameter listed in signature and described
+
+  - id: AC3
+    description: "get_entity_edge tool is fully documented"
+    verification: Section exists with description, parameters, returns
+
+  - id: AC4
+    description: "llm_health_check tool is fully documented"
+    verification: Section exists with description, response format
+
+  - id: AC5
+    description: "session_tracking_health tool is fully documented"
+    verification: Section exists with description, response format
+
+  - id: AC6
+    description: "get_failed_episodes tool is fully documented"
+    verification: Section exists with description, parameters, response format
+
+  - id: AC7
+    description: "No documentation for removed tools"
+    verification: session_tracking_start/stop not mentioned (except in notes)
+
+  - id: AC8
+    description: "Metadata updated"
+    verification: Last Updated is 2025-12-07, Version is 1.0.0
+
+estimated_tokens:
+  discovery: 800  # completed
+  implementation: 2500  # ~5 new tool sections + updates
+  testing: 300
+  total: 3600
+
+dependencies:
+  completed:
+    - R2: "Removed session_tracking_start/stop tools"
+    - R3: "Made session_tracking_sync_history read-only"
+    - R4: "Added CLI entry point"
+    - R5: "Documented circuit breaker restart"
+  none_blocking: true
+
+metadata:
+  created: "2025-12-07T00:00:00Z"
+  created_by: "discovery:R6.d"
+  risk_level: low
+  breaking_changes: false
