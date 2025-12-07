@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:32:33
+**Generated**: 2025-12-07 15:35:26
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 59.5%
+- **Completion**: 60.3%
 
 ### By Status
 
-- completed: 69
+- completed: 70
 - resolved: 7
 - superseded: 33
-- unassigned: 7
+- unassigned: 6
 
 ### By Type
 
@@ -102,7 +102,7 @@
   - Blocks: Story R5.i
 
   ### Story R5.i: Implementation: Document circuit breaker restart behavior
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story R5, Story R5.d
   - Blocks: Story R5.t
 

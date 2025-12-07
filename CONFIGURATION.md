@@ -502,6 +502,21 @@ Prevents cascading failures by temporarily disabling LLM calls after repeated fa
 - **OPEN**: Circuit tripped, all calls fail immediately (fast-fail)
 - **HALF-OPEN**: Recovery testing, limited calls allowed
 
+**Restart Behavior**:
+
+The circuit breaker state is held **in-memory only** and is reset when the MCP server restarts:
+
+- On server start/restart, circuit initializes to **CLOSED** state with `failure_count=0`
+- All previous failure history is cleared
+- This behavior can be used as a manual recovery technique when the circuit is stuck OPEN
+- There is no persistence to disk or database - state is ephemeral
+
+**Important Notes**:
+- State is not persisted across MCP server restarts
+- To manually reset the circuit without restarting, wait for the `recovery_timeout_seconds` period
+- Use the `llm_health_check` MCP tool to monitor circuit state and LLM availability
+- Future versions may add optional state persistence (e.g., Redis/database backing)
+
 ### Example Configurations
 
 **High Availability (aggressive retry)**:

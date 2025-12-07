@@ -1895,7 +1895,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Document circuit breaker restart behavior",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R5",
       "phase": "implementation",
       "phase_order": 2,
