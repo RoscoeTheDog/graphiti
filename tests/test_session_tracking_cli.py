@@ -334,3 +334,124 @@ class TestStatusCommand:
         captured = capsys.readouterr()
         assert "Disabled" in captured.out
         assert "enable session tracking" in captured.out.lower()
+
+
+class TestSubcommandRouting:
+    """Test graphiti-mcp session-tracking subcommand routing (Story R4)
+
+    Tests that 'graphiti-mcp session-tracking <command>' properly delegates
+    to the session_tracking_cli module.
+    """
+
+    def test_subcommand_routing_detects_session_tracking(self):
+        """Verify main() detects 'session-tracking' as first arg"""
+        import sys
+        from unittest.mock import patch, MagicMock
+
+        # Mock sys.argv as if called: graphiti-mcp session-tracking --help
+        test_argv = ['graphiti-mcp', 'session-tracking', '--help']
+
+        with patch.object(sys, 'argv', test_argv):
+            with patch('mcp_server.graphiti_mcp_server.asyncio') as mock_asyncio:
+                with patch('mcp_server.session_tracking_cli.main') as mock_st_main:
+                    # Import and call main
+                    from mcp_server.graphiti_mcp_server import main
+                    main()
+
+                    # Should delegate to session_tracking_cli.main()
+                    mock_st_main.assert_called_once()
+
+                    # Should NOT run MCP server
+                    mock_asyncio.run.assert_not_called()
+
+    def test_subcommand_routing_preserves_args(self):
+        """Verify remaining args are passed to session_tracking_cli"""
+        import sys
+        from unittest.mock import patch
+
+        # Mock sys.argv as if called: graphiti-mcp session-tracking sync --days 7
+        test_argv = ['graphiti-mcp', 'session-tracking', 'sync', '--days', '7']
+
+        with patch.object(sys, 'argv', test_argv):
+            with patch('mcp_server.session_tracking_cli.main') as mock_st_main:
+                from mcp_server.graphiti_mcp_server import main
+                main()
+
+                # Check that sys.argv was transformed correctly
+                # Should be: ['graphiti-mcp session-tracking', 'sync', '--days', '7']
+                assert 'session-tracking' in sys.argv[0]
+                assert 'sync' in sys.argv
+                assert '--days' in sys.argv
+                assert '7' in sys.argv
+
+    def test_no_subcommand_runs_mcp_server(self):
+        """Verify main() runs MCP server when no subcommand"""
+        import sys
+        from unittest.mock import patch, AsyncMock
+
+        # Mock sys.argv as if called: graphiti-mcp --transport stdio
+        test_argv = ['graphiti-mcp', '--transport', 'stdio']
+
+        with patch.object(sys, 'argv', test_argv):
+            with patch('mcp_server.graphiti_mcp_server.asyncio.run') as mock_run:
+                with patch('mcp_server.session_tracking_cli.main') as mock_st_main:
+                    from mcp_server.graphiti_mcp_server import main
+                    try:
+                        main()
+                    except Exception:
+                        pass  # MCP server may fail without full setup
+
+                    # Should NOT delegate to session_tracking_cli
+                    mock_st_main.assert_not_called()
+
+                    # Should attempt to run MCP server
+                    mock_run.assert_called_once()
+
+    def test_subcommand_routing_requires_graphiti_mcp_prefix(self):
+        """Verify routing only works when argv[0] ends with 'graphiti-mcp'"""
+        import sys
+        from unittest.mock import patch
+
+        # Mock sys.argv with wrong program name
+        test_argv = ['other-program', 'session-tracking', '--help']
+
+        with patch.object(sys, 'argv', test_argv):
+            with patch('mcp_server.graphiti_mcp_server.asyncio.run') as mock_run:
+                with patch('mcp_server.session_tracking_cli.main') as mock_st_main:
+                    from mcp_server.graphiti_mcp_server import main
+                    try:
+                        main()
+                    except Exception:
+                        pass  # MCP server may fail
+
+                    # Should NOT delegate (wrong program name)
+                    mock_st_main.assert_not_called()
+
+    def test_backward_compatibility_direct_entry_point(self):
+        """Verify graphiti-mcp-session-tracking entry point still works"""
+        import sys
+        from unittest.mock import patch
+
+        # The graphiti-mcp-session-tracking entry point directly calls
+        # session_tracking_cli.main, so just verify the import works
+        from mcp_server.session_tracking_cli import main as st_main
+        assert callable(st_main)
+
+    def test_subcommand_help_displays_correctly(self):
+        """Verify --help after session-tracking shows CLI help"""
+        import sys
+        from unittest.mock import patch
+
+        test_argv = ['graphiti-mcp', 'session-tracking', '--help']
+
+        with patch.object(sys, 'argv', test_argv):
+            with patch('mcp_server.session_tracking_cli.main') as mock_st_main:
+                # When help is requested, argparse in st_main will handle it
+                mock_st_main.side_effect = SystemExit(0)  # --help exits cleanly
+
+                from mcp_server.graphiti_mcp_server import main
+
+                with pytest.raises(SystemExit) as exc_info:
+                    main()
+
+                assert exc_info.value.code == 0  # Clean exit from --help

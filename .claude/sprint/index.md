@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 15:22:02
+**Generated**: 2025-12-07 15:25:43
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 116
-- **Completion**: 57.8%
+- **Completion**: 58.6%
 
 ### By Status
 
-- completed: 67
-- resolved: 6
+- completed: 68
+- resolved: 7
 - superseded: 33
-- unassigned: 10
+- unassigned: 8
 
 ### By Type
 
@@ -93,7 +93,7 @@
   - Blocks: Story R4.t
 
   ### Story R4.t: Testing: Add CLI entry point for manual sync execution
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story R4, Story R4.i
 
   ### Story R5.d: Discovery: Document circuit breaker restart behavior

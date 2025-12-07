@@ -1791,7 +1791,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Add CLI entry point for manual sync execution",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "R4.d",
@@ -1842,7 +1842,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Add CLI entry point for manual sync execution",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R4",
       "phase": "testing",
       "phase_order": 3,
