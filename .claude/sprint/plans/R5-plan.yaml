@@ -1,0 +1,112 @@
+# Discovery Plan: R5 - Document circuit breaker restart behavior
+# Generated: 2025-12-07
+# Phase: Discovery (R5.d)
+
+story_id: R5
+title: "Document circuit breaker restart behavior"
+type: documentation_remediation
+
+# Discovery Summary
+discovery:
+  completed: true
+  findings:
+    - id: F1
+      category: architecture
+      description: >
+        Circuit breaker state is entirely in-memory, stored as instance variables
+        (_state, _failure_count, _last_failure_time, _half_open_calls).
+      file: graphiti_core/llm_client/availability.py
+      lines: 253-259 (CircuitBreaker.__init__)
+
+    - id: F2
+      category: behavior
+      description: >
+        On MCP server restart, circuit breaker always initializes to CLOSED state
+        with failure_count=0. Previous failure history is lost.
+      implication: >
+        A restart can be used as a manual recovery mechanism when circuit is OPEN,
+        but also means legitimate failure detection is reset.
+
+    - id: F3
+      category: documentation_gap
+      description: >
+        CONFIGURATION.md documents circuit breaker configuration but does not
+        explain restart behavior or state persistence characteristics.
+      file: CONFIGURATION.md
+      section: "Circuit Breaker Configuration"
+      lines: 489-503
+
+    - id: F4
+      category: design_decision
+      description: >
+        No state persistence is implemented by design - circuit breaker is
+        stateless across restarts. This is common for simple implementations
+        but users should be aware of the behavior.
+
+# Implementation Plan
+implementation:
+  target_files:
+    - path: CONFIGURATION.md
+      section: "Circuit Breaker Configuration"
+      changes:
+        - type: add
+          description: Add "Restart Behavior" subsection explaining state reset
+        - type: add
+          description: Add "Important Notes" covering persistence characteristics
+
+    - path: docs/SESSION_TRACKING_USER_GUIDE.md
+      section: Troubleshooting (if exists)
+      changes:
+        - type: add
+          description: Document server restart as a circuit recovery technique
+
+  content_outline:
+    restart_behavior_section:
+      title: "Restart Behavior"
+      content: |
+        - Circuit breaker state is in-memory only
+        - MCP server restart resets circuit to CLOSED state
+        - All failure history is cleared on restart
+        - Can be used as manual recovery when circuit is stuck OPEN
+
+    important_notes:
+      title: "Important Notes"
+      content: |
+        - State is not persisted to disk or database
+        - Planned: Future versions may add optional Redis/DB persistence
+        - For manual reset without restart, use llm_health_check tool monitoring
+
+# Testing Requirements
+testing:
+  categories:
+    - unit: false  # Documentation only, no code changes
+    - integration: false
+    - security: false
+  validation:
+    - type: documentation_accuracy
+      check: Verify documented behavior matches code implementation
+    - type: link_validation
+      check: Ensure any cross-references are valid
+    - type: formatting
+      check: Markdown renders correctly
+
+# Acceptance Criteria Mapping
+acceptance_criteria:
+  - id: AC1
+    description: "CONFIGURATION.md includes Restart Behavior section"
+    implementation: Add subsection under Circuit Breaker Configuration
+
+  - id: AC2
+    description: "Restart behavior is accurately documented"
+    implementation: Document that state is in-memory and resets on restart
+
+  - id: AC3
+    description: "Users understand persistence characteristics"
+    implementation: Explicitly state no persistence, with note about future plans
+
+# Metadata
+metadata:
+  estimated_tokens: 500  # Documentation changes only
+  risk_level: low
+  dependencies: []
+  blocks: []

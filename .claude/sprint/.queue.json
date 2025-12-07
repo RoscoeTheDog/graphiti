@@ -1880,7 +1880,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Document circuit breaker restart behavior",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R5",
       "phase": "discovery",
       "phase_order": 1,
