@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-07 23:00:42
+**Generated**: 2025-12-07 23:05:22
 
 ---
 
@@ -20,9 +20,8 @@
 ### By Status
 
 - completed: 74
-- resolved: 8
+- resolved: 9
 - superseded: 33
-- unassigned: 1
 
 ### By Type
 

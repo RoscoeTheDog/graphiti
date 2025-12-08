@@ -1859,7 +1859,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Document circuit breaker restart behavior",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "R5.d",
