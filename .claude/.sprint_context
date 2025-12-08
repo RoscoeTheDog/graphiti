@@ -1,0 +1,4 @@
+SPRINT_BRANCH="sprint/v1.0.0/session-tracking-integration"
+SPRINT_NAME="Session Tracking Integration"
+SPRINT_VERSION="v1.0.0"
+BASE_BRANCH="main"

@@ -1,0 +1,85 @@
+{
+  "archived_at": "2025-12-04-0658",
+  "validation_id": "-18",
+  "story_data": {
+    "-18": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: MCP Tools Error Handling",
+      "status": "unassigned",
+      "validates": "18",
+      "children": [
+        "-18.d",
+        "-18.i",
+        "-18.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-18.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: MCP Tools Error Handling",
+      "status": "unassigned",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: MCP Tools Error Handling",
+      "status": "pending",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: MCP Tools Error Handling",
+      "status": "pending",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "children": [
+    "-18.d",
+    "-18.i",
+    "-18.t"
+  ]
+}

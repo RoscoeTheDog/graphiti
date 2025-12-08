@@ -1,0 +1,85 @@
+{
+  "archived_at": "2025-12-04-0658",
+  "validation_id": "-20",
+  "story_data": {
+    "-20": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Unified LLM Configuration",
+      "status": "unassigned",
+      "validates": "20",
+      "children": [
+        "-20.d",
+        "-20.i",
+        "-20.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-20.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Unified LLM Configuration",
+      "status": "unassigned",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-20.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Unified LLM Configuration",
+      "status": "pending",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-20.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Unified LLM Configuration",
+      "status": "pending",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "children": [
+    "-20.d",
+    "-20.i",
+    "-20.t"
+  ]
+}

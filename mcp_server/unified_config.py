@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
+from graphiti_core.session_tracking.filter_config import FilterConfig
 import logging
 
 logger = logging.getLogger(__name__)
@@ -299,17 +300,331 @@ class MCPServerConfig(BaseModel):
 
 
 # ============================================================================
-# Resilience Configuration
+# LLM Resilience Configuration (Story 20)
+# ============================================================================
+
+
+class LLMHealthCheckConfig(BaseModel):
+    """LLM health check configuration for proactive availability monitoring.
+
+    The health check system periodically validates LLM connectivity and responsiveness,
+    enabling proactive detection of outages before they impact user operations.
+    """
+
+    enabled: bool = Field(
+        default=True,
+        description="Enable periodic LLM health checks"
+    )
+    interval_seconds: int = Field(
+        default=60,
+        description="Interval between health checks in seconds"
+    )
+    on_startup: bool = Field(
+        default=True,
+        description="Run health check on server startup"
+    )
+    timeout_seconds: int = Field(
+        default=10,
+        description="Timeout for health check requests"
+    )
+
+
+class LLMRetryConfig(BaseModel):
+    """LLM retry policy configuration with exponential backoff.
+
+    Configures automatic retry behavior for transient LLM failures such as
+    rate limits, timeouts, and temporary service unavailability.
+    """
+
+    max_attempts: int = Field(
+        default=4,
+        description="Maximum number of retry attempts (including initial attempt)"
+    )
+    initial_delay_seconds: float = Field(
+        default=5.0,
+        description="Initial delay before first retry in seconds"
+    )
+    max_delay_seconds: float = Field(
+        default=120.0,
+        description="Maximum delay between retries in seconds"
+    )
+    exponential_base: float = Field(
+        default=2.0,
+        description="Base for exponential backoff calculation"
+    )
+    retry_on_rate_limit: bool = Field(
+        default=True,
+        description="Retry on rate limit errors (429)"
+    )
+    retry_on_timeout: bool = Field(
+        default=True,
+        description="Retry on timeout errors"
+    )
+
+
+class CircuitBreakerConfig(BaseModel):
+    """Circuit breaker configuration for LLM failure protection.
+
+    Implements the circuit breaker pattern to prevent cascading failures
+    when the LLM service is experiencing issues. After a threshold of
+    failures, the circuit opens and fast-fails requests without attempting
+    LLM calls, allowing the service to recover.
+    """
+
+    enabled: bool = Field(
+        default=True,
+        description="Enable circuit breaker for LLM calls"
+    )
+    failure_threshold: int = Field(
+        default=5,
+        description="Number of consecutive failures before opening circuit"
+    )
+    recovery_timeout_seconds: int = Field(
+        default=300,
+        description="Time to wait before attempting recovery (half-open state)"
+    )
+    half_open_max_calls: int = Field(
+        default=3,
+        description="Maximum calls allowed in half-open state to test recovery"
+    )
+
+
+class LLMResilienceConfig(BaseModel):
+    """Unified LLM resilience configuration.
+
+    Consolidates all LLM resilience features:
+    - Health checks for proactive monitoring
+    - Retry policies for transient failures
+    - Circuit breaker for failure protection
+    """
+
+    health_check: LLMHealthCheckConfig = Field(
+        default_factory=LLMHealthCheckConfig,
+        description="Health check configuration"
+    )
+    retry: LLMRetryConfig = Field(
+        default_factory=LLMRetryConfig,
+        description="Retry policy configuration"
+    )
+    circuit_breaker: CircuitBreakerConfig = Field(
+        default_factory=CircuitBreakerConfig,
+        description="Circuit breaker configuration"
+    )
+
+
+# ============================================================================
+# MCP Tools Configuration (Story 20)
+# ============================================================================
+
+
+class MCPToolsBehaviorConfig(BaseModel):
+    """MCP tools behavior configuration when LLM is unavailable.
+
+    Defines how MCP tools behave when the underlying LLM service is
+    unavailable or degraded. This provides explicit control over
+    failure modes for different operational requirements.
+    """
+
+    on_llm_unavailable: Literal["FAIL", "STORE_RAW", "QUEUE_RETRY"] = Field(
+        default="FAIL",
+        description=(
+            "Behavior when LLM is unavailable:\n"
+            "- FAIL: Immediately return error (best for interactive use)\n"
+            "- STORE_RAW: Store data without LLM processing (best for data preservation)\n"
+            "- QUEUE_RETRY: Queue for later retry when LLM recovers (best for batch operations)"
+        )
+    )
+    wait_for_completion_default: bool = Field(
+        default=True,
+        description="Default wait behavior for async operations"
+    )
+    timeout_seconds: int = Field(
+        default=60,
+        description="Default timeout for MCP tool operations"
+    )
+
+
+# ============================================================================
+# Session Tracking Resilience Configuration (Story 20)
+# ============================================================================
+
+
+class RetryQueueConfig(BaseModel):
+    """Retry queue configuration for session tracking resilience.
+
+    Configures the persistent queue used to retry failed session processing
+    when the LLM becomes available again. Ensures no session data is lost
+    during LLM outages.
+    """
+
+    max_retries: int = Field(
+        default=5,
+        description="Maximum retry attempts per session"
+    )
+    retry_delays_seconds: list[int] = Field(
+        default_factory=lambda: [300, 900, 2700, 7200, 21600],
+        description=(
+            "Delay in seconds before each retry attempt. "
+            "Default: 5m, 15m, 45m, 2h, 6h (progressive backoff)"
+        )
+    )
+    max_queue_size: int = Field(
+        default=1000,
+        description="Maximum number of sessions in retry queue"
+    )
+    persist_to_disk: bool = Field(
+        default=True,
+        description="Persist retry queue to disk for crash recovery"
+    )
+
+
+class SessionNotificationsConfig(BaseModel):
+    """Notification configuration for session tracking failures."""
+
+    on_permanent_failure: bool = Field(
+        default=True,
+        description="Notify on permanent processing failure (after all retries exhausted)"
+    )
+    notification_method: Literal["log", "webhook", "both"] = Field(
+        default="log",
+        description="Method for sending failure notifications"
+    )
+    webhook_url: Optional[str] = Field(
+        default=None,
+        description="Webhook URL for failure notifications (if method includes webhook)"
+    )
+
+
+class SessionTrackingResilienceConfig(BaseModel):
+    """Session tracking resilience configuration.
+
+    Defines how session tracking handles LLM unavailability to ensure
+    no session data is lost. The default STORE_RAW_AND_RETRY mode
+    stores sessions with raw content and queues them for LLM processing
+    when service recovers.
+    """
+
+    on_llm_unavailable: Literal["FAIL", "STORE_RAW", "STORE_RAW_AND_RETRY"] = Field(
+        default="STORE_RAW_AND_RETRY",
+        description=(
+            "Behavior when LLM is unavailable during session processing:\n"
+            "- FAIL: Skip session (data loss risk)\n"
+            "- STORE_RAW: Store raw session content without summarization\n"
+            "- STORE_RAW_AND_RETRY: Store raw and queue for later processing (recommended)"
+        )
+    )
+    retry_queue: RetryQueueConfig = Field(
+        default_factory=RetryQueueConfig,
+        description="Retry queue configuration for failed sessions"
+    )
+    notifications: SessionNotificationsConfig = Field(
+        default_factory=SessionNotificationsConfig,
+        description="Notification configuration for session failures"
+    )
+
+
+# ============================================================================
+# Resilience Configuration (Legacy - kept for backward compatibility)
 # ============================================================================
 
 
 class ResilienceConfig(BaseModel):
-    """Resilience and error recovery configuration"""
+    """Resilience and error recovery configuration (legacy).
+
+    Note: This section is maintained for backward compatibility.
+    New resilience configuration should use the llm.resilience section
+    for LLM-specific settings and session_tracking.resilience for
+    session-specific settings.
+    """
 
     max_retries: int = 3
     retry_backoff_base: int = 2
     episode_timeout: int = 60
     health_check_interval: int = 300
+
+
+# ============================================================================
+# Session Tracking Configuration
+# ============================================================================
+
+
+class SessionTrackingConfig(BaseModel):
+    """Session tracking configuration for automatic JSONL monitoring.
+
+    Configures the session tracking system that monitors Claude Code session files
+    (JSONL format) and automatically indexes them into the Graphiti knowledge graph.
+    """
+
+    enabled: bool = Field(
+        default=False,
+        description="Enable or disable session tracking (opt-in model, disabled by default for security)"
+    )
+    watch_path: Optional[str] = Field(
+        default=None,
+        description=(
+            "Path to directory containing Claude Code session files. "
+            "If None, defaults to ~/.claude/projects/. "
+            "Must be an absolute path (native OS format: C:\\ on Windows, / on Unix)."
+        )
+    )
+    inactivity_timeout: int = Field(
+        default=900,
+        description=(
+            "Inactivity timeout in seconds before a session is considered closed. "
+            "After this timeout, the session will be indexed into Graphiti. "
+            "Default: 900 seconds (15 minutes) to accommodate long-running operations."
+        )
+    )
+    check_interval: int = Field(
+        default=60,
+        description=(
+            "Interval in seconds to check for inactive sessions. "
+            "The file watcher checks for inactive sessions at this interval."
+        )
+    )
+    auto_summarize: bool = Field(
+        default=False,
+        description=(
+            "Automatically summarize closed sessions using Graphiti's LLM. "
+            "If False, sessions are stored as raw episodes without summarization (no LLM costs)."
+        )
+    )
+    store_in_graph: bool = Field(
+        default=True,
+        description=(
+            "Store session summaries in the Graphiti knowledge graph. "
+            "If False, sessions are logged but not persisted to Neo4j."
+        )
+    )
+    keep_length_days: Optional[int] = Field(
+        default=7,
+        description=(
+            "Rolling window filter for session discovery in days. "
+            "Only sessions modified within the last N days will be indexed. "
+            "Set to null to index all sessions (not recommended, may cause bulk LLM costs)."
+        )
+    )
+    filter: FilterConfig = Field(
+        default_factory=FilterConfig,
+        description=(
+            "Filtering configuration for session content. "
+            "Controls how messages and tool results are filtered for token reduction. "
+            "Default: template-based tool summarization, preserve user/agent messages."
+        )
+    )
+    resilience: SessionTrackingResilienceConfig = Field(
+        default_factory=SessionTrackingResilienceConfig,
+        description=(
+            "Resilience configuration for session tracking. "
+            "Defines behavior when LLM is unavailable during session processing."
+        )
+    )
+
+    @field_validator('keep_length_days')
+    def validate_keep_length_days(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("keep_length_days must be > 0 or null")
+        return v
 
 
 # ============================================================================
@@ -330,6 +645,9 @@ class GraphitiConfig(BaseModel):
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
+    session_tracking: SessionTrackingConfig = Field(default_factory=SessionTrackingConfig)
+    llm_resilience: LLMResilienceConfig = Field(default_factory=LLMResilienceConfig)
+    mcp_tools: MCPToolsBehaviorConfig = Field(default_factory=MCPToolsBehaviorConfig)
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":
@@ -338,7 +656,7 @@ class GraphitiConfig(BaseModel):
         Args:
             config_path: Path to config file. If None, searches in:
                 1. ./graphiti.config.json (project root)
-                2. ~/.claude/graphiti.config.json (global)
+                2. ~/.graphiti/graphiti.config.json (global)
                 3. Falls back to defaults
 
         Returns:
@@ -346,9 +664,29 @@ class GraphitiConfig(BaseModel):
         """
         if config_path is None:
             # Search order: project root -> global -> defaults
+            global_config_path = Path.home() / ".graphiti" / "graphiti.config.json"
+            old_global_config_path = Path.home() / ".claude" / "graphiti.config.json"
+
+            # Migration: Check for old ~/.claude/ location and migrate to ~/.graphiti/
+            if old_global_config_path.exists() and not global_config_path.exists():
+                try:
+                    global_config_path.parent.mkdir(parents=True, exist_ok=True)
+                    import shutil
+                    shutil.copy2(old_global_config_path, global_config_path)
+                    logger.info(f"Migrated config from {old_global_config_path} to {global_config_path}")
+
+                    # Create deprecation notice
+                    deprecation_notice = old_global_config_path.parent / "graphiti.config.json.deprecated"
+                    deprecation_notice.write_text(
+                        "This config has been migrated to ~/.graphiti/graphiti.config.json\n"
+                        "Graphiti now uses ~/.graphiti/ for global configuration (MCP server independence).\n"
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to migrate config from {old_global_config_path}: {e}")
+
             search_paths = [
                 Path.cwd() / "graphiti.config.json",
-                Path.home() / ".claude" / "graphiti.config.json",
+                global_config_path,
             ]
 
             for path in search_paths:
@@ -376,6 +714,26 @@ class GraphitiConfig(BaseModel):
             logger.error(f"Failed to load config from {config_path}: {e}")
             logger.warning("Falling back to default configuration")
             return cls._default_config()
+
+    @classmethod
+    def validate_file(cls, config_path: str | Path) -> "ValidationResult":
+        """Validate configuration file without loading it.
+
+        Args:
+            config_path: Path to config file to validate
+
+        Returns:
+            ValidationResult with validation errors/warnings
+
+        Example:
+            result = GraphitiConfig.validate_file("./graphiti.config.json")
+            if not result.valid:
+                print(f"Config has {len(result.errors)} errors")
+        """
+        from mcp_server.config_validator import ConfigValidator
+
+        validator = ConfigValidator()
+        return validator.validate_all(Path(config_path))
 
     @classmethod
     def _default_config(cls) -> "GraphitiConfig":
@@ -459,6 +817,53 @@ class GraphitiConfig(BaseModel):
             )
 
         logger.info(f"Saved config to: {config_path}")
+
+    def log_effective_config(self) -> None:
+        """Log the effective configuration on startup.
+
+        Logs key configuration values for debugging and auditing.
+        Sensitive values (API keys, passwords) are masked.
+        """
+        logger.info("=" * 60)
+        logger.info("Graphiti Configuration Summary")
+        logger.info("=" * 60)
+
+        # Database
+        logger.info(f"Database backend: {self.database.backend}")
+        if self.database.backend == "neo4j":
+            logger.info(f"  URI: {self.database.neo4j.uri}")
+            logger.info(f"  Database: {self.database.neo4j.database}")
+
+        # LLM
+        logger.info(f"LLM provider: {self.llm.provider}")
+        logger.info(f"  Default model: {self.llm.default_model}")
+        logger.info(f"  Small model: {self.llm.small_model}")
+        logger.info(f"  Temperature: {self.llm.temperature}")
+
+        # LLM Resilience
+        logger.info(f"LLM Resilience:")
+        logger.info(f"  Health check enabled: {self.llm_resilience.health_check.enabled}")
+        logger.info(f"  Health check interval: {self.llm_resilience.health_check.interval_seconds}s")
+        logger.info(f"  Retry max attempts: {self.llm_resilience.retry.max_attempts}")
+        logger.info(f"  Circuit breaker enabled: {self.llm_resilience.circuit_breaker.enabled}")
+        logger.info(f"  Circuit breaker threshold: {self.llm_resilience.circuit_breaker.failure_threshold}")
+
+        # MCP Tools
+        logger.info(f"MCP Tools:")
+        logger.info(f"  On LLM unavailable: {self.mcp_tools.on_llm_unavailable}")
+        logger.info(f"  Timeout: {self.mcp_tools.timeout_seconds}s")
+
+        # Session Tracking
+        logger.info(f"Session Tracking:")
+        logger.info(f"  Enabled: {self.session_tracking.enabled}")
+        if self.session_tracking.enabled:
+            logger.info(f"  Watch path: {self.session_tracking.watch_path or '~/.claude/projects/'}")
+            logger.info(f"  On LLM unavailable: {self.session_tracking.resilience.on_llm_unavailable}")
+
+        # Embedder
+        logger.info(f"Embedder: {self.embedder.provider} ({self.embedder.model})")
+
+        logger.info("=" * 60)
 
 
 # ============================================================================

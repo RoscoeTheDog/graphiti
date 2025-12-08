@@ -1,0 +1,16 @@
+{
+  "archived_at": "2025-12-03-0948",
+  "validation_id": "-19",
+  "story_data": {
+    "-19": {
+      "type": "validation",
+      "title": "Validate Story 19",
+      "status": "unassigned",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "file": "stories/-19-validate-story-19.md"
+    }
+  },
+  "reason": "force_recreate"
+}

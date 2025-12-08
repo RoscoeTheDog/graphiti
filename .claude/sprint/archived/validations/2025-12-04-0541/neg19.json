@@ -1,0 +1,85 @@
+{
+  "archived_at": "2025-12-04-0541",
+  "validation_id": "-19",
+  "story_data": {
+    "-19": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Session Tracking Resilience",
+      "status": "unassigned",
+      "validates": "19",
+      "children": [
+        "-19.d",
+        "-19.i",
+        "-19.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-19.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Session Tracking Resilience",
+      "status": "unassigned",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Session Tracking Resilience",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Session Tracking Resilience",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "children": [
+    "-19.d",
+    "-19.i",
+    "-19.t"
+  ]
+}

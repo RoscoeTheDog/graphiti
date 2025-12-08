@@ -10,6 +10,7 @@ import logging
 import logging.handlers
 import os
 import sys
+import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,6 +47,47 @@ from graphiti_core.utils.maintenance.graph_data_operations import clear_data
 from mcp_server.export_helpers import _resolve_path_pattern, _scan_for_credentials, _resolve_absolute_path, _normalize_msys_path
 from mcp_server.unified_config import get_config
 
+from mcp_server.responses import (
+    MCPResponse,
+    SuccessResponse,
+    DegradedResponse,
+    QueuedResponse,
+    ErrorResponse as MCPErrorResponse,
+    DegradationReason,
+    create_success,
+    create_degraded,
+    create_queued,
+    create_error,
+    create_llm_unavailable_error,
+    create_llm_auth_error,
+    create_llm_rate_limit_error,
+    create_database_error,
+    create_timeout_error,
+    format_response,
+    ErrorCategory,
+)
+# Session tracking imports
+from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
+from graphiti_core.session_tracking.session_manager import SessionManager
+from graphiti_core.session_tracking.filter import SessionFilter
+from graphiti_core.session_tracking.indexer import SessionIndexer
+from graphiti_core.session_tracking.prompts import DEFAULT_TEMPLATES
+from mcp_server.manual_sync import session_tracking_sync_history as _session_tracking_sync_history
+
+# Session tracking resilience imports (Story 19)
+from graphiti_core.session_tracking.resilient_indexer import (
+    ResilientSessionIndexer,
+    ResilientIndexerConfig,
+    OnLLMUnavailable,
+)
+from graphiti_core.session_tracking.retry_queue import FailedEpisode, RetryQueue
+from graphiti_core.session_tracking.status import (
+    SessionTrackingHealth,
+    SessionTrackingStatusAggregator,
+    DegradationLevel,
+    ServiceStatus,
+)
+
 load_dotenv()
 
 # Load unified config instance (will replace local GraphitiConfig)
@@ -60,6 +102,16 @@ DEFAULT_EMBEDDER_MODEL = 'text-embedding-3-small'
 # Decrease this if you're experiencing 429 rate limit errors from your LLM provider.
 # Increase if you have high rate limits.
 SEMAPHORE_LIMIT = int(os.getenv('SEMAPHORE_LIMIT', 10))
+
+# Global session manager instance (initialized in initialize_server)
+session_manager: SessionManager | None = None
+
+# Global inactivity checker task (initialized in initialize_session_tracking)
+_inactivity_checker_task: asyncio.Task | None = None
+
+# Session tracking resilience components (Story 19)
+resilient_indexer: ResilientSessionIndexer | None = None
+status_aggregator: SessionTrackingStatusAggregator | None = None
 
 
 class Requirement(BaseModel):
@@ -1041,6 +1093,7 @@ async def add_memory(
     source_description: str = '',
     uuid: str | None = None,
     filepath: str | None = None,
+    wait_for_completion: bool | None = None,
 ) -> str:
     """Add an episode to memory and optionally export to file.
 
@@ -1063,6 +1116,9 @@ async def add_memory(
         uuid (str, optional): Optional UUID for the episode
         filepath (str, optional): Optional file path to export episode. Supports path variables:
                                  {date}, {timestamp}, {time}, {hash}. If provided, saves episode_body to file.
+        wait_for_completion (bool, optional): If True, block until processing completes.
+                                             If False, return immediately after queueing.
+                                             Defaults to config value (mcp_tools.wait_for_completion_default).
 
     Examples:
         # Adding plain text content (graph only)
@@ -1108,11 +1164,35 @@ async def add_memory(
         - Complex nested structures are supported (arrays, nested objects, mixed data types), but keep nesting to a minimum
         - Entities will be created from appropriate JSON properties
         - Relationships between entities will be established based on the JSON structure
+
+    Response Types (Story 18):
+        - Success: Full processing completed with LLM entity extraction
+        - Degraded: Data stored but with reduced functionality (e.g., LLM unavailable)
+        - Queued: Operation queued for later processing (when QUEUE_RETRY mode)
+        - Error: Operation failed with actionable error details
+
+    LLM Unavailable Behavior (configurable via mcp_tools.on_llm_unavailable):
+        - FAIL: Return error immediately (default, best for interactive use)
+        - STORE_RAW: Store episode without LLM processing (data preservation)
+        - QUEUE_RETRY: Queue for retry when LLM recovers (batch operations)
     """
     global graphiti_client, episode_queues, queue_workers
 
+    start_time = time.perf_counter()
+
+    # Resolve wait_for_completion from config if not provided
+    should_wait = wait_for_completion
+    if should_wait is None:
+        should_wait = unified_config.mcp_tools.wait_for_completion_default
+
     if graphiti_client is None:
-        return "Error: Graphiti client not initialized"
+        response = create_error(
+            category=ErrorCategory.CONFIGURATION,
+            message="Graphiti client not initialized",
+            recoverable=False,
+            suggestion="Check server startup logs. The MCP server may not have connected to Neo4j successfully."
+        )
+        return format_response(response)
 
     try:
         # Map string source to EpisodeType enum
@@ -1136,14 +1216,58 @@ async def add_memory(
         # Use cast to help the type checker understand that graphiti_client is not None
         client = cast(Graphiti, graphiti_client)
 
-        # Define the episode processing function
+        # =================================================================
+        # LLM Availability Check (Story 18: AC-18.6)
+        # =================================================================
+        llm_available = client.llm_available
+        degradation_mode = unified_config.mcp_tools.on_llm_unavailable
+        is_degraded = False
+        degradation_reason = None
+
+        if not llm_available:
+            logger.warning(f"LLM unavailable for episode '{name}', mode: {degradation_mode}")
+            circuit_state = client._availability_manager.circuit_breaker.state.value
+
+            if degradation_mode == "FAIL":
+                # Immediate failure with actionable error (AC-18.4)
+                response = create_llm_unavailable_error(
+                    circuit_state=circuit_state,
+                    retry_after_seconds=unified_config.llm_resilience.circuit_breaker.recovery_timeout_seconds
+                )
+                return format_response(response)
+
+            elif degradation_mode == "STORE_RAW":
+                # Mark as degraded - will store without LLM processing
+                is_degraded = True
+                degradation_reason = DegradationReason.LLM_UNAVAILABLE
+                logger.info(f"Episode '{name}' will be stored raw (LLM unavailable, STORE_RAW mode)")
+
+            elif degradation_mode == "QUEUE_RETRY":
+                # Queue for later retry when LLM recovers
+                # For now, we queue normally but mark for retry
+                is_degraded = True
+                degradation_reason = DegradationReason.LLM_UNAVAILABLE
+                logger.info(f"Episode '{name}' queued for retry when LLM recovers (QUEUE_RETRY mode)")
+
+        # =================================================================
+        # Episode Processing (with wait_for_completion support - AC-18.8, AC-18.9)
+        # =================================================================
+
+        # Create an Event for synchronization if waiting
+        processing_complete: asyncio.Event | None = asyncio.Event() if should_wait else None
+        processing_result: dict[str, Any] = {"success": False, "error": None, "episode_id": None}
+
         async def process_episode():
+            nonlocal processing_result
             try:
                 logger.info(f"Processing queued episode '{name}' for group_id: {group_id_str}")
                 # Use all entity types if use_custom_entities is enabled, otherwise use empty dict
                 entity_types = ENTITY_TYPES if config.use_custom_entities else {}
 
-                await client.add_episode(
+                # If degraded due to LLM unavailability and using STORE_RAW mode,
+                # we store the episode but skip LLM-dependent processing
+                # The Graphiti client will handle this internally based on store_raw_episode_content flag
+                result = await client.add_episode(
                     name=name,
                     episode_body=episode_body,
                     source=source_type,
@@ -1153,14 +1277,20 @@ async def add_memory(
                     reference_time=datetime.now(timezone.utc),
                     entity_types=entity_types,
                 )
-                logger.info(f"Episode '{name}' added successfully")
 
+                processing_result["success"] = True
+                processing_result["episode_id"] = str(result.uuid) if hasattr(result, 'uuid') else None
                 logger.info(f"Episode '{name}' processed successfully")
+
             except Exception as e:
                 error_msg = str(e)
+                processing_result["error"] = error_msg
                 logger.error(
                     f"Error processing episode '{name}' for group_id {group_id_str}: {error_msg}"
                 )
+            finally:
+                if processing_complete:
+                    processing_complete.set()
 
         # Initialize queue for this group_id if it doesn't exist
         if group_id_str not in episode_queues:
@@ -1173,7 +1303,43 @@ async def add_memory(
         if not queue_workers.get(group_id_str, False):
             asyncio.create_task(process_episode_queue(group_id_str))
 
-        # Optional file export
+        # =================================================================
+        # Wait for Completion (if requested - AC-18.8, AC-18.9)
+        # =================================================================
+        if should_wait and processing_complete:
+            try:
+                # Wait with timeout to prevent indefinite blocking
+                timeout = unified_config.mcp_tools.timeout_seconds
+                await asyncio.wait_for(processing_complete.wait(), timeout=float(timeout))
+            except asyncio.TimeoutError:
+                processing_time_ms = (time.perf_counter() - start_time) * 1000
+                response = create_timeout_error(
+                    operation="add_memory",
+                    timeout_seconds=timeout,
+                    suggestion=(
+                        f"Episode processing timed out after {timeout}s. "
+                        "The operation may still complete in the background. "
+                        "Consider using wait_for_completion=false for long operations."
+                    )
+                )
+                return format_response(response)
+
+            # Check processing result after waiting
+            if not processing_result["success"]:
+                response = create_error(
+                    category=ErrorCategory.INTERNAL,
+                    message=f"Episode processing failed: {processing_result['error']}",
+                    recoverable=True,
+                    suggestion="Check the error message and retry."
+                )
+                return format_response(response)
+
+        # =================================================================
+        # Optional File Export
+        # =================================================================
+        file_saved_path = None
+        file_warnings = []
+
         if filepath:
             try:
                 # Resolve path pattern variables
@@ -1189,9 +1355,8 @@ async def add_memory(
                 logger.debug(f"Path resolution: resolved='{resolved_path}', CLIENT_ROOT='{CLIENT_ROOT}', output='{output_path}'")
 
                 # Security scan
-                warnings = []
                 if detected := _scan_for_credentials(episode_body):
-                    warnings.append(f"Detected credentials: {', '.join(detected)}")
+                    file_warnings.append(f"Detected credentials: {', '.join(detected)}")
 
                 # Write file
                 output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1199,30 +1364,78 @@ async def add_memory(
 
                 # Display path relative to client root for cleaner output
                 try:
-                    display_path = output_path.relative_to(CLIENT_ROOT)
+                    file_saved_path = str(output_path.relative_to(CLIENT_ROOT))
                 except ValueError:
                     # Path is outside client root, show absolute
-                    display_path = output_path
-
-                # Success message with file info
-                msg = f"Episode '{name}' queued successfully\nSaved to {display_path}"
-                if warnings:
-                    msg += f"\nWarning: {warnings[0]}"
-                return msg
+                    file_saved_path = str(output_path)
 
             except Exception as e:
                 # File export failed, but episode still queued
                 error_msg = str(e)
                 logger.error(f"File export failed for episode '{name}': {error_msg}")
-                return f"Episode '{name}' queued successfully\nWarning: File export failed: {error_msg}"
+                file_warnings.append(f"File export failed: {error_msg}")
 
-        # No filepath provided (backward compatible)
-        return f"Episode '{name}' queued successfully"
+        # =================================================================
+        # Build Response (Story 18: AC-18.1, AC-18.2, AC-18.3)
+        # =================================================================
+        processing_time_ms = (time.perf_counter() - start_time) * 1000
+
+        if is_degraded:
+            # Degraded response (AC-18.2)
+            limitations = ["Entity extraction skipped (LLM unavailable)"]
+            if degradation_mode == "QUEUE_RETRY":
+                limitations.append("Episode queued for reprocessing when LLM recovers")
+
+            response = create_degraded(
+                reason=degradation_reason or DegradationReason.LLM_UNAVAILABLE,
+                message=f"Episode '{name}' stored with degraded functionality",
+                limitations=limitations,
+                episode_id=processing_result.get("episode_id") if should_wait else None,
+                processing_time_ms=processing_time_ms,
+                episode_name=name,
+                group_id=group_id_str,
+                saved_to=file_saved_path,
+            )
+            result = format_response(response)
+            if file_warnings:
+                result += f"\nWarning: {file_warnings[0]}"
+            return result
+
+        else:
+            # Success response (AC-18.1)
+            if should_wait:
+                # Synchronous: processing completed
+                msg = f"Episode '{name}' added successfully"
+                if file_saved_path:
+                    msg += f"\nSaved to {file_saved_path}"
+                response = create_success(
+                    message=msg,
+                    episode_id=processing_result.get("episode_id"),
+                    processing_time_ms=processing_time_ms,
+                )
+                result = format_response(response)
+            else:
+                # Asynchronous: just queued
+                if file_saved_path:
+                    msg = f"Episode '{name}' queued successfully\nSaved to {file_saved_path}"
+                else:
+                    msg = f"Episode '{name}' queued successfully"
+                result = msg
+
+            if file_warnings:
+                result += f"\nWarning: {file_warnings[0]}"
+            return result
 
     except Exception as e:
         error_msg = str(e)
         logger.error(f'Error queuing episode task: {error_msg}')
-        return f"Error queuing episode task: {error_msg}"
+        response = create_error(
+            category=ErrorCategory.INTERNAL,
+            message=f"Error queuing episode task: {error_msg}",
+            recoverable=True,
+            suggestion="Check the error message and retry. If the issue persists, check server logs."
+        )
+        return format_response(response)
 
 
 @mcp.tool()
@@ -1591,6 +1804,509 @@ async def health_check() -> HealthCheckResponse:
         )
 
 
+class LLMHealthCheckResponse(TypedDict):
+    """Response from LLM health check."""
+
+    status: str
+    available: bool
+    circuit_state: str
+    provider: str
+    healthy: bool
+    success_rate: float
+    latency_ms: float | None
+    last_check_timestamp: str | None
+    error: str | None
+
+
+@mcp.tool()
+async def llm_health_check() -> LLMHealthCheckResponse:
+    """Check the health of the LLM service (AC-17.14).
+
+    Performs a health check on the configured LLM (OpenAI, Azure, Anthropic, etc.)
+    and returns detailed status information including circuit breaker state.
+
+    This tool is useful for:
+    - Validating LLM API credentials
+    - Checking if the LLM service is responding
+    - Monitoring circuit breaker state
+    - Diagnosing LLM-related issues
+
+    Returns:
+        LLMHealthCheckResponse with:
+        - status: 'healthy' or 'unhealthy'
+        - available: Whether the LLM is available for requests
+        - circuit_state: Current circuit breaker state (closed/open/half_open)
+        - provider: LLM provider name (openai, anthropic, etc.)
+        - healthy: Result of the last health check
+        - success_rate: Recent success rate (0.0 to 1.0)
+        - latency_ms: Response time of last health check in milliseconds
+        - last_check_timestamp: ISO timestamp of last health check
+        - error: Error message if unhealthy
+    """
+    global graphiti_client
+
+    if graphiti_client is None:
+        return LLMHealthCheckResponse(
+            status='unhealthy',
+            available=False,
+            circuit_state='unknown',
+            provider='unknown',
+            healthy=False,
+            success_rate=0.0,
+            latency_ms=None,
+            last_check_timestamp=None,
+            error='Graphiti client not initialized',
+        )
+
+    try:
+        client = cast(Graphiti, graphiti_client)
+
+        # Perform health check and get status
+        health_result = await client.llm_health_check()
+
+        # Extract values from health result
+        is_available = health_result.get('available', False)
+        circuit_state = health_result.get('circuit_state', 'unknown')
+        health_status = health_result.get('health_status', {})
+        last_check_result = health_result.get('last_check_result', {})
+
+        return LLMHealthCheckResponse(
+            status='healthy' if last_check_result.get('healthy', False) else 'unhealthy',
+            available=is_available,
+            circuit_state=circuit_state,
+            provider=client._get_provider_type(client.llm_client),
+            healthy=last_check_result.get('healthy', False),
+            success_rate=health_status.get('success_rate', 0.0),
+            latency_ms=last_check_result.get('latency_ms'),
+            last_check_timestamp=last_check_result.get('timestamp'),
+            error=last_check_result.get('error'),
+        )
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'LLM health check failed: {error_msg}')
+
+        return LLMHealthCheckResponse(
+            status='unhealthy',
+            available=False,
+            circuit_state='unknown',
+            provider='unknown',
+            healthy=False,
+            success_rate=0.0,
+            latency_ms=None,
+            last_check_timestamp=None,
+            error=error_msg,
+        )
+
+
+# NOTE: session_tracking_start and session_tracking_stop tools have been removed (Story R2)
+# Session tracking is controlled via configuration (graphiti.config.json -> session_tracking.enabled)
+# MCP tools are now read-only for monitoring/diagnostics only
+
+
+@mcp.tool()
+async def session_tracking_status(session_id: str | None = None) -> str:
+    """Get session tracking status and configuration details.
+
+    Returns comprehensive information about session tracking state, including:
+    - Global configuration (enabled/disabled)
+    - Session manager status
+    - Active session count
+    - Configuration details (paths, timeouts, filtering)
+
+    Note: Session tracking is controlled via configuration only (graphiti.config.json).
+    Runtime per-session overrides are no longer supported.
+
+    Args:
+        session_id (str, optional): Session ID to check status for. If None, returns global status.
+                                    Format: UUID string (extracted from JSONL filename)
+
+    Returns:
+        str: JSON string with detailed status information
+
+    Response format:
+        {
+            "status": "success" | "error",
+            "session_id": str | null,
+            "enabled": bool (from global config),
+            "global_config": {
+                "enabled": bool,
+                "watch_path": str,
+                "inactivity_timeout": int (seconds),
+                "check_interval": int (seconds)
+            },
+            "session_manager": {
+                "running": bool,
+                "active_sessions": int
+            },
+            "filter_config": {
+                "tool_calls": str (FULL|SUMMARY|OMIT),
+                "tool_content": str (FULL|SUMMARY|OMIT),
+                "user_messages": str (FULL|SUMMARY|OMIT),
+                "agent_messages": str (FULL|SUMMARY|OMIT)
+            }
+        }
+
+    Examples:
+        # Check global status
+        session_tracking_status()
+
+        # Check specific session status
+        session_tracking_status(session_id="abc123-def456")
+
+    Note:
+        - Session tracking is a background service controlled by configuration
+        - Use graphiti.config.json -> session_tracking.enabled to control
+        - Filter config shows token reduction strategy
+    """
+    global session_manager
+
+    try:
+        # Determine effective session ID (for informational purposes)
+        effective_session_id = session_id if session_id else None
+
+        # Get global configuration
+        global_config = {
+            "enabled": unified_config.session_tracking.enabled,
+            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None,
+            "inactivity_timeout": unified_config.session_tracking.inactivity_timeout,
+            "check_interval": unified_config.session_tracking.check_interval
+        }
+
+        # Session tracking is now config-only (no runtime overrides)
+        effective_enabled = global_config["enabled"]
+
+        # Get session manager status
+        session_manager_status = {
+            "running": session_manager is not None and session_manager._is_running,
+            "active_sessions": session_manager.get_active_session_count() if session_manager else 0
+        }
+
+        # Get filter configuration
+        filter_config = {
+            "tool_calls": unified_config.session_tracking.filter.tool_calls.value if unified_config.session_tracking.filter else "SUMMARY",
+            "tool_content": unified_config.session_tracking.filter.tool_content.value if unified_config.session_tracking.filter else "SUMMARY",
+            "user_messages": unified_config.session_tracking.filter.user_messages.value if unified_config.session_tracking.filter else "FULL",
+            "agent_messages": unified_config.session_tracking.filter.agent_messages.value if unified_config.session_tracking.filter else "FULL"
+        }
+
+        return json.dumps({
+            "status": "success",
+            "session_id": effective_session_id,
+            "enabled": effective_enabled,
+            "global_config": global_config,
+            "session_manager": session_manager_status,
+            "filter_config": filter_config
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting session tracking status: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting status: {error_msg}",
+            "session_id": session_id
+        })
+
+
+@mcp.tool()
+async def session_tracking_health() -> str:
+    """Get comprehensive health status of the session tracking system (AC-19.10, AC-19.11).
+
+    This tool provides detailed health information including:
+    - Service status (running/stopped/degraded/error)
+    - LLM availability status
+    - Current degradation level (FULL=0, PARTIAL=1, RAW_ONLY=2)
+    - Processing queue status (pending, processing, completed today, failed today)
+    - Retry queue status (pending retries, permanent failures, next retry time)
+    - Recent failures (last 10 with details)
+    - Uptime and activity metrics
+
+    This tool is useful for:
+    - Monitoring session tracking health
+    - Diagnosing LLM availability issues
+    - Checking retry queue status
+    - Understanding current degradation level
+
+    Returns:
+        JSON string with comprehensive health information:
+        {
+            "status": "success" | "error",
+            "health": {
+                "service_status": "running" | "stopped" | "degraded" | "error",
+                "degradation_level": {
+                    "level": 0 | 1 | 2,
+                    "name": "FULL" | "PARTIAL" | "RAW_ONLY",
+                    "description": str
+                },
+                "llm_status": {
+                    "available": bool,
+                    "last_check": str | null,
+                    "provider": str | null,
+                    "circuit_state": str | null,
+                    "error": str | null,
+                    "success_rate": float | null
+                },
+                "queue_status": {
+                    "pending": int,
+                    "processing": int,
+                    "completed_today": int,
+                    "failed_today": int
+                },
+                "retry_queue": {
+                    "count": int,
+                    "pending_retries": int,
+                    "permanent_failures": int,
+                    "next_retry": str | null,
+                    "oldest_failure": str | null
+                },
+                "recent_failures": [
+                    {
+                        "episode_id": str,
+                        "session_id": str,
+                        "error": str,
+                        "retry_count": int,
+                        "next_retry": str | null,
+                        "failed_at": str | null
+                    }
+                ],
+                "uptime_seconds": int | null,
+                "started_at": str | null,
+                "last_activity": str | null,
+                "active_sessions": int
+            }
+        }
+
+    Examples:
+        # Get full health status
+        session_tracking_health()
+
+    Note:
+        - Use this tool to monitor session tracking health proactively
+        - Degradation level indicates current processing capability
+        - Check retry_queue.pending_retries to see queued episodes awaiting LLM recovery
+    """
+    global session_manager, resilient_indexer, status_aggregator
+
+    try:
+        # Create status aggregator if not exists
+        if status_aggregator is None:
+            aggregator = SessionTrackingStatusAggregator()
+            if session_manager:
+                aggregator.set_session_manager(session_manager)
+            if resilient_indexer:
+                aggregator.set_retry_queue(resilient_indexer.retry_queue)
+        else:
+            aggregator = status_aggregator
+
+        # Get health status
+        health = await aggregator.get_health()
+
+        # If we have a resilient indexer, get its degradation level
+        if resilient_indexer:
+            health.degradation_level = resilient_indexer.get_degradation_level()
+
+        return json.dumps({
+            "status": "success",
+            "health": health.to_dict()
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting session tracking health: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting health: {error_msg}"
+        })
+
+
+@mcp.tool()
+async def get_failed_episodes(
+    include_permanent: bool = True,
+    limit: int = 50,
+) -> str:
+    """Get failed episodes from the retry queue (AC-19.12).
+
+    This tool retrieves information about episodes that failed during processing
+    and are either awaiting retry or have permanently failed.
+
+    Args:
+        include_permanent: Include permanently failed episodes (default: True)
+        limit: Maximum number of episodes to return (default: 50, max: 100)
+
+    Returns:
+        JSON string with failed episodes:
+        {
+            "status": "success" | "error",
+            "total_count": int,
+            "returned_count": int,
+            "episodes": [
+                {
+                    "episode_id": str,
+                    "session_id": str,
+                    "session_file": str,
+                    "group_id": str,
+                    "error_type": str,
+                    "error_message": str,
+                    "failed_at": str,
+                    "retry_count": int,
+                    "next_retry_at": str | null,
+                    "permanent_failure": bool,
+                    "last_retry_at": str | null,
+                    "created_at": str,
+                    "metadata": dict
+                }
+            ],
+            "stats": {
+                "queue_size": int,
+                "pending_retries": int,
+                "permanent_failures": int,
+                "total_added": int,
+                "total_retried": int,
+                "total_succeeded": int,
+                "total_failed_permanently": int
+            }
+        }
+
+    Examples:
+        # Get all failed episodes
+        get_failed_episodes()
+
+        # Get only episodes awaiting retry (exclude permanent failures)
+        get_failed_episodes(include_permanent=False)
+
+        # Get top 10 failed episodes
+        get_failed_episodes(limit=10)
+
+    Note:
+        - Episodes with permanent_failure=True have exhausted all retries
+        - Use session_tracking_health() for aggregate status
+        - Episodes are sorted by failed_at (most recent first)
+    """
+    global resilient_indexer
+
+    try:
+        # Clamp limit
+        limit = min(max(1, limit), 100)
+
+        if resilient_indexer is None:
+            return json.dumps({
+                "status": "success",
+                "message": "Resilient indexer not initialized - no retry queue available",
+                "total_count": 0,
+                "returned_count": 0,
+                "episodes": [],
+                "stats": {
+                    "queue_size": 0,
+                    "pending_retries": 0,
+                    "permanent_failures": 0,
+                    "total_added": 0,
+                    "total_retried": 0,
+                    "total_succeeded": 0,
+                    "total_failed_permanently": 0
+                }
+            }, indent=2)
+
+        # Get failed episodes
+        episodes = await resilient_indexer.get_failed_episodes(
+            include_permanent=include_permanent,
+            limit=limit
+        )
+
+        # Get queue stats
+        stats = resilient_indexer.retry_queue.get_stats()
+
+        # Convert episodes to dict
+        episode_dicts = []
+        for ep in episodes:
+            episode_dicts.append({
+                "episode_id": ep.episode_id,
+                "session_id": ep.session_id,
+                "session_file": ep.session_file,
+                "group_id": ep.group_id,
+                "error_type": ep.error_type,
+                "error_message": ep.error_message,
+                "failed_at": ep.failed_at.isoformat() if ep.failed_at else None,
+                "retry_count": ep.retry_count,
+                "next_retry_at": ep.next_retry_at.isoformat() if ep.next_retry_at else None,
+                "permanent_failure": ep.permanent_failure,
+                "last_retry_at": ep.last_retry_at.isoformat() if ep.last_retry_at else None,
+                "created_at": ep.created_at.isoformat() if ep.created_at else None,
+                "metadata": ep.metadata,
+            })
+
+        # Get total count
+        all_episodes = await resilient_indexer.retry_queue.get_all()
+        if not include_permanent:
+            all_episodes = [ep for ep in all_episodes if not ep.permanent_failure]
+        total_count = len(all_episodes)
+
+        return json.dumps({
+            "status": "success",
+            "total_count": total_count,
+            "returned_count": len(episode_dicts),
+            "episodes": episode_dicts,
+            "stats": stats
+        }, indent=2)
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error getting failed episodes: {error_msg}", exc_info=True)
+        return json.dumps({
+            "status": "error",
+            "message": f"Error getting failed episodes: {error_msg}"
+        })
+
+
+@mcp.tool()
+async def session_tracking_sync_history(
+    project: str | None = None,
+    days: int = 7,
+    max_sessions: int = 100,
+) -> str:
+    """Preview historical sessions available for sync to Graphiti (read-only).
+
+    This tool provides a preview of historical sessions that could be indexed,
+    showing session counts and cost estimates. It operates in read-only mode
+    and does NOT perform actual indexing.
+
+    **Important**: This MCP tool is read-only (preview mode only). To perform
+    actual session indexing, use the CLI command:
+        graphiti-mcp session-tracking sync --no-dry-run
+
+    Args:
+        project: Project path to preview (None = all projects in watch_path)
+        days: Number of days to look back (default: 7, 0 = all history)
+        max_sessions: Maximum sessions to preview (safety limit, default 100)
+
+    Returns:
+        JSON string with preview results including:
+        - sessions_found: Number of sessions discovered
+        - estimated_cost: Estimated cost if these sessions were indexed
+        - estimated_tokens: Estimated token usage
+        - sessions: List of first 10 sessions with metadata
+        - message: Instructions for actual sync via CLI
+
+    Examples:
+        Preview last 7 days: await session_tracking_sync_history()
+        Preview last 30 days: await session_tracking_sync_history(days=30)
+        Preview specific project: await session_tracking_sync_history(project="/path/to/project")
+
+    Note:
+        To perform actual sync, use CLI: graphiti-mcp session-tracking sync --no-dry-run
+    """
+    global session_manager, graphiti_client, resilient_indexer
+    return await _session_tracking_sync_history(
+        session_manager=session_manager,
+        graphiti_client=graphiti_client,
+        unified_config=unified_config,
+        project=project,
+        days=days,
+        max_sessions=max_sessions,
+        dry_run=True,  # Always read-only - actual sync requires CLI
+        resilient_indexer=resilient_indexer,
+    )
+
+
 @mcp.resource('http://graphiti/status')
 async def get_status() -> StatusResponse:
     """Get the status of the Graphiti MCP server and Neo4j connection."""
@@ -1621,9 +2337,304 @@ async def get_status() -> StatusResponse:
         )
 
 
+async def check_inactive_sessions_periodically(
+    manager: SessionManager,
+    interval_seconds: int
+) -> None:
+    """Periodically check for inactive sessions and close them.
+
+    This function runs in a loop, checking for inactive sessions at regular intervals.
+    When inactive sessions are found, they are closed and indexed to Graphiti.
+
+    Args:
+        manager: SessionManager instance to check for inactive sessions
+        interval_seconds: How often to check for inactive sessions (in seconds)
+
+    Raises:
+        asyncio.CancelledError: When the task is cancelled (expected on shutdown)
+    """
+    logger.info(f"Started periodic session inactivity checker (interval: {interval_seconds}s)")
+
+    try:
+        while True:
+            await asyncio.sleep(interval_seconds)
+
+            try:
+                closed_count = manager.check_inactive_sessions()
+                if closed_count > 0:
+                    logger.info(f"Closed {closed_count} inactive session(s)")
+            except Exception as e:
+                logger.error(f"Error checking inactive sessions: {e}", exc_info=True)
+
+    except asyncio.CancelledError:
+        logger.info("Session inactivity checker stopped")
+        raise
+
+
+
+def ensure_global_config_exists() -> Path:
+    """Ensure global configuration file exists with sensible defaults.
+
+    Creates ~/.graphiti/graphiti.config.json if it doesn't exist.
+    Includes inline comments (_comment and _*_help fields) to guide users.
+
+    Returns:
+        Path to config file
+    """
+    config_path = Path.home() / ".graphiti" / "graphiti.config.json"
+
+    if config_path.exists():
+        logger.debug(f"Config file already exists: {config_path}")
+        return config_path
+
+    # Create directory
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Generate config with inline comments
+    default_config = {
+        "_comment": "Graphiti MCP Server Configuration (auto-generated)",
+        "_docs": "https://github.com/getzep/graphiti/blob/main/CONFIGURATION.md",
+        "database": {
+            "_comment": "Required: Configure your Neo4j connection",
+            "uri": "bolt://localhost:7687",
+            "user": "neo4j",
+            "password_env": "NEO4J_PASSWORD",
+        },
+        "llm": {
+            "_comment": "Required: Configure your OpenAI API key",
+            "provider": "openai",
+            "default_model": "gpt-4.1-mini",
+            "small_model": "gpt-4.1-nano",
+            "openai": {
+                "api_key_env": "OPENAI_API_KEY",
+            },
+        },
+        "session_tracking": {
+            "_comment": "Session tracking is DISABLED by default for security",
+            "_docs": "See docs/SESSION_TRACKING_USER_GUIDE.md",
+            "enabled": False,
+            "_enabled_help": "Set to true to enable session tracking (opt-in)",
+            "watch_path": None,
+            "_watch_path_help": "null = ~/.claude/projects/ | Set to specific project path",
+            "inactivity_timeout": 900,
+            "_inactivity_timeout_help": "Seconds before session closed (900 = 15 minutes, handles long operations)",
+            "check_interval": 60,
+            "_check_interval_help": "Seconds between inactivity checks (60 = 1 minute, responsive)",
+            "auto_summarize": False,
+            "_auto_summarize_help": "Use LLM to summarize sessions (costs money, set to true to enable)",
+            "store_in_graph": True,
+            "_store_in_graph_help": "Store in Neo4j graph (required for cross-session memory)",
+            "keep_length_days": 7,
+            "_keep_length_days_help": "Track sessions from last N days (7 = safe, null = all)",
+            "filter": {
+                "_comment": "Message filtering for token reduction",
+                "tool_calls": True,
+                "_tool_calls_help": "Preserve tool structure (recommended: true)",
+                "tool_content": "default-tool-content.md",
+                "_tool_content_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+                "user_messages": True,
+                "_user_messages_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+                "agent_messages": True,
+                "_agent_messages_help": "true (full) | false (omit) | 'template.md' | 'inline prompt...'",
+            },
+        },
+    }
+
+    # Write config
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(default_config, f, indent=2)
+
+    logger.info(f"Created default config: {config_path}")
+    logger.info("Please update database credentials and OpenAI API key in environment variables!")
+
+    return config_path
+
+def ensure_default_templates_exist() -> None:
+    """Ensure default summarization templates exist in global config directory.
+
+    Creates ~/.graphiti/auto-tracking/templates/ directory and populates it with
+    default templates from graphiti_core.session_tracking.prompts if they don't exist.
+
+    This function is idempotent - safe to call multiple times.
+    """
+    templates_dir = Path.home() / ".graphiti" / "auto-tracking" / "templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+
+    for filename, content in DEFAULT_TEMPLATES.items():
+        template_path = templates_dir / filename
+        if not template_path.exists():
+            template_path.write_text(content, encoding="utf-8")
+            logger.info(f"Created default template: {template_path}")
+        else:
+            logger.debug(f"Template already exists: {template_path}")
+
+
+async def initialize_session_tracking() -> None:
+    """Initialize session tracking system if enabled in configuration.
+
+    This function:
+    1. Checks if session tracking is enabled in unified_config
+    2. Creates ClaudePathResolver for session file discovery
+    3. Initializes SessionManager with indexing callback
+    4. Creates ResilientSessionIndexer with retry queue (Story 19)
+    5. Starts session manager to begin monitoring
+
+    The session manager will:
+    - Monitor Claude Code session files (.jsonl)
+    - Detect new sessions and session updates
+    - Track inactivity and trigger indexing on session close
+    - Filter and index sessions into Graphiti knowledge graph
+    - Handle LLM failures with graceful degradation (Story 19)
+    """
+    global session_manager, graphiti_client, resilient_indexer, status_aggregator
+
+    try:
+        # Check if session tracking is enabled
+        if not unified_config.session_tracking.enabled:
+            logger.info("Session tracking disabled in configuration")
+            return
+
+        # Check if Graphiti is initialized
+        if graphiti_client is None:
+            logger.warning("Session tracking enabled but Graphiti client not initialized. Skipping session tracking.")
+            return
+
+        logger.info("Initializing session tracking...")
+
+        # Ensure default templates exist
+        ensure_default_templates_exist()
+
+        # Create path resolver
+        watch_path = unified_config.session_tracking.watch_path
+        path_resolver = ClaudePathResolver(claude_dir=watch_path) if watch_path else ClaudePathResolver()
+
+        logger.info(f"Session tracking watch path: {path_resolver.watch_all_projects()}")
+
+        # Get resilience configuration
+        resilience_config = unified_config.session_tracking.resilience
+
+        # Map string config to enum
+        on_llm_unavailable_map = {
+            "FAIL": OnLLMUnavailable.FAIL,
+            "STORE_RAW": OnLLMUnavailable.STORE_RAW,
+            "STORE_RAW_AND_RETRY": OnLLMUnavailable.STORE_RAW_AND_RETRY,
+        }
+        on_llm_unavailable = on_llm_unavailable_map.get(
+            resilience_config.on_llm_unavailable,
+            OnLLMUnavailable.STORE_RAW_AND_RETRY
+        )
+
+        # Determine retry queue path
+        retry_queue_path = None
+        if resilience_config.retry_queue.persist_to_disk:
+            # Store retry queue in .graphiti directory
+            retry_queue_path = Path.home() / ".graphiti" / "retry_queue.json"
+            retry_queue_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Create resilient indexer config (Story 19)
+        resilient_config = ResilientIndexerConfig(
+            on_llm_unavailable=on_llm_unavailable,
+            retry_queue_path=retry_queue_path,
+            max_retries=resilience_config.retry_queue.max_retries,
+            retry_delays=resilience_config.retry_queue.retry_delays_seconds,
+            max_queue_size=resilience_config.retry_queue.max_queue_size,
+            auto_recovery_interval=60,  # Check every 60 seconds
+        )
+
+        # Create resilient session indexer
+        resilient_indexer = ResilientSessionIndexer(
+            graphiti=graphiti_client,
+            config=resilient_config,
+        )
+
+        # Start resilient indexer (loads retry queue, starts processor)
+        await resilient_indexer.start()
+        logger.info(f"Resilient session indexer started (mode: {on_llm_unavailable.value})")
+
+        # Create status aggregator
+        status_aggregator = SessionTrackingStatusAggregator()
+        status_aggregator.set_retry_queue(resilient_indexer.retry_queue)
+        status_aggregator.mark_started()
+
+        # Create filter
+        filter_config = unified_config.session_tracking.filter
+        session_filter = SessionFilter(
+            filter_config=filter_config
+        ) if filter_config else SessionFilter()
+
+        # Define session closed callback with resilience
+        def on_session_closed(session_id: str, file_path: Path, context) -> None:
+            """Callback when session closes - filter and index to Graphiti with resilience."""
+            try:
+                # Session tracking is now controlled by config only (no runtime overrides)
+                logger.info(f"Session closed: {session_id}, indexing to Graphiti...")
+
+                # Filter conversation
+                filtered_messages = session_filter.filter_conversation(context.messages)
+
+                # Format filtered content
+                filtered_content = "\n\n".join([
+                    f"[{msg.role}]: {msg.content}" for msg in filtered_messages
+                ])
+
+                # Get project hash as group_id
+                group_id = path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+
+                # Index to Graphiti using resilient indexer (handles degradation)
+                import asyncio
+                loop = asyncio.get_event_loop()
+                loop.create_task(resilient_indexer.index_session(
+                    session_id=session_id,
+                    filtered_content=filtered_content,
+                    group_id=group_id,
+                    session_file=str(file_path),
+                ))
+
+                logger.info(f"Session {session_id} indexing initiated ({len(filtered_messages)} messages)")
+
+            except Exception as e:
+                logger.error(f"Error indexing session {session_id}: {e}", exc_info=True)
+                # Session isolation: error in one session doesn't affect others (AC-19.3)
+
+        # Create session manager
+        session_manager = SessionManager(
+            path_resolver=path_resolver,
+            inactivity_timeout=unified_config.session_tracking.inactivity_timeout,
+            keep_length_days=unified_config.session_tracking.keep_length_days,
+            on_session_closed=on_session_closed
+        )
+
+        # Connect session manager to status aggregator
+        status_aggregator.set_session_manager(session_manager)
+
+        # Start session manager
+        session_manager.start()
+
+        # Start periodic inactivity checker
+        global _inactivity_checker_task
+        check_interval = unified_config.session_tracking.check_interval
+        _inactivity_checker_task = asyncio.create_task(
+            check_inactive_sessions_periodically(session_manager, check_interval)
+        )
+
+        logger.info(f"Session tracking initialized and started successfully (check_interval: {check_interval}s)")
+
+    except Exception as e:
+        logger.error(f"Error initializing session tracking: {e}", exc_info=True)
+        logger.warning("Continuing without session tracking")
+
+
 async def initialize_server() -> MCPConfig:
     """Parse CLI arguments and initialize the Graphiti server configuration."""
     global config
+
+    # Ensure config and templates exist (auto-generate if missing)
+    try:
+        ensure_global_config_exists()
+        ensure_default_templates_exist()
+    except Exception as e:
+        logger.error(f"Failed to auto-generate config/templates: {e}", exc_info=True)
+        # Continue - user may have config in project directory
 
     parser = argparse.ArgumentParser(
         description='Run the Graphiti MCP server with optional LLM client'
@@ -1685,6 +2696,9 @@ async def initialize_server() -> MCPConfig:
     if not success:
         logger.error('Failed to initialize Graphiti after retries. Server may have limited functionality.')
 
+    # Initialize session tracking if enabled
+    await initialize_session_tracking()
+
     if args.host:
         logger.info(f'Setting MCP server host to: {args.host}')
         # Set MCP server host from CLI or env
@@ -1721,9 +2735,57 @@ async def run_mcp_server():
         except asyncio.CancelledError:
             logger.info('Metrics logging task cancelled successfully')
 
+        # Clean up session manager and inactivity checker on shutdown
+        global session_manager, _inactivity_checker_task, resilient_indexer
+
+        # Cancel inactivity checker task first
+        if _inactivity_checker_task is not None:
+            logger.info('Stopping session inactivity checker...')
+            _inactivity_checker_task.cancel()
+            try:
+                await _inactivity_checker_task
+            except asyncio.CancelledError:
+                logger.info('Session inactivity checker cancelled successfully')
+
+        # Stop session manager
+        if session_manager is not None:
+            try:
+                logger.info('Stopping session manager...')
+                session_manager.stop()
+                logger.info('Session manager stopped successfully')
+            except Exception as e:
+                logger.error(f'Error stopping session manager: {e}', exc_info=True)
+
+        # Stop resilient indexer (Story 19 - persists retry queue)
+        if resilient_indexer is not None:
+            try:
+                logger.info('Stopping resilient indexer...')
+                await resilient_indexer.stop()
+                logger.info('Resilient indexer stopped successfully')
+            except Exception as e:
+                logger.error(f'Error stopping resilient indexer: {e}', exc_info=True)
+
 
 def main():
-    """Main function to run the Graphiti MCP server."""
+    """Main function to run the Graphiti MCP server.
+
+    Also supports subcommand routing for session-tracking CLI.
+    Usage: graphiti-mcp session-tracking <command> [options]
+    """
+    import sys
+
+    # Check for subcommand routing
+    if len(sys.argv) > 1 and sys.argv[0].endswith('graphiti-mcp'):
+        subcommand = sys.argv[1]
+        if subcommand == 'session-tracking':
+            # Delegate to session tracking CLI
+            # Remove 'session-tracking' from argv so argparse sees correct args
+            sys.argv = [sys.argv[0] + ' session-tracking'] + sys.argv[2:]
+            from mcp_server.session_tracking_cli import main as st_main
+            st_main()
+            return
+
+    # Run MCP server (original behavior)
     try:
         # Run everything in a single event loop
         asyncio.run(run_mcp_server())

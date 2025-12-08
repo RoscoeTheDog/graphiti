@@ -1,0 +1,223 @@
+# Plan: R4 - Add CLI entry point for manual sync execution
+# Generated: 2025-12-07 (Discovery Phase R4.d)
+
+story_id: R4
+title: Add CLI entry point for manual sync execution
+type: remediation
+priority: P2
+
+discovery_summary:
+  context:
+    - Story R3 made the MCP tool `session_tracking_sync_history` read-only
+    - MCP tool always operates with dry_run=True (preview mode)
+    - Actual sync execution requires CLI command
+    - Documentation references `graphiti-mcp session-tracking sync` but this doesn't exist
+
+  current_implementation:
+    entry_points:
+      - name: graphiti-mcp
+        file: mcp_server/graphiti_mcp_server.py:main
+        purpose: Run MCP server
+        has_subcommands: false
+
+      - name: graphiti-mcp-session-tracking
+        file: mcp_server/session_tracking_cli.py:main
+        purpose: Session tracking CLI
+        has_subcommands: true
+        subcommands: [enable, disable, status, sync]
+
+    sync_command:
+      file: mcp_server/session_tracking_cli.py
+      function: cmd_sync (lines 211-303)
+      parser: sync_parser (lines 337-382)
+      flags:
+        - --project: Specific project path
+        - --days: Days to look back (default 7, 0 = all)
+        - --max-sessions: Safety limit (default 100)
+        - --dry-run: Preview mode (default true)
+        - --no-dry-run: Perform actual sync
+        - --confirm: Required for --days 0
+        - --quiet/-q: Suppress progress
+      status: FULLY IMPLEMENTED
+
+  documentation_inconsistency:
+    correct_usage:
+      - "graphiti-mcp-session-tracking sync --days 7"
+      - "graphiti-mcp-session-tracking sync --no-dry-run"
+
+    incorrect_references:
+      - file: docs/MCP_TOOLS.md
+        lines: [291, 328, 344, 347, 350]
+        shows: "graphiti-mcp session-tracking sync"
+
+      - file: docs/SESSION_TRACKING_USER_GUIDE.md
+        lines: [182, 191, 194, 197, 369]
+        shows: "graphiti-mcp session-tracking sync"
+
+      - file: mcp_server/graphiti_mcp_server.py
+        lines: [2274, 2295]
+        shows: "graphiti-mcp session-tracking sync"
+
+  problem:
+    - Docs reference non-existent command `graphiti-mcp session-tracking sync`
+    - Actual command is `graphiti-mcp-session-tracking sync` (hyphenated)
+    - Users following docs will get "command not found" errors
+
+  solution_options:
+    option_a:
+      name: Add subcommand routing to graphiti-mcp
+      description: |
+        Modify graphiti-mcp main() to detect when first arg is "session-tracking"
+        and delegate to session_tracking_cli.main()
+      pros:
+        - Shorter command
+        - Consistent with docs
+        - Better UX (single entry point)
+      cons:
+        - Requires code changes to main MCP server
+        - Potential for arg parsing conflicts
+
+    option_b:
+      name: Update documentation only
+      description: |
+        Change all docs from "graphiti-mcp session-tracking sync"
+        to "graphiti-mcp-session-tracking sync"
+      pros:
+        - No code changes
+        - Simpler implementation
+        - CLI already fully works
+      cons:
+        - Longer command
+        - Less intuitive naming
+
+  recommended_solution: option_a
+  rationale: |
+    Option A provides better UX and matches user expectations from the docs.
+    The implementation is straightforward - detect "session-tracking" as first
+    positional arg and delegate to the existing CLI module.
+
+implementation:
+  phase: R4.i
+
+  files_to_modify:
+    - path: mcp_server/graphiti_mcp_server.py
+      changes:
+        - location: main() function (line 2769)
+          action: modify
+          description: |
+            Add subcommand detection before running MCP server:
+            1. Check if sys.argv[1] == "session-tracking"
+            2. If yes, delegate to session_tracking_cli.main()
+            3. Otherwise, run MCP server as normal
+
+    - path: docs/MCP_TOOLS.md
+      changes:
+        - action: verify_or_update
+          description: |
+            Verify examples use "graphiti-mcp session-tracking sync"
+            (should work after code change)
+
+    - path: docs/SESSION_TRACKING_USER_GUIDE.md
+      changes:
+        - action: verify_or_update
+          description: |
+            Verify examples use "graphiti-mcp session-tracking sync"
+            (should work after code change)
+
+  code_change:
+    before: |
+      def main():
+          """Main function to run the Graphiti MCP server."""
+          try:
+              asyncio.run(run_mcp_server())
+          except Exception as e:
+              logger.error(f'Error initializing Graphiti MCP server: {str(e)}')
+              raise
+
+    after: |
+      def main():
+          """Main function to run the Graphiti MCP server.
+
+          Also supports subcommand routing for session-tracking CLI.
+          Usage: graphiti-mcp session-tracking <command> [options]
+          """
+          import sys
+
+          # Check for subcommand routing
+          if len(sys.argv) > 1 and sys.argv[0].endswith('graphiti-mcp'):
+              subcommand = sys.argv[1]
+              if subcommand == 'session-tracking':
+                  # Delegate to session tracking CLI
+                  # Remove 'session-tracking' from argv so argparse sees correct args
+                  sys.argv = [sys.argv[0] + ' session-tracking'] + sys.argv[2:]
+                  from mcp_server.session_tracking_cli import main as st_main
+                  st_main()
+                  return
+
+          # Run MCP server (original behavior)
+          try:
+              asyncio.run(run_mcp_server())
+          except Exception as e:
+              logger.error(f'Error initializing Graphiti MCP server: {str(e)}')
+              raise
+
+testing:
+  phase: R4.t
+
+  test_cases:
+    - id: TC1
+      description: Verify subcommand routing works
+      command: graphiti-mcp session-tracking status
+      expected: Shows session tracking status (same as graphiti-mcp-session-tracking status)
+
+    - id: TC2
+      description: Verify sync preview works
+      command: graphiti-mcp session-tracking sync
+      expected: Shows preview with dry_run=true
+
+    - id: TC3
+      description: Verify actual sync works
+      command: graphiti-mcp session-tracking sync --no-dry-run --max-sessions 1 --days 1
+      expected: Indexes 1 session (or 0 if none found)
+
+    - id: TC4
+      description: Verify help works
+      command: graphiti-mcp session-tracking --help
+      expected: Shows help for session tracking CLI
+
+    - id: TC5
+      description: Verify original MCP server still works
+      command: graphiti-mcp --transport stdio
+      expected: MCP server starts normally
+
+    - id: TC6
+      description: Verify backward compatibility
+      command: graphiti-mcp-session-tracking sync
+      expected: Still works (separate entry point unchanged)
+
+acceptance_criteria:
+  - id: AC1
+    description: "graphiti-mcp session-tracking sync" works
+    verification: Run command, verify preview output
+
+  - id: AC2
+    description: "graphiti-mcp session-tracking sync --no-dry-run" performs actual sync
+    verification: Run with --max-sessions 1, verify indexing occurs
+
+  - id: AC3
+    description: Original MCP server functionality unchanged
+    verification: Run "graphiti-mcp" without subcommand, verify server starts
+
+  - id: AC4
+    description: Backward compatibility maintained
+    verification: "graphiti-mcp-session-tracking sync" still works
+
+  - id: AC5
+    description: Help text updated
+    verification: "graphiti-mcp session-tracking --help" shows correct usage
+
+estimated_tokens:
+  discovery: 600  # completed
+  implementation: 400
+  testing: 300
+  total: 1300

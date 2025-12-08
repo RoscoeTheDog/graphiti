@@ -240,3 +240,51 @@ class LLMClient(ABC):
         else:
             log += 'No raw output available'
         return log
+
+    async def health_check(self) -> bool:
+        """
+        Perform a health check on the LLM client (AC-17.3).
+
+        Validates that the LLM is accessible and credentials are valid by
+        making a minimal request. Subclasses should override this method
+        with provider-specific health check logic.
+
+        Returns:
+            bool: True if the LLM is healthy and accessible, False otherwise.
+
+        Raises:
+            LLMAuthenticationError: If credentials are invalid
+            LLMUnavailableError: If the LLM service is unavailable
+        """
+        try:
+            # Default implementation: make a minimal request to validate connectivity
+            test_message = Message(
+                role='system',
+                content='Respond with exactly: OK',
+            )
+            test_user_message = Message(role='user', content='Health check')
+
+            await self._generate_response(
+                messages=[test_message, test_user_message],
+                response_model=None,
+                max_tokens=10,
+                model_size=ModelSize.small,
+            )
+            return True
+        except Exception as e:
+            logger.warning(f'Health check failed: {e}')
+            return False
+
+    async def validate_credentials(self) -> bool:
+        """
+        Validate LLM credentials (AC-17.2).
+
+        This method attempts to verify that the configured API credentials
+        are valid without making a full LLM call. Subclasses should override
+        with provider-specific credential validation.
+
+        Returns:
+            bool: True if credentials are valid, False otherwise.
+        """
+        # Default implementation: use health check
+        return await self.health_check()

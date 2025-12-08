@@ -1,0 +1,218 @@
+# Story 13.3: Resilience Integration for Manual Sync
+# Discovery Phase Plan
+# Generated: 2025-12-04
+
+story_id: "13.3"
+title: "Resilience Integration for Manual Sync"
+phase: "discovery"
+status: "complete"
+
+# Discovery Summary
+summary: |
+  The resilience layer (Story 19) is already implemented with:
+  - ResilientSessionIndexer in graphiti_core/session_tracking/resilient_indexer.py
+  - RetryQueue in graphiti_core/session_tracking/retry_queue.py
+  - Global `resilient_indexer` variable in mcp_server/graphiti_mcp_server.py
+
+  The manual_sync.py currently uses direct SessionIndexer. Integration requires:
+  1. Accept optional resilient_indexer parameter
+  2. Use resilient_indexer.index_session() instead of SessionIndexer
+  3. Respect circuit breaker state
+  4. Return degradation status in response
+  5. Add progress tracking callback support
+
+# Files Analysis
+files:
+  primary_target:
+    path: "mcp_server/manual_sync.py"
+    changes_needed:
+      - "Add resilient_indexer parameter to session_tracking_sync_history()"
+      - "Add progress_callback parameter for progress tracking"
+      - "Modify index_session_sync() to use resilient_indexer when provided"
+      - "Update response to include degradation_level field"
+      - "Track queued_for_retry count in response"
+
+  mcp_server_wiring:
+    path: "mcp_server/graphiti_mcp_server.py"
+    changes_needed:
+      - "Pass global resilient_indexer to _session_tracking_sync_history()"
+      - "Update MCP tool to include new response fields"
+
+  cli_wiring:
+    path: "mcp_server/session_tracking_cli.py"
+    changes_needed:
+      - "Import resilient_indexer from graphiti_mcp_server"
+      - "Pass to session_tracking_sync_history()"
+      - "Display degradation status in output"
+
+  new_test_file:
+    path: "tests/session_tracking/test_manual_sync_resilience.py"
+    description: "Integration tests for resilience in manual sync"
+
+# Implementation Plan
+implementation:
+  step_1:
+    description: "Update manual_sync.py signature"
+    file: "mcp_server/manual_sync.py"
+    changes:
+      - action: "modify"
+        function: "session_tracking_sync_history"
+        details: |
+          Add parameters:
+          - resilient_indexer: ResilientSessionIndexer | None = None
+          - progress_callback: Callable[[int, int], None] | None = None
+
+      - action: "modify"
+        function: "index_session_sync"
+        details: |
+          Add parameters:
+          - resilient_indexer: ResilientSessionIndexer | None = None
+          If resilient_indexer provided:
+            - Use resilient_indexer.index_session() instead of SessionIndexer
+            - Capture result.degraded, result.queued_for_retry
+          Else:
+            - Fallback to current SessionIndexer behavior
+
+  step_2:
+    description: "Add progress tracking"
+    file: "mcp_server/manual_sync.py"
+    changes:
+      - action: "modify"
+        function: "session_tracking_sync_history"
+        details: |
+          In sync loop:
+            if progress_callback:
+                progress_callback(current_index + 1, total_sessions)
+
+  step_3:
+    description: "Update response format"
+    file: "mcp_server/manual_sync.py"
+    changes:
+      - action: "modify"
+        function: "session_tracking_sync_history"
+        details: |
+          Add to response JSON:
+          - degradation_level: str (from resilient_indexer.get_degradation_level())
+          - sessions_queued_for_retry: int (count of queued)
+          - llm_available: bool (circuit breaker state)
+
+  step_4:
+    description: "Wire up MCP server"
+    file: "mcp_server/graphiti_mcp_server.py"
+    changes:
+      - action: "modify"
+        function: "session_tracking_sync_history (MCP tool)"
+        details: |
+          Pass resilient_indexer to _session_tracking_sync_history:
+          return await _session_tracking_sync_history(
+              session_manager=session_manager,
+              graphiti_client=graphiti_client,
+              unified_config=unified_config,
+              resilient_indexer=resilient_indexer,  # NEW
+              ...
+          )
+
+  step_5:
+    description: "Wire up CLI"
+    file: "mcp_server/session_tracking_cli.py"
+    changes:
+      - action: "modify"
+        function: "cmd_sync"
+        details: |
+          Import and pass resilient_indexer:
+          from mcp_server.graphiti_mcp_server import (
+              session_manager, graphiti_client, unified_config,
+              resilient_indexer  # NEW
+          )
+
+          Display degradation_level in output table
+
+  step_6:
+    description: "Add tests"
+    file: "tests/session_tracking/test_manual_sync_resilience.py"
+    changes:
+      - action: "create"
+        tests:
+          - "test_sync_uses_resilient_indexer_when_provided"
+          - "test_sync_queues_failed_sessions"
+          - "test_sync_respects_circuit_breaker"
+          - "test_sync_returns_degradation_level"
+          - "test_sync_progress_callback_invoked"
+          - "test_sync_fallback_to_session_indexer"
+
+# Acceptance Criteria Mapping
+acceptance_criteria:
+  AC1:
+    criteria: "Use resilient_indexer.py instead of direct SessionIndexer in index_session_sync()"
+    implementation: "step_1 - modify index_session_sync"
+    test: "test_sync_uses_resilient_indexer_when_provided"
+
+  AC2:
+    criteria: "Failed sessions are added to retry_queue for later retry"
+    implementation: "step_1 - resilient_indexer handles this automatically"
+    test: "test_sync_queues_failed_sessions"
+
+  AC3:
+    criteria: "Respect circuit breaker state (skip indexing if LLM unavailable)"
+    implementation: "step_1 - resilient_indexer.index_session returns degraded=True"
+    test: "test_sync_respects_circuit_breaker"
+
+  AC4:
+    criteria: "Return degradation status in response (full/partial/raw_only)"
+    implementation: "step_3 - add degradation_level to response"
+    test: "test_sync_returns_degradation_level"
+
+  AC5:
+    criteria: "Add progress tracking (sessions processed / total)"
+    implementation: "step_2 - progress_callback parameter"
+    test: "test_sync_progress_callback_invoked"
+
+  AC6:
+    criteria: "Support resuming interrupted syncs"
+    implementation: "Built-in via retry_queue persistence (resilient_indexer handles)"
+    test: "test_sync_queues_failed_sessions (covers resumability)"
+
+  AC7:
+    criteria: "Add integration test with mocked LLM failure"
+    implementation: "step_6 - test_manual_sync_resilience.py"
+    test: "test_sync_respects_circuit_breaker"
+
+# Dependencies
+dependencies:
+  required:
+    - name: "Story 19 - Resilience Layer"
+      status: "complete"
+      files:
+        - "graphiti_core/session_tracking/resilient_indexer.py"
+        - "graphiti_core/session_tracking/retry_queue.py"
+        - "graphiti_core/session_tracking/status.py"
+
+  optional:
+    - name: "Story 13 - Manual Sync Command"
+      status: "complete"
+      files:
+        - "mcp_server/manual_sync.py"
+        - "mcp_server/session_tracking_cli.py"
+
+# Risks & Mitigations
+risks:
+  - risk: "CLI imports global resilient_indexer which may be None if called before MCP server starts"
+    mitigation: "Add None check in cmd_sync, warn user to run MCP server first"
+    severity: "medium"
+
+  - risk: "Breaking change to session_tracking_sync_history signature"
+    mitigation: "All new parameters are optional with defaults, backward compatible"
+    severity: "low"
+
+  - risk: "Progress callback overhead for large syncs"
+    mitigation: "Callback is optional, only invoked when provided"
+    severity: "low"
+
+# Estimated Effort
+estimates:
+  implementation_tokens: 3500
+  testing_tokens: 2000
+  total_tokens: 5500
+  complexity: "medium"
+  files_modified: 3
+  files_created: 1

@@ -186,3 +186,7 @@ claude-mcp-installer/instance/
 # MCP Cache
 .serena/
 .claude-context/
+
+# MCP cache directories
+.serena/
+.claude-context/
