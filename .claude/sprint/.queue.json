@@ -1927,7 +1927,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Update MCP_TOOLS.md to reflect tool changes",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "R6.d",
@@ -1978,7 +1978,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Update MCP_TOOLS.md to reflect tool changes",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R6",
       "phase": "testing",
       "phase_order": 3,
