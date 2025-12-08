@@ -215,32 +215,50 @@ class TestOriginalIndexerFunctionality:
 
 
 class TestOriginalMCPToolsFunctionality:
-    """Story 6: Verify MCP tools still work."""
+    """Story 6: Verify MCP tools still work.
 
-    @pytest.mark.asyncio
-    async def test_session_tracking_start_tool(self):
-        """Verify session_tracking_start() tool still works."""
-        # Import tool function
-        from mcp_server.graphiti_mcp_server import session_tracking_start
-
-        # Call tool
-        result = await session_tracking_start()
-
-        # Should return success message
-        assert isinstance(result, str)
-        assert "enabled" in result.lower() or "started" in result.lower()
+    NOTE: session_tracking_start() and session_tracking_stop() were removed in Story R2.
+    Session tracking is now controlled via configuration (graphiti.config.json).
+    """
 
     @pytest.mark.asyncio
     async def test_session_tracking_status_tool(self):
         """Verify session_tracking_status() tool still works."""
+        from unittest.mock import Mock
+        import mcp_server.graphiti_mcp_server as mcp_server
         from mcp_server.graphiti_mcp_server import session_tracking_status
 
-        result = await session_tracking_status()
+        # Mock session manager
+        mock_manager = Mock()
+        mock_manager._is_running = True
+        mock_manager.get_active_session_count.return_value = 0
+        original_manager = mcp_server.session_manager
+        mcp_server.session_manager = mock_manager
 
-        # Should return JSON status
-        assert isinstance(result, str)
-        status = json.loads(result)
-        assert "enabled" in status or "global_config" in status
+        # Mock global config
+        original_config = mcp_server.unified_config
+        mock_config = Mock()
+        mock_config.session_tracking.enabled = True
+        mock_config.session_tracking.watch_path = None
+        mock_config.session_tracking.inactivity_timeout = 300
+        mock_config.session_tracking.check_interval = 60
+        mock_config.session_tracking.filter = Mock()
+        mock_config.session_tracking.filter.tool_calls.value = "SUMMARY"
+        mock_config.session_tracking.filter.tool_content.value = "SUMMARY"
+        mock_config.session_tracking.filter.user_messages.value = "FULL"
+        mock_config.session_tracking.filter.agent_messages.value = "FULL"
+        mcp_server.unified_config = mock_config
+
+        try:
+            result = await session_tracking_status()
+
+            # Should return JSON status
+            assert isinstance(result, str)
+            status = json.loads(result)
+            assert "enabled" in status or "global_config" in status
+        finally:
+            mcp_server.session_manager = original_manager
+            mcp_server.unified_config = original_config
 
 
 class TestOriginalPathResolutionFunctionality:

@@ -297,10 +297,14 @@ graphiti-mcp-session-tracking sync --days 0
    # Do nothing - tracking is disabled by default
    ```
 
-2. Enable per-session when needed:
-   ```python
-   # In Claude Code session, use MCP tool:
-   session_tracking_start(force=True)
+2. Enable via configuration when needed:
+   ```json
+   // graphiti.config.json
+   {
+     "session_tracking": {
+       "enabled": true
+     }
+   }
    ```
 
 3. Configure minimal filtering:

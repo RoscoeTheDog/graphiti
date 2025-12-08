@@ -316,16 +316,17 @@ class TestNoBreakingAPIChanges:
         assert filter2 is not None
 
     def test_mcp_tools_api_unchanged(self):
-        """Verify MCP tool signatures unchanged."""
+        """Verify MCP tool signatures unchanged.
+
+        NOTE: session_tracking_start() and session_tracking_stop() were removed in Story R2.
+        Session tracking is now controlled via configuration (graphiti.config.json).
+        MCP tools are read-only for monitoring/diagnostics only.
+        """
         from mcp_server.graphiti_mcp_server import (
-            session_tracking_start,
             session_tracking_status,
-            session_tracking_stop,
         )
 
         # Check signatures exist (can be called)
-        assert callable(session_tracking_start)
-        assert callable(session_tracking_stop)
         assert callable(session_tracking_status)
 
     def test_config_loading_api_unchanged(self):

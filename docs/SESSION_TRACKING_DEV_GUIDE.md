@@ -1056,10 +1056,10 @@ episodes = await graphiti.search(
    - Per-tool output inclusion/exclusion
    - Content modes (full, summary, metadata-only)
 
-2. **MCP Runtime Control** (Story 6):
-   - `session_tracking_start()` - Enable for current session
-   - `session_tracking_stop()` - Disable for current session
-   - `session_tracking_status()` - Check status
+2. **MCP Monitoring Tools** (Story 6):
+   - `session_tracking_status()` - Check configuration and status
+   - `session_tracking_health()` - Health diagnostics
+   - Note: Control is via configuration only (no runtime start/stop)
 
 3. **CLI Integration** (Story 5):
    - `graphiti-mcp session-tracking enable/disable/status`

@@ -235,10 +235,15 @@ class TestNoUnintendedIndexing:
         # (This is tested in MCP server integration tests)
 
     def test_manual_sync_requires_explicit_command(self):
-        """Verify manual sync is not automatic (requires explicit command)."""
+        """Verify manual sync is not automatic (requires explicit command).
+
+        NOTE: session_tracking_start() was removed in Story R2.
+        Session tracking is controlled via configuration (graphiti.config.json).
+        Manual sync is now done via CLI command only.
+        """
         # Manual sync should only happen via:
-        # 1. MCP tool call (session_tracking_start)
-        # 2. CLI command (graphiti-mcp-session-tracking sync)
+        # 1. CLI command (graphiti-mcp-session-tracking sync)
+        # 2. Configuration (graphiti.config.json -> session_tracking.enabled)
 
         # This is architectural - no automatic sync on startup
         # Tested via absence of auto-sync code in MCP server initialization

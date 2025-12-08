@@ -276,15 +276,15 @@ async def initialize_session_tracking(config: GraphitiConfig, graphiti: Graphiti
     return manager
 ```
 
-**MCP Tools**:
-- `session_tracking_start()`: Enable tracking (force override or respect config)
-- `session_tracking_stop()`: Disable tracking for current client
-- `session_tracking_status()`: Get comprehensive status (config, runtime, sessions)
+**MCP Tools** (read-only monitoring):
+- `session_tracking_status()`: Get comprehensive status (config, sessions)
+- `session_tracking_health()`: Health diagnostics and metrics
+- `get_failed_episodes()`: View retry queue status
 
-**Runtime State Management**:
-- `runtime_session_tracking_state` (dict): Per-client enable/disable state
-- Overrides global configuration when set
-- Cleared on client disconnect
+**Configuration-Based Control**:
+- Session tracking is enabled/disabled via `graphiti.config.json`
+- No runtime override capability (consistent behavior)
+- Changes require MCP server restart
 
 ---
 
@@ -369,19 +369,19 @@ class SessionTrackingConfig:
 **Tool Registration**:
 ```python
 @mcp.tool()
-async def session_tracking_start(force: bool = False) -> str:
-    """Enable session tracking"""
+async def session_tracking_status(session_id: str | None = None) -> str:
+    """Get session tracking status and configuration"""
     # Implementation
-    return json.dumps({"status": "enabled", ...})
+    return json.dumps({"status": "success", "enabled": True, ...})
 ```
 
 **Tool Response Format**:
 ```json
 {
-  "status": "enabled|disabled",
-  "message": "Human-readable message",
-  "config": {...},  // Optional configuration details
-  "active_sessions": 2  // Optional session count
+  "status": "success|error",
+  "enabled": true,
+  "global_config": {...},  // Configuration details
+  "session_manager": {...}  // Runtime status
 }
 ```
 

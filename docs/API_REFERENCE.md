@@ -338,48 +338,11 @@ else:
 
 ### Session Tracking Tools
 
-Exposed via MCP server for runtime control:
+Exposed via MCP server for monitoring (read-only):
 
-#### `session_tracking_start`
-
-**Enable session tracking** for current client
-
-```python
-# MCP tool call
-result = await mcp_client.call_tool(
-    "session_tracking_start",
-    force=False  # Override global config if True
-)
-```
-
-**Response**:
-```json
-{
-  "status": "enabled",
-  "message": "Session tracking started",
-  "config": {
-    "watch_path": "~/.claude-code/sessions",
-    "check_interval": 5,
-    "inactivity_timeout": 300
-  }
-}
-```
-
-#### `session_tracking_stop`
-
-**Disable session tracking** for current client
-
-```python
-result = await mcp_client.call_tool("session_tracking_stop")
-```
-
-**Response**:
-```json
-{
-  "status": "disabled",
-  "message": "Session tracking stopped"
-}
-```
+> **Note**: Session tracking is controlled via configuration (`graphiti.config.json`).
+> MCP tools provide monitoring and diagnostics only. The `session_tracking_start` and
+> `session_tracking_stop` tools were removed in v1.0.0.
 
 #### `session_tracking_status`
 

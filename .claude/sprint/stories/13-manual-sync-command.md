@@ -2,12 +2,36 @@
 
 **Status**: completed
 **Claimed**: 2025-11-19 07:03
-**Completed**: 2025-11-19 07:23
+**Completed**: 2025-12-04 (core logic - remaining work in sub-stories 13.1-13.3)
 **Created**: 2025-11-18 23:01
 **Priority**: MEDIUM
-**Estimated Effort**: 10 hours
+**Estimated Effort**: 10 hours (original), ~4 hours remaining
 **Phase**: 5 (Week 2, Days 4-5)
-**Depends on**: Story 12 (rolling period filter)
+**Depends on**: Story 12 (rolling period filter), Story 19 (resilience layer)
+
+## Current State (Updated 2025-12-04)
+
+**Core logic is IMPLEMENTED** in `mcp_server/manual_sync.py` (~274 lines):
+- ✅ `session_tracking_sync_history()` - Main entry point with dry-run, cost estimation
+- ✅ `discover_sessions_for_sync()` - Time-filtered session discovery
+- ✅ `index_session_sync()` - Parse → filter → index single session
+- ✅ Safety limits (max_sessions default 100)
+- ✅ Cost estimation ($0.17/session average)
+
+**NOT IMPLEMENTED** (requires sub-stories 13.1-13.3):
+- ❌ MCP tool wiring (`@mcp.tool()` in graphiti_mcp_server.py)
+- ❌ CLI command (`graphiti-mcp session-tracking sync`)
+- ❌ Resilience integration (Story 19's retry_queue)
+- ❌ Progress tracking / resumability
+- ❌ Unit tests
+
+## Sub-Stories
+
+| Story | Title | Status | Effort |
+|-------|-------|--------|--------|
+| 13.1 | MCP Tool Wiring | pending | 1 hour |
+| 13.2 | CLI Command Implementation | pending | 2 hours |
+| 13.3 | Resilience Integration | pending | 1 hour |
 
 ## Description
 
@@ -24,13 +48,14 @@ Implement manual sync command for users who want to index historical sessions be
 ## Acceptance Criteria
 
 ### MCP Tool Implementation
-- [ ] Add `session_tracking_sync_history()` function to MCP server
-- [ ] Implement session discovery with time range filter
-- [ ] Implement cost estimation (sessions × $0.17 average)
-- [ ] Implement dry-run mode (preview only, no indexing)
-- [ ] Implement actual sync logic (parse → filter → index)
-- [ ] Safety limit: default max 100 sessions
-- [ ] Return JSON with session count, estimated cost, indexed count
+- [x] Add `session_tracking_sync_history()` function to MCP server (in manual_sync.py)
+- [x] Implement session discovery with time range filter
+- [x] Implement cost estimation (sessions × $0.17 average)
+- [x] Implement dry-run mode (preview only, no indexing)
+- [x] Implement actual sync logic (parse → filter → index)
+- [x] Safety limit: default max 100 sessions
+- [x] Return JSON with session count, estimated cost, indexed count
+- [ ] **Wire function into MCP server with @mcp.tool() decorator** (Story 13.1)
 - [ ] Test: Dry-run returns preview without indexing
 - [ ] Test: Cost estimation accurate
 - [ ] Test: Safety limit enforced
