@@ -16,7 +16,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Configuration Schema Updates",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -26,7 +26,7 @@
       "phase_status": {
         "discovery": "completed",
         "implementation": "completed",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/1-configuration-schema-updates.md",
@@ -262,7 +262,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Configuration Schema Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,

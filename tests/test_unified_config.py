@@ -342,4 +342,154 @@ def test_config_no_migration_if_new_exists(tmp_path, monkeypatch, clean_env):
     assert old_data["llm"]["default_model"] == "gpt-4o-old", "Old config should be unchanged"
 
 
+# =============================================================================
+# SESSION TRACKING CONFIG - GLOBAL SCOPE TESTS (Story 1)
+# =============================================================================
+
+def test_session_tracking_default_values():
+    """Test that SessionTrackingConfig has correct default values for global scope fields."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig()
+
+    # Verify default values per Story 1 acceptance criteria
+    assert config.group_id is None, "group_id should default to None"
+    assert config.cross_project_search is True, "cross_project_search should default to True"
+    assert config.trusted_namespaces is None, "trusted_namespaces should default to None"
+    assert config.include_project_path is True, "include_project_path should default to True"
+
+
+def test_session_tracking_group_id_custom():
+    """Test that group_id can be set to a custom value."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig(group_id="my_custom_group")
+    assert config.group_id == "my_custom_group"
+
+
+def test_session_tracking_cross_project_search_false():
+    """Test that cross_project_search can be disabled."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig(cross_project_search=False)
+    assert config.cross_project_search is False
+
+
+def test_session_tracking_trusted_namespaces_valid():
+    """Test that trusted_namespaces accepts valid hexadecimal hashes."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    # Valid hex hashes
+    valid_namespaces = ["a1b2c3d4", "ABCDEF12", "123456", "abcdef0123456789"]
+    config = SessionTrackingConfig(trusted_namespaces=valid_namespaces)
+    assert config.trusted_namespaces == valid_namespaces
+
+
+def test_session_tracking_trusted_namespaces_invalid_non_hex():
+    """Test that trusted_namespaces rejects non-hex strings."""
+    from mcp_server.unified_config import SessionTrackingConfig
+    import pytest
+
+    # Invalid: contains non-hex characters
+    with pytest.raises(ValueError) as excinfo:
+        SessionTrackingConfig(trusted_namespaces=["a1b2c3d4", "invalid_hash!"])
+
+    assert "Invalid namespace format" in str(excinfo.value)
+    assert "invalid_hash!" in str(excinfo.value)
+
+
+def test_session_tracking_trusted_namespaces_invalid_special_chars():
+    """Test that trusted_namespaces rejects strings with special characters."""
+    from mcp_server.unified_config import SessionTrackingConfig
+    import pytest
+
+    # Invalid: contains underscores, dashes, or other non-hex chars
+    invalid_inputs = [
+        ["namespace_with_underscore"],
+        ["namespace-with-dash"],
+        ["namespace with space"],
+        ["ghijkl"],  # g-z are not hex
+    ]
+
+    for namespaces in invalid_inputs:
+        with pytest.raises(ValueError) as excinfo:
+            SessionTrackingConfig(trusted_namespaces=namespaces)
+        assert "Invalid namespace format" in str(excinfo.value) or "Must be a hexadecimal" in str(excinfo.value)
+
+
+def test_session_tracking_trusted_namespaces_non_string():
+    """Test that trusted_namespaces rejects non-string entries."""
+    from mcp_server.unified_config import SessionTrackingConfig
+    import pytest
+
+    # Invalid: non-string types
+    # Pydantic raises ValidationError (subclass of ValueError) for type mismatch
+    with pytest.raises(Exception) as excinfo:
+        SessionTrackingConfig(trusted_namespaces=["a1b2c3d4", 12345])
+
+    # Pydantic error message says "input should be a valid string"
+    assert "string" in str(excinfo.value).lower()
+
+
+def test_session_tracking_trusted_namespaces_empty_list():
+    """Test that trusted_namespaces accepts empty list."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig(trusted_namespaces=[])
+    assert config.trusted_namespaces == []
+
+
+def test_session_tracking_include_project_path_false():
+    """Test that include_project_path can be disabled for privacy."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig(include_project_path=False)
+    assert config.include_project_path is False
+
+
+def test_session_tracking_all_fields_combined():
+    """Test SessionTrackingConfig with all global scope fields set."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    config = SessionTrackingConfig(
+        enabled=True,
+        group_id="team__shared",
+        cross_project_search=False,
+        trusted_namespaces=["a1b2c3d4", "e5f6a7b8"],
+        include_project_path=False
+    )
+
+    assert config.enabled is True
+    assert config.group_id == "team__shared"
+    assert config.cross_project_search is False
+    assert config.trusted_namespaces == ["a1b2c3d4", "e5f6a7b8"]
+    assert config.include_project_path is False
+
+
+def test_session_tracking_fields_have_docstrings():
+    """Test that all global scope fields have proper docstrings."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    # Get field info from Pydantic model
+    fields = SessionTrackingConfig.model_fields
+
+    # Check that each global scope field has a description
+    global_scope_fields = ['group_id', 'cross_project_search', 'trusted_namespaces', 'include_project_path']
+
+    for field_name in global_scope_fields:
+        assert field_name in fields, f"Field {field_name} not found in SessionTrackingConfig"
+        field_info = fields[field_name]
+        assert field_info.description is not None, f"Field {field_name} missing description"
+        assert len(field_info.description) > 10, f"Field {field_name} description too short"
+
+
+def test_session_tracking_case_insensitive_hex():
+    """Test that trusted_namespaces accepts both upper and lower case hex."""
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    # Mix of upper and lower case
+    config = SessionTrackingConfig(trusted_namespaces=["ABCD1234", "abcd1234", "AbCd1234"])
+    assert len(config.trusted_namespaces) == 3
+
+
 # Run with: pytest tests/test_unified_config.py -v --cov=mcp_server.unified_config --cov-report=term
