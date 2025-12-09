@@ -492,7 +492,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Graphiti Storage Integration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
