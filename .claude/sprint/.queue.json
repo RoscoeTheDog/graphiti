@@ -509,7 +509,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Session Manager Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "discovery",
       "phase_order": 1,
