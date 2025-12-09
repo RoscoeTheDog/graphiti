@@ -322,7 +322,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: JSON Schema and Config File Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -342,7 +342,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/2-plan.yaml"
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
     },
     "2.t": {
       "type": "testing",
