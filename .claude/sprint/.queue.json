@@ -368,7 +368,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Path Resolver Enhancements",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "discovery",
       "phase_order": 1,
@@ -388,7 +388,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/3-plan.yaml"
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
     },
     "3.t": {
       "type": "testing",
