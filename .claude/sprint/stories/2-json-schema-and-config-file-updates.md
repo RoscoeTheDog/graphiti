@@ -11,10 +11,10 @@ Reference: GLOBAL_SESSION_TRACKING_SPEC_v2.0.md Section 3.2
 
 ## Acceptance Criteria
 
-- [ ] (P0) JSON schema updated with all new session_tracking fields
-- [ ] (P0) Field descriptions match Pydantic model docstrings
-- [ ] (P1) Example config file shows sensible defaults
-- [ ] (P1) Schema validates correctly against updated config
+- [x] (P0) JSON schema updated with all new session_tracking fields
+- [x] (P0) Field descriptions match Pydantic model docstrings
+- [x] (P1) Example config file shows sensible defaults
+- [x] (P1) Schema validates correctly against updated config
 
 ## Dependencies
 
