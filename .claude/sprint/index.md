@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-09 00:14:30
+**Generated**: 2025-12-09 00:19:27
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 40
-- **Completion**: 27.5%
+- **Completion**: 30.0%
 
 ### By Status
 
-- completed: 11
+- completed: 12
 - resolved: 1
-- unassigned: 28
+- unassigned: 27
 
 ### By Type
 
@@ -63,7 +63,7 @@
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Episode Metadata Builder
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Episode Metadata Builder
