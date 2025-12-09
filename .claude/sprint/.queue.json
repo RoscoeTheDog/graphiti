@@ -476,7 +476,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Graphiti Storage Integration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
