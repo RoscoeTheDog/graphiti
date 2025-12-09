@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-09 00:28:06
+**Generated**: 2025-12-09 00:36:00
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 40
-- **Completion**: 32.5%
+- **Completion**: 35.0%
 
 ### By Status
 
-- completed: 13
+- completed: 14
 - resolved: 1
-- unassigned: 26
+- unassigned: 25
 
 ### By Type
 
@@ -83,7 +83,7 @@
   - Dependencies: Story 2
 
   ### Story 5.d: Discovery: Graphiti Storage Integration
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: Graphiti Storage Integration
