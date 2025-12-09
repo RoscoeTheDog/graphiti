@@ -348,3 +348,233 @@ class TestSessionIndexer:
                 query='test',
                 group_id='group1',
             )
+
+
+class TestSessionIndexerNamespaceMetadata:
+    """Tests for SessionIndexer with namespace metadata parameters (Story 6)."""
+
+    @pytest.mark.asyncio
+    async def test_index_session_with_namespace_metadata(self, indexer, mock_graphiti):
+        """Test indexing with all namespace parameters provided."""
+        # Setup mock response
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'test-uuid-123'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        # Call with namespace metadata
+        episode_uuid = await indexer.index_session(
+            session_id='abc123def456',
+            filtered_content='User: Fix auth\nAgent: Reading...',
+            group_id='myhost__global',
+            project_namespace='a1b2c3d4e5f6g7h8',
+            project_path='/home/user/my-project',
+            hostname='DESKTOP-TEST',
+            include_project_path=True,
+            session_file='session-abc123.jsonl',
+        )
+
+        # Verify result
+        assert episode_uuid == 'test-uuid-123'
+
+        # Verify add_episode was called
+        mock_graphiti.add_episode.assert_called_once()
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+
+        # Episode body should contain metadata header
+        episode_body = call_kwargs['episode_body']
+        assert episode_body.startswith('---\n')
+        assert 'a1b2c3d4e5f6g7h8' in episode_body  # namespace
+        assert '/home/user/my-project' in episode_body  # project_path
+        assert 'DESKTOP-TEST' in episode_body  # hostname
+
+        # Source description should have namespace prefix
+        source_desc = call_kwargs['source_description']
+        assert source_desc.startswith('[a1b2c3d4]')  # First 8 chars of namespace
+
+    @pytest.mark.asyncio
+    async def test_index_session_without_namespace_backward_compat(
+        self, indexer, mock_graphiti
+    ):
+        """Test backward compatibility when project_namespace=None."""
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        await indexer.index_session(
+            session_id='abc123',
+            filtered_content='Content',
+            group_id='group1',
+            project_namespace=None,  # Backward compatibility
+        )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+
+        # Episode body should NOT have YAML frontmatter
+        episode_body = call_kwargs['episode_body']
+        assert not episode_body.startswith('---\n')
+        assert episode_body == 'Content'
+
+        # Source description should NOT have namespace prefix
+        source_desc = call_kwargs['source_description']
+        assert not source_desc.startswith('[')
+
+    @pytest.mark.asyncio
+    async def test_index_session_exclude_project_path(self, indexer, mock_graphiti):
+        """Test include_project_path=False excludes project_path from metadata."""
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        await indexer.index_session(
+            session_id='abc123',
+            filtered_content='Content',
+            group_id='group1',
+            project_namespace='namespace123',
+            project_path='/home/user/my-project',
+            hostname='HOST',
+            include_project_path=False,  # Should exclude project_path
+            session_file='test.jsonl',
+        )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+        episode_body = call_kwargs['episode_body']
+
+        # Metadata should be present but project_path excluded
+        assert '---\n' in episode_body
+        assert 'namespace123' in episode_body
+        assert 'project_path' not in episode_body
+
+    @pytest.mark.asyncio
+    async def test_index_session_hostname_defaults(self, indexer, mock_graphiti):
+        """Test hostname defaults to socket.gethostname() when not provided."""
+        import socket
+        from unittest.mock import patch
+
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        with patch.object(socket, 'gethostname', return_value='MOCKED-HOST'):
+            await indexer.index_session(
+                session_id='abc123',
+                filtered_content='Content',
+                group_id='group1',
+                project_namespace='namespace123',
+                hostname=None,  # Should use socket.gethostname()
+            )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+        episode_body = call_kwargs['episode_body']
+
+        # Should have used mocked hostname
+        assert 'MOCKED-HOST' in episode_body
+
+    @pytest.mark.asyncio
+    async def test_index_session_default_session_file(self, indexer, mock_graphiti):
+        """Test default session_file is generated from session_id."""
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        await indexer.index_session(
+            session_id='abc123def456',
+            filtered_content='Content',
+            group_id='group1',
+            project_namespace='namespace123',
+            hostname='HOST',
+            session_file=None,  # Should auto-generate
+        )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+        episode_body = call_kwargs['episode_body']
+
+        # Should have auto-generated session file name using first 8 chars of session_id
+        assert 'session-abc123de.jsonl' in episode_body
+
+    @pytest.mark.asyncio
+    async def test_index_session_source_description_with_namespace(
+        self, indexer, mock_graphiti
+    ):
+        """Test source_description format with namespace prefix."""
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        await indexer.index_session(
+            session_id='longersessionid123',
+            filtered_content='Content',
+            group_id='group1',
+            project_namespace='namespace123456789',  # 18 chars
+            hostname='HOST',
+        )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+        source_desc = call_kwargs['source_description']
+
+        # Should prefix with first 8 chars of namespace
+        assert source_desc.startswith('[namespac]')
+        assert 'Filtered Claude Code session longersessionid123' in source_desc
+
+    @pytest.mark.asyncio
+    async def test_index_session_metadata_and_content_combined(
+        self, indexer, mock_graphiti
+    ):
+        """Test that metadata header and content are properly combined."""
+        mock_episode = MagicMock()
+        mock_episode.uuid = 'uuid'
+        mock_result = MagicMock()
+        mock_result.episode = mock_episode
+        mock_result.nodes = []
+        mock_result.edges = []
+        mock_graphiti.add_episode.return_value = mock_result
+
+        original_content = "## Session Start\n\nUser requested help."
+
+        await indexer.index_session(
+            session_id='abc123',
+            filtered_content=original_content,
+            group_id='group1',
+            project_namespace='ns12345678',
+            project_path='/test',
+            hostname='HOST',
+            session_file='test.jsonl',
+        )
+
+        call_kwargs = mock_graphiti.add_episode.call_args.kwargs
+        episode_body = call_kwargs['episode_body']
+
+        # Should have metadata header at start
+        assert episode_body.startswith('---\n')
+
+        # Should have content after metadata
+        assert '---\n\n' in episode_body
+        assert original_content in episode_body
+
+        # Content should appear after metadata closes
+        metadata_end = episode_body.find('---\n\n')
+        content_start = episode_body.find(original_content)
+        assert content_start > metadata_end

@@ -535,7 +535,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Session Manager Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "testing",
       "phase_order": 3,
