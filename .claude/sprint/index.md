@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-08 22:50:48
+**Generated**: 2025-12-08 22:59:30
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 40
-- **Completion**: 20.0%
+- **Completion**: 22.5%
 
 ### By Status
 
-- completed: 8
-- unassigned: 32
+- completed: 9
+- unassigned: 31
 
 ### By Type
 
@@ -50,7 +50,7 @@
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: Path Resolver Enhancements
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Path Resolver Enhancements
