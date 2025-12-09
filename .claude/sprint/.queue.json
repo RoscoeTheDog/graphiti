@@ -249,7 +249,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Configuration Schema Updates",
-      "status": "in_progress",
+      "status": "completed",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,

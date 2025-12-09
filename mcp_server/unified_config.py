@@ -620,10 +620,65 @@ class SessionTrackingConfig(BaseModel):
         )
     )
 
+    # -------------------------------------------------------------------------
+    # Global Scope Settings (v2.0)
+    # -------------------------------------------------------------------------
+
+    group_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Global group ID for all indexed sessions. "
+            "If None, defaults to '{hostname}__global' at runtime. "
+            "All sessions from all projects are indexed to this single group, "
+            "enabling cross-project knowledge sharing."
+        )
+    )
+    cross_project_search: bool = Field(
+        default=True,
+        description=(
+            "Allow searching across all project namespaces. "
+            "When True, search results include sessions from all indexed projects. "
+            "When False, results are filtered to the current project namespace only."
+        )
+    )
+    trusted_namespaces: Optional[list[str]] = Field(
+        default=None,
+        description=(
+            "List of project namespace hashes to trust for cross-project search. "
+            "If specified, only sessions from these namespaces are included in search results. "
+            "Each namespace must be a valid hexadecimal hash (e.g., 'a1b2c3d4'). "
+            "If None, all namespaces are trusted (when cross_project_search is True)."
+        )
+    )
+    include_project_path: bool = Field(
+        default=True,
+        description=(
+            "Include human-readable project path in episode metadata. "
+            "When True, the full project directory path is embedded in indexed sessions. "
+            "Set to False to redact paths for privacy (only namespace hash is stored)."
+        )
+    )
+
     @field_validator('keep_length_days')
     def validate_keep_length_days(cls, v):
         if v is not None and v <= 0:
             raise ValueError("keep_length_days must be > 0 or null")
+        return v
+
+    @field_validator('trusted_namespaces')
+    def validate_trusted_namespaces(cls, v):
+        """Validate that trusted_namespaces contains only valid hex hashes."""
+        if v is not None:
+            import re
+            hex_pattern = re.compile(r'^[a-f0-9]+$', re.IGNORECASE)
+            for ns in v:
+                if not isinstance(ns, str):
+                    raise ValueError(f"Namespace must be a string, got: {type(ns).__name__}")
+                if not hex_pattern.match(ns):
+                    raise ValueError(
+                        f"Invalid namespace format: '{ns}'. "
+                        "Must be a hexadecimal hash (e.g., 'a1b2c3d4e5f6')."
+                    )
         return v
 
 
