@@ -552,7 +552,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: MCP Server Search Filter Implementation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "7",
       "phase": "discovery",
       "phase_order": 1,
@@ -572,7 +572,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/7-plan.yaml"
+      "requires_artifact": "plans/7-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/7-plan.yaml"
+      }
     },
     "7.t": {
       "type": "testing",
