@@ -417,7 +417,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Episode Metadata Builder",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,
@@ -437,7 +437,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/4-plan.yaml"
+      "requires_artifact": "plans/4-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4-plan.yaml"
+      }
     },
     "4.t": {
       "type": "testing",
