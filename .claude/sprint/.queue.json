@@ -446,7 +446,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Episode Metadata Builder",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
