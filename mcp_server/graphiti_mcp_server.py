@@ -2566,6 +2566,8 @@ async def initialize_session_tracking() -> None:
         def on_session_closed(session_id: str, file_path: Path, context) -> None:
             """Callback when session closes - filter and index to Graphiti with resilience."""
             try:
+                import socket
+
                 # Session tracking is now controlled by config only (no runtime overrides)
                 logger.info(f"Session closed: {session_id}, indexing to Graphiti...")
 
@@ -2577,8 +2579,26 @@ async def initialize_session_tracking() -> None:
                     f"[{msg.role}]: {msg.content}" for msg in filtered_messages
                 ])
 
-                # Get project hash as group_id
-                group_id = path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+                # Extract project namespace from session path (Story 6)
+                project_namespace = path_resolver.resolve_project_from_session_file(file_path)
+
+                # Get human-readable project path (if config allows) (Story 6)
+                project_path = None
+                if unified_config.session_tracking.include_project_path and project_namespace:
+                    project_path = path_resolver.get_project_path_from_hash(project_namespace)
+
+                # Compute global group_id (Story 6 - was project-specific before)
+                hostname = socket.gethostname()
+                if unified_config.session_tracking.group_id:
+                    group_id = unified_config.session_tracking.group_id
+                else:
+                    group_id = path_resolver.get_global_group_id(hostname)
+
+                # Log namespace information at DEBUG level (Story 6 AC-6.5)
+                logger.debug(
+                    f"Indexing session from namespace {project_namespace[:8] if project_namespace else 'unknown'} "
+                    f"to group {group_id}"
+                )
 
                 # Index to Graphiti using resilient indexer (handles degradation)
                 import asyncio
@@ -2588,6 +2608,11 @@ async def initialize_session_tracking() -> None:
                     filtered_content=filtered_content,
                     group_id=group_id,
                     session_file=str(file_path),
+                    # Namespace metadata (Story 6)
+                    project_namespace=project_namespace,
+                    project_path=project_path,
+                    hostname=hostname,
+                    include_project_path=unified_config.session_tracking.include_project_path,
                 ))
 
                 logger.info(f"Session {session_id} indexing initiated ({len(filtered_messages)} messages)")
