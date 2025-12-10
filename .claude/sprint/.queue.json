@@ -192,7 +192,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Integration Tests for Cross-Project Search",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "9.d",
@@ -670,7 +670,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Integration Tests for Cross-Project Search",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "testing",
       "phase_order": 3,
