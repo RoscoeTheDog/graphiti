@@ -644,7 +644,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Integration Tests for Cross-Project Search",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "discovery",
       "phase_order": 1,
