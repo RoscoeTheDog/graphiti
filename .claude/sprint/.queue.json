@@ -308,7 +308,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "testing",
       "phase_order": 3,
