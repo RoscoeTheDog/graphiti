@@ -170,7 +170,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Unit Tests for New Components",
-      "status": "unassigned",
+      "status": "resolved",
       "parent": null,
       "children": [
         "8.d",
@@ -627,7 +627,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Unit Tests for New Components",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "8",
       "phase": "testing",
       "phase_order": 3,
