@@ -657,7 +657,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Integration Tests for Cross-Project Search",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "implementation",
       "phase_order": 2,
