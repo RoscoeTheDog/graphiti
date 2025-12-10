@@ -292,7 +292,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "implementation",
       "phase_order": 2,

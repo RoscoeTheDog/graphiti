@@ -93,6 +93,91 @@ Semantic Search & Context Retrieval
 
 ---
 
+## Global Knowledge Graph (v2.0)
+
+**New in v2.0** - Session tracking now uses a unified global knowledge graph with cross-project learning capabilities.
+
+### What Changed in v2.0
+
+Previously, sessions were isolated by project - knowledge from Project A was invisible when working on Project B. Starting in v2.0, all sessions are indexed to a **single global graph** with project namespace metadata embedded for provenance tracking.
+
+**Benefits:**
+- **Cross-Project Learning**: Knowledge gained in one project informs work in others
+- **Pattern Recognition**: Agents learn from corrections across all your projects
+- **Institutional Memory**: Solutions discovered once can be applied everywhere
+- **Self-Correcting**: When you correct an agent, that correction is indexed too
+
+### How Namespace Metadata Works
+
+Each indexed session includes a YAML frontmatter header with provenance information:
+
+```yaml
+---
+graphiti_session_metadata:
+  version: "2.0"
+  project_namespace: "a1b2c3d4"
+  project_path: "/home/user/my-project"
+  hostname: "DESKTOP-ABC123"
+  indexed_at: "2025-12-08T15:30:00Z"
+---
+```
+
+**Key Fields:**
+- `project_namespace`: 8-character hash identifying the source project
+- `project_path`: Human-readable path (optional, can be disabled for privacy)
+- `hostname`: Machine identifier for multi-machine disambiguation
+
+### How Agents Interpret Provenance
+
+When searching the knowledge graph, agents see results from all projects along with their namespace metadata. This allows agents to:
+
+1. **Recognize cross-project context**: "This result is from a different project (namespace: e5f6g7h8)"
+2. **Weigh relevance**: Apply context appropriately based on project similarity
+3. **Learn from corrections**: If a session says "X didn't work", agents avoid repeating that mistake
+4. **Ask when uncertain**: Query the user if cross-project context seems inapplicable
+
+**Example agent response:**
+> "Based on a session from the `auth-service` project (namespace a1b2c3d4), JWT authentication was implemented using RS256 signing. I also found an earlier session from `old-prototype` that used HS256 but was later marked as insecure. I'll follow the RS256 approach."
+
+### When to Use cross_project_search: false
+
+Set `cross_project_search: false` when:
+- Working on **sensitive projects** that shouldn't inform other work
+- Projects have **fundamentally different architectures** that would cause confusion
+- You want **complete isolation** for compliance or security reasons
+
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "cross_project_search": false
+  }
+}
+```
+
+### When to Use trusted_namespaces
+
+Use `trusted_namespaces` to create an "allowlist" of projects whose context should be included:
+
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "trusted_namespaces": ["a1b2c3d4", "e5f6g7h8"]
+  }
+}
+```
+
+**Use cases:**
+- **Exclude known-bad projects**: Projects with outdated or incorrect patterns
+- **Multi-team environments**: Only trust projects from your team
+- **Legacy exclusion**: Prevent old archived projects from influencing new work
+
+**Finding your namespace hash:**
+The namespace is derived from your project path. Check your indexed sessions to find the namespace for each project.
+
+---
+
 ## Configuration
 
 ### Global Settings
@@ -257,11 +342,20 @@ graphiti-mcp session-tracking sync --days 0 --no-dry-run --confirm
 
 ### Understanding Group IDs
 
-Group IDs isolate sessions by project:
+**v2.0 (Global Scope)**:
+- Format: `{hostname}__global`
+- Example: `devmachine__global`
+- All projects share a single global group ID
+- Project isolation via `project_namespace` metadata in episodes
+- Cross-project learning enabled by default
+
+**v1.x (Project Scope - Legacy)**:
 - Format: `{hostname}__{project_hash}`
 - Example: `devmachine__a1b2c3d4`
-- Automatically calculated from project directory path
-- Ensures cross-session context stays project-specific
+- Each project had its own isolated group ID
+- No cross-project learning
+
+**Note**: v2.0 uses global group IDs with namespace tagging for provenance. Project-specific group IDs from v1.x won't be searched by default. See the Migration Guide for options.
 
 ---
 
@@ -272,7 +366,29 @@ Group IDs isolate sessions by project:
 ✅ Session content stored locally in your Neo4j database
 ✅ No data sent to third parties (except OpenAI for entity extraction)
 ✅ Full control over what gets tracked (opt-in by default)
-✅ Group isolation prevents cross-project data leakage
+✅ Namespace metadata enables filtering when needed
+✅ Project paths can be redacted (`include_project_path: false`)
+
+### Security Considerations (v2.0 Global Scope)
+
+**Project Path Exposure:**
+- By default, `project_path` is included in episode metadata
+- This reveals your directory structure to anyone with graph access
+- **Mitigation**: Set `include_project_path: false` if paths contain sensitive information
+
+**Cross-Project Information Leakage:**
+- With `cross_project_search: true` (default), information from any project can appear in searches
+- Sensitive work patterns from Project A may surface when working on Project B
+- **Mitigations**:
+  - Set `cross_project_search: false` for sensitive projects
+  - Use `trusted_namespaces` to exclude specific projects
+  - Use session filtering to reduce stored content
+
+**Multi-User Environments:**
+- On shared machines, users might see each other's project data if sharing Neo4j
+- Session files are in user-specific `~/.claude/` directory (private)
+- Global group_id includes hostname (not shared across machines)
+- **For shared Neo4j**: Use separate databases or group_id prefixes per user
 
 ### Best Practices
 
@@ -280,6 +396,8 @@ Group IDs isolate sessions by project:
 2. **Use Environment Variables**: Never hardcode secrets in session content
 3. **Regular Cleanup**: Delete old/sensitive episodes when no longer needed
 4. **Audit Configuration**: Periodically review `graphiti.config.json`
+5. **Isolate Sensitive Projects**: Use `cross_project_search: false` for compliance-sensitive work
+6. **Hide Paths When Needed**: Set `include_project_path: false` for projects with sensitive directory structures
 
 ### Deleting Session Data
 
@@ -383,7 +501,18 @@ A: Yes. Sequential sessions in the same project are automatically linked via `pr
 A: Nodes are entities (files, tools, patterns). Facts are relationships between entities.
 
 **Q: Can I search across multiple projects?**
-A: Yes. Provide multiple group IDs in `search_memory_nodes` or `search_memory_facts`.
+A: Yes! In v2.0, cross-project search is enabled by default. All projects are indexed to a single global graph with namespace metadata for provenance. Set `cross_project_search: false` to disable, or use `trusted_namespaces` to limit which projects are included.
+
+**Q: How do I prevent a project's context from affecting other projects?**
+A: Two options:
+1. Set `cross_project_search: false` in that project's config (isolates it completely)
+2. Add the project's namespace to other projects' `trusted_namespaces` exclusion (blocks it from searches)
+
+**Q: Will cross-project search give me incorrect context?**
+A: The namespace metadata helps agents weigh relevance appropriately. Agents can see which project context came from and apply it judiciously. When you correct an agent, that correction is also indexed, creating a self-correcting system.
+
+**Q: How do I find a project's namespace hash?**
+A: The namespace is an 8-character hex hash derived from the project path. Check indexed sessions for your project to find its namespace in the `project_namespace` field.
 
 ---
 
