@@ -611,7 +611,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Unit Tests for New Components",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "8",
       "phase": "implementation",
       "phase_order": 2,
