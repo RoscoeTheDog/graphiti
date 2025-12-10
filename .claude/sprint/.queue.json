@@ -279,7 +279,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "discovery",
       "phase_order": 1,
@@ -299,7 +299,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/10-plan.yaml"
+      "requires_artifact": "plans/10-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/10-plan.yaml"
+      }
     },
     "10.t": {
       "type": "testing",
