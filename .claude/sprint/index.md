@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-09 08:45:40
+**Generated**: 2025-12-10 00:23:10
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 40
-- **Completion**: 50.0%
+- **Completion**: 52.5%
 
 ### By Status
 
-- completed: 20
+- completed: 21
 - resolved: 1
-- unassigned: 19
+- unassigned: 18
 
 ### By Type
 
@@ -111,7 +111,7 @@
   - Dependencies: Story 7
 
   ### Story 7.i: Implementation: MCP Server Search Filter Implementation
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 7
 
   ### Story 7.t: Testing: MCP Server Search Filter Implementation
