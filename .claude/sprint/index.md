@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-10 00:33:34
+**Generated**: 2025-12-10 00:43:29
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 40
-- **Completion**: 55.0%
+- **Completion**: 57.5%
 
 ### By Status
 
-- completed: 22
+- completed: 23
 - resolved: 1
-- unassigned: 17
+- unassigned: 16
 
 ### By Type
 
@@ -119,7 +119,7 @@
   - Dependencies: Story 7
 
   ### Story 8.d: Discovery: Unit Tests for New Components
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 8
 
   ### Story 8.i: Implementation: Unit Tests for New Components

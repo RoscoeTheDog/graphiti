@@ -598,7 +598,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Unit Tests for New Components",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "8",
       "phase": "discovery",
       "phase_order": 1,
@@ -618,7 +618,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/8-plan.yaml"
+      "requires_artifact": "plans/8-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/8-plan.yaml"
+      }
     },
     "8.t": {
       "type": "testing",
