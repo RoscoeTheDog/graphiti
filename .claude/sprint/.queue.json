@@ -883,7 +883,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Activity Vector Model",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "2",
       "children": [
         "-2.d",
@@ -941,7 +941,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Activity Vector Model",
-      "status": "in_progress",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.t",
       "phase": "validation_testing",
