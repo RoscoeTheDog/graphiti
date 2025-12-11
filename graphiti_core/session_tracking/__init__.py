@@ -22,6 +22,7 @@ from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
 from .message_summarizer import MessageSummarizer
+from .summarizer import DecisionRecord, ErrorResolution, SessionSummary, SessionSummarySchema
 from .metadata import build_episode_metadata_header
 from .parser import JSONLParser
 from .path_resolver import ClaudePathResolver
@@ -63,6 +64,11 @@ __all__ = [
     "FilterConfig",
     # Message summarization (NEW - Story 2.3.4)
     "MessageSummarizer",
+    # Session summary models (NEW - Story 1 v3.0.0)
+    "SessionSummary",
+    "SessionSummarySchema",
+    "DecisionRecord",
+    "ErrorResolution",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)

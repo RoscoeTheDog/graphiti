@@ -28,6 +28,25 @@ from .types import ConversationContext
 logger = logging.getLogger(__name__)
 
 
+class DecisionRecord(BaseModel):
+    """Structured record of an important decision made during a session."""
+
+    decision: str = Field(description='The decision that was made')
+    rationale: str = Field(description='Why this decision was made')
+    alternatives: list[str] | None = Field(
+        default=None, description='Alternative options considered'
+    )
+
+
+class ErrorResolution(BaseModel):
+    """Structured record of an error that was resolved during a session."""
+
+    error: str = Field(description='The error that occurred')
+    root_cause: str = Field(description='Root cause analysis')
+    fix: str = Field(description='How the error was fixed')
+    verification: str = Field(description='How the fix was verified')
+
+
 class SessionSummarySchema(BaseModel):
     """Structured schema for session summaries."""
 
@@ -43,8 +62,11 @@ class SessionSummarySchema(BaseModel):
     documentation_referenced: list[str] = Field(
         default_factory=list, description='List of documentation paths referenced'
     )
-    key_decisions: list[str] = Field(
-        default_factory=list, description='Important decisions made during the session'
+    key_decisions: list[DecisionRecord] = Field(
+        default_factory=list, description='Important decisions made during the session with rationale'
+    )
+    errors_resolved: list[ErrorResolution] = Field(
+        default_factory=list, description='Errors encountered and how they were resolved'
     )
     mcp_tools_used: list[str] = Field(
         default_factory=list, description='MCP tools used during the session'
@@ -68,7 +90,8 @@ class SessionSummary:
     next_steps: list[str]
     files_modified: list[str]
     documentation_referenced: list[str]
-    key_decisions: list[str]
+    key_decisions: list[DecisionRecord]
+    errors_resolved: list[ErrorResolution]
     mcp_tools_used: list[str]
     token_count: int | None
     duration_estimate: str | None
@@ -107,7 +130,18 @@ class SessionSummary:
         if self.key_decisions:
             markdown += '\n---\n\n## Key Decisions\n\n'
             for decision in self.key_decisions:
-                markdown += f'- {decision}\n'
+                markdown += f'- **{decision.decision}**\n'
+                markdown += f'  - Rationale: {decision.rationale}\n'
+                if decision.alternatives:
+                    markdown += f'  - Alternatives: {", ".join(decision.alternatives)}\n'
+
+        if self.errors_resolved:
+            markdown += '\n---\n\n## Errors Resolved\n\n'
+            for err in self.errors_resolved:
+                markdown += f'### {err.error}\n'
+                markdown += f'- **Root Cause**: {err.root_cause}\n'
+                markdown += f'- **Fix**: {err.fix}\n'
+                markdown += f'- **Verification**: {err.verification}\n\n'
 
         markdown += '\n---\n\n## Context\n\n'
         if self.files_modified:
@@ -188,10 +222,21 @@ Extract the following information:
 6. **Documentation Referenced**: Which documentation paths were read or referenced?
 
 7. **Key Decisions**: What important decisions were made during the session?
+   For each decision, provide:
+   - decision: The actual decision (e.g., "Used RS256 over HS256 for JWT signing")
+   - rationale: Why this was chosen (e.g., "RS256 is more secure for production")
+   - alternatives: Other options considered (e.g., ["HS256", "EdDSA"]) or null if none
 
-8. **MCP Tools Used**: List unique MCP tools used (e.g., serena, graphiti-memory, claude-context).
+8. **Errors Resolved**: What errors were encountered and fixed during the session?
+   For each error, provide:
+   - error: The error message or description
+   - root_cause: What caused the error
+   - fix: How it was resolved
+   - verification: How the fix was verified to work
 
-9. **Duration Estimate**: Estimate session duration based on message count (e.g., "1-2 hours").
+9. **MCP Tools Used**: List unique MCP tools used (e.g., serena, graphiti-memory, claude-context).
+
+10. **Duration Estimate**: Estimate session duration based on message count (e.g., "1-2 hours").
 
 Focus on actionable information that helps the next session continue work efficiently.
 """
@@ -271,6 +316,7 @@ Focus on actionable information that helps the next session continue work effici
                 files_modified=response.files_modified,
                 documentation_referenced=response.documentation_referenced,
                 key_decisions=response.key_decisions,
+                errors_resolved=response.errors_resolved,
                 mcp_tools_used=response.mcp_tools_used,
                 token_count=response.token_count or context.total_tokens,
                 duration_estimate=response.duration_estimate,
