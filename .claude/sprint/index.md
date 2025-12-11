@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:20:10
+**Generated**: 2025-12-11 15:29:34
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 52
-- **Completion**: 15.4%
+- **Completion**: 17.3%
 
 ### By Status
 
-- completed: 8
-- pending: 33
-- unassigned: 11
+- completed: 9
+- in_progress: 1
+- unassigned: 42
 
 ### By Type
 
@@ -59,135 +59,135 @@
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Activity Detection from Messages
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: Activity Detection from Messages
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Activity Detection from Messages
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Tool Classification Heuristics
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Tool Classification Heuristics
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Tool Classification Heuristics
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: LLM Tool Classification with Caching
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: LLM Tool Classification with Caching
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: LLM Tool Classification with Caching
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Bash Command Analysis
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Bash Command Analysis
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 6
 
   ### Story 6.t: Testing: Bash Command Analysis
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 6
 
   ### Story 7.d: Discovery: Unified Tool Classifier
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 7
 
   ### Story 7.i: Implementation: Unified Tool Classifier
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 7
 
   ### Story 7.t: Testing: Unified Tool Classifier
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 7
 
   ### Story 8.d: Discovery: Extraction Priority Algorithm
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 8
 
   ### Story 8.i: Implementation: Extraction Priority Algorithm
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 8
 
   ### Story 8.t: Testing: Extraction Priority Algorithm
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 8
 
   ### Story 9.d: Discovery: Dynamic Prompt Generation
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 9
 
   ### Story 9.i: Implementation: Dynamic Prompt Generation
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 9
 
   ### Story 9.t: Testing: Dynamic Prompt Generation
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 9
 
   ### Story 10.d: Discovery: Enhanced Markdown Rendering
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 10
 
   ### Story 10.i: Implementation: Enhanced Markdown Rendering
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 10
 
   ### Story 10.t: Testing: Enhanced Markdown Rendering
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 10
 
   ### Story 11.d: Discovery: Summarizer Integration
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 11
 
   ### Story 11.i: Implementation: Summarizer Integration
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 11
 
   ### Story 11.t: Testing: Summarizer Integration
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 11
 
   ### Story 12.d: Discovery: Configuration Schema Updates
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 12
 
   ### Story 12.i: Implementation: Configuration Schema Updates
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 12
 
   ### Story 12.t: Testing: Configuration Schema Updates
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 12
 
   ### Story 13.d: Discovery: Template Updates
-  **Status**: pending | **Type**: discovery
+  **Status**: unassigned | **Type**: discovery
   - Dependencies: Story 13
 
   ### Story 13.i: Implementation: Template Updates
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 13
 
   ### Story 13.t: Testing: Template Updates
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 13
 
 ---
