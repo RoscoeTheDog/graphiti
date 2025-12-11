@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:36:11
+**Generated**: 2025-12-11 15:39:18
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 17.9%
+- **Completion**: 19.6%
 
 ### By Status
 
-- completed: 10
-- in_progress: 1
-- unassigned: 45
+- completed: 11
+- in_progress: 2
+- unassigned: 43
 
 ### By Type
 
@@ -39,7 +39,7 @@
 ## Stories (Execution Order)
 
   ### Story -2.d: Validate Discovery: Activity Vector Model
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -2
   - Blocks: Story -2.i
 

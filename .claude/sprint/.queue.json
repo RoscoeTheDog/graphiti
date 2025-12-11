@@ -883,7 +883,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Activity Vector Model",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "2",
       "children": [
         "-2.d",
@@ -903,7 +903,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Activity Vector Model",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.d",
       "phase": "validation_discovery",
