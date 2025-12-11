@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:07:14
+**Generated**: 2025-12-11 15:14:10
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 52
-- **Completion**: 3.8%
+- **Completion**: 7.7%
 
 ### By Status
 
-- completed: 2
-- in_progress: 1
+- completed: 4
 - pending: 36
-- unassigned: 13
+- unassigned: 12
 
 ### By Type
 
@@ -44,7 +43,7 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Enhanced Session Summary Schema
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Activity Vector Model

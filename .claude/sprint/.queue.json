@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Enhanced Session Summary Schema",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -350,7 +350,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Enhanced Session Summary Schema",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
