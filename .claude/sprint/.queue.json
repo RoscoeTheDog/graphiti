@@ -38,7 +38,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "JSON Schema and Config File Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -82,7 +82,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Episode Metadata Builder",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "4.d",
@@ -104,7 +104,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Graphiti Storage Integration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "5.d",
@@ -126,7 +126,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Session Manager Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "6.d",
@@ -148,7 +148,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "MCP Server Search Filter Implementation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "7.d",
@@ -214,7 +214,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "10.d",
