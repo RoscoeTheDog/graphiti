@@ -1445,6 +1445,7 @@ async def search_memory_nodes(
     max_nodes: int = 10,
     center_node_uuid: str | None = None,
     entity: str = '',  # cursor seems to break with None
+    project_namespaces: list[str] | None = None,
 ) -> NodeSearchResponse | ErrorResponse:
     """Search the graph memory for relevant node summaries.
     These contain a summary of all of a node's relationships with other nodes.
@@ -1457,6 +1458,9 @@ async def search_memory_nodes(
         max_nodes: Maximum number of nodes to return (default: 10)
         center_node_uuid: Optional UUID of a node to center the search around
         entity: Optional single entity type to filter results (permitted: "Preference", "Procedure")
+        project_namespaces: Optional filter for specific project namespaces.
+            If None, uses config settings (cross_project_search, trusted_namespaces).
+            If provided, overrides config and filters to specified namespaces only.
     """
     global graphiti_client
 
@@ -1464,10 +1468,20 @@ async def search_memory_nodes(
         return ErrorResponse(error='Graphiti client not initialized')
 
     try:
-        # Use the provided group_ids or fall back to the default from config if none provided
-        effective_group_ids = (
-            group_ids if group_ids is not None else [config.group_id] if config.group_id else []
+        # Import namespace filtering utilities
+        from mcp_server.namespace_filter import (
+            extract_namespace_from_content,
+            get_effective_group_id,
         )
+
+        # Determine effective group_ids using global session tracking config
+        if group_ids is not None:
+            effective_group_ids = group_ids
+        else:
+            # Use global group_id from session tracking config
+            st_config = unified_config.session_tracking
+            global_group = get_effective_group_id(st_config)
+            effective_group_ids = [global_group]
 
         # Configure the search
         if center_node_uuid is not None:
@@ -1494,6 +1508,37 @@ async def search_memory_nodes(
             center_node_uuid=center_node_uuid,
             search_filter=filters,
         )
+
+        # Determine effective namespace filter
+        st_config = unified_config.session_tracking
+        effective_namespaces = project_namespaces
+        if effective_namespaces is None:
+            if not st_config.cross_project_search:
+                # Would need current project namespace - log warning if not available
+                logger.warning(
+                    "cross_project_search is False but no project_namespaces provided. "
+                    "Results may include all namespaces."
+                )
+            elif st_config.trusted_namespaces:
+                effective_namespaces = st_config.trusted_namespaces
+
+        # Post-filter results by namespace if specified
+        if effective_namespaces and search_results.nodes:
+            filtered_nodes = []
+            for node in search_results.nodes:
+                # Try to extract namespace from summary or attributes
+                ns = None
+                if hasattr(node, 'summary') and node.summary:
+                    ns = extract_namespace_from_content(node.summary)
+                if ns is None and hasattr(node, 'attributes'):
+                    ns = node.attributes.get('project_namespace')
+
+                # Include if matches or no namespace found (backward compat)
+                if ns is None or ns in effective_namespaces:
+                    filtered_nodes.append(node)
+
+            # Update nodes list with filtered results
+            search_results.nodes = filtered_nodes
 
         if not search_results.nodes:
             return NodeSearchResponse(message='No relevant nodes found', nodes=[])
@@ -1525,6 +1570,7 @@ async def search_memory_facts(
     group_ids: list[str] | None = None,
     max_facts: int = 10,
     center_node_uuid: str | None = None,
+    project_namespaces: list[str] | None = None,
 ) -> FactSearchResponse | ErrorResponse:
     """Search the graph memory for relevant facts.
 
@@ -1533,6 +1579,9 @@ async def search_memory_facts(
         group_ids: Optional list of group IDs to filter results
         max_facts: Maximum number of facts to return (default: 10)
         center_node_uuid: Optional UUID of a node to center the search around
+        project_namespaces: Optional filter for specific project namespaces.
+            If None, uses config settings (cross_project_search, trusted_namespaces).
+            If provided, overrides config and filters to specified namespaces only.
     """
     global graphiti_client
 
@@ -1540,14 +1589,24 @@ async def search_memory_facts(
         return ErrorResponse(error='Graphiti client not initialized')
 
     try:
+        # Import namespace filtering utilities
+        from mcp_server.namespace_filter import (
+            filter_by_namespace,
+            get_effective_group_id,
+        )
+
         # Validate max_facts parameter
         if max_facts <= 0:
             return ErrorResponse(error='max_facts must be a positive integer')
 
-        # Use the provided group_ids or fall back to the default from config if none provided
-        effective_group_ids = (
-            group_ids if group_ids is not None else [config.group_id] if config.group_id else []
-        )
+        # Determine effective group_ids using global session tracking config
+        if group_ids is not None:
+            effective_group_ids = group_ids
+        else:
+            # Use global group_id from session tracking config
+            st_config = unified_config.session_tracking
+            global_group = get_effective_group_id(st_config)
+            effective_group_ids = [global_group]
 
         # We've already checked that graphiti_client is not None above
         assert graphiti_client is not None
@@ -1561,6 +1620,28 @@ async def search_memory_facts(
             num_results=max_facts,
             center_node_uuid=center_node_uuid,
         )
+
+        # Determine effective namespace filter
+        st_config = unified_config.session_tracking
+        effective_namespaces = project_namespaces
+        if effective_namespaces is None:
+            if not st_config.cross_project_search:
+                logger.warning(
+                    "cross_project_search is False but no project_namespaces provided. "
+                    "Results may include all namespaces."
+                )
+            elif st_config.trusted_namespaces:
+                effective_namespaces = st_config.trusted_namespaces
+
+        # Post-filter edges by namespace if specified
+        if effective_namespaces and relevant_edges:
+            # Edges have fact attribute with content
+            filtered_edges = filter_by_namespace(
+                relevant_edges,
+                effective_namespaces,
+                content_attr='fact'
+            )
+            relevant_edges = filtered_edges
 
         if not relevant_edges:
             return FactSearchResponse(message='No relevant facts found', facts=[])
@@ -2566,6 +2647,8 @@ async def initialize_session_tracking() -> None:
         def on_session_closed(session_id: str, file_path: Path, context) -> None:
             """Callback when session closes - filter and index to Graphiti with resilience."""
             try:
+                import socket
+
                 # Session tracking is now controlled by config only (no runtime overrides)
                 logger.info(f"Session closed: {session_id}, indexing to Graphiti...")
 
@@ -2577,8 +2660,26 @@ async def initialize_session_tracking() -> None:
                     f"[{msg.role}]: {msg.content}" for msg in filtered_messages
                 ])
 
-                # Get project hash as group_id
-                group_id = path_resolver.resolve_project_from_session_file(file_path) or "unknown"
+                # Extract project namespace from session path (Story 6)
+                project_namespace = path_resolver.resolve_project_from_session_file(file_path)
+
+                # Get human-readable project path (if config allows) (Story 6)
+                project_path = None
+                if unified_config.session_tracking.include_project_path and project_namespace:
+                    project_path = path_resolver.get_project_path_from_hash(project_namespace)
+
+                # Compute global group_id (Story 6 - was project-specific before)
+                hostname = socket.gethostname()
+                if unified_config.session_tracking.group_id:
+                    group_id = unified_config.session_tracking.group_id
+                else:
+                    group_id = path_resolver.get_global_group_id(hostname)
+
+                # Log namespace information at DEBUG level (Story 6 AC-6.5)
+                logger.debug(
+                    f"Indexing session from namespace {project_namespace[:8] if project_namespace else 'unknown'} "
+                    f"to group {group_id}"
+                )
 
                 # Index to Graphiti using resilient indexer (handles degradation)
                 import asyncio
@@ -2588,6 +2689,11 @@ async def initialize_session_tracking() -> None:
                     filtered_content=filtered_content,
                     group_id=group_id,
                     session_file=str(file_path),
+                    # Namespace metadata (Story 6)
+                    project_namespace=project_namespace,
+                    project_path=project_path,
+                    hostname=hostname,
+                    include_project_path=unified_config.session_tracking.include_project_path,
                 ))
 
                 logger.info(f"Session {session_id} indexing initiated ({len(filtered_messages)} messages)")

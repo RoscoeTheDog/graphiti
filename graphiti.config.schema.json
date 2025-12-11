@@ -1,5 +1,152 @@
 {
   "$defs": {
+    "FilterConfig": {
+      "description": "Configuration for session message filtering. Controls how different message types are filtered during session tracking.",
+      "properties": {
+        "tool_calls": {
+          "default": true,
+          "description": "Preserve tool call structure (names, parameters) even when filtering content",
+          "title": "Tool Calls",
+          "type": "boolean"
+        },
+        "tool_content": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "default-tool-content.md",
+          "description": "Content mode for tool results: true (no filtering), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "Tool Content"
+        },
+        "user_messages": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": true,
+          "description": "Content mode for user messages: true (preserve), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "User Messages"
+        },
+        "agent_messages": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": true,
+          "description": "Content mode for agent text responses: true (preserve), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "Agent Messages"
+        }
+      },
+      "title": "FilterConfig",
+      "type": "object"
+    },
+    "RetryQueueConfig": {
+      "description": "Retry queue configuration for session tracking resilience. Configures the persistent queue used to retry failed session processing when the LLM becomes available again.",
+      "properties": {
+        "max_retries": {
+          "default": 5,
+          "description": "Maximum retry attempts per session",
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "retry_delays_seconds": {
+          "default": [300, 900, 2700, 7200, 21600],
+          "description": "Delay in seconds before each retry attempt. Default: 5m, 15m, 45m, 2h, 6h (progressive backoff)",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Retry Delays Seconds",
+          "type": "array"
+        },
+        "max_queue_size": {
+          "default": 1000,
+          "description": "Maximum number of sessions in retry queue",
+          "title": "Max Queue Size",
+          "type": "integer"
+        },
+        "persist_to_disk": {
+          "default": true,
+          "description": "Persist retry queue to disk for crash recovery",
+          "title": "Persist To Disk",
+          "type": "boolean"
+        }
+      },
+      "title": "RetryQueueConfig",
+      "type": "object"
+    },
+    "SessionNotificationsConfig": {
+      "description": "Notification configuration for session tracking failures.",
+      "properties": {
+        "on_permanent_failure": {
+          "default": true,
+          "description": "Notify on permanent processing failure (after all retries exhausted)",
+          "title": "On Permanent Failure",
+          "type": "boolean"
+        },
+        "notification_method": {
+          "default": "log",
+          "description": "Method for sending failure notifications",
+          "enum": [
+            "log",
+            "webhook",
+            "both"
+          ],
+          "title": "Notification Method",
+          "type": "string"
+        },
+        "webhook_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Webhook URL for failure notifications (if method includes webhook)",
+          "title": "Webhook Url"
+        }
+      },
+      "title": "SessionNotificationsConfig",
+      "type": "object"
+    },
+    "SessionTrackingResilienceConfig": {
+      "description": "Session tracking resilience configuration. Defines how session tracking handles LLM unavailability to ensure no session data is lost.",
+      "properties": {
+        "on_llm_unavailable": {
+          "default": "STORE_RAW_AND_RETRY",
+          "description": "Behavior when LLM is unavailable during session processing:\n- FAIL: Skip session (data loss risk)\n- STORE_RAW: Store raw session content without summarization\n- STORE_RAW_AND_RETRY: Store raw and queue for later processing (recommended)",
+          "enum": [
+            "FAIL",
+            "STORE_RAW",
+            "STORE_RAW_AND_RETRY"
+          ],
+          "title": "On Llm Unavailable",
+          "type": "string"
+        },
+        "retry_queue": {
+          "$ref": "#/$defs/RetryQueueConfig"
+        },
+        "notifications": {
+          "$ref": "#/$defs/SessionNotificationsConfig"
+        }
+      },
+      "title": "SessionTrackingResilienceConfig",
+      "type": "object"
+    },
     "AnthropicProviderConfig": {
       "description": "Anthropic provider configuration",
       "properties": {
@@ -612,6 +759,67 @@
           "default": true,
           "description": "Store session summaries in the Graphiti knowledge graph. If False, sessions are logged but not persisted to Neo4j.",
           "title": "Store In Graph",
+          "type": "boolean"
+        },
+        "keep_length_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 7,
+          "description": "Rolling window filter for session discovery in days. Only sessions modified within the last N days will be indexed. Set to null to index all sessions (not recommended, may cause bulk LLM costs).",
+          "title": "Keep Length Days"
+        },
+        "filter": {
+          "$ref": "#/$defs/FilterConfig"
+        },
+        "resilience": {
+          "$ref": "#/$defs/SessionTrackingResilienceConfig"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Global group ID for all indexed sessions. If None, defaults to '{hostname}__global' at runtime. All sessions from all projects are indexed to this single group, enabling cross-project knowledge sharing.",
+          "title": "Group Id"
+        },
+        "cross_project_search": {
+          "default": true,
+          "description": "Allow searching across all project namespaces. When True, search results include sessions from all indexed projects. When False, results are filtered to the current project namespace only.",
+          "title": "Cross Project Search",
+          "type": "boolean"
+        },
+        "trusted_namespaces": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]+$"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "List of project namespace hashes to trust for cross-project search. If specified, only sessions from these namespaces are included in search results. Each namespace must be a valid hexadecimal hash (e.g., 'a1b2c3d4'). If None, all namespaces are trusted (when cross_project_search is True).",
+          "title": "Trusted Namespaces"
+        },
+        "include_project_path": {
+          "default": true,
+          "description": "Include human-readable project path in episode metadata. When True, the full project directory path is embedded in indexed sessions. Set to False to redact paths for privacy (only namespace hash is stored).",
+          "title": "Include Project Path",
           "type": "boolean"
         }
       },

@@ -829,6 +829,104 @@ summary = await summarizer.summarize(
 - **Flexible**: Use file-based templates or inline prompts
 - **Efficient**: Template resolution is cached to minimize overhead
 
+### Global Scope Settings (v2.0)
+
+**New in v2.0.0** - Cross-project knowledge sharing with namespace tagging.
+
+Starting in v2.0, session tracking uses a **global knowledge graph** instead of per-project isolation. All sessions are indexed to a single graph with project namespace metadata embedded for provenance tracking and optional filtering.
+
+#### Configuration
+
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "group_id": null,
+    "cross_project_search": true,
+    "trusted_namespaces": null,
+    "include_project_path": true
+  }
+}
+```
+
+#### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `group_id` | string\|null | `null` | Global group ID for all indexed sessions. If null, defaults to `{hostname}__global`. All projects share this single graph with `project_namespace` metadata embedded in each episode for filtering. |
+| `cross_project_search` | bool | `true` | Allow searching across all project namespaces. If true (default), queries return results from all projects with namespace metadata visible for agent interpretation. If false, queries are automatically filtered to the current project's namespace only. |
+| `trusted_namespaces` | string[]\|null | `null` | List of project namespace hashes to trust for cross-project search. If null (default), all namespaces are trusted. Use this to exclude known-problematic project contexts from search results. Example: `["a1b2c3d4", "e5f6g7h8"]` |
+| `include_project_path` | bool | `true` | Include human-readable project path in episode metadata. Helps agents understand context provenance (e.g., `/home/user/myproject`). Set to false if project paths contain sensitive information. |
+
+#### How It Works
+
+When a session is indexed:
+1. The project namespace (8-character hash from project path) is calculated
+2. A YAML frontmatter header is embedded in the episode content:
+   ```yaml
+   ---
+   graphiti_session_metadata:
+     version: "2.0"
+     project_namespace: "a1b2c3d4"
+     project_path: "/home/user/my-project"
+     hostname: "DESKTOP-ABC123"
+     indexed_at: "2025-12-08T15:30:00Z"
+   ---
+   ```
+3. The episode is stored in the global graph with this metadata
+
+#### Cross-Project Search Behavior
+
+**Default (cross_project_search: true)**:
+- All matching episodes from all projects are returned
+- Each result includes visible namespace metadata
+- Agents can interpret provenance and weigh relevance
+
+**Restricted (cross_project_search: false)**:
+- Only episodes from the current project are returned
+- Useful for sensitive projects requiring isolation
+
+**Trusted Namespaces Filter**:
+- Specify which project namespaces to include in search
+- Excludes potentially incorrect context from untrusted projects
+
+#### Example Configurations
+
+**Default (Cross-Project Learning)**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "group_id": null,
+    "cross_project_search": true,
+    "trusted_namespaces": null,
+    "include_project_path": true
+  }
+}
+```
+
+**Project Isolation (Sensitive Work)**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "cross_project_search": false,
+    "include_project_path": false
+  }
+}
+```
+
+**Trusted Projects Only**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "cross_project_search": true,
+    "trusted_namespaces": ["a1b2c3d4", "e5f6g7h8"]
+  }
+}
+```
+
 ### Rolling Retention (keep_length_days)
 
 **New in v1.1.0** - Control how long sessions are retained in the knowledge graph.
@@ -1524,5 +1622,5 @@ The `graphiti.config.schema.json` file enables autocomplete and validation in ID
 
 ---
 
-**Last Updated:** 2025-11-27
-**Version:** 3.0 (Added LLM Resilience Configuration, MCP Tools Configuration)
+**Last Updated:** 2025-12-10
+**Version:** 3.1 (Added Global Scope Settings v2.0 for cross-project knowledge sharing)

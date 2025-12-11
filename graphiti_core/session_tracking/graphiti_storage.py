@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import logging
+import socket
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ from typing import Any
 from graphiti_core.graphiti import Graphiti
 from graphiti_core.nodes import EpisodeType
 
+from .metadata import build_episode_metadata_header
 from .summarizer import SessionSummary
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,12 @@ class SessionStorage:
         self,
         summary: SessionSummary,
         group_id: str,
+        project_namespace: str | None = None,
+        project_path: str | None = None,
+        hostname: str | None = None,
+        include_project_path: bool = True,
+        session_file: str | None = None,
+        message_count: int | None = None,
         previous_session_uuid: str | None = None,
         handoff_file_path: Path | None = None,
     ) -> str:
@@ -57,7 +65,15 @@ class SessionStorage:
 
         Args:
             summary: SessionSummary to store
-            group_id: Group ID for the session (project-scoped)
+            group_id: Group ID for the session (global or project-scoped)
+            project_namespace: Optional namespace hash for cross-project filtering.
+                If provided, a YAML metadata header is prepended to the episode body.
+            project_path: Optional human-readable project path for metadata
+            hostname: Optional hostname for multi-machine disambiguation.
+                Defaults to socket.gethostname() if project_namespace is provided.
+            include_project_path: Whether to include project_path in metadata header
+            session_file: Optional session file name for metadata header
+            message_count: Optional message count for metadata header
             previous_session_uuid: UUID of previous session for relationship linking
             handoff_file_path: Optional path to handoff file for reference
 
@@ -74,18 +90,68 @@ class SessionStorage:
             episode_name = f'Session {summary.sequence_number:03d}: {summary.title}'
 
             # Build episode body with markdown content
-            episode_body = summary.to_markdown()
+            base_content = summary.to_markdown()
+
+            # Build metadata header (only if namespace provided)
+            if project_namespace is not None:
+                # Use provided values or sensible defaults
+                effective_hostname = hostname or socket.gethostname()
+                effective_session_file = session_file or f'session-{summary.slug}.jsonl'
+                effective_message_count = message_count or 0
+
+                # Calculate duration from summary's duration_estimate
+                duration_minutes = 0
+                if summary.duration_estimate:
+                    # Parse "~Xh" or "~Xm" format
+                    try:
+                        duration_str = summary.duration_estimate.replace('~', '').strip()
+                        if 'h' in duration_str:
+                            duration_minutes = int(duration_str.replace('h', '')) * 60
+                        elif 'm' in duration_str:
+                            duration_minutes = int(duration_str.replace('m', ''))
+                    except ValueError:
+                        duration_minutes = 0
+                        logger.warning(
+                            f'Could not parse duration_estimate: {summary.duration_estimate}'
+                        )
+
+                logger.debug(
+                    f'Building metadata header with namespace={project_namespace[:8]}..., '
+                    f'hostname={effective_hostname}'
+                )
+
+                metadata_header = build_episode_metadata_header(
+                    project_namespace=project_namespace,
+                    project_path=project_path,
+                    hostname=effective_hostname,
+                    session_file=effective_session_file,
+                    message_count=effective_message_count,
+                    duration_minutes=duration_minutes,
+                    include_project_path=include_project_path,
+                )
+                episode_body = metadata_header + base_content
+            else:
+                # Backward compatibility: no metadata header
+                episode_body = base_content
 
             # Add handoff file reference if provided
             if handoff_file_path:
                 episode_body += f'\n---\n\n**Handoff File**: `{handoff_file_path}`\n'
 
-            # Prepare source description
-            source_description = (
-                f'Session handoff summary with {len(summary.completed_tasks)} completed tasks, '
-                f'{len(summary.blocked_items)} blocked items, '
-                f'and {len(summary.files_modified)} files modified'
-            )
+            # Prepare source description (prefix with namespace if provided)
+            if project_namespace is not None:
+                source_description = (
+                    f'[{project_namespace[:8]}] '
+                    f'Session handoff summary with {len(summary.completed_tasks)} completed tasks, '
+                    f'{len(summary.blocked_items)} blocked items, '
+                    f'and {len(summary.files_modified)} files modified'
+                )
+            else:
+                source_description = (
+                    f'Session handoff summary with {len(summary.completed_tasks)} completed tasks, '
+                    f'{len(summary.blocked_items)} blocked items, '
+                    f'and {len(summary.files_modified)} files modified'
+                )
 
             # Add episode to graph
             logger.debug(f'Adding episode: {episode_name}')

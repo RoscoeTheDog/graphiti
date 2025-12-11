@@ -15,10 +15,14 @@ limitations under the License.
 """
 
 import logging
+import socket
 from datetime import datetime
+from typing import Optional
 
 from graphiti_core.graphiti import Graphiti
 from graphiti_core.nodes import EpisodeType
+
+from .metadata import build_episode_metadata_header
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +60,11 @@ class SessionIndexer:
         session_number: int | None = None,
         reference_time: datetime | None = None,
         previous_episode_uuid: str | None = None,
+        project_namespace: Optional[str] = None,
+        project_path: Optional[str] = None,
+        hostname: Optional[str] = None,
+        include_project_path: bool = True,
+        session_file: Optional[str] = None,
     ) -> str:
         """
         Index a session by adding filtered content as an episode to Graphiti.
@@ -69,10 +78,15 @@ class SessionIndexer:
         Args:
             session_id: Unique session identifier
             filtered_content: Filtered session content (from SessionFilter)
-            group_id: Group ID for the session (project-scoped, format: hostname__pwdhash)
+            group_id: Group ID for the session (global format: hostname__global)
             session_number: Optional session sequence number for naming
             reference_time: Optional timestamp for the session (defaults to now)
             previous_episode_uuid: Optional UUID of previous session for linking
+            project_namespace: Project hash for namespace tagging (Story 6)
+            project_path: Human-readable project path (if include_project_path=True)
+            hostname: Machine hostname for metadata (defaults to socket.gethostname())
+            include_project_path: Whether to include project_path in metadata
+            session_file: Original session file path for metadata
 
         Returns:
             UUID of created episode
@@ -85,8 +99,10 @@ class SessionIndexer:
             >>> episode_uuid = await indexer.index_session(
             ...     session_id="abc123",
             ...     filtered_content=filtered_session,  # From SessionFilter
-            ...     group_id="myhost__a1b2c3d4",
-            ...     session_number=5
+            ...     group_id="myhost__global",
+            ...     session_number=5,
+            ...     project_namespace="a1b2c3d4",
+            ...     hostname="DESKTOP-123",
             ... )
             >>> print(f"Session indexed: {episode_uuid}")
         """
@@ -99,11 +115,35 @@ class SessionIndexer:
         # Use provided reference time or current time
         ref_time = reference_time or datetime.now()
 
-        # Build source description with session metadata
-        source_description = (
-            f'Filtered Claude Code session {session_id} '
-            f'(93% token reduction applied, structure preserved)'
-        )
+        # Build episode body with optional namespace metadata header (Story 6)
+        if project_namespace is not None:
+            effective_hostname = hostname or socket.gethostname()
+            effective_session_file = session_file or f"session-{session_id[:8]}.jsonl"
+
+            metadata_header = build_episode_metadata_header(
+                project_namespace=project_namespace,
+                project_path=project_path,
+                hostname=effective_hostname,
+                session_file=effective_session_file,
+                message_count=0,  # Will be set by caller if available
+                duration_minutes=0,  # Will be set by caller if available
+                include_project_path=include_project_path,
+            )
+            episode_body = metadata_header + filtered_content
+
+            # Build source description with namespace prefix
+            source_description = (
+                f'[{project_namespace[:8]}] '
+                f'Filtered Claude Code session {session_id} '
+                f'(93% token reduction applied, structure preserved)'
+            )
+        else:
+            # Backward compatibility: no namespace metadata
+            episode_body = filtered_content
+            source_description = (
+                f'Filtered Claude Code session {session_id} '
+                f'(93% token reduction applied, structure preserved)'
+            )
 
         logger.info(f'Indexing session: {episode_name} (group: {group_id})')
 
@@ -116,7 +156,7 @@ class SessionIndexer:
             # - Enable semantic search
             result = await self.graphiti.add_episode(
                 name=episode_name,
-                episode_body=filtered_content,
+                episode_body=episode_body,  # May include namespace metadata header
                 source_description=source_description,
                 reference_time=ref_time,
                 source=EpisodeType.text,

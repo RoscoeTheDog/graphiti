@@ -159,6 +159,10 @@
         "notification_method": "log",
         "webhook_url": null
       }
-    }
+    },
+    "group_id": null,
+    "cross_project_search": true,
+    "trusted_namespaces": null,
+    "include_project_path": true
   }
 }

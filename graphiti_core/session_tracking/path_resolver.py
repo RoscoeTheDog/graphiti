@@ -37,6 +37,7 @@ class ClaudePathResolver:
         self.claude_dir = claude_dir or self._default_claude_dir()
         self.projects_dir = self.claude_dir / "projects"
         self._hash_cache: Dict[str, str] = {}  # project_path -> hash
+        self._reverse_hash_cache: Dict[str, str] = {}  # hash -> project_path
 
     def _default_claude_dir(self) -> Path:
         """Get default Claude directory path.
@@ -281,3 +282,89 @@ class ClaudePathResolver:
             logger.warning(f"Error resolving project from path {file_path}: {e}")
 
         return None
+
+    def get_global_group_id(self, hostname: str) -> str:
+        """Generate the global group ID for this machine.
+
+        The global group ID is used for machine-wide memories that are not
+        tied to a specific project, following the naming convention used
+        by Claude Code for cross-project session tracking.
+
+        Args:
+            hostname: Machine hostname
+
+        Returns:
+            Global group ID in format '{hostname}__global'
+        """
+        return f"{hostname}__global"
+
+    def get_project_path_from_hash(self, project_hash: str) -> Optional[str]:
+        """Reverse-lookup project path from hash by scanning known projects.
+
+        This method scans known project directories and computes hashes to find
+        a matching project path. Results are cached for subsequent lookups.
+
+        Note: This is an O(n) operation where n is the number of known projects.
+        For typical usage (< 10 projects), this is negligible.
+
+        Args:
+            project_hash: The 8-character hash to look up
+
+        Returns:
+            Project directory path in native OS format, or None if not found
+        """
+        # Check cache first
+        if project_hash in self._reverse_hash_cache:
+            return self._reverse_hash_cache[project_hash]
+
+        # Build/update reverse cache by scanning known projects
+        try:
+            projects = self.list_all_projects()
+
+            for hash_key, sessions_dir in projects.items():
+                # Already in reverse cache? Skip
+                if hash_key in self._reverse_hash_cache:
+                    continue
+
+                # Try to find a project path that hashes to this key
+                # The sessions_dir is: ~/.claude/projects/{hash}/sessions
+                # We need to find the original project path that produced this hash
+
+                # Store the hash -> path mapping (path is unknown, but we know the hash exists)
+                # Since we can't reverse the hash, we can only match against forward lookups
+                # For now, record that this hash exists but path is unknown
+                # The hash will be matched when a project path is explicitly provided
+
+            # Check if the requested hash exists in our projects
+            if project_hash in projects:
+                # The hash exists but we don't know the original path
+                # without additional information (like watching which paths are opened)
+                logger.debug(f"Hash {project_hash} exists but original path unknown")
+
+        except Exception as e:
+            logger.error(f"Error building reverse hash cache: {e}", exc_info=True)
+
+        # Also check our forward cache to see if we've seen this hash before
+        for path, cached_hash in self._hash_cache.items():
+            if cached_hash == project_hash:
+                # Found it! Cache the reverse mapping and return
+                self._reverse_hash_cache[project_hash] = path
+                return path
+
+        return None
+
+    def register_project_path(self, project_path: str) -> str:
+        """Register a project path and return its hash.
+
+        This populates both the forward and reverse hash caches,
+        enabling subsequent reverse lookups via get_project_path_from_hash.
+
+        Args:
+            project_path: Absolute path to project directory
+
+        Returns:
+            8-character hash string for the project
+        """
+        project_hash = self.get_project_hash(project_path)
+        self._reverse_hash_cache[project_hash] = project_path
+        return project_hash

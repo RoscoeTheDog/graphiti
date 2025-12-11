@@ -2,11 +2,16 @@
 
 ## Overview
 
-This guide covers migrating session tracking configuration from v1.0.0 to v1.1.0. The v1.1.0 release introduces significant improvements to session tracking, including a new opt-in security model, flexible filtering system, and enhanced cost management features.
+This guide covers migrating session tracking configuration across major versions:
+- **v1.0.0 → v1.1.0**: Opt-in security model, flexible filtering, rolling retention
+- **v1.1.0 → v2.0.0**: Global knowledge graph with cross-project learning (NEW)
 
-**Migration Timeline**: ~15-30 minutes  
-**Breaking Changes**: Yes (5 major changes)  
-**Backward Compatibility**: Limited (see details below)
+The v2.0.0 release introduces a fundamental architectural change: migrating from project-scoped isolation to global indexing with namespace tagging. This enables cross-project knowledge sharing while preserving provenance tracking.
+
+**v1.1.0 Migration Timeline**: ~15-30 minutes
+**v2.0.0 Migration Timeline**: ~5-15 minutes (fresh start recommended)
+**Breaking Changes**: Yes
+**Backward Compatibility**: v1.x data preserved, not searched by default in v2.0
 
 ---
 
@@ -558,6 +563,161 @@ graphiti-mcp episodes list --limit 5
 
 ---
 
-**Version:** 1.0 (2025-11-19)  
-**Covers:** v1.0.0 → v1.1.0 migration  
-**Next Review:** 2025-12-19
+## v1.1.0 → v2.0.0 Migration (Global Scope)
+
+**New in v2.0.0** - Fundamental architectural change from project-scoped isolation to global indexing with namespace tagging.
+
+### What Changed
+
+| Aspect | v1.1.0 (Project Scope) | v2.0.0 (Global Scope) |
+|--------|------------------------|----------------------|
+| **Group ID** | Per-project (`{hostname}__{project_hash}`) | Single global (`{hostname}__global`) |
+| **Cross-Project Learning** | None (isolated) | Enabled by default |
+| **Episode Metadata** | Minimal | YAML frontmatter with namespace/path |
+| **Configuration** | Project or global | Global only (recommended) |
+
+### Migration Path: Fresh Start (Recommended)
+
+Since v1.x was never publicly released, we recommend a clean start with v2.0:
+
+**Step 1: Update configuration**
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "group_id": null,
+    "cross_project_search": true,
+    "trusted_namespaces": null,
+    "include_project_path": true
+  }
+}
+```
+
+**Step 2: Start using v2.0**
+- New sessions will be indexed with namespace metadata
+- Old v1.x data in project-specific group_ids remains but won't be searched
+
+**Before (v1.1.0)**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_path": null,
+    "keep_length_days": 90,
+    "filter": {
+      "user_messages": true,
+      "agent_messages": true,
+      "tool_calls": true,
+      "tool_content": false
+    }
+  }
+}
+```
+
+**After (v2.0.0)**:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_path": null,
+    "keep_length_days": 90,
+    "group_id": null,
+    "cross_project_search": true,
+    "trusted_namespaces": null,
+    "include_project_path": true,
+    "filter": {
+      "user_messages": true,
+      "agent_messages": true,
+      "tool_calls": true,
+      "tool_content": false
+    }
+  }
+}
+```
+
+**Estimated Time:** 5 minutes
+**Cost Impact:** None (new sessions only)
+
+### Migration Path: Keep Old Data
+
+If you have valuable v1.x data you want to preserve access to:
+
+**Option A: Keep Old Data (Separate)**
+- Old data remains in project-specific group_ids
+- New data goes to global group_id
+- Query both group_ids when needed:
+  ```json
+  {
+    "tool": "search_memory_nodes",
+    "arguments": {
+      "query": "authentication",
+      "group_ids": ["myhost__global", "myhost__a1b2c3d4"]
+    }
+  }
+  ```
+
+**Option B: Re-index Sessions**
+- Use CLI to re-index existing sessions with new global group_id
+- Sessions get namespace metadata added automatically
+- Old project-specific data can be cleared
+
+```bash
+# Re-index last 90 days
+graphiti-mcp session-tracking sync --days 90 --no-dry-run
+
+# Clear old project-specific data (optional, irreversible)
+# graphiti-mcp episodes cleanup --group-id "myhost__a1b2c3d4"
+```
+
+**Option C: Manual Migration Script**
+For advanced users who need fine-grained control:
+
+```python
+# Example: Migrate episodes to global group_id with namespace metadata
+from graphiti_core import Graphiti
+
+async def migrate_episode(graphiti, old_episode, new_group_id, namespace):
+    """Re-index episode with namespace metadata."""
+    metadata_header = f"""---
+graphiti_session_metadata:
+  version: "2.0"
+  project_namespace: "{namespace}"
+  migrated_from: "{old_episode.group_id}"
+---
+
+"""
+    await graphiti.add_episode(
+        name=old_episode.name,
+        episode_body=metadata_header + old_episode.content,
+        source_description=f"[{namespace[:8]}] {old_episode.source_description}",
+        group_id=new_group_id,
+    )
+```
+
+### New Configuration Fields
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `group_id` | `null` | Global group ID (default: `{hostname}__global`) |
+| `cross_project_search` | `true` | Search across all project namespaces |
+| `trusted_namespaces` | `null` | Restrict search to specific namespaces |
+| `include_project_path` | `true` | Include paths in episode metadata |
+
+### Breaking Changes
+
+1. **Group ID Format**: Changed from `{hostname}__{project_hash}` to `{hostname}__global`
+2. **Episode Content**: Now includes YAML frontmatter with namespace metadata
+3. **Search Behavior**: Cross-project search enabled by default
+
+### Backward Compatibility Notes
+
+- Existing v1.x data in old group_ids is preserved but not searched by default
+- New configuration fields have sensible defaults (no config changes required)
+- v1.x filter syntax (`true`/`false`) continues to work
+- v1.0 was never publicly released, simplifying migration
+
+---
+
+**Version:** 2.0 (2025-12-10)
+**Covers:** v1.0.0 → v1.1.0 migration, v1.1.0 → v2.0.0 migration
+**Next Review:** 2026-01-10

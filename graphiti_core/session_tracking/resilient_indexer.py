@@ -191,6 +191,10 @@ class ResilientSessionIndexer:
         reference_time: Optional[datetime] = None,
         previous_episode_uuid: Optional[str] = None,
         metadata: Optional[dict] = None,
+        project_namespace: Optional[str] = None,
+        project_path: Optional[str] = None,
+        hostname: Optional[str] = None,
+        include_project_path: bool = True,
     ) -> dict[str, Any]:
         """Index a session with resilience.
 
@@ -200,12 +204,16 @@ class ResilientSessionIndexer:
         Args:
             session_id: Unique session identifier
             filtered_content: Filtered session content
-            group_id: Group ID for the session
-            session_file: Path to session file (for retry queue)
+            group_id: Group ID for the session (global format: hostname__global)
+            session_file: Path to session file (for retry queue and metadata)
             session_number: Optional session sequence number
             reference_time: Optional timestamp for the session
             previous_episode_uuid: Optional UUID of previous session
             metadata: Optional additional metadata
+            project_namespace: Project hash for namespace tagging (Story 6)
+            project_path: Human-readable project path (if include_project_path=True)
+            hostname: Machine hostname for metadata
+            include_project_path: Whether to include project_path in metadata
 
         Returns:
             Dict with:
@@ -236,6 +244,11 @@ class ResilientSessionIndexer:
                     session_number=session_number,
                     reference_time=reference_time,
                     previous_episode_uuid=previous_episode_uuid,
+                    project_namespace=project_namespace,
+                    project_path=project_path,
+                    hostname=hostname,
+                    include_project_path=include_project_path,
+                    session_file=session_file,
                 )
                 result['success'] = True
                 result['episode_uuid'] = episode_uuid
@@ -258,6 +271,10 @@ class ResilientSessionIndexer:
             previous_episode_uuid=previous_episode_uuid,
             metadata=metadata,
             original_error=result.get('error'),
+            project_namespace=project_namespace,
+            project_path=project_path,
+            hostname=hostname,
+            include_project_path=include_project_path,
         )
 
     async def _handle_degraded_indexing(
@@ -271,6 +288,10 @@ class ResilientSessionIndexer:
         previous_episode_uuid: Optional[str],
         metadata: Optional[dict],
         original_error: Optional[str],
+        project_namespace: Optional[str] = None,
+        project_path: Optional[str] = None,
+        hostname: Optional[str] = None,
+        include_project_path: bool = True,
     ) -> dict[str, Any]:
         """Handle indexing when in degraded mode.
 
@@ -331,6 +352,10 @@ class ResilientSessionIndexer:
                         'session_number': session_number,
                         'reference_time': reference_time.isoformat() if reference_time else None,
                         'previous_episode_uuid': previous_episode_uuid,
+                        'project_namespace': project_namespace,
+                        'project_path': project_path,
+                        'hostname': hostname,
+                        'include_project_path': include_project_path,
                         **(metadata or {}),
                     },
                 )
@@ -464,6 +489,12 @@ class ResilientSessionIndexer:
                 reference_time = datetime.fromisoformat(metadata['reference_time'])
             previous_uuid = metadata.get('previous_episode_uuid')
 
+            # Extract namespace metadata (Story 6)
+            project_namespace = metadata.get('project_namespace')
+            project_path = metadata.get('project_path')
+            hostname = metadata.get('hostname')
+            include_project_path = metadata.get('include_project_path', True)
+
             # Attempt full indexing
             await self._indexer.index_session(
                 session_id=episode.session_id,
@@ -472,6 +503,11 @@ class ResilientSessionIndexer:
                 session_number=session_number,
                 reference_time=reference_time,
                 previous_episode_uuid=previous_uuid,
+                project_namespace=project_namespace,
+                project_path=project_path,
+                hostname=hostname,
+                include_project_path=include_project_path,
+                session_file=episode.session_file,
             )
 
             logger.info(f"Episode {episode.episode_id} retry succeeded")

@@ -365,3 +365,186 @@ class TestPathResolverIntegration:
             project_hash = resolver.resolve_project_from_session_file(session_file)
             expected_hash = resolver.get_project_hash(project_path)
             assert project_hash == expected_hash
+
+
+class TestGetGlobalGroupId:
+    """Tests for get_global_group_id method (Story 3 AC-3.1)."""
+
+    def test_get_global_group_id(self):
+        """Test format '{hostname}__global'."""
+        resolver = ClaudePathResolver()
+
+        # Test with simple hostname
+        result = resolver.get_global_group_id("myhost")
+        assert result == "myhost__global"
+        assert "__global" in result
+
+    def test_get_global_group_id_with_domain(self):
+        """Test hostname with domain."""
+        resolver = ClaudePathResolver()
+
+        result = resolver.get_global_group_id("server.example.com")
+        assert result == "server.example.com__global"
+
+    def test_get_global_group_id_special_chars(self):
+        """Test hostname with special characters (Story 3 AC-3.1)."""
+        resolver = ClaudePathResolver()
+
+        # Test with hyphen
+        result = resolver.get_global_group_id("my-host-name")
+        assert result == "my-host-name__global"
+
+        # Test with underscore
+        result = resolver.get_global_group_id("my_host_name")
+        assert result == "my_host_name__global"
+
+        # Test with numbers
+        result = resolver.get_global_group_id("host123")
+        assert result == "host123__global"
+
+        # Test mixed
+        result = resolver.get_global_group_id("DESKTOP-9SIHNJI")
+        assert result == "DESKTOP-9SIHNJI__global"
+
+    def test_get_global_group_id_empty_hostname(self):
+        """Test with empty hostname edge case."""
+        resolver = ClaudePathResolver()
+
+        result = resolver.get_global_group_id("")
+        assert result == "__global"
+
+    def test_get_global_group_id_unicode(self):
+        """Test with unicode characters in hostname."""
+        resolver = ClaudePathResolver()
+
+        result = resolver.get_global_group_id("myhost-тест")
+        assert result == "myhost-тест__global"
+
+
+class TestGetProjectPathFromHash:
+    """Tests for get_project_path_from_hash method (Story 3 AC-3.2)."""
+
+    def test_get_project_path_from_hash_not_found(self):
+        """Test returns None for unknown hash (Story 3 AC-3.2)."""
+        resolver = ClaudePathResolver()
+
+        # Unknown hash should return None
+        result = resolver.get_project_path_from_hash("deadbeef")
+        assert result is None
+
+    def test_get_project_path_from_hash_found_via_cache(self):
+        """Test returns path when hash exists in cache (Story 3 AC-3.2)."""
+        resolver = ClaudePathResolver()
+
+        # Register a path (populates forward cache)
+        project_path = "/home/user/my-project"
+        project_hash = resolver.get_project_hash(project_path)
+
+        # The hash should be findable via forward cache lookup
+        result = resolver.get_project_path_from_hash(project_hash)
+        assert result == project_path
+
+    def test_get_project_path_from_hash_caching(self):
+        """Test that reverse cache is populated (Story 3 AC-3.2)."""
+        resolver = ClaudePathResolver()
+
+        # Initially cache is empty
+        assert len(resolver._reverse_hash_cache) == 0
+
+        # Register a path (using register_project_path helper)
+        project_path = "/tmp/test-project"
+        project_hash = resolver.register_project_path(project_path)
+
+        # Reverse cache should be populated
+        assert project_hash in resolver._reverse_hash_cache
+        assert resolver._reverse_hash_cache[project_hash] == project_path
+
+        # Lookup should use cache and return same result
+        result = resolver.get_project_path_from_hash(project_hash)
+        assert result == project_path
+
+    def test_get_project_path_from_hash_returns_native_format(self):
+        """Test returns path in native OS format (Story 3 AC-3.2)."""
+        resolver = ClaudePathResolver()
+
+        if platform.system() == "Windows":
+            # Windows path
+            project_path = "C:\\Users\\Admin\\my-project"
+        else:
+            # Unix path
+            project_path = "/home/user/my-project"
+
+        # Register the path
+        project_hash = resolver.register_project_path(project_path)
+
+        # Lookup should return same format as registered
+        result = resolver.get_project_path_from_hash(project_hash)
+        assert result == project_path
+
+    def test_get_project_path_from_hash_multiple_projects(self):
+        """Test with multiple registered projects."""
+        resolver = ClaudePathResolver()
+
+        # Register multiple paths
+        paths = [
+            "/home/user/project-a",
+            "/home/user/project-b",
+            "/tmp/other-project",
+        ]
+        hashes = [resolver.register_project_path(p) for p in paths]
+
+        # Each hash should resolve to correct path
+        for path, hash_val in zip(paths, hashes):
+            result = resolver.get_project_path_from_hash(hash_val)
+            assert result == path
+
+
+class TestRegisterProjectPath:
+    """Tests for register_project_path helper method."""
+
+    def test_register_project_path_returns_hash(self):
+        """Test that register_project_path returns the hash."""
+        resolver = ClaudePathResolver()
+
+        project_path = "/home/user/test-project"
+        result = resolver.register_project_path(project_path)
+
+        # Should return 8-char hash
+        assert len(result) == 8
+        assert result.isalnum()
+
+        # Should match get_project_hash result
+        expected = resolver.get_project_hash(project_path)
+        assert result == expected
+
+    def test_register_project_path_populates_both_caches(self):
+        """Test that both forward and reverse caches are populated."""
+        resolver = ClaudePathResolver()
+
+        project_path = "/home/user/test-project"
+        project_hash = resolver.register_project_path(project_path)
+
+        # Forward cache should be populated
+        assert project_path in resolver._hash_cache
+        assert resolver._hash_cache[project_path] == project_hash
+
+        # Reverse cache should be populated
+        assert project_hash in resolver._reverse_hash_cache
+        assert resolver._reverse_hash_cache[project_hash] == project_path
+
+    def test_register_project_path_idempotent(self):
+        """Test that registering same path twice is idempotent."""
+        resolver = ClaudePathResolver()
+
+        project_path = "/home/user/test-project"
+
+        # Register twice
+        hash1 = resolver.register_project_path(project_path)
+        hash2 = resolver.register_project_path(project_path)
+
+        # Should return same hash
+        assert hash1 == hash2
+
+        # Caches should not be duplicated
+        assert len([k for k, v in resolver._hash_cache.items() if k == project_path]) == 1
+        assert len([k for k, v in resolver._reverse_hash_cache.items() if v == project_path]) == 1

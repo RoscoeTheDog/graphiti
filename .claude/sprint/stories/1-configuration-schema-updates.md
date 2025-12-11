@@ -11,12 +11,12 @@ Reference: GLOBAL_SESSION_TRACKING_SPEC_v2.0.md Section 3.1
 
 ## Acceptance Criteria
 
-- [ ] (P0) `group_id: Optional[str]` field added with default None (resolves to `{hostname}__global`)
-- [ ] (P0) `cross_project_search: bool` field added with default True
-- [ ] (P1) `trusted_namespaces: Optional[list[str]]` field added with hex hash validation
-- [ ] (P1) `include_project_path: bool` field added with default True
-- [ ] (P0) All fields have proper docstrings explaining behavior
-- [ ] (P1) Validator for `trusted_namespaces` rejects non-hex strings
+- [x] (P0) `group_id: Optional[str]` field added with default None (resolves to `{hostname}__global`)
+- [x] (P0) `cross_project_search: bool` field added with default True
+- [x] (P1) `trusted_namespaces: Optional[list[str]]` field added with hex hash validation
+- [x] (P1) `include_project_path: bool` field added with default True
+- [x] (P0) All fields have proper docstrings explaining behavior
+- [x] (P1) Validator for `trusted_namespaces` rejects non-hex strings
 
 ## Dependencies
 
