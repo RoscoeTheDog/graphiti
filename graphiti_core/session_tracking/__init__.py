@@ -22,6 +22,7 @@ from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
 from .message_summarizer import MessageSummarizer
+from .activity_vector import ActivityVector
 from .summarizer import DecisionRecord, ErrorResolution, SessionSummary, SessionSummarySchema
 from .metadata import build_episode_metadata_header
 from .parser import JSONLParser
@@ -69,6 +70,8 @@ __all__ = [
     "SessionSummarySchema",
     "DecisionRecord",
     "ErrorResolution",
+    # Activity vector model (NEW - Story 2 v3.0.0)
+    "ActivityVector",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)

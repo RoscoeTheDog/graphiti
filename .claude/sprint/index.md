@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:14:10
+**Generated**: 2025-12-11 15:20:10
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 52
-- **Completion**: 7.7%
+- **Completion**: 15.4%
 
 ### By Status
 
-- completed: 4
-- pending: 36
-- unassigned: 12
+- completed: 8
+- pending: 33
+- unassigned: 11
 
 ### By Type
 
@@ -47,15 +47,15 @@
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Activity Vector Model
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Activity Vector Model
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Activity Vector Model
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Activity Detection from Messages
