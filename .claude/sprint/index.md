@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:48:59
+**Generated**: 2025-12-11 15:52:37
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 21.4%
+- **Completion**: 25.0%
 
 ### By Status
 
-- completed: 12
-- in_progress: 3
-- unassigned: 41
+- completed: 14
+- in_progress: 2
+- unassigned: 40
 
 ### By Type
 
@@ -49,7 +49,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Activity Vector Model
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story 1.d: Discovery: Enhanced Session Summary Schema
@@ -85,7 +85,7 @@
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Activity Detection from Messages
-  **Status**: in_progress | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Tool Classification Heuristics
