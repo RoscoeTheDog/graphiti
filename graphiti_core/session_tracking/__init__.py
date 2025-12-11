@@ -17,12 +17,13 @@ Core components:
 - SessionTrackingHealth: Health status aggregation (Story 19)
 """
 
+from .activity_detector import ActivityDetector
+from .activity_vector import ActivityVector
 from .filter import SessionFilter
 from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
 from .message_summarizer import MessageSummarizer
-from .activity_vector import ActivityVector
 from .summarizer import DecisionRecord, ErrorResolution, SessionSummary, SessionSummarySchema
 from .metadata import build_episode_metadata_header
 from .parser import JSONLParser
@@ -72,6 +73,8 @@ __all__ = [
     "ErrorResolution",
     # Activity vector model (NEW - Story 2 v3.0.0)
     "ActivityVector",
+    # Activity detection (NEW - Story 3 v3.0.0)
+    "ActivityDetector",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)

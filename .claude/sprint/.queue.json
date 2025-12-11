@@ -595,7 +595,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Activity Detection from Messages",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -878,9 +878,90 @@
         "integration",
         "security"
       ]
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Activity Vector Model",
+      "status": "unassigned",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Activity Vector Model",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Activity Vector Model",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Activity Vector Model",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
+    "-2.d",
+    "-2.i",
+    "-2.t",
     "1.d",
     "1.i",
     "1.t",
