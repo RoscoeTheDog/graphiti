@@ -17,3 +17,4 @@
 | s014 | sprint-creation-attempt-and-cleanup-for | ACTIVE | 2025-12-11 22:38 | Reviewed spec and attempted sprint creation for hybrid |
 | s015 | turn-based-indexing-with-single-pass | ACTIVE | 2025-12-11 23:53 | Turn-based indexing with single-pass LLM research |
 | s016 | research-and-specify-preprocessing | ACTIVE | 2025-12-12 00:27 | Research and specify preprocessing prompt injection |
+| s017 | execute-turn-based-preprocessing | ACTIVE | 2025-12-12 07:34 | Execute Turn-Based Preprocessing Injection sprint |
