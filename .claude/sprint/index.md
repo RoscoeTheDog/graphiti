@@ -1,225 +1,174 @@
-# Sprint Index (Auto-Generated from .queue.json)
+# Implementation Sprint: Session Tracking Hybrid Close
 
-**DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
+**Version**: v3.1.0
+**Created**: 2025-12-11 22:28
+**Base Branch**: dev
+**Status**: Active
+**Spec**: [SESSION_TRACKING_HYBRID_CLOSE_SPEC_v1.0.md](../implementation/SESSION_TRACKING_HYBRID_CLOSE_SPEC_v1.0.md)
 
-**Generated**: 2025-12-11 20:31:31
+## Sprint Goal
 
----
+Implement a hybrid approach to session close detection that eliminates wasted LLM calls while ensuring timely context handoff between agents. The architecture combines explicit signals, lazy indexing, content-based deduplication, and inactivity timeout as a layered fallback system.
 
-## Sprint Information
+## Key Decisions
 
-- **Sprint ID**: intelligent-session-summarization-vv3.0.0
-- **Status**: active
-- **Branch**: dev
-
-## Sprint Statistics
-
-- **Total Stories**: 60
-- **Completion**: 100.0%
-
-### By Status
-
-- completed: 60
-
-### By Type
-
-- discovery: 13
-- feature: 13
-- implementation: 13
-- testing: 13
-- validation: 2
-- validation_discovery: 2
-- validation_implementation: 2
-- validation_testing: 2
+- **Delete/replace over incremental indexing**: LLM summarization output changes based on full context
+- **Lazy indexing is blocking**: Ensures fresh results when next agent queries
+- **Hash on filtered content**: Stability across non-semantic JSONL changes
+- **30-minute default timeout**: Primary close is explicit; timeout is fallback
+- **Socket/pipe communication**: Hook scripts communicate with MCP server via IPC
 
 ---
 
-## Stories (Execution Order)
+## Stories
 
-  ### Story -2.d: Validate Discovery: Activity Vector Model
-  **Status**: completed | **Type**: validation_discovery
-  - Dependencies: Story -2
-  - Blocks: Story -2.i
+### Core Implementation (High Priority)
 
-  ### Story -2.i: Validate Implementation: Activity Vector Model
-  **Status**: completed | **Type**: validation_implementation
-  - Dependencies: Story -2, Story -2.d
-  - Blocks: Story -2.t
+### Story 1: SessionStateManager with Persistence
+**Status**: unassigned | **Priority**: High | **Size**: M
+**See**: [stories/1-session-state-manager.md](stories/1-session-state-manager.md)
 
-  ### Story -2.t: Validate Testing: Activity Vector Model
-  **Status**: completed | **Type**: validation_testing
-  - Dependencies: Story -2, Story -2.i
+### Story 2: session_tracking_close() MCP Tool
+**Status**: unassigned | **Priority**: High | **Size**: S
+**See**: [stories/2-session-tracking-close-tool.md](stories/2-session-tracking-close-tool.md)
 
-  ### Story -9.d: Validate Discovery: Dynamic Prompt Generation
-  **Status**: completed | **Type**: validation_discovery
-  - Dependencies: Story -9
-  - Blocks: Story -9.i
+### Story 3: Content Hash Computation
+**Status**: unassigned | **Priority**: High | **Size**: S
+**See**: [stories/3-content-hash-computation.md](stories/3-content-hash-computation.md)
 
-  ### Story -9.i: Validate Implementation: Dynamic Prompt Generation
-  **Status**: completed | **Type**: validation_implementation
-  - Dependencies: Story -9, Story -9.d
-  - Blocks: Story -9.t
+### Story 4: Delete/Replace Logic in Indexer
+**Status**: unassigned | **Priority**: High | **Size**: M
+**See**: [stories/4-delete-replace-indexer.md](stories/4-delete-replace-indexer.md)
 
-  ### Story -9.t: Validate Testing: Dynamic Prompt Generation
-  **Status**: completed | **Type**: validation_testing
-  - Dependencies: Story -9, Story -9.i
+### Story 5: Lazy Indexing in Search Tools
+**Status**: unassigned | **Priority**: Medium | **Size**: M
+**See**: [stories/5-lazy-indexing-search.md](stories/5-lazy-indexing-search.md)
 
-  ### Story 1.d: Discovery: Enhanced Session Summary Schema
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 1
+### Story 6: session_tracking_list_unindexed() Tool
+**Status**: unassigned | **Priority**: Low | **Size**: S
+**See**: [stories/6-list-unindexed-tool.md](stories/6-list-unindexed-tool.md)
 
-  ### Story 1.i: Implementation: Enhanced Session Summary Schema
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 1
+### Story 7: Configuration Schema Updates
+**Status**: unassigned | **Priority**: Medium | **Size**: S
+**See**: [stories/7-configuration-schema.md](stories/7-configuration-schema.md)
 
-  ### Story 1.t: Testing: Enhanced Session Summary Schema
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 1
+### Story 8: Update ensure_global_config_exists()
+**Status**: unassigned | **Priority**: Medium | **Size**: S
+**See**: [stories/8-ensure-global-config.md](stories/8-ensure-global-config.md)
 
-  ### Story 2.d: Discovery: Activity Vector Model
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 2
+### Story 9: Integration Tests for Hybrid Flow
+**Status**: unassigned | **Priority**: High | **Size**: L
+**See**: [stories/9-integration-tests.md](stories/9-integration-tests.md)
 
-  ### Story 2.i: Implementation: Activity Vector Model
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 2
-
-  ### Story 2.t: Testing: Activity Vector Model
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 2
-
-  ### Story 3.d: Discovery: Activity Detection from Messages
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 3
-
-  ### Story 3.i: Implementation: Activity Detection from Messages
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 3
-
-  ### Story 3.t: Testing: Activity Detection from Messages
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 3
-
-  ### Story 4.d: Discovery: Tool Classification Heuristics
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 4
-
-  ### Story 4.i: Implementation: Tool Classification Heuristics
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 4
-
-  ### Story 4.t: Testing: Tool Classification Heuristics
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 4
-
-  ### Story 5.d: Discovery: LLM Tool Classification with Caching
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 5
-
-  ### Story 5.i: Implementation: LLM Tool Classification with Caching
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 5
-
-  ### Story 5.t: Testing: LLM Tool Classification with Caching
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 5
-
-  ### Story 6.d: Discovery: Bash Command Analysis
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 6
-
-  ### Story 6.i: Implementation: Bash Command Analysis
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 6
-
-  ### Story 6.t: Testing: Bash Command Analysis
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 6
-
-  ### Story 7.d: Discovery: Unified Tool Classifier
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 7
-
-  ### Story 7.i: Implementation: Unified Tool Classifier
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 7
-
-  ### Story 7.t: Testing: Unified Tool Classifier
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 7
-
-  ### Story 8.d: Discovery: Extraction Priority Algorithm
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 8
-
-  ### Story 8.i: Implementation: Extraction Priority Algorithm
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 8
-
-  ### Story 8.t: Testing: Extraction Priority Algorithm
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 8
-
-  ### Story 9.d: Discovery: Dynamic Prompt Generation
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 9
-
-  ### Story 9.i: Implementation: Dynamic Prompt Generation
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 9
-
-  ### Story 9.t: Testing: Dynamic Prompt Generation
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 9
-
-  ### Story 10.d: Discovery: Enhanced Markdown Rendering
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 10
-
-  ### Story 10.i: Implementation: Enhanced Markdown Rendering
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 10
-
-  ### Story 10.t: Testing: Enhanced Markdown Rendering
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 10
-
-  ### Story 11.d: Discovery: Summarizer Integration
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 11
-
-  ### Story 11.i: Implementation: Summarizer Integration
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 11
-
-  ### Story 11.t: Testing: Summarizer Integration
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 11
-
-  ### Story 12.d: Discovery: Configuration Schema Updates
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 12
-
-  ### Story 12.i: Implementation: Configuration Schema Updates
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 12
-
-  ### Story 12.t: Testing: Configuration Schema Updates
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 12
-
-  ### Story 13.d: Discovery: Template Updates
-  **Status**: completed | **Type**: discovery
-  - Dependencies: Story 13
-
-  ### Story 13.i: 13 Template Updates
-  **Status**: completed | **Type**: implementation
-  - Dependencies: Story 13
-
-  ### Story 13.t: Testing: Template Updates
-  **Status**: completed | **Type**: testing
-  - Dependencies: Story 13
+### Story 10: Documentation Updates
+**Status**: unassigned | **Priority**: Medium | **Size**: M
+**See**: [stories/10-documentation.md](stories/10-documentation.md)
 
 ---
 
-**Note**: This index is automatically generated from `.queue.json`. To modify stories, use the queue helper scripts or update `.queue.json` directly.
+### Hook Integration (Medium Priority)
+
+### Story 11: Hook Socket Server in MCP Server
+**Status**: unassigned | **Priority**: Medium | **Size**: M
+**See**: [stories/11-hook-socket-server.md](stories/11-hook-socket-server.md)
+
+### Story 12: session_close_hook.py Script
+**Status**: unassigned | **Priority**: Medium | **Size**: S
+**See**: [stories/12-session-close-hook-script.md](stories/12-session-close-hook-script.md)
+
+### Story 13: graphiti_mcp_client.py Library
+**Status**: unassigned | **Priority**: Medium | **Size**: M
+**See**: [stories/13-mcp-client-library.md](stories/13-mcp-client-library.md)
+
+### Story 14: Windows Named Pipe Support
+**Status**: unassigned | **Priority**: Low | **Size**: M
+**See**: [stories/14-windows-named-pipe.md](stories/14-windows-named-pipe.md)
+
+### Story 15: Hook Setup/Installation Utilities
+**Status**: unassigned | **Priority**: Medium | **Size**: S
+**See**: [stories/15-hook-setup-utilities.md](stories/15-hook-setup-utilities.md)
+
+### Story 16: Hook Integration Tests
+**Status**: unassigned | **Priority**: Medium | **Size**: M
+**See**: [stories/16-hook-integration-tests.md](stories/16-hook-integration-tests.md)
+
+### Story 17: Document Hook Setup in User Guide
+**Status**: unassigned | **Priority**: Medium | **Size**: S
+**See**: [stories/17-hook-documentation.md](stories/17-hook-documentation.md)
+
+---
+
+## Dependency Graph
+
+```
+         ┌─────┐
+         │  1  │ SessionStateManager
+         └──┬──┘
+      ┌─────┼─────┬─────┐
+      ▼     ▼     ▼     ▼
+   ┌───┐ ┌───┐ ┌───┐ ┌───┐
+   │ 2 │ │ 3 │ │ 5 │ │ 6 │
+   └─┬─┘ └─┬─┘ └───┘ └───┘
+     │     │
+     └──┬──┘
+        ▼
+     ┌───┐
+     │ 4 │ Delete/Replace
+     └─┬─┘
+       │
+       ▼
+     ┌───┐
+     │ 9 │ Integration Tests
+     └───┘
+
+   ┌───┐     ┌───┐
+   │ 7 │────▶│ 8 │ Config
+   └─┬─┘     └───┘
+     │
+     ▼
+   ┌────┐    ┌────┐    ┌────┐
+   │ 11 │───▶│ 12 │───▶│ 15 │
+   └──┬─┘    └─┬──┘    └──┬─┘
+      │        │          │
+      ▼        ▼          ▼
+   ┌────┐   ┌────┐     ┌────┐
+   │ 13 │   │ 14 │     │ 16 │
+   └────┘   └────┘     └────┘
+                          │
+                          ▼
+                       ┌────┐
+                       │ 17 │ Docs
+                       └────┘
+
+   ┌────┐
+   │ 10 │ Core Docs (parallel)
+   └────┘
+```
+
+---
+
+## Recommended Execution Order
+
+**Phase 1: Foundation** (Stories 1, 3, 7)
+- Can be done in parallel
+- No external dependencies
+
+**Phase 2: Core Tools** (Stories 2, 4, 8)
+- Depend on Phase 1
+- Implement explicit close and delete/replace
+
+**Phase 3: Lazy Indexing** (Stories 5, 6)
+- Depend on Phase 1-2
+- Complete core hybrid close
+
+**Phase 4: Testing & Docs** (Stories 9, 10)
+- Integration tests after core complete
+- Documentation in parallel
+
+**Phase 5: Hook Integration** (Stories 11-17)
+- Can start after Phase 2
+- Independent feature track
+
+---
+
+*Generated by /sprint:CREATE_SPRINT v3.1.0*
