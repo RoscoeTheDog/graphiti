@@ -85,7 +85,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Configuration Schema Updates",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "12.d",
@@ -491,7 +491,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Configuration Schema Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "12",
       "phase": "testing",
       "phase_order": 3,
