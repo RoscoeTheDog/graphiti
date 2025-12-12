@@ -26,7 +26,7 @@ from graphiti_core.llm_client import LLMClient
 from .activity_detector import ActivityDetector
 from .activity_vector import ActivityVector
 from .prompt_builder import build_extraction_prompt
-from .tool_classifier import UnifiedToolClassifier
+from .tool_classifier import ToolClassifier
 from .types import ConversationContext
 
 logger = logging.getLogger(__name__)
@@ -353,14 +353,14 @@ Focus on actionable information that helps the next session continue work effici
 """
 
     def __init__(
-        self, llm_client: LLMClient, tool_classifier: UnifiedToolClassifier | None = None
+        self, llm_client: LLMClient, tool_classifier: ToolClassifier | None = None
     ):
         """
         Initialize the SessionSummarizer.
 
         Args:
             llm_client: LLM client for generating summaries (uses gpt-4.1-mini for cost efficiency)
-            tool_classifier: Optional UnifiedToolClassifier for activity detection.
+            tool_classifier: Optional ToolClassifier for activity detection.
                              If None, ActivityDetector will use heuristics only.
         """
         self.llm_client = llm_client

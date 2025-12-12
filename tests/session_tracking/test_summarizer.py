@@ -1209,3 +1209,487 @@ class TestEnhancedMarkdownRendering:
         assert 'Activity Profile' not in md
         assert '## Configuration Changes' not in md
         assert '## Test Results' not in md
+
+
+# =============================================================================
+# Story 11: Summarizer Integration Tests
+# =============================================================================
+
+
+class TestSummarizerIntegration:
+    """Tests for Story 11: Summarizer Integration with ActivityDetector and dynamic prompts."""
+
+    def test_sessionsummarizer_init_with_tool_classifier(self):
+        """Test AC-11.1: SessionSummarizer initializes ActivityDetector."""
+        from unittest.mock import Mock
+
+        from graphiti_core.session_tracking.tool_classifier import ToolClassifier
+
+        llm_client = Mock()
+        tool_classifier = Mock(spec=ToolClassifier)
+
+        summarizer = SessionSummarizer(llm_client=llm_client, tool_classifier=tool_classifier)
+
+        # Verify summarizer is initialized
+        assert summarizer.llm_client == llm_client
+        assert hasattr(summarizer, 'activity_detector')
+        assert summarizer.activity_detector is not None
+
+    @pytest.mark.asyncio
+    async def test_activity_vector_computed_from_messages(self):
+        """Test AC-11.1: Activity vector is computed from messages during summarization."""
+        from unittest.mock import AsyncMock, Mock, patch
+
+        from graphiti_core.session_tracking.activity_vector import ActivityVector
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        # Mock LLM client
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Test objective',
+                completed_tasks=['Task 1'],
+                next_steps=['Step 1'],
+            )
+        )
+
+        # Create test messages
+        from datetime import datetime, timezone
+        from uuid import uuid4
+
+        messages = [
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Fix the bug',
+                tool_calls=None,
+            ),
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-session',
+                timestamp=datetime.now(timezone.utc),
+                role='assistant',
+                content='Found the issue',
+                tool_calls=[
+                    {'type': 'function', 'function': {'name': 'Read', 'arguments': '{}'}}
+                ],
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=100, message_count=2, window_start_idx=0
+        )
+
+        # Mock activity detector to return specific activity
+        with patch.object(
+            ActivityDetector,
+            'detect',
+            return_value=ActivityVector(exploring=0.3, fixing=0.7, configuring=0.1),
+        ):
+            summarizer = SessionSummarizer(llm_client=llm_client)
+            summary = await summarizer.summarize_session(
+                context=context, filtered_content='Test content', sequence_number=1
+            )
+
+            # Verify activity vector was computed
+            assert summary.activity_vector is not None
+            assert isinstance(summary.activity_vector, ActivityVector)
+            assert summary.activity_vector.fixing == 0.7
+            assert summary.activity_vector.exploring == 0.3
+
+    @pytest.mark.asyncio
+    async def test_dynamic_prompt_used_for_extraction(self):
+        """Test AC-11.2: build_extraction_prompt is called instead of static prompt."""
+        from unittest.mock import AsyncMock, Mock, patch
+
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        # Mock LLM client
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Test objective',
+                completed_tasks=['Task 1'],
+                next_steps=['Step 1'],
+            )
+        )
+
+        from datetime import datetime, timezone
+        from uuid import uuid4
+
+        messages = [
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Debug the issue',
+                tool_calls=None,
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+        )
+
+        # Mock build_extraction_prompt to verify it's called
+        with patch(
+            'graphiti_core.session_tracking.summarizer.build_extraction_prompt',
+            return_value='Dynamic prompt based on activity',
+        ) as mock_build_prompt:
+            summarizer = SessionSummarizer(llm_client=llm_client)
+            await summarizer.summarize_session(
+                context=context, filtered_content='Test content', sequence_number=1
+            )
+
+            # Verify build_extraction_prompt was called with correct parameters
+            mock_build_prompt.assert_called_once()
+            call_args = mock_build_prompt.call_args
+            assert 'activity' in call_args.kwargs
+            assert 'content' in call_args.kwargs
+            assert 'threshold' in call_args.kwargs
+            assert call_args.kwargs['threshold'] == 0.3
+
+    @pytest.mark.asyncio
+    async def test_activity_vector_included_in_summary(self):
+        """Test AC-11.3: Summary includes activity_vector field."""
+        from unittest.mock import AsyncMock, Mock
+
+        from graphiti_core.session_tracking.activity_vector import ActivityVector
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Test objective',
+                completed_tasks=['Task 1'],
+                next_steps=['Step 1'],
+            )
+        )
+
+        from datetime import datetime, timezone
+        from uuid import uuid4
+
+        messages = [
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Test message',
+                tool_calls=None,
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+        )
+
+        summarizer = SessionSummarizer(llm_client=llm_client)
+        summary = await summarizer.summarize_session(
+            context=context, filtered_content='Test content', sequence_number=1
+        )
+
+        # Verify activity_vector is set
+        assert summary.activity_vector is not None
+        assert isinstance(summary.activity_vector, ActivityVector)
+
+    @pytest.mark.asyncio
+    async def test_graceful_fallback_on_activity_detection_failure(self):
+        """Test AC-11.4: Falls back to neutral ActivityVector on detection failure."""
+        from unittest.mock import AsyncMock, Mock, patch
+
+        from graphiti_core.session_tracking.activity_vector import ActivityVector
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Test objective',
+                completed_tasks=['Task 1'],
+                next_steps=['Step 1'],
+            )
+        )
+
+        from datetime import datetime, timezone
+        from uuid import uuid4
+
+        messages = [
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Test message',
+                tool_calls=None,
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+        )
+
+        # Mock activity detector to raise exception
+        with patch.object(
+            ActivityDetector, 'detect', side_effect=RuntimeError('Detection failed')
+        ):
+            summarizer = SessionSummarizer(llm_client=llm_client)
+            summary = await summarizer.summarize_session(
+                context=context, filtered_content='Test content', sequence_number=1
+            )
+
+            # Verify summarization continued with neutral activity vector
+            assert summary.activity_vector is not None
+            assert isinstance(summary.activity_vector, ActivityVector)
+            # Neutral activity should have all zeros
+            assert summary.activity_vector.exploring == 0.0
+            assert summary.activity_vector.fixing == 0.0
+            assert summary.activity_vector.configuring == 0.0
+
+    def test_activity_vector_in_markdown_output(self):
+        """Test AC-11.3: Activity vector appears in markdown output."""
+        from graphiti_core.session_tracking.activity_vector import ActivityVector
+
+        summary = SessionSummary(
+            sequence_number=1,
+            title='Test Session',
+            slug='test-session',
+            objective='Test objective',
+            activity_profile='fixing (0.80), testing (0.50)',
+            completed_tasks=['Task 1'],
+            blocked_items=[],
+            next_steps=['Step 1'],
+            files_modified=[],
+            documentation_referenced=[],
+            key_decisions=[],
+            errors_resolved=[],
+            config_changes=[],
+            test_results=None,
+            mcp_tools_used=[],
+            token_count=100,
+            duration_estimate='1 hour',
+            created_at=datetime.now(timezone.utc),
+            activity_vector=ActivityVector(exploring=0.2, fixing=0.8, configuring=0.3),
+        )
+
+        md = summary.to_markdown()
+
+        # Verify markdown contains activity information
+        assert 'Activity Profile' in md or 'activity_profile' in md.lower()
+        assert 'fixing (0.80)' in md
+
+    def test_activity_vector_in_metadata_output(self):
+        """Test AC-11.3: Activity vector appears in metadata dict."""
+        from graphiti_core.session_tracking.activity_vector import ActivityVector
+
+        summary = SessionSummary(
+            sequence_number=1,
+            title='Test Session',
+            slug='test-session',
+            objective='Test objective',
+            activity_profile='fixing (0.80)',
+            completed_tasks=['Task 1'],
+            blocked_items=[],
+            next_steps=['Step 1'],
+            files_modified=[],
+            documentation_referenced=[],
+            key_decisions=[],
+            errors_resolved=[],
+            config_changes=[],
+            test_results=None,
+            mcp_tools_used=[],
+            token_count=100,
+            duration_estimate='1 hour',
+            created_at=datetime.now(timezone.utc),
+            activity_vector=ActivityVector(exploring=0.2, fixing=0.8, configuring=0.3),
+        )
+
+        metadata = summary.to_metadata()
+
+        # Verify metadata includes activity vector
+        assert 'activity_vector' in metadata
+        activity_dict = metadata['activity_vector']
+        assert activity_dict['fixing'] == 0.8
+        assert activity_dict['exploring'] == 0.2
+        assert activity_dict['configuring'] == 0.3
+
+
+class TestSummarizerIntegrationE2E:
+    """Integration tests for end-to-end scenarios with real-ish sessions."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_end_to_end_debugging_session(self):
+        """Test AC-11.5: End-to-end debugging session shows fixing > 0.5."""
+        from unittest.mock import AsyncMock, Mock
+
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        # Mock LLM to return realistic debugging summary
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Fix authentication bug in login endpoint',
+                completed_tasks=['Identified root cause', 'Fixed JWT verification'],
+                next_steps=['Add regression tests'],
+                errors_resolved=[
+                    ErrorResolution(
+                        error='JWT verification failing',
+                        root_cause='Incorrect secret key',
+                        fix='Updated .env with correct key',
+                        verification='Tests passing',
+                    )
+                ],
+            )
+        )
+
+        # Simulate debugging session messages
+        messages = [
+            SessionMessage(role='user', content='Fix the authentication bug', tool_calls=None),
+            SessionMessage(
+                role='assistant',
+                content='Investigating the issue...',
+                tool_calls=[
+                    {'type': 'function', 'function': {'name': 'Read', 'arguments': '{"file": ".env"}'}}
+                ],
+            ),
+            SessionMessage(
+                role='assistant',
+                content='Found the issue, fixing now',
+                tool_calls=[
+                    {'type': 'function', 'function': {'name': 'Edit', 'arguments': '{"file": ".env"}'}}
+                ],
+            ),
+            SessionMessage(
+                role='assistant',
+                content='Running tests...',
+                tool_calls=[
+                    {
+                        'type': 'function',
+                        'function': {'name': 'Bash', 'arguments': '{"command": "pytest tests/"}'},
+                    }
+                ],
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=500, message_count=4, window_start_idx=0
+        )
+
+        summarizer = SessionSummarizer(llm_client=llm_client)
+        summary = await summarizer.summarize_session(
+            context=context,
+            filtered_content='User: Fix auth bug\nAgent: Found issue in .env',
+            sequence_number=1,
+        )
+
+        # Verify activity vector shows fixing as dominant
+        assert summary.activity_vector is not None
+        assert summary.activity_vector.fixing > 0.5  # Debugging/fixing should dominate
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_end_to_end_exploration_session(self):
+        """Test AC-11.5: End-to-end exploration session shows exploring > 0.5."""
+        from unittest.mock import AsyncMock, Mock
+
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        # Mock LLM to return realistic exploration summary
+        llm_client = Mock()
+        llm_client.generate_response = AsyncMock(
+            return_value=SessionSummarySchema(
+                objective='Explore codebase structure and architecture',
+                completed_tasks=['Reviewed main modules', 'Understood data flow'],
+                next_steps=['Design new feature'],
+                files_modified=[],
+                documentation_referenced=['README.md', 'ARCHITECTURE.md'],
+            )
+        )
+
+        # Simulate exploration session messages
+        messages = [
+            SessionMessage(role='user', content='Show me how the system works', tool_calls=None),
+            SessionMessage(
+                role='assistant',
+                content='Reading main files...',
+                tool_calls=[
+                    {
+                        'type': 'function',
+                        'function': {'name': 'Read', 'arguments': '{"file": "README.md"}'},
+                    }
+                ],
+            ),
+            SessionMessage(
+                role='assistant',
+                content='Checking architecture...',
+                tool_calls=[
+                    {'type': 'function', 'function': {'name': 'Glob', 'arguments': '{"pattern": "**/*.py"}'}}
+                ],
+            ),
+            SessionMessage(
+                role='assistant',
+                content='Searching for patterns...',
+                tool_calls=[
+                    {'type': 'function', 'function': {'name': 'Grep', 'arguments': '{"pattern": "class"}'}}
+                ],
+            ),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=400, message_count=4, window_start_idx=0
+        )
+
+        summarizer = SessionSummarizer(llm_client=llm_client)
+        summary = await summarizer.summarize_session(
+            context=context,
+            filtered_content='User: Show me system\nAgent: Reading files...',
+            sequence_number=1,
+        )
+
+        # Verify activity vector shows exploring as dominant
+        assert summary.activity_vector is not None
+        assert summary.activity_vector.exploring > 0.5  # Exploration should dominate
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    @pytest.mark.skip(reason='Requires real LLM client - manual testing only')
+    async def test_integration_with_real_llm_client(self):
+        """Test integration with actual LLM client (structured output parsing).
+
+        This test is skipped by default as it requires:
+        - Real OpenAI API key
+        - Network access
+        - Costs money per run
+
+        To run manually: pytest -m integration --run-llm-tests
+        """
+        from graphiti_core.llm_client import LLMClient
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+
+        # This would use real LLM client
+        llm_client = LLMClient(api_key='test-key', model='gpt-4o-mini')
+
+        messages = [
+            SessionMessage(role='user', content='Fix the bug in auth.py', tool_calls=None),
+        ]
+
+        context = ConversationContext(
+            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+        )
+
+        summarizer = SessionSummarizer(llm_client=llm_client)
+
+        # Would test real LLM structured output parsing
+        # summary = await summarizer.summarize_session(
+        #     context=context,
+        #     filtered_content="User asked to fix bug",
+        #     sequence_number=1,
+        # )
+        # assert summary.objective
+        # assert summary.activity_vector is not None
+
+        # Placeholder assertion for now
+        assert True

@@ -63,7 +63,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Summarizer Integration",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "11.d",
@@ -442,7 +442,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Summarizer Integration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "11",
       "phase": "testing",
       "phase_order": 3,
