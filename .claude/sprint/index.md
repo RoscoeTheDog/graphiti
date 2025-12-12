@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 02:06:39
+**Generated**: 2025-12-12 02:15:27
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 20
-- **Completion**: 80.0%
+- **Completion**: 85.0%
 
 ### By Status
 
-- completed: 16
-- unassigned: 4
+- completed: 17
+- unassigned: 3
 
 ### By Type
 
@@ -86,7 +86,7 @@
 - Dependencies: Story 2, Story 6
 
 ### Story 8: Implement Templateresolver
-**Status**: unassigned | **Type**: implementation
+**Status**: completed | **Type**: implementation
 - Dependencies: Story 1
 - Blocks: Story 10, Story 9
 

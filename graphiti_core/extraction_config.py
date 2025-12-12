@@ -5,9 +5,15 @@ This module defines the configurable preprocessing behavior for entity/edge
 extraction in Graphiti knowledge graph construction.
 """
 
-from typing import Literal, Union
+import logging
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, Field
+
+from .template_resolver import TemplateResolver
+
+logger = logging.getLogger(__name__)
 
 
 class ExtractionConfig(BaseModel):
@@ -117,23 +123,62 @@ class ExtractionConfig(BaseModel):
         """
         return isinstance(self.preprocessing_prompt, str) and len(self.preprocessing_prompt) > 0
 
-    def resolve_prompt(self) -> str:
+    def resolve_prompt(self, project_dir: Optional[Path] = None) -> str:
         """Resolve preprocessing prompt to final string.
 
-        This method is a stub for future template resolution logic.
-        Template resolution will be implemented in Story 8 (TemplateResolver).
+        Handles both template files and inline prompts:
+        - Template files (e.g., "template.md"): Loaded via TemplateResolver hierarchy
+        - Inline prompts (e.g., "Extract entities..."): Returned directly
+        - Disabled (False/None): Returns empty string
+
+        Template resolution searches in this order:
+        1. Project templates: {project_dir}/.graphiti/templates/
+        2. Global templates: ~/.graphiti/templates/
+        3. Built-in templates: graphiti_core/session_tracking/prompts/
+
+        Args:
+            project_dir: Optional project root for project-level templates.
+                If None, only global and built-in templates are searched.
 
         Returns:
-            Empty string (stub implementation).
+            Resolved prompt string, or empty string if disabled or not found.
 
-        Note:
-            Full implementation deferred to Story 8 (TemplateResolver with hierarchy).
-            Future implementation will:
-            - Load templates from project/.claude/templates/
-            - Fall back to global ~/.claude/templates/
-            - Fall back to built-in templates
-            - Return inline strings directly
+        Examples:
+            >>> config = ExtractionConfig(preprocessing_prompt="template.md")
+            >>> prompt = config.resolve_prompt()  # Loads from hierarchy
+
+            >>> config = ExtractionConfig(preprocessing_prompt="Extract entities.")
+            >>> prompt = config.resolve_prompt()  # Returns inline prompt directly
+            'Extract entities.'
+
+            >>> config = ExtractionConfig(preprocessing_prompt=False)
+            >>> prompt = config.resolve_prompt()  # Returns empty string
+            ''
         """
-        # TODO: Implement template resolution in Story 8
-        # For now, return empty string as stub
-        return ""
+        # If disabled or not set, return empty string
+        if not self.is_enabled():
+            return ""
+
+        prompt_value = self.preprocessing_prompt
+        assert isinstance(prompt_value, str), "is_enabled() ensures this is a string"
+
+        # Check if it looks like a template filename (ends with .md or contains path separator)
+        is_template = prompt_value.endswith(".md") or "/" in prompt_value or "\\" in prompt_value
+
+        if is_template:
+            # Load template via TemplateResolver
+            resolver = TemplateResolver(project_dir=project_dir)
+            content = resolver.load(prompt_value)
+
+            if content is None:
+                logger.warning(
+                    "Template '%s' not found in hierarchy, returning empty string",
+                    prompt_value,
+                )
+                return ""
+
+            return content
+        else:
+            # Treat as inline prompt - return directly
+            logger.debug("Using inline preprocessing prompt (length: %d)", len(prompt_value))
+            return prompt_value

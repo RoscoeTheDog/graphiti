@@ -146,7 +146,7 @@
     "8": {
       "type": "implementation",
       "title": "Implement TemplateResolver with Hierarchy",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/8-implement-templateresolver.md",
       "parent": null,
       "children": [],
