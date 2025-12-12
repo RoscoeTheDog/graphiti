@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:42:21
+**Generated**: 2025-12-12 03:44:11
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 75.0%
+- **Completion**: 77.3%
 
 ### By Status
 
-- completed: 66
-- in_progress: 1
-- unassigned: 21
+- completed: 68
+- unassigned: 20
 
 ### By Type
 
@@ -120,7 +119,7 @@
   - Blocks: Story -6.t
 
   ### Story -6.t: Validate Testing: Add Extraction Config to unified_config.py
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -6, Story -6.i
 
   ### Story -7.d: Validate Discovery: Wire Preprocessing in MCP Server Initialization
