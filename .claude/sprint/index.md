@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 02:59:01
+**Generated**: 2025-12-12 03:04:52
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 52.3%
+- **Completion**: 54.5%
 
 ### By Status
 
-- completed: 46
-- in_progress: 1
-- unassigned: 41
+- completed: 48
+- unassigned: 40
 
 ### By Type
 
@@ -50,7 +49,7 @@
   - Blocks: Story -1.t
 
   ### Story -1.t: Validate Testing: Create ExtractionConfig Schema
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -1, Story -1.i
 
   ### Story -2.d: Validate Discovery: Extend GraphitiClients with Preprocessing Fields
