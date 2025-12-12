@@ -111,7 +111,7 @@
     },
     "6": {
       "id": "6",
-      "status": "in_progress",
+      "status": "completed",
       "title": "Add Extraction Config to unified_config.py",
       "parent": null,
       "file": "stories/6-add-extraction-config-unified.md",
@@ -293,7 +293,7 @@
     },
     "6.t": {
       "id": "6.t",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "testing",
       "title": "Testing: Add Extraction Config to unified_config.py",
       "parent": "6",

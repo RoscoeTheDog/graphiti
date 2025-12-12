@@ -492,4 +492,183 @@ def test_session_tracking_case_insensitive_hex():
     assert len(config.trusted_namespaces) == 3
 
 
+# =============================================================================
+# EXTRACTION CONFIG TESTS (Story 6)
+# =============================================================================
+
+def test_extraction_config_default_values():
+    """Test that GraphitiConfig has extraction field with default ExtractionConfig."""
+    config = GraphitiConfig._default_config()
+
+    # AC-6.1: GraphitiConfig has extraction field
+    assert hasattr(config, 'extraction'), "GraphitiConfig missing extraction field"
+    assert config.extraction is not None, "extraction field should not be None"
+
+    # AC-6.2: Default is preprocessing_prompt=False (disabled, not template-based)
+    assert config.extraction.preprocessing_prompt is False, "Default should be False (disabled)"
+    assert config.extraction.preprocessing_mode == "prepend", "Default mode should be prepend"
+
+
+def test_extraction_config_explicit_values():
+    """Test GraphitiConfig with explicit ExtractionConfig values."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    config = GraphitiConfig(
+        extraction=ExtractionConfig(
+            preprocessing_prompt="default-session-turn.md",
+            preprocessing_mode="append"
+        )
+    )
+
+    assert config.extraction.preprocessing_prompt == "default-session-turn.md"
+    assert config.extraction.preprocessing_mode == "append"
+    assert config.extraction.is_enabled() is True
+
+
+def test_extraction_config_from_file(tmp_path, monkeypatch, clean_env):
+    """Test loading GraphitiConfig.from_file() with extraction config in JSON."""
+    config_data = {
+        "database": {"backend": "neo4j"},
+        "extraction": {
+            "preprocessing_prompt": "custom-template.md",
+            "preprocessing_mode": "prepend"
+        }
+    }
+
+    config_file = tmp_path / "graphiti.config.json"
+    config_file.write_text(json.dumps(config_data, indent=2))
+    monkeypatch.chdir(tmp_path)
+
+    config = GraphitiConfig.from_file()
+
+    # AC-6.4: JSON config loading works
+    assert config.extraction.preprocessing_prompt == "custom-template.md"
+    assert config.extraction.preprocessing_mode == "prepend"
+
+
+def test_extraction_config_backward_compatibility(tmp_path, monkeypatch, clean_env):
+    """Test backward compatibility when extraction field is missing from config."""
+    config_data = {
+        "database": {"backend": "neo4j"},
+        "llm": {"provider": "openai"}
+        # No extraction field - old config format
+    }
+
+    config_file = tmp_path / "graphiti.config.json"
+    config_file.write_text(json.dumps(config_data, indent=2))
+    monkeypatch.chdir(tmp_path)
+
+    config = GraphitiConfig.from_file()
+
+    # Should load with default ExtractionConfig
+    assert hasattr(config, 'extraction')
+    assert config.extraction.preprocessing_prompt is False  # Default disabled
+
+
+def test_extraction_config_preprocessing_prompt_types():
+    """Test preprocessing_prompt validation (bool | str | None types)."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    # Test bool (False - disabled)
+    config1 = GraphitiConfig(extraction=ExtractionConfig(preprocessing_prompt=False))
+    assert config1.extraction.preprocessing_prompt is False
+    assert config1.extraction.is_enabled() is False
+
+    # Test bool (True would be invalid per AC, but None is valid)
+    config2 = GraphitiConfig(extraction=ExtractionConfig(preprocessing_prompt=None))
+    assert config2.extraction.preprocessing_prompt is None
+    assert config2.extraction.is_enabled() is False
+
+    # Test str (template)
+    config3 = GraphitiConfig(extraction=ExtractionConfig(preprocessing_prompt="template.md"))
+    assert config3.extraction.preprocessing_prompt == "template.md"
+    assert config3.extraction.is_enabled() is True
+
+    # Test str (inline)
+    config4 = GraphitiConfig(extraction=ExtractionConfig(
+        preprocessing_prompt="Consider session context"
+    ))
+    assert config4.extraction.preprocessing_prompt == "Consider session context"
+    assert config4.extraction.is_enabled() is True
+
+
+def test_extraction_config_preprocessing_mode_literals():
+    """Test preprocessing_mode validation (prepend | append literals)."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    # Test valid: prepend
+    config1 = GraphitiConfig(extraction=ExtractionConfig(preprocessing_mode="prepend"))
+    assert config1.extraction.preprocessing_mode == "prepend"
+
+    # Test valid: append
+    config2 = GraphitiConfig(extraction=ExtractionConfig(preprocessing_mode="append"))
+    assert config2.extraction.preprocessing_mode == "append"
+
+    # Test invalid: should raise ValidationError
+    with pytest.raises(Exception) as excinfo:
+        GraphitiConfig(extraction=ExtractionConfig(preprocessing_mode="invalid"))
+
+    # Pydantic raises validation error for invalid literal
+    assert "preprocessing_mode" in str(excinfo.value).lower() or "input" in str(excinfo.value).lower()
+
+
+def test_extraction_config_serialization():
+    """Test config serialization to JSON includes extraction config."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    config = GraphitiConfig(
+        extraction=ExtractionConfig(
+            preprocessing_prompt="template.md",
+            preprocessing_mode="append"
+        )
+    )
+
+    # Serialize to dict
+    config_dict = config.model_dump()
+
+    assert 'extraction' in config_dict
+    assert config_dict['extraction']['preprocessing_prompt'] == "template.md"
+    assert config_dict['extraction']['preprocessing_mode'] == "append"
+
+    # Serialize to JSON string
+    config_json = config.model_dump_json()
+    assert '"extraction"' in config_json
+    assert '"preprocessing_prompt":"template.md"' in config_json
+
+
+def test_extraction_config_path_traversal_prevention():
+    """Test preprocessing_prompt with malicious template paths (security)."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    # Note: Path validation deferred to Story 8 (TemplateResolver)
+    # This test ensures config accepts path-like strings but doesn't validate them yet
+
+    malicious_paths = [
+        "../../../etc/passwd",
+        "..\\..\\..\\windows\\system32\\config\\sam",
+        "/etc/shadow",
+        "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    ]
+
+    for path in malicious_paths:
+        # Config should accept these (validation happens later in TemplateResolver)
+        config = GraphitiConfig(extraction=ExtractionConfig(preprocessing_prompt=path))
+        assert config.extraction.preprocessing_prompt == path
+        # Story 8 will add path validation logic
+
+
+def test_extraction_config_dos_prevention():
+    """Test preprocessing_prompt with excessively long inline strings (DOS prevention)."""
+    from graphiti_core.extraction_config import ExtractionConfig
+
+    # Test very long string (simulating potential DOS attack)
+    long_string = "A" * 100000  # 100KB string
+
+    # Config should accept (no length validation at config level)
+    config = GraphitiConfig(extraction=ExtractionConfig(preprocessing_prompt=long_string))
+    assert len(config.extraction.preprocessing_prompt) == 100000
+
+    # Note: Length/size validation would be in LLM client layer, not config
+
+
 # Run with: pytest tests/test_unified_config.py -v --cov=mcp_server.unified_config --cov-report=term

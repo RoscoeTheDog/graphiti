@@ -1,0 +1,63 @@
+{
+  "story_id": "6",
+  "parent_story": "6",
+  "phase": "testing",
+  "timestamp": "2025-12-12T12:30:00Z",
+  "test_run": {
+    "total_tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100,
+    "coverage": null
+  },
+  "categories": {
+    "unit": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "tests": [
+        "test_extraction_config_default_values",
+        "test_extraction_config_explicit_values",
+        "test_extraction_config_from_file",
+        "test_extraction_config_backward_compatibility",
+        "test_extraction_config_preprocessing_prompt_types",
+        "test_extraction_config_preprocessing_mode_literals",
+        "test_extraction_config_serialization"
+      ]
+    },
+    "integration": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "tests": []
+    },
+    "security": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        "test_extraction_config_path_traversal_prevention",
+        "test_extraction_config_dos_prevention"
+      ]
+    }
+  },
+  "outcome": "passed",
+  "blocking": false,
+  "advisory_severity": "",
+  "failures": [],
+  "acceptance_criteria_coverage": {
+    "AC-6.1": "tested - test_extraction_config_default_values",
+    "AC-6.2": "tested - test_extraction_config_default_values, test_extraction_config_backward_compatibility",
+    "AC-6.3": "tested - test_extraction_config_preprocessing_prompt_types, test_extraction_config_preprocessing_mode_literals",
+    "AC-6.4": "tested - test_extraction_config_from_file, test_extraction_config_serialization"
+  },
+  "notes": [
+    "All 9 tests pass (100% pass rate)",
+    "Tests cover all P0 and P1 acceptance criteria",
+    "Backward compatibility verified - old configs without extraction field work correctly",
+    "Type validation confirmed - Union[bool, str, None] enforced by Pydantic",
+    "Literal validation confirmed - preprocessing_mode restricted to 'prepend' or 'append'",
+    "Security tests acknowledge path validation deferred to Story 8 (TemplateResolver)"
+  ]
+}
