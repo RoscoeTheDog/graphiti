@@ -6,39 +6,80 @@
     "version": "1.0",
     "status": "active",
     "branch": "dev",
-    "created": "2025-12-12 00:39"
+    "created": "2025-12-12 00:39",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
   },
   "stories": {
     "1": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Create ExtractionConfig Schema",
       "status": "completed",
-      "file": "stories/1-create-extractionconfig-schema.md",
       "parent": null,
-      "children": [],
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
       "blocks": [
         "2",
         "6",
         "8"
-      ]
+      ],
+      "file": "stories/1-create-extractionconfig-schema.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "10": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Unit Tests for Preprocessing Injection",
       "status": "completed",
-      "file": "stories/10-unit-tests-preprocessing.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "10.d",
+        "10.i",
+        "10.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/10-unit-tests-preprocessing.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "11": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Update CONFIGURATION.md with Extraction Section",
       "status": "completed",
-      "file": "stories/11-update-configuration-docs.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "11.d",
+        "11.i",
+        "11.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/11-update-configuration-docs.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "2": {
       "id": "2",
@@ -87,27 +128,53 @@
       "blocks": []
     },
     "4": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Modify node_operations.py for Preprocessing Injection",
       "status": "completed",
-      "file": "stories/4-modify-node-operations-preprocessing.md",
       "parent": null,
-      "children": [],
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
       "blocks": [
         "10",
         "5"
-      ]
+      ],
+      "file": "stories/4-modify-node-operations-preprocessing.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "5": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Modify edge_operations.py for Preprocessing Injection",
       "status": "completed",
-      "file": "stories/5-modify-edge-operations-preprocessing.md",
       "parent": null,
-      "children": [],
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
       "blocks": [
         "10"
-      ]
+      ],
+      "file": "stories/5-modify-edge-operations-preprocessing.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "6": {
       "id": "6",
@@ -135,25 +202,51 @@
       ]
     },
     "7": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Wire Preprocessing in MCP Server Initialization",
       "status": "completed",
-      "file": "stories/7-wire-preprocessing-mcp-server.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/7-wire-preprocessing-mcp-server.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "8": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Implement TemplateResolver with Hierarchy",
       "status": "completed",
-      "file": "stories/8-implement-templateresolver.md",
       "parent": null,
-      "children": [],
+      "children": [
+        "8.d",
+        "8.i",
+        "8.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
       "blocks": [
         "10",
         "9"
-      ]
+      ],
+      "file": "stories/8-implement-templateresolver.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "9": {
       "id": "9",
@@ -365,27 +458,1233 @@
         "integration",
         "security"
       ]
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Create ExtractionConfig Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Create ExtractionConfig Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml"
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Create ExtractionConfig Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "10.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Unit Tests for Preprocessing Injection",
+      "status": "completed",
+      "parent": "10",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/10-plan.yaml"
+    },
+    "10.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Unit Tests for Preprocessing Injection",
+      "status": "completed",
+      "parent": "10",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/10-plan.yaml"
+    },
+    "10.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Unit Tests for Preprocessing Injection",
+      "status": "completed",
+      "parent": "10",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "11.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update CONFIGURATION.md with Extraction Section",
+      "status": "completed",
+      "parent": "11",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/11-plan.yaml"
+    },
+    "11.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update CONFIGURATION.md with Extraction Section",
+      "status": "completed",
+      "parent": "11",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/11-plan.yaml"
+    },
+    "11.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update CONFIGURATION.md with Extraction Section",
+      "status": "completed",
+      "parent": "11",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Modify node_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Modify node_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml"
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Modify node_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Modify edge_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Modify edge_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Modify edge_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Wire Preprocessing in MCP Server Initialization",
+      "status": "completed",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Wire Preprocessing in MCP Server Initialization",
+      "status": "completed",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml"
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Wire Preprocessing in MCP Server Initialization",
+      "status": "completed",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "8.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Implement TemplateResolver with Hierarchy",
+      "status": "completed",
+      "parent": "8",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/8-plan.yaml"
+    },
+    "8.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Implement TemplateResolver with Hierarchy",
+      "status": "completed",
+      "parent": "8",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/8-plan.yaml"
+    },
+    "8.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Implement TemplateResolver with Hierarchy",
+      "status": "completed",
+      "parent": "8",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "-1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Create ExtractionConfig Schema",
+      "status": "in_progress",
+      "validates": "1",
+      "children": [
+        "-1.d",
+        "-1.i",
+        "-1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Create ExtractionConfig Schema",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.i"
+      ],
+      "file": null
+    },
+    "-1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Create ExtractionConfig Schema",
+      "status": "unassigned",
+      "parent": "-1",
+      "validates": "1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": null
+    },
+    "-1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Create ExtractionConfig Schema",
+      "status": "unassigned",
+      "parent": "-1",
+      "validates": "1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Extend GraphitiClients with Preprocessing Fields",
+      "status": "unassigned",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Extend GraphitiClients with Preprocessing Fields",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Extend GraphitiClients with Preprocessing Fields",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Extend GraphitiClients with Preprocessing Fields",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Create Default Session Turn Template",
+      "status": "unassigned",
+      "validates": "3",
+      "children": [
+        "-3.d",
+        "-3.i",
+        "-3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Create Default Session Turn Template",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.i"
+      ],
+      "file": null
+    },
+    "-3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Create Default Session Turn Template",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.t"
+      ],
+      "file": null
+    },
+    "-3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Create Default Session Turn Template",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-4": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Modify node_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "validates": "4",
+      "children": [
+        "-4.d",
+        "-4.i",
+        "-4.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-4.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Modify node_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.i"
+      ],
+      "file": null
+    },
+    "-4.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Modify node_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.t"
+      ],
+      "file": null
+    },
+    "-4.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Modify node_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-5": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Modify edge_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "validates": "5",
+      "children": [
+        "-5.d",
+        "-5.i",
+        "-5.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-5.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Modify edge_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.i"
+      ],
+      "file": null
+    },
+    "-5.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Modify edge_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.t"
+      ],
+      "file": null
+    },
+    "-5.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Modify edge_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-6": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add Extraction Config to unified_config.py",
+      "status": "unassigned",
+      "validates": "6",
+      "children": [
+        "-6.d",
+        "-6.i",
+        "-6.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-6.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add Extraction Config to unified_config.py",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.i"
+      ],
+      "file": null
+    },
+    "-6.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add Extraction Config to unified_config.py",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.t"
+      ],
+      "file": null
+    },
+    "-6.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add Extraction Config to unified_config.py",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-7": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Wire Preprocessing in MCP Server Initialization",
+      "status": "unassigned",
+      "validates": "7",
+      "children": [
+        "-7.d",
+        "-7.i",
+        "-7.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-7.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Wire Preprocessing in MCP Server Initialization",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.i"
+      ],
+      "file": null
+    },
+    "-7.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Wire Preprocessing in MCP Server Initialization",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.t"
+      ],
+      "file": null
+    },
+    "-7.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Wire Preprocessing in MCP Server Initialization",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-8": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Implement TemplateResolver with Hierarchy",
+      "status": "unassigned",
+      "validates": "8",
+      "children": [
+        "-8.d",
+        "-8.i",
+        "-8.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-8.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Implement TemplateResolver with Hierarchy",
+      "status": "unassigned",
+      "parent": "-8",
+      "validates": "8.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-8.i"
+      ],
+      "file": null
+    },
+    "-8.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Implement TemplateResolver with Hierarchy",
+      "status": "unassigned",
+      "parent": "-8",
+      "validates": "8.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-8.t"
+      ],
+      "file": null
+    },
+    "-8.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Implement TemplateResolver with Hierarchy",
+      "status": "unassigned",
+      "parent": "-8",
+      "validates": "8.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-9": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add Template Validation and Error Handling",
+      "status": "unassigned",
+      "validates": "9",
+      "children": [
+        "-9.d",
+        "-9.i",
+        "-9.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-9.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add Template Validation and Error Handling",
+      "status": "unassigned",
+      "parent": "-9",
+      "validates": "9.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.i"
+      ],
+      "file": null
+    },
+    "-9.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add Template Validation and Error Handling",
+      "status": "unassigned",
+      "parent": "-9",
+      "validates": "9.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.t"
+      ],
+      "file": null
+    },
+    "-9.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add Template Validation and Error Handling",
+      "status": "unassigned",
+      "parent": "-9",
+      "validates": "9.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-10": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Unit Tests for Preprocessing Injection",
+      "status": "unassigned",
+      "validates": "10",
+      "children": [
+        "-10.d",
+        "-10.i",
+        "-10.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-10.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Unit Tests for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-10",
+      "validates": "10.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-10.i"
+      ],
+      "file": null
+    },
+    "-10.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Unit Tests for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-10",
+      "validates": "10.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-10.t"
+      ],
+      "file": null
+    },
+    "-10.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Unit Tests for Preprocessing Injection",
+      "status": "unassigned",
+      "parent": "-10",
+      "validates": "10.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-11": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update CONFIGURATION.md with Extraction Section",
+      "status": "unassigned",
+      "validates": "11",
+      "children": [
+        "-11.d",
+        "-11.i",
+        "-11.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-11.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update CONFIGURATION.md with Extraction Section",
+      "status": "unassigned",
+      "parent": "-11",
+      "validates": "11.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-11.i"
+      ],
+      "file": null
+    },
+    "-11.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update CONFIGURATION.md with Extraction Section",
+      "status": "unassigned",
+      "parent": "-11",
+      "validates": "11.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-11.t"
+      ],
+      "file": null
+    },
+    "-11.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update CONFIGURATION.md with Extraction Section",
+      "status": "unassigned",
+      "parent": "-11",
+      "validates": "11.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
-    "1",
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "-4.d",
+    "-4.i",
+    "-4.t",
+    "-5.d",
+    "-5.i",
+    "-5.t",
+    "-6.d",
+    "-6.i",
+    "-6.t",
+    "-7.d",
+    "-7.i",
+    "-7.t",
+    "-8.d",
+    "-8.i",
+    "-8.t",
+    "-9.d",
+    "-9.i",
+    "-9.t",
+    "-10.d",
+    "-10.i",
+    "-10.t",
+    "-11.d",
+    "-11.i",
+    "-11.t",
+    "1.d",
+    "1.i",
+    "1.t",
     "2.d",
     "2.i",
     "2.t",
     "3.d",
     "3.i",
     "3.t",
-    "4",
-    "5",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
     "6.d",
     "6.i",
     "6.t",
-    "7",
-    "8",
+    "7.d",
+    "7.i",
+    "7.t",
+    "8.d",
+    "8.i",
+    "8.t",
     "9.d",
     "9.i",
     "9.t",
-    "10",
-    "11"
+    "10.d",
+    "10.i",
+    "10.t",
+    "11.d",
+    "11.i",
+    "11.t"
   ]
 }
