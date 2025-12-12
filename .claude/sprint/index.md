@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 04:04:56
+**Generated**: 2025-12-12 04:12:27
 
 ---
 
@@ -14,20 +14,21 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 88
-- **Completion**: 86.4%
+- **Total Stories**: 89
+- **Completion**: 85.4%
 
 ### By Status
 
-- blocked: 2
+- blocked: 4
 - completed: 76
-- unassigned: 10
+- unassigned: 9
 
 ### By Type
 
 - discovery: 7
 - feature: 7
 - implementation: 7
+- remediation: 1
 - testing: 7
 - unknown: 16
 - validation: 11
@@ -166,7 +167,7 @@
   - Dependencies: Story -9, Story -9.i
 
   ### Story -10.d: Validate Discovery: Unit Tests for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: blocked | **Type**: validation_discovery
   - Dependencies: Story -10
   - Blocks: Story -10.i
 
@@ -301,17 +302,22 @@
   **Status**: completed | **Type**: unknown
   - Dependencies: Story 9
 
+  ### Story 10.1: Fix Missing_Artifact
+  **Status**: unassigned | **Type**: remediation
+  - Dependencies: Story 10
+  - Blocks: Story 10.d, Story 10.i, Story 10.t
+
   ### Story 10.d: Discovery: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: discovery
-  - Dependencies: Story 10
+  - Dependencies: Story 10, Story 10.1
 
   ### Story 10.i: Implementation: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: implementation
-  - Dependencies: Story 10
+  - Dependencies: Story 10, Story 10.1
 
   ### Story 10.t: Testing: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: testing
-  - Dependencies: Story 10
+  - Dependencies: Story 10, Story 10.1
 
   ### Story 11.d: Discovery: Update CONFIGURATION.md with Extraction Section
   **Status**: completed | **Type**: discovery
