@@ -1,0 +1,145 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "turn-based-preprocessing-injection-v1.0",
+    "name": "Turn-Based Preprocessing Injection",
+    "version": "1.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-12 00:39"
+  },
+  "stories": {
+    "1": {
+      "type": "implementation",
+      "title": "Create ExtractionConfig Schema",
+      "status": "unassigned",
+      "file": "stories/1-create-extractionconfig-schema.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "2",
+        "6",
+        "8"
+      ]
+    },
+    "10": {
+      "type": "implementation",
+      "title": "Unit Tests for Preprocessing Injection",
+      "status": "unassigned",
+      "file": "stories/10-unit-tests-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "11": {
+      "type": "implementation",
+      "title": "Update CONFIGURATION.md with Extraction Section",
+      "status": "unassigned",
+      "file": "stories/11-update-configuration-docs.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "2": {
+      "type": "implementation",
+      "title": "Extend GraphitiClients with Preprocessing Fields",
+      "status": "unassigned",
+      "file": "stories/2-extend-graphiticlients-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "4",
+        "5",
+        "7"
+      ]
+    },
+    "3": {
+      "type": "implementation",
+      "title": "Create Default Session Turn Template",
+      "status": "unassigned",
+      "file": "stories/3-create-default-session-turn-template.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "4": {
+      "type": "implementation",
+      "title": "Modify node_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "file": "stories/4-modify-node-operations-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10",
+        "5"
+      ]
+    },
+    "5": {
+      "type": "implementation",
+      "title": "Modify edge_operations.py for Preprocessing Injection",
+      "status": "unassigned",
+      "file": "stories/5-modify-edge-operations-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10"
+      ]
+    },
+    "6": {
+      "type": "implementation",
+      "title": "Add Extraction Config to unified_config.py",
+      "status": "unassigned",
+      "file": "stories/6-add-extraction-config-unified.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "11",
+        "7",
+        "9"
+      ]
+    },
+    "7": {
+      "type": "implementation",
+      "title": "Wire Preprocessing in MCP Server Initialization",
+      "status": "unassigned",
+      "file": "stories/7-wire-preprocessing-mcp-server.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "8": {
+      "type": "implementation",
+      "title": "Implement TemplateResolver with Hierarchy",
+      "status": "unassigned",
+      "file": "stories/8-implement-templateresolver.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10",
+        "9"
+      ]
+    },
+    "9": {
+      "type": "implementation",
+      "title": "Add Template Validation and Error Handling",
+      "status": "unassigned",
+      "file": "stories/9-template-validation-error-handling.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    }
+  },
+  "execution_queue": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11"
+  ]
+}
