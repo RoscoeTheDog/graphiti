@@ -380,7 +380,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Enhanced Markdown Rendering",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "implementation",
       "phase_order": 2,
@@ -404,7 +404,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/10-plan.yaml"
+      }
     },
     "11.d": {
       "type": "discovery",
