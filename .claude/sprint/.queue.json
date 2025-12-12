@@ -12,7 +12,7 @@
     "1": {
       "type": "implementation",
       "title": "Create ExtractionConfig Schema",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/1-create-extractionconfig-schema.md",
       "parent": null,
       "children": [],
