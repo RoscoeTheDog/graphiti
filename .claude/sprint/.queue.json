@@ -1310,7 +1310,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Implement TemplateResolver with Hierarchy",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "8",
       "children": [
         "-8.d",
@@ -1368,7 +1368,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Implement TemplateResolver with Hierarchy",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-8",
       "validates": "8.t",
       "phase": "validation_testing",
