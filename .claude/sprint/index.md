@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:31:33
+**Generated**: 2025-12-12 03:32:59
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 69.3%
+- **Completion**: 70.5%
 
 ### By Status
 
-- completed: 61
+- completed: 62
 - in_progress: 1
-- unassigned: 26
+- unassigned: 25
 
 ### By Type
 
@@ -101,7 +101,7 @@
   - Blocks: Story -5.i
 
   ### Story -5.i: Validate Implementation: Modify edge_operations.py for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -5, Story -5.d
   - Blocks: Story -5.t
 
