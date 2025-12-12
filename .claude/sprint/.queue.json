@@ -41,12 +41,24 @@
       "blocks": []
     },
     "2": {
-      "type": "implementation",
+      "id": "2",
+      "status": "in_progress",
       "title": "Extend GraphitiClients with Preprocessing Fields",
-      "status": "unassigned",
-      "file": "stories/2-extend-graphiticlients-preprocessing.md",
       "parent": null,
-      "children": [],
+      "file": "stories/2-extend-graphiticlients-preprocessing.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "4",
         "5",
@@ -127,11 +139,59 @@
       "parent": null,
       "children": [],
       "blocks": []
+    },
+    "2.d": {
+      "id": "2.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "id": "2.i",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "Implementation: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "id": "2.t",
+      "status": "pending",
+      "story_type": "testing",
+      "title": "Testing: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
     "1",
-    "2",
+    "2.d",
+    "2.i",
+    "2.t",
     "3",
     "4",
     "5",
