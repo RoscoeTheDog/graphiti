@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:44:11
+**Generated**: 2025-12-12 03:50:00
 
 ---
 
@@ -19,8 +19,9 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 68
-- unassigned: 20
+- unassigned: 18
 
 ### By Type
 
@@ -123,7 +124,7 @@
   - Dependencies: Story -6, Story -6.i
 
   ### Story -7.d: Validate Discovery: Wire Preprocessing in MCP Server Initialization
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: blocked | **Type**: validation_discovery
   - Dependencies: Story -7
   - Blocks: Story -7.i
 

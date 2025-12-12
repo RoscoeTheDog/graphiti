@@ -1232,7 +1232,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Wire Preprocessing in MCP Server Initialization",
-      "status": "unassigned",
+      "status": "blocked",
       "validates": "7",
       "children": [
         "-7.d",
@@ -1252,7 +1252,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Wire Preprocessing in MCP Server Initialization",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "-7",
       "validates": "7.d",
       "phase": "validation_discovery",
