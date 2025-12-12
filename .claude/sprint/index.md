@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 10:05:39
+**Generated**: 2025-12-12 10:06:37
 
 ---
 
@@ -15,13 +15,11 @@
 ## Sprint Statistics
 
 - **Total Stories**: 89
-- **Completion**: 97.8%
+- **Completion**: 100.0%
 
 ### By Status
 
-- completed: 87
-- in_progress: 1
-- unassigned: 1
+- completed: 89
 
 ### By Type
 
@@ -135,7 +133,7 @@
   - Blocks: Story -7.t
 
   ### Story -7.t: Validate Testing: Wire Preprocessing in MCP Server Initialization
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -7, Story -7.i
 
   ### Story -8.d: Validate Discovery: Implement TemplateResolver with Hierarchy
