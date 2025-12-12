@@ -204,7 +204,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "LLM Tool Classification with Caching",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "5.d",
@@ -694,7 +694,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: LLM Tool Classification with Caching",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
