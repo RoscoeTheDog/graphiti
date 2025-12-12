@@ -13,3 +13,4 @@
 | s009 | sprint-v100-audit-identify-conflicts | ACTIVE | 2025-12-05 13:42 | Sprint v1.0.0 audit - identify conflicts and create ma |
 | s010 | created-v20-sprint-for-global-session | ACTIVE | 2025-12-08 17:13 | Created v2.0 sprint for Global Session Tracking |
 | s012 | complete-sprint-v300-stories-10-13-and | ACTIVE | 2025-12-11 20:53 | Complete Sprint v3.0.0 Stories 10-13 and Fix Test W |
+| s013 | design-hybrid-session-close | ACTIVE | 2025-12-11 22:15 | Design hybrid session close architecture with Claude Code hook |
