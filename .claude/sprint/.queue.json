@@ -216,7 +216,7 @@
     },
     "3.i": {
       "id": "3.i",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "Implementation: Create Default Session Turn Template",
       "parent": "3",
@@ -232,7 +232,7 @@
     },
     "3.t": {
       "id": "3.t",
-      "status": "pending",
+      "status": "unassigned",
       "story_type": "testing",
       "title": "Testing: Create Default Session Turn Template",
       "parent": "3",
@@ -245,7 +245,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
     }
   },
   "execution_queue": [

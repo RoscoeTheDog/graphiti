@@ -29,7 +29,12 @@ class ExtractionConfig(BaseModel):
         # No preprocessing (default)
         config = ExtractionConfig()
 
-        # Template-based preprocessing
+        # Template-based preprocessing (built-in template)
+        config = ExtractionConfig(
+            preprocessing_prompt="default-session-turn.md"
+        )
+
+        # Custom template-based preprocessing
         config = ExtractionConfig(
             preprocessing_prompt="session-turn-extraction.md"
         )
@@ -69,6 +74,10 @@ class ExtractionConfig(BaseModel):
             "examples": [
                 {
                     "preprocessing_prompt": False,
+                    "preprocessing_mode": "prepend"
+                },
+                {
+                    "preprocessing_prompt": "default-session-turn.md",
                     "preprocessing_mode": "prepend"
                 },
                 {
