@@ -107,7 +107,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Template Updates",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "13.d",
@@ -511,7 +511,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Template Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "13",
       "phase": "discovery",
       "phase_order": 1,
@@ -531,7 +531,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/13-plan.yaml"
+      "requires_artifact": "plans/13-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/13-plan.yaml"
+      }
     },
     "13.t": {
       "type": "testing",
