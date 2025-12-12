@@ -1,0 +1,440 @@
+# Discovery Plan: Story 5 - LLM Tool Classification with Caching
+# Generated: 2025-12-11
+# Phase: discovery (5.d)
+
+story:
+  id: "5"
+  title: "LLM Tool Classification with Caching"
+  dependency: "Story 4 (Tool Classification Heuristics)"
+
+# =============================================================================
+# DISCOVERY FINDINGS
+# =============================================================================
+
+codebase_analysis:
+  existing_files:
+    - path: "graphiti_core/session_tracking/tool_classifier.py"
+      purpose: "Tool classification using heuristics - Story 4"
+      key_interfaces:
+        - "ToolClassifier.classify(tool_name: str, parameters: dict | None) -> ToolClassification"
+        - "ToolClassifier._try_heuristic(tool_name, parameters) -> ToolClassification | None"
+        - "ToolClassifier.KNOWN_TOOL_MAPPINGS: ClassVar[dict[str, tuple[ToolIntent, ToolDomain, float]]]"
+        - "ToolClassifier.INTENT_PATTERNS: ClassVar[list[tuple[list[str], ToolIntent, float]]]"
+        - "ToolClassifier.DOMAIN_PATTERNS: ClassVar[list[tuple[list[str], ToolDomain, float]]]"
+        - "ToolClassifier.INTENT_TO_ACTIVITY: ClassVar[dict[ToolIntent, dict[str, float]]]"
+        - "ToolClassifier.DOMAIN_MODIFIERS: ClassVar[dict[ToolDomain, dict[str, float]]]"
+      patterns_to_extend:
+        - "Current classify() returns heuristic result or fallback to UNKNOWN"
+        - "ToolClassification.method field already supports: 'heuristic', 'llm', 'cached'"
+
+    - path: "graphiti_core/llm_client/client.py"
+      purpose: "LLM client base class with caching support"
+      key_interfaces:
+        - "LLMClient.generate_response(messages, response_model, ...) -> dict"
+        - "LLMClient.cache_enabled: bool"
+        - "LLMClient.cache_dir: Path | None"
+        - "LLMClient._get_cache_key(messages) -> str"
+      patterns_to_reuse:
+        - "Built-in caching in LLMClient (cache_enabled, cache_dir)"
+        - "Pydantic response_model for structured output"
+
+    - path: "graphiti_core/session_tracking/activity_vector.py"
+      purpose: "ActivityVector model (8 dimensions) - Story 2"
+      key_interfaces:
+        - "ActivityVector.from_signals(signals: dict[str, float]) -> ActivityVector"
+        - "ActivityVector.DIMENSIONS: list[str]"
+
+  patterns_found:
+    - pattern: "Method field in ToolClassification supports 'heuristic', 'llm', 'cached'"
+      location: "tool_classifier.py:146"
+      reuse: "Set method='cached' for cache hits, method='llm' for LLM classification"
+
+    - pattern: "Hash-based cache keys"
+      location: "llm_client/client.py:_get_cache_key()"
+      reuse: "Similar approach for tool classification cache keys"
+
+    - pattern: "Pydantic models for LLM structured output"
+      location: "LLMClient.generate_response(response_model=...)"
+      reuse: "Create Pydantic model for LLM classification response"
+
+# =============================================================================
+# REQUIREMENTS ANALYSIS
+# =============================================================================
+
+acceptance_criteria:
+  P0_critical:
+    - id: "AC-1"
+      description: "classify_batch() uses cache hierarchy: exact -> pattern -> heuristic -> LLM"
+      implementation_notes: |
+        - Add classify_batch() method to ToolClassifier
+        - Check exact cache first (tool_name + params hash)
+        - Check pattern cache second (tool_name only)
+        - Try heuristic third (existing _try_heuristic)
+        - Fall back to LLM for unknown tools
+        - Batch multiple LLM calls for efficiency
+
+    - id: "AC-2"
+      description: "LLM classification prompt follows spec format"
+      implementation_notes: |
+        LLM prompt template from story spec:
+        ```
+        Classify these tool invocations by their intent and domain.
+
+        For each tool call, determine:
+        1. Intent: create, modify, delete, read, search, execute, configure, validate, transform
+        2. Domain: filesystem, code, database, network, process, version_control, package, testing, memory
+        3. Activity Signals: Rate 0.0-1.0 contribution to each dimension
+
+        ## Tool Invocations to Classify:
+        {tool_calls_json}
+        ```
+
+    - id: "AC-3"
+      description: "Cache key generation using tool_name + params hash"
+      implementation_notes: |
+        - Cache key format: {tool_name}::{md5(normalized_params)[:8]}
+        - Normalize params: sort keys, convert to canonical JSON
+        - Handle missing/empty params gracefully
+
+  P1_important:
+    - id: "AC-4"
+      description: "save_cache() and _load_cache() for persistence to JSON file"
+      implementation_notes: |
+        - JSON file with "exact" and "pattern" sections
+        - Load on ToolClassifier.__init__ if path provided
+        - Save atomically (write to temp, rename)
+        - Handle corrupted cache gracefully (warn and reset)
+
+    - id: "AC-5"
+      description: "Integration test: first call uses LLM, second call uses cache"
+      implementation_notes: |
+        - Mock LLM client to track calls
+        - Verify LLM called on first classify of unknown tool
+        - Verify cache hit (no LLM call) on second classify
+        - Verify method field set correctly ('llm' vs 'cached')
+
+# =============================================================================
+# IMPLEMENTATION PLAN
+# =============================================================================
+
+implementation:
+  file_to_modify: "graphiti_core/session_tracking/tool_classifier.py"
+
+  new_classes:
+    - name: "LLMToolClassificationResponse"
+      purpose: "Pydantic model for LLM structured response"
+      base_class: "pydantic.BaseModel"
+      fields:
+        - name: "classifications"
+          type: "list[ToolClassificationResult]"
+          description: "List of classification results from LLM"
+
+    - name: "ToolClassificationResult"
+      purpose: "Single tool classification from LLM"
+      base_class: "pydantic.BaseModel"
+      fields:
+        - name: "tool_name"
+          type: "str"
+          description: "Name of the tool classified"
+        - name: "intent"
+          type: "str"
+          description: "Intent enum value"
+        - name: "domain"
+          type: "str"
+          description: "Domain enum value"
+        - name: "activity_signals"
+          type: "dict[str, float]"
+          description: "Activity vector contributions"
+
+  modifications_to_ToolClassifier:
+    instance_attributes:
+      - name: "_exact_cache"
+        type: "dict[str, ToolClassification]"
+        purpose: "Exact match cache (tool_name + params hash)"
+
+      - name: "_pattern_cache"
+        type: "dict[str, ToolClassification]"
+        purpose: "Pattern match cache (tool_name only)"
+
+      - name: "_cache_path"
+        type: "Path | None"
+        purpose: "Path for persistent cache storage"
+
+      - name: "_llm_client"
+        type: "LLMClient | None"
+        purpose: "LLM client for fallback classification"
+
+    new_methods:
+      - name: "__init__"
+        signature: "(self, cache_path: Path | None = None, llm_client: LLMClient | None = None)"
+        purpose: "Initialize classifier with optional cache persistence and LLM client"
+        implementation: |
+          - Initialize empty caches
+          - If cache_path exists, call _load_cache()
+          - Store llm_client reference
+
+      - name: "classify_batch"
+        signature: "(self, tool_calls: list[tuple[str, dict | None]]) -> list[ToolClassification]"
+        purpose: "Classify multiple tools with cache hierarchy optimization"
+        implementation: |
+          results = []
+          unknown_tools = []
+          for tool_name, params in tool_calls:
+              # 1. Try exact cache
+              cache_key = self._get_cache_key(tool_name, params)
+              if cache_key in self._exact_cache:
+                  results.append(self._exact_cache[cache_key]._replace(method='cached'))
+                  continue
+
+              # 2. Try pattern cache
+              if tool_name in self._pattern_cache:
+                  results.append(self._pattern_cache[tool_name]._replace(method='cached'))
+                  continue
+
+              # 3. Try heuristic
+              heuristic = self._try_heuristic(tool_name, params)
+              if heuristic and heuristic.confidence >= 0.7:
+                  results.append(heuristic)
+                  continue
+
+              # 4. Queue for LLM
+              unknown_tools.append((tool_name, params, len(results)))
+              results.append(None)  # Placeholder
+
+          # 5. Batch LLM classification
+          if unknown_tools and self._llm_client:
+              llm_results = await self._classify_with_llm([t[:2] for t in unknown_tools])
+              for (tool_name, params, idx), llm_result in zip(unknown_tools, llm_results):
+                  results[idx] = llm_result
+                  self._update_cache(tool_name, params, llm_result)
+
+          return results
+
+      - name: "_get_cache_key"
+        signature: "(self, tool_name: str, params: dict | None) -> str"
+        purpose: "Generate cache key from tool name and params"
+        implementation: |
+          if not params:
+              return f"{tool_name}::"
+          # Normalize params: sort keys, canonical JSON
+          normalized = json.dumps(params, sort_keys=True)
+          hash_suffix = hashlib.md5(normalized.encode()).hexdigest()[:8]
+          return f"{tool_name}::{hash_suffix}"
+
+      - name: "_classify_with_llm"
+        signature: "(self, tool_calls: list[tuple[str, dict | None]]) -> list[ToolClassification]"
+        purpose: "Batch classify unknown tools using LLM"
+        implementation: |
+          # Build prompt from spec
+          prompt = LLM_CLASSIFICATION_PROMPT.format(
+              tool_calls_json=json.dumps([
+                  {"tool_name": name, "params": params}
+                  for name, params in tool_calls
+              ], indent=2)
+          )
+
+          # Call LLM with structured response
+          response = await self._llm_client.generate_response(
+              messages=[Message(role="user", content=prompt)],
+              response_model=LLMToolClassificationResponse,
+          )
+
+          # Convert to ToolClassification objects
+          return [
+              ToolClassification(
+                  intent=ToolIntent(r.intent),
+                  domain=ToolDomain(r.domain),
+                  confidence=0.85,  # LLM confidence
+                  activity_signals=r.activity_signals,
+                  tool_name=r.tool_name,
+                  method="llm",
+              )
+              for r in response["classifications"]
+          ]
+
+      - name: "_update_cache"
+        signature: "(self, tool_name: str, params: dict | None, classification: ToolClassification)"
+        purpose: "Update both exact and pattern caches"
+        implementation: |
+          # Update exact cache
+          cache_key = self._get_cache_key(tool_name, params)
+          self._exact_cache[cache_key] = classification
+
+          # Update pattern cache (tool_name only)
+          if tool_name not in self._pattern_cache:
+              self._pattern_cache[tool_name] = classification
+
+      - name: "save_cache"
+        signature: "(self)"
+        purpose: "Persist caches to JSON file"
+        implementation: |
+          if not self._cache_path:
+              return
+
+          cache_data = {
+              "exact": {k: v.model_dump() for k, v in self._exact_cache.items()},
+              "pattern": {k: v.model_dump() for k, v in self._pattern_cache.items()},
+          }
+
+          # Atomic write
+          temp_path = self._cache_path.with_suffix('.tmp')
+          with open(temp_path, 'w') as f:
+              json.dump(cache_data, f, indent=2)
+          temp_path.rename(self._cache_path)
+
+      - name: "_load_cache"
+        signature: "(self)"
+        purpose: "Load caches from JSON file"
+        implementation: |
+          try:
+              with open(self._cache_path) as f:
+                  data = json.load(f)
+
+              self._exact_cache = {
+                  k: ToolClassification(**v) for k, v in data.get("exact", {}).items()
+              }
+              self._pattern_cache = {
+                  k: ToolClassification(**v) for k, v in data.get("pattern", {}).items()
+              }
+              logger.info("Loaded tool classification cache: %d exact, %d pattern entries",
+                         len(self._exact_cache), len(self._pattern_cache))
+          except (FileNotFoundError, json.JSONDecodeError) as e:
+              logger.warning("Could not load cache: %s", e)
+              self._exact_cache = {}
+              self._pattern_cache = {}
+
+  constants:
+    - name: "LLM_CLASSIFICATION_PROMPT"
+      type: "str"
+      value: |
+        Classify these tool invocations by their intent and domain.
+
+        For each tool call, determine:
+        1. Intent: create, modify, delete, read, search, execute, configure, validate, transform
+        2. Domain: filesystem, code, database, network, process, version_control, package, testing, memory
+        3. Activity Signals: Rate 0.0-1.0 contribution to each dimension (building, fixing, configuring, exploring, refactoring, reviewing, testing, documenting)
+
+        ## Tool Invocations to Classify:
+        {tool_calls_json}
+
+# =============================================================================
+# TESTING PLAN
+# =============================================================================
+
+testing:
+  unit_tests:
+    - test_class: "TestCacheKeyGeneration"
+      tests:
+        - "test_cache_key_without_params"
+        - "test_cache_key_with_params"
+        - "test_cache_key_param_order_invariant"
+        - "test_cache_key_different_params_different_keys"
+
+    - test_class: "TestCacheHierarchy"
+      tests:
+        - "test_exact_cache_hit_returns_cached_method"
+        - "test_pattern_cache_hit_returns_cached_method"
+        - "test_heuristic_fallback_for_unknown_tools"
+        - "test_llm_fallback_when_heuristic_low_confidence"
+
+    - test_class: "TestLLMClassification"
+      tests:
+        - "test_llm_prompt_format"
+        - "test_llm_response_parsing"
+        - "test_llm_batch_classification"
+        - "test_cache_updated_after_llm_call"
+
+    - test_class: "TestCachePersistence"
+      tests:
+        - "test_save_cache_creates_json"
+        - "test_load_cache_restores_entries"
+        - "test_load_cache_handles_missing_file"
+        - "test_load_cache_handles_corrupted_json"
+        - "test_cache_survives_round_trip"
+
+  integration_tests:
+    - test_class: "TestLLMCacheIntegration"
+      tests:
+        - "test_first_call_uses_llm_second_uses_cache"
+        - "test_cache_persists_across_instances"
+
+# =============================================================================
+# IMPLEMENTATION ORDER
+# =============================================================================
+
+implementation_order:
+  phase_i:
+    description: "Core caching infrastructure"
+    tasks:
+      - "Add instance attributes (_exact_cache, _pattern_cache, _cache_path, _llm_client)"
+      - "Implement __init__ with optional cache_path and llm_client"
+      - "Implement _get_cache_key() with MD5 hashing"
+      - "Implement _update_cache() for both cache types"
+
+  phase_ii:
+    description: "Cache persistence"
+    tasks:
+      - "Implement save_cache() with atomic write"
+      - "Implement _load_cache() with error handling"
+      - "Add cache loading to __init__"
+
+  phase_iii:
+    description: "LLM classification"
+    tasks:
+      - "Add LLM_CLASSIFICATION_PROMPT constant"
+      - "Add LLMToolClassificationResponse Pydantic model"
+      - "Implement _classify_with_llm() async method"
+
+  phase_iv:
+    description: "Batch classification with hierarchy"
+    tasks:
+      - "Implement classify_batch() with full cache hierarchy"
+      - "Add async support (make classify_batch async)"
+
+  phase_t:
+    description: "Testing"
+    tasks:
+      - "Write unit tests for cache key generation"
+      - "Write unit tests for cache hierarchy"
+      - "Write unit tests for cache persistence"
+      - "Write integration test for LLM + cache flow"
+
+# =============================================================================
+# DEPENDENCIES AND IMPORTS
+# =============================================================================
+
+new_imports:
+  - "import hashlib"
+  - "import json"
+  - "from pathlib import Path"
+  - "from typing import ClassVar"
+  - "from graphiti_core.llm_client import LLMClient"
+  - "from graphiti_core.llm_client.client import Message"
+
+# =============================================================================
+# RISKS AND MITIGATIONS
+# =============================================================================
+
+risks:
+  - risk: "LLM API costs for classification"
+    mitigation: "Multi-level caching ensures LLM called only once per unique tool"
+
+  - risk: "Cache file corruption"
+    mitigation: "Atomic write (temp file + rename) and graceful corruption handling"
+
+  - risk: "LLM response parsing errors"
+    mitigation: "Pydantic model validation with fallback to heuristic on error"
+
+  - risk: "Large cache files"
+    mitigation: "Consider cache eviction in future if needed (not in scope for Story 5)"
+
+# =============================================================================
+# ACCEPTANCE CRITERIA MAPPING
+# =============================================================================
+
+ac_mapping:
+  "AC-1": ["classify_batch", "cache hierarchy"]
+  "AC-2": ["LLM_CLASSIFICATION_PROMPT", "_classify_with_llm"]
+  "AC-3": ["_get_cache_key"]
+  "AC-4": ["save_cache", "_load_cache"]
+  "AC-5": ["integration tests"]

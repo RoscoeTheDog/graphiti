@@ -1,4 +1,4 @@
-Summarize this user message in 1-2 sentences.
+Summarize this user message in 2 paragraphs or less.
 
 **Context**: {context}
 
@@ -10,4 +10,4 @@ Summarize this user message in 1-2 sentences.
 **Original message**:
 {content}
 
-**Summary** (preserve user intent):
+**Summary** (preserve user intent, 2 paragraphs or less):

@@ -6,163 +6,1106 @@
     "version": "v3.0.0",
     "status": "active",
     "branch": "dev",
-    "created": "2025-12-11 14:39"
+    "created": "2025-12-11 14:39",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
   },
   "stories": {
     "1": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Enhanced Session Summary Schema",
-      "status": "unassigned",
-      "file": "stories/1-enhanced-session-summary-schema.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "10"
-      ]
+      ],
+      "file": "stories/1-enhanced-session-summary-schema.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "10": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Enhanced Markdown Rendering",
-      "status": "unassigned",
-      "file": "stories/10-enhanced-markdown-rendering.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "10.d",
+        "10.i",
+        "10.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "11"
-      ]
+      ],
+      "file": "stories/10-enhanced-markdown-rendering.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "11": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Summarizer Integration",
-      "status": "unassigned",
-      "file": "stories/11-summarizer-integration.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "11.d",
+        "11.i",
+        "11.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/11-summarizer-integration.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "12": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Configuration Schema Updates",
-      "status": "unassigned",
-      "file": "stories/12-configuration-schema-updates.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "12.d",
+        "12.i",
+        "12.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/12-configuration-schema-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "13": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Template Updates",
-      "status": "unassigned",
-      "file": "stories/13-template-updates.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "13.d",
+        "13.i",
+        "13.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/13-template-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "2": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Activity Vector Model",
-      "status": "unassigned",
-      "file": "stories/2-activity-vector-model.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "3",
         "4",
         "8"
-      ]
+      ],
+      "file": "stories/2-activity-vector-model.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "3": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Activity Detection from Messages",
-      "status": "unassigned",
-      "file": "stories/3-activity-detection-from-messages.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "11"
-      ]
+      ],
+      "file": "stories/3-activity-detection-from-messages.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "4": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Tool Classification Heuristics",
-      "status": "unassigned",
-      "file": "stories/4-tool-classification-heuristics.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "5",
         "6"
-      ]
+      ],
+      "file": "stories/4-tool-classification-heuristics.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "5": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "LLM Tool Classification with Caching",
-      "status": "unassigned",
-      "file": "stories/5-llm-tool-classification-with-caching.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "7"
-      ]
+      ],
+      "file": "stories/5-llm-tool-classification-with-caching.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "6": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Bash Command Analysis",
-      "status": "unassigned",
-      "file": "stories/6-bash-command-analysis.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "7"
-      ]
+      ],
+      "file": "stories/6-bash-command-analysis.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "7": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Unified Tool Classifier",
-      "status": "unassigned",
-      "file": "stories/7-unified-tool-classifier.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "11"
-      ]
+      ],
+      "file": "stories/7-unified-tool-classifier.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "8": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Extraction Priority Algorithm",
-      "status": "unassigned",
-      "file": "stories/8-extraction-priority-algorithm.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "8.d",
+        "8.i",
+        "8.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "9"
-      ]
+      ],
+      "file": "stories/8-extraction-priority-algorithm.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "9": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Dynamic Prompt Generation",
-      "status": "unassigned",
-      "file": "stories/9-dynamic-prompt-generation.md",
+      "status": "completed",
       "parent": null,
-      "children": [],
+      "children": [
+        "9.d",
+        "9.i",
+        "9.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
       "blocks": [
         "11"
+      ],
+      "file": "stories/9-dynamic-prompt-generation.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Enhanced Session Summary Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Enhanced Session Summary Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml"
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Enhanced Session Summary Schema",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
       ]
+    },
+    "10.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Enhanced Markdown Rendering",
+      "status": "completed",
+      "parent": "10",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/10-plan.yaml"
+    },
+    "10.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Enhanced Markdown Rendering",
+      "status": "completed",
+      "parent": "10",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/10-plan.yaml"
+    },
+    "10.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Enhanced Markdown Rendering",
+      "status": "completed",
+      "parent": "10",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/10-plan.yaml"
+      }
+    },
+    "11.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Summarizer Integration",
+      "status": "completed",
+      "parent": "11",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/11-plan.yaml"
+    },
+    "11.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Summarizer Integration",
+      "status": "completed",
+      "parent": "11",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/11-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/11-plan.yaml"
+      }
+    },
+    "11.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Summarizer Integration",
+      "status": "completed",
+      "parent": "11",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/11-plan.yaml"
+      }
+    },
+    "12.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "12",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/12-plan.yaml"
+    },
+    "12.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "12",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/12-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/12-plan.yaml"
+      }
+    },
+    "12.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "12",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/12-plan.yaml"
+      }
+    },
+    "13.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Template Updates",
+      "status": "completed",
+      "parent": "13",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/13-plan.yaml"
+    },
+    "13.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Template Updates",
+      "status": "completed",
+      "parent": "13",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": "stories/13-template-updates.md",
+      "requires_artifact": "plans/13-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/13-plan.yaml",
+        "file": "stories/13-template-updates.md"
+      }
+    },
+    "13.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Template Updates",
+      "status": "completed",
+      "parent": "13",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Activity Vector Model",
+      "status": "completed",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Activity Vector Model",
+      "status": "completed",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml"
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Activity Vector Model",
+      "status": "completed",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Activity Detection from Messages",
+      "status": "completed",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Activity Detection from Messages",
+      "status": "completed",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml"
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Activity Detection from Messages",
+      "status": "completed",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Tool Classification Heuristics",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Tool Classification Heuristics",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml"
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Tool Classification Heuristics",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: LLM Tool Classification with Caching",
+      "status": "completed",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: LLM Tool Classification with Caching",
+      "status": "completed",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: LLM Tool Classification with Caching",
+      "status": "completed",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Bash Command Analysis",
+      "status": "completed",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Bash Command Analysis",
+      "status": "completed",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Bash Command Analysis",
+      "status": "completed",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Unified Tool Classifier",
+      "status": "completed",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Unified Tool Classifier",
+      "status": "completed",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/7-plan.yaml"
+      }
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Unified Tool Classifier",
+      "status": "completed",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/7-plan.yaml"
+      }
+    },
+    "8.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Extraction Priority Algorithm",
+      "status": "completed",
+      "parent": "8",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/8-plan.yaml"
+    },
+    "8.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Extraction Priority Algorithm",
+      "status": "completed",
+      "parent": "8",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/8-plan.yaml"
+    },
+    "8.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Extraction Priority Algorithm",
+      "status": "completed",
+      "parent": "8",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "9.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "9",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/9-plan.yaml"
+    },
+    "9.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "9",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/9-plan.yaml"
+    },
+    "9.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "9",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Activity Vector Model",
+      "status": "completed",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Activity Vector Model",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Activity Vector Model",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Activity Vector Model",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-9": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Dynamic Prompt Generation",
+      "status": "completed",
+      "validates": "9",
+      "children": [
+        "-9.d",
+        "-9.i",
+        "-9.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-9.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "-9",
+      "validates": "9.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.i"
+      ],
+      "file": null
+    },
+    "-9.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "-9",
+      "validates": "9.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.t"
+      ],
+      "file": null
+    },
+    "-9.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "-9",
+      "validates": "9.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13"
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-9.d",
+    "-9.i",
+    "-9.t",
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7.d",
+    "7.i",
+    "7.t",
+    "8.d",
+    "8.i",
+    "8.t",
+    "9.d",
+    "9.i",
+    "9.t",
+    "10.d",
+    "10.i",
+    "10.t",
+    "11.d",
+    "11.i",
+    "11.t",
+    "12.d",
+    "12.i",
+    "12.t",
+    "13.d",
+    "13.i",
+    "13.t"
   ]
 }

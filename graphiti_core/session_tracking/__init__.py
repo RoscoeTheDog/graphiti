@@ -17,11 +17,29 @@ Core components:
 - SessionTrackingHealth: Health status aggregation (Story 19)
 """
 
+from .activity_detector import ActivityDetector
+from .activity_vector import ActivityVector
+from .bash_analyzer import BashAnalyzer, BashCommandClassification
+from .extraction_priority import (
+    EXTRACTION_AFFINITIES,
+    compute_extraction_priority,
+    get_extraction_fields,
+    get_extraction_priorities,
+)
+from .prompt_builder import (
+    FIELD_INSTRUCTIONS,
+    DEFAULT_PROMPT_TEMPLATE,
+    PromptTemplate,
+    build_extraction_prompt,
+)
+from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
+from .unified_classifier import UnifiedToolClassifier
 from .filter import SessionFilter
 from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
 from .indexer import SessionIndexer
 from .message_summarizer import MessageSummarizer
+from .summarizer import DecisionRecord, ErrorResolution, SessionSummary, SessionSummarySchema
 from .metadata import build_episode_metadata_header
 from .parser import JSONLParser
 from .path_resolver import ClaudePathResolver
@@ -63,6 +81,35 @@ __all__ = [
     "FilterConfig",
     # Message summarization (NEW - Story 2.3.4)
     "MessageSummarizer",
+    # Session summary models (NEW - Story 1 v3.0.0)
+    "SessionSummary",
+    "SessionSummarySchema",
+    "DecisionRecord",
+    "ErrorResolution",
+    # Activity vector model (NEW - Story 2 v3.0.0)
+    "ActivityVector",
+    # Activity detection (NEW - Story 3 v3.0.0)
+    "ActivityDetector",
+    # Tool classification (NEW - Story 4 v3.0.0)
+    "ToolIntent",
+    "ToolDomain",
+    "ToolClassification",
+    "ToolClassifier",
+    # Bash command analysis (NEW - Story 6 v3.0.0)
+    "BashAnalyzer",
+    "BashCommandClassification",
+    # Unified tool classification (NEW - Story 7 v3.0.0)
+    "UnifiedToolClassifier",
+    # Extraction priority (NEW - Story 8 v3.0.0)
+    "EXTRACTION_AFFINITIES",
+    "compute_extraction_priority",
+    "get_extraction_fields",
+    "get_extraction_priorities",
+    # Prompt builder (NEW - Story 9 v3.0.0)
+    "FIELD_INSTRUCTIONS",
+    "DEFAULT_PROMPT_TEMPLATE",
+    "PromptTemplate",
+    "build_extraction_prompt",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)

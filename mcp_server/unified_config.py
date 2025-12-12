@@ -524,6 +524,54 @@ class SessionTrackingResilienceConfig(BaseModel):
 
 
 # ============================================================================
+# Summarization Configuration
+# ============================================================================
+
+
+class SummarizationConfig(BaseModel):
+    """Configuration for intelligent session summarization features.
+
+    Controls how sessions are analyzed, categorized, and summarized for
+    efficient cross-session retrieval. Uses dynamic extraction based on
+    activity priority to balance detail preservation with token efficiency.
+    """
+
+    template: Optional[str] = Field(
+        default=None,
+        description="Custom summarization template path. If None, uses dynamic extraction."
+    )
+    type_detection: Literal["auto", "manual"] = Field(
+        default="auto",
+        description="Activity detection mode. 'auto' infers from messages, 'manual' requires explicit config."
+    )
+    extraction_threshold: float = Field(
+        default=0.3,
+        ge=0.0,
+        le=1.0,
+        description="Minimum priority score to include extraction field"
+    )
+    include_decisions: bool = Field(
+        default=True,
+        description="Extract key_decisions (prevents repeated debates)"
+    )
+    include_errors_resolved: bool = Field(
+        default=True,
+        description="Extract errors_resolved (debugging continuity)"
+    )
+    tool_classification_cache: Optional[str] = Field(
+        default=None,
+        description="Path to tool classification cache. Default: ~/.graphiti/tool_cache.json"
+    )
+
+    @field_validator('extraction_threshold')
+    def validate_extraction_threshold(cls, v):
+        """Enforce extraction_threshold is between 0.0 and 1.0."""
+        if not 0.0 <= v <= 1.0:
+            raise ValueError("extraction_threshold must be between 0.0 and 1.0")
+        return v
+
+
+# ============================================================================
 # Resilience Configuration (Legacy - kept for backward compatibility)
 # ============================================================================
 
@@ -617,6 +665,13 @@ class SessionTrackingConfig(BaseModel):
         description=(
             "Resilience configuration for session tracking. "
             "Defines behavior when LLM is unavailable during session processing."
+        )
+    )
+    summarization: SummarizationConfig = Field(
+        default_factory=SummarizationConfig,
+        description=(
+            "Intelligent session summarization configuration. "
+            "Controls activity detection, dynamic extraction, and summary generation."
         )
     )
 

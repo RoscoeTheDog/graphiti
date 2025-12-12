@@ -1,0 +1,168 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "intelligent-session-summarization-vv3.0.0",
+    "name": "Intelligent Session Summarization",
+    "version": "v3.0.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-11 14:39"
+  },
+  "stories": {
+    "1": {
+      "type": "implementation",
+      "title": "Enhanced Session Summary Schema",
+      "status": "unassigned",
+      "file": "stories/1-enhanced-session-summary-schema.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10"
+      ]
+    },
+    "10": {
+      "type": "implementation",
+      "title": "Enhanced Markdown Rendering",
+      "status": "unassigned",
+      "file": "stories/10-enhanced-markdown-rendering.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "11"
+      ]
+    },
+    "11": {
+      "type": "implementation",
+      "title": "Summarizer Integration",
+      "status": "unassigned",
+      "file": "stories/11-summarizer-integration.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "12": {
+      "type": "implementation",
+      "title": "Configuration Schema Updates",
+      "status": "unassigned",
+      "file": "stories/12-configuration-schema-updates.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "13": {
+      "type": "implementation",
+      "title": "Template Updates",
+      "status": "unassigned",
+      "file": "stories/13-template-updates.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "2": {
+      "type": "implementation",
+      "title": "Activity Vector Model",
+      "status": "unassigned",
+      "file": "stories/2-activity-vector-model.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "3",
+        "4",
+        "8"
+      ]
+    },
+    "3": {
+      "type": "implementation",
+      "title": "Activity Detection from Messages",
+      "status": "unassigned",
+      "file": "stories/3-activity-detection-from-messages.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "11"
+      ]
+    },
+    "4": {
+      "type": "implementation",
+      "title": "Tool Classification Heuristics",
+      "status": "unassigned",
+      "file": "stories/4-tool-classification-heuristics.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "5",
+        "6"
+      ]
+    },
+    "5": {
+      "type": "implementation",
+      "title": "LLM Tool Classification with Caching",
+      "status": "unassigned",
+      "file": "stories/5-llm-tool-classification-with-caching.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "7"
+      ]
+    },
+    "6": {
+      "type": "implementation",
+      "title": "Bash Command Analysis",
+      "status": "unassigned",
+      "file": "stories/6-bash-command-analysis.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "7"
+      ]
+    },
+    "7": {
+      "type": "implementation",
+      "title": "Unified Tool Classifier",
+      "status": "unassigned",
+      "file": "stories/7-unified-tool-classifier.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "11"
+      ]
+    },
+    "8": {
+      "type": "implementation",
+      "title": "Extraction Priority Algorithm",
+      "status": "unassigned",
+      "file": "stories/8-extraction-priority-algorithm.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "9"
+      ]
+    },
+    "9": {
+      "type": "implementation",
+      "title": "Dynamic Prompt Generation",
+      "status": "unassigned",
+      "file": "stories/9-dynamic-prompt-generation.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "11"
+      ]
+    }
+  },
+  "execution_queue": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13"
+  ]
+}

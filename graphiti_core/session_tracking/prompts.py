@@ -20,7 +20,7 @@ DEFAULT_TOOL_CONTENT_TEMPLATE = """Summarize this tool result concisely in 1 par
 **Summary** (1 paragraph, actionable information):
 """
 
-DEFAULT_USER_MESSAGES_TEMPLATE = """Summarize this user message in 1-2 sentences.
+DEFAULT_USER_MESSAGES_TEMPLATE = """Summarize this user message in 2 paragraphs or less.
 
 **Context**: {context}
 
@@ -32,10 +32,10 @@ DEFAULT_USER_MESSAGES_TEMPLATE = """Summarize this user message in 1-2 sentences
 **Original message**:
 {content}
 
-**Summary** (preserve user intent):
+**Summary** (preserve user intent, 2 paragraphs or less):
 """
 
-DEFAULT_AGENT_MESSAGES_TEMPLATE = """Summarize this agent response in 1 paragraph.
+DEFAULT_AGENT_MESSAGES_TEMPLATE = """Summarize this agent response in 2 paragraphs or less.
 
 **Context**: {context}
 
@@ -48,7 +48,21 @@ DEFAULT_AGENT_MESSAGES_TEMPLATE = """Summarize this agent response in 1 paragrap
 **Original response**:
 {content}
 
-**Summary** (reasoning and decisions):
+**Summary** (reasoning and decisions, 2 paragraphs or less):
+"""
+
+DEFAULT_SESSION_SUMMARY_TEMPLATE = """Summarize this coding session into structured format.
+
+**Activity Profile**: {activity_profile}
+
+**Extract based on session activities**:
+
+{dynamic_extraction_instructions}
+
+**Session Content**:
+{content}
+
+**Response** (JSON matching EnhancedSessionSummary schema):
 """
 
 # Template filename mapping
@@ -56,4 +70,5 @@ DEFAULT_TEMPLATES = {
     "default-tool-content.md": DEFAULT_TOOL_CONTENT_TEMPLATE,
     "default-user-messages.md": DEFAULT_USER_MESSAGES_TEMPLATE,
     "default-agent-messages.md": DEFAULT_AGENT_MESSAGES_TEMPLATE,
+    "default-session-summary.md": DEFAULT_SESSION_SUMMARY_TEMPLATE,
 }

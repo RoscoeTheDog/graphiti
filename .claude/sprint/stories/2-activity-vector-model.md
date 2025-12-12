@@ -1,6 +1,6 @@
 # Story 2: Activity Vector Model
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-11 14:39
 
 ## Description
@@ -9,11 +9,11 @@ Implement the 8-dimensional ActivityVector model that represents session activit
 
 ## Acceptance Criteria
 
-- [ ] (P0) `ActivityVector` Pydantic model with 8 dimensions (building, fixing, configuring, exploring, refactoring, reviewing, testing, documenting)
-- [ ] (P0) `from_signals()` class method normalizes raw signals to 0-1 range
-- [ ] (P0) `dominant_activities` property returns activities above 0.3 threshold
-- [ ] (P1) `activity_profile` property returns human-readable string (e.g., "fixing (0.8), configuring (0.7)")
-- [ ] (P1) Unit tests for normalization, dominant activities, edge cases
+- [x] (P0) `ActivityVector` Pydantic model with 8 dimensions (building, fixing, configuring, exploring, refactoring, reviewing, testing, documenting)
+- [x] (P0) `from_signals()` class method normalizes raw signals to 0-1 range
+- [x] (P0) `dominant_activities` property returns activities above 0.3 threshold
+- [x] (P1) `activity_profile` property returns human-readable string (e.g., "fixing (0.8), configuring (0.7)")
+- [x] (P1) Unit tests for normalization, dominant activities, edge cases
 
 ## Dependencies
 
