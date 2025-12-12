@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:50:00
+**Generated**: 2025-12-12 04:01:25
 
 ---
 
@@ -15,13 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 77.3%
+- **Completion**: 83.0%
 
 ### By Status
 
 - blocked: 2
-- completed: 68
-- unassigned: 18
+- completed: 73
+- in_progress: 1
+- unassigned: 12
 
 ### By Type
 
@@ -138,21 +139,21 @@
   - Dependencies: Story -7, Story -7.i
 
   ### Story -8.d: Validate Discovery: Implement TemplateResolver with Hierarchy
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -8
   - Blocks: Story -8.i
 
   ### Story -8.i: Validate Implementation: Implement TemplateResolver with Hierarchy
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -8, Story -8.d
   - Blocks: Story -8.t
 
   ### Story -8.t: Validate Testing: Implement TemplateResolver with Hierarchy
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -8, Story -8.i
 
   ### Story -9.d: Validate Discovery: Add Template Validation and Error Handling
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -9
   - Blocks: Story -9.i
 
