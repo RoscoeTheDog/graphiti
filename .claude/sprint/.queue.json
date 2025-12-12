@@ -1076,7 +1076,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Modify edge_operations.py for Preprocessing Injection",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "5",
       "children": [
         "-5.d",
@@ -1134,7 +1134,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Modify edge_operations.py for Preprocessing Injection",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.t",
       "phase": "validation_testing",

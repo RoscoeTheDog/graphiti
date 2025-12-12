@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:32:59
+**Generated**: 2025-12-12 03:34:17
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 70.5%
+- **Completion**: 72.7%
 
 ### By Status
 
-- completed: 62
-- in_progress: 1
-- unassigned: 25
+- completed: 64
+- unassigned: 24
 
 ### By Type
 
@@ -106,7 +105,7 @@
   - Blocks: Story -5.t
 
   ### Story -5.t: Validate Testing: Modify edge_operations.py for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Add Extraction Config to unified_config.py
