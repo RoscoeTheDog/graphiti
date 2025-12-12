@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:04:52
+**Generated**: 2025-12-12 03:14:59
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 54.5%
+- **Completion**: 60.2%
 
 ### By Status
 
-- completed: 48
-- unassigned: 40
+- completed: 53
+- in_progress: 1
+- unassigned: 34
 
 ### By Type
 
@@ -53,21 +54,21 @@
   - Dependencies: Story -1, Story -1.i
 
   ### Story -2.d: Validate Discovery: Extend GraphitiClients with Preprocessing Fields
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -2
   - Blocks: Story -2.i
 
   ### Story -2.i: Validate Implementation: Extend GraphitiClients with Preprocessing Fields
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -2, Story -2.d
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Extend GraphitiClients with Preprocessing Fields
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Create Default Session Turn Template
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -3
   - Blocks: Story -3.i
 
