@@ -1388,7 +1388,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Add Template Validation and Error Handling",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "9",
       "children": [
         "-9.d",
@@ -1446,7 +1446,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Add Template Validation and Error Handling",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-9",
       "validates": "9.t",
       "phase": "validation_testing",
