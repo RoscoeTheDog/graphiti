@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 18:52:34
+**Generated**: 2025-12-11 18:58:39
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 60
-- **Completion**: 70.0%
+- **Completion**: 73.3%
 
 ### By Status
 
-- completed: 42
-- in_progress: 1
-- unassigned: 17
+- completed: 44
+- unassigned: 16
 
 ### By Type
 
@@ -63,7 +62,7 @@
   - Blocks: Story -9.t
 
   ### Story -9.t: Validate Testing: Dynamic Prompt Generation
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -9, Story -9.i
 
   ### Story 1.d: Discovery: Enhanced Session Summary Schema

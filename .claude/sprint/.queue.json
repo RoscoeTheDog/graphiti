@@ -967,7 +967,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Dynamic Prompt Generation",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "9",
       "children": [
         "-9.d",
@@ -1025,7 +1025,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Dynamic Prompt Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-9",
       "validates": "9.t",
       "phase": "validation_testing",
