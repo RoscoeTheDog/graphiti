@@ -767,7 +767,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Unified Tool Classifier",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "7",
       "phase": "implementation",
       "phase_order": 2,
@@ -794,7 +794,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/7-plan.yaml"
+      }
     },
     "8.d": {
       "type": "discovery",

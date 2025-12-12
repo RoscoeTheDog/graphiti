@@ -21,6 +21,7 @@ from .activity_detector import ActivityDetector
 from .activity_vector import ActivityVector
 from .bash_analyzer import BashAnalyzer, BashCommandClassification
 from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
+from .unified_classifier import UnifiedToolClassifier
 from .filter import SessionFilter
 from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
@@ -85,6 +86,8 @@ __all__ = [
     # Bash command analysis (NEW - Story 6 v3.0.0)
     "BashAnalyzer",
     "BashCommandClassification",
+    # Unified tool classification (NEW - Story 7 v3.0.0)
+    "UnifiedToolClassifier",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)
