@@ -276,7 +276,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Extraction Priority Algorithm",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "8.d",
@@ -803,7 +803,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Extraction Priority Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "8",
       "phase": "discovery",
       "phase_order": 1,
