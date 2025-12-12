@@ -104,7 +104,8 @@ async def extract_nodes(
     start = time()
     llm_client = clients.llm_client
     llm_response = {}
-    custom_prompt = ''
+    # AC-4.1: Initialize with preprocessing_prompt if available
+    custom_prompt = clients.preprocessing_prompt if clients.preprocessing_prompt else ''
     entities_missed = True
     reflexion_iterations = 0
     error_classifier = LLMErrorClassifier()
@@ -130,17 +131,18 @@ async def extract_nodes(
         else []
     )
 
-    context = {
-        'episode_content': episode.content,
-        'episode_timestamp': episode.valid_at.isoformat(),
-        'previous_episodes': [ep.content for ep in previous_episodes],
-        'custom_prompt': custom_prompt,
-        'entity_types': entity_types_context,
-        'source_description': episode.source_description,
-    }
-
     try:
         while entities_missed and reflexion_iterations <= MAX_REFLEXION_ITERATIONS:
+            # AC-4.5: Update context with current custom_prompt in each iteration
+            context = {
+                'episode_content': episode.content,
+                'episode_timestamp': episode.valid_at.isoformat(),
+                'previous_episodes': [ep.content for ep in previous_episodes],
+                'custom_prompt': custom_prompt,
+                'entity_types': entity_types_context,
+                'source_description': episode.source_description,
+            }
+
             if episode.source == EpisodeType.message:
                 llm_response = await llm_client.generate_response(
                     prompt_library.extract_nodes.extract_message(context),
@@ -179,9 +181,22 @@ async def extract_nodes(
 
                 entities_missed = len(missing_entities) != 0
 
-                custom_prompt = 'Make sure that the following entities are extracted: '
+                # AC-4.2 & AC-4.3: Build reflexion hint
+                reflexion_hint = 'Make sure that the following entities are extracted: '
                 for entity in missing_entities:
-                    custom_prompt += f'\n{entity},'
+                    reflexion_hint += f'\n{entity},'
+
+                # AC-4.3: Concatenate based on preprocessing_mode
+                if clients.preprocessing_prompt:
+                    if clients.preprocessing_mode == 'prepend':
+                        # Prepend mode: preprocessing + reflexion
+                        custom_prompt = f"{clients.preprocessing_prompt}\n\n{reflexion_hint}"
+                    else:  # append mode
+                        # Append mode: reflexion + preprocessing
+                        custom_prompt = f"{reflexion_hint}\n\n{clients.preprocessing_prompt}"
+                else:
+                    # AC-4.4: No preprocessing_prompt, preserve existing behavior
+                    custom_prompt = reflexion_hint
     except Exception as e:
         # AC-17.12: Classify the error and raise appropriate exception
         llm_error = error_classifier.classify(e)

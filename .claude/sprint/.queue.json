@@ -89,7 +89,7 @@
     "4": {
       "type": "implementation",
       "title": "Modify node_operations.py for Preprocessing Injection",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/4-modify-node-operations-preprocessing.md",
       "parent": null,
       "children": [],
