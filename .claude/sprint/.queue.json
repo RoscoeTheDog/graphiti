@@ -300,7 +300,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Dynamic Prompt Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "9.d",
@@ -308,9 +308,9 @@
         "9.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "11"
@@ -846,7 +846,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Dynamic Prompt Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "discovery",
       "phase_order": 1,
@@ -859,7 +859,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Dynamic Prompt Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "implementation",
       "phase_order": 2,
@@ -872,7 +872,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Dynamic Prompt Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "9",
       "phase": "testing",
       "phase_order": 3,

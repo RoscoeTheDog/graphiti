@@ -26,6 +26,12 @@ from .extraction_priority import (
     get_extraction_fields,
     get_extraction_priorities,
 )
+from .prompt_builder import (
+    FIELD_INSTRUCTIONS,
+    DEFAULT_PROMPT_TEMPLATE,
+    PromptTemplate,
+    build_extraction_prompt,
+)
 from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
 from .unified_classifier import UnifiedToolClassifier
 from .filter import SessionFilter
@@ -99,6 +105,11 @@ __all__ = [
     "compute_extraction_priority",
     "get_extraction_fields",
     "get_extraction_priorities",
+    # Prompt builder (NEW - Story 9 v3.0.0)
+    "FIELD_INSTRUCTIONS",
+    "DEFAULT_PROMPT_TEMPLATE",
+    "PromptTemplate",
+    "build_extraction_prompt",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)
