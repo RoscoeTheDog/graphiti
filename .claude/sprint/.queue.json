@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Enhanced Markdown Rendering",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "10.d",
@@ -367,7 +367,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Enhanced Markdown Rendering",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "discovery",
       "phase_order": 1,
