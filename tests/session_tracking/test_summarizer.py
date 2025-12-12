@@ -14,11 +14,13 @@ import pytest
 from pydantic import ValidationError
 
 from graphiti_core.session_tracking.summarizer import (
+    ConfigChange,
     DecisionRecord,
     ErrorResolution,
     SessionSummary,
     SessionSummarySchema,
     SessionSummarizer,
+    TestResults,
 )
 
 
@@ -384,6 +386,9 @@ class TestSessionSummary:
             documentation_referenced=['docs/README.md'],
             key_decisions=key_decisions or [],
             errors_resolved=errors_resolved or [],
+            activity_profile=None,  # Story 10: New field
+            config_changes=[],  # Story 10: New field
+            test_results=None,  # Story 10: New field
             mcp_tools_used=['graphiti-memory'],
             token_count=5000,
             duration_estimate='1 hour',
@@ -518,6 +523,9 @@ class TestSessionSummary:
             documentation_referenced=[],
             key_decisions=[],
             errors_resolved=[],
+            activity_profile=None,  # Story 10: New field
+            config_changes=[],  # Story 10: New field
+            test_results=None,  # Story 10: New field
             mcp_tools_used=[],
             token_count=None,
             duration_estimate=None,
@@ -687,6 +695,9 @@ class TestIntegrationScenarios:
                     verification='All tests pass including new edge case tests',
                 ),
             ],
+            activity_profile=None,  # Story 10: New field
+            config_changes=[],  # Story 10: New field
+            test_results=None,  # Story 10: New field
             mcp_tools_used=[],
             token_count=3000,
             duration_estimate='30 minutes',
@@ -699,3 +710,502 @@ class TestIntegrationScenarios:
         assert '`TypeError`' in md or 'TypeError' in md  # Title may not have backticks
         assert '`None`' in md or 'None' in md
         assert 'isinstance()' in md or '`isinstance()`' in md
+
+
+class TestConfigChange:
+    """Test ConfigChange Pydantic model (Story 10)."""
+
+    def test_basic_creation(self):
+        """Test creating a ConfigChange with all required fields."""
+        config = ConfigChange(
+            file='.env',
+            setting='JWT_EXPIRY',
+            change='60 -> 3600',
+            reason='Fix timeout - was ambiguous units',
+        )
+        assert config.file == '.env'
+        assert config.setting == 'JWT_EXPIRY'
+        assert config.change == '60 -> 3600'
+        assert config.reason == 'Fix timeout - was ambiguous units'
+
+    def test_serialization_to_dict(self):
+        """Test model_dump() serialization."""
+        config = ConfigChange(
+            file='config.yaml',
+            setting='DEBUG_MODE',
+            change='true -> false',
+            reason='Production deployment',
+        )
+        data = config.model_dump()
+        assert data == {
+            'file': 'config.yaml',
+            'setting': 'DEBUG_MODE',
+            'change': 'true -> false',
+            'reason': 'Production deployment',
+        }
+
+    def test_serialization_to_json(self):
+        """Test JSON serialization."""
+        config = ConfigChange(
+            file='settings.py',
+            setting='ALLOWED_HOSTS',
+            change='[] -> ["example.com"]',
+            reason='Allow production domain',
+        )
+        json_str = config.model_dump_json()
+        parsed = json.loads(json_str)
+        assert parsed['file'] == 'settings.py'
+        assert parsed['change'] == '[] -> ["example.com"]'
+
+    def test_deserialization_from_dict(self):
+        """Test model_validate() deserialization."""
+        data = {
+            'file': 'database.conf',
+            'setting': 'MAX_CONNECTIONS',
+            'change': '100 -> 500',
+            'reason': 'Increase connection pool for high traffic',
+        }
+        config = ConfigChange.model_validate(data)
+        assert config.file == 'database.conf'
+        assert config.setting == 'MAX_CONNECTIONS'
+        assert config.reason == 'Increase connection pool for high traffic'
+
+    def test_validation_all_fields_required(self):
+        """Test that all four fields are required."""
+        required_fields = ['file', 'setting', 'change', 'reason']
+
+        for missing_field in required_fields:
+            data = {
+                'file': 'file.txt',
+                'setting': 'SETTING',
+                'change': 'old -> new',
+                'reason': 'Because',
+            }
+            del data[missing_field]
+            with pytest.raises(ValidationError) as exc_info:
+                ConfigChange.model_validate(data)
+            assert missing_field in str(exc_info.value)
+
+    def test_roundtrip_serialization(self):
+        """Test full round-trip serialization/deserialization."""
+        original = ConfigChange(
+            file='.env',
+            setting='API_KEY',
+            change='old_key -> new_key',
+            reason='Key rotation',
+        )
+        json_str = original.model_dump_json()
+        restored = ConfigChange.model_validate_json(json_str)
+        assert original == restored
+
+    def test_special_characters_in_values(self):
+        """Test handling of special characters in config values."""
+        config = ConfigChange(
+            file='nginx.conf',
+            setting='server_name',
+            change='localhost -> api.example.com|www.example.com',
+            reason='Multi-domain setup (use | for separation)',
+        )
+        # Should serialize/deserialize correctly with pipes
+        data = config.model_dump()
+        restored = ConfigChange.model_validate(data)
+        assert restored.change == 'localhost -> api.example.com|www.example.com'
+        assert '|' in restored.change
+        assert '|' in restored.reason
+
+
+class TestTestResults:
+    """Test TestResults Pydantic model (Story 10)."""
+
+    def test_basic_creation_with_coverage(self):
+        """Test creating TestResults with coverage."""
+        results = TestResults(
+            framework='pytest',
+            passed=12,
+            failed=0,
+            coverage=87.3,
+        )
+        assert results.framework == 'pytest'
+        assert results.passed == 12
+        assert results.failed == 0
+        assert results.coverage == 87.3
+
+    def test_basic_creation_without_coverage(self):
+        """Test creating TestResults without coverage (optional field)."""
+        results = TestResults(
+            framework='jest',
+            passed=45,
+            failed=2,
+        )
+        assert results.framework == 'jest'
+        assert results.passed == 45
+        assert results.failed == 2
+        assert results.coverage is None
+
+    def test_serialization_to_dict(self):
+        """Test model_dump() serialization."""
+        results = TestResults(
+            framework='pytest',
+            passed=20,
+            failed=1,
+            coverage=92.5,
+        )
+        data = results.model_dump()
+        assert data == {
+            'framework': 'pytest',
+            'passed': 20,
+            'failed': 1,
+            'coverage': 92.5,
+        }
+
+    def test_serialization_to_json(self):
+        """Test JSON serialization."""
+        results = TestResults(
+            framework='mocha',
+            passed=10,
+            failed=0,
+            coverage=None,
+        )
+        json_str = results.model_dump_json()
+        parsed = json.loads(json_str)
+        assert parsed['framework'] == 'mocha'
+        assert parsed['passed'] == 10
+        assert parsed['coverage'] is None
+
+    def test_deserialization_from_dict(self):
+        """Test model_validate() deserialization."""
+        data = {
+            'framework': 'pytest',
+            'passed': 15,
+            'failed': 3,
+            'coverage': 78.2,
+        }
+        results = TestResults.model_validate(data)
+        assert results.framework == 'pytest'
+        assert results.passed == 15
+        assert results.failed == 3
+        assert results.coverage == 78.2
+
+    def test_deserialization_minimal(self):
+        """Test deserialization with only required fields."""
+        data = {
+            'framework': 'unittest',
+            'passed': 5,
+            'failed': 0,
+        }
+        results = TestResults.model_validate(data)
+        assert results.coverage is None
+
+    def test_validation_missing_framework(self):
+        """Test validation fails without framework field."""
+        with pytest.raises(ValidationError) as exc_info:
+            TestResults(passed=10, failed=0)
+        assert 'framework' in str(exc_info.value)
+
+    def test_validation_missing_passed(self):
+        """Test validation fails without passed field."""
+        with pytest.raises(ValidationError) as exc_info:
+            TestResults(framework='pytest', failed=0)
+        assert 'passed' in str(exc_info.value)
+
+    def test_validation_missing_failed(self):
+        """Test validation fails without failed field."""
+        with pytest.raises(ValidationError) as exc_info:
+            TestResults(framework='pytest', passed=10)
+        assert 'failed' in str(exc_info.value)
+
+    def test_roundtrip_serialization(self):
+        """Test full round-trip serialization/deserialization."""
+        original = TestResults(
+            framework='pytest',
+            passed=25,
+            failed=2,
+            coverage=88.1,
+        )
+        json_str = original.model_dump_json()
+        restored = TestResults.model_validate_json(json_str)
+        assert original == restored
+
+    def test_zero_values(self):
+        """Test handling of zero values (all tests passed or failed)."""
+        # All passed
+        all_passed = TestResults(framework='pytest', passed=100, failed=0)
+        assert all_passed.failed == 0
+
+        # All failed
+        all_failed = TestResults(framework='pytest', passed=0, failed=10)
+        assert all_failed.passed == 0
+
+    def test_coverage_bounds(self):
+        """Test coverage percentage bounds (0-100)."""
+        # Min coverage
+        min_cov = TestResults(framework='pytest', passed=1, failed=0, coverage=0.0)
+        assert min_cov.coverage == 0.0
+
+        # Max coverage
+        max_cov = TestResults(framework='pytest', passed=10, failed=0, coverage=100.0)
+        assert max_cov.coverage == 100.0
+
+        # Decimal precision
+        precise = TestResults(framework='pytest', passed=10, failed=0, coverage=87.345)
+        assert precise.coverage == 87.345
+
+
+class TestEnhancedMarkdownRendering:
+    """Test enhanced markdown rendering with new fields (Story 10)."""
+
+    def create_sample_summary_with_enhancements(
+        self,
+        activity_profile: str | None = None,
+        config_changes: list[ConfigChange] | None = None,
+        test_results: TestResults | None = None,
+    ) -> SessionSummary:
+        """Create a sample SessionSummary with enhanced fields for testing."""
+        return SessionSummary(
+            sequence_number=42,
+            title='Fix JWT Authentication Timeout',
+            slug='fix-jwt-timeout',
+            objective='Resolve JWT authentication timeout causing 401 errors',
+            completed_tasks=['Fixed token expiry configuration', 'Added explicit time unit documentation'],
+            blocked_items=[],
+            next_steps=['Add config schema validation to CI pipeline'],
+            files_modified=['.env', 'config.py', 'tests/test_auth.py'],
+            documentation_referenced=[],
+            key_decisions=[
+                DecisionRecord(
+                    decision='Explicit time units',
+                    rationale='Code-enforced validation prevents human error',
+                    alternatives=['Document-only fix', 'use ISO 8601 duration format'],
+                )
+            ],
+            errors_resolved=[
+                ErrorResolution(
+                    error='401 Unauthorized after ~1 minute',
+                    root_cause='`JWT_EXPIRY=60` interpreted as 60 seconds (was meant to be minutes)',
+                    fix='Changed to `JWT_EXPIRY=3600` (explicit seconds)',
+                    verification='Tested token validity over 30 minutes',
+                )
+            ],
+            activity_profile=activity_profile,
+            config_changes=config_changes or [],
+            test_results=test_results,
+            mcp_tools_used=[],
+            token_count=5000,
+            duration_estimate='1 hour',
+            created_at=datetime(2025, 12, 11, 15, 30, tzinfo=timezone.utc),
+        )
+
+    def test_to_markdown_with_activity_profile(self):
+        """Test to_markdown() renders activity profile in header."""
+        summary = self.create_sample_summary_with_enhancements(
+            activity_profile='fixing (0.80), configuring (0.70), testing (0.50)'
+        )
+        md = summary.to_markdown()
+
+        # Check activity profile appears in header
+        assert '**Activity Profile**: fixing (0.80), configuring (0.70), testing (0.50)' in md
+
+        # Should appear near the top (before Objective)
+        assert md.index('Activity Profile') < md.index('## Objective')
+
+    def test_to_markdown_without_activity_profile(self):
+        """Test to_markdown() works correctly when activity_profile is None."""
+        summary = self.create_sample_summary_with_enhancements(activity_profile=None)
+        md = summary.to_markdown()
+
+        # Should not include activity profile
+        assert 'Activity Profile' not in md
+
+        # Should still have objective
+        assert '**Objective**: Resolve JWT authentication timeout' in md
+
+    def test_to_markdown_with_config_changes(self):
+        """Test to_markdown() renders config changes as markdown table."""
+        config_changes = [
+            ConfigChange(
+                file='.env',
+                setting='JWT_EXPIRY',
+                change='60 -> 3600',
+                reason='Fix timeout - was ambiguous units',
+            ),
+            ConfigChange(
+                file='config.py',
+                setting='TOKEN_ALGORITHM',
+                change='HS256 -> RS256',
+                reason='Improve security',
+            ),
+        ]
+        summary = self.create_sample_summary_with_enhancements(config_changes=config_changes)
+        md = summary.to_markdown()
+
+        # Check section exists
+        assert '## Configuration Changes' in md
+
+        # Check table headers
+        assert '| File | Setting | Change | Reason |' in md
+        assert '|------|---------|--------|--------|' in md
+
+        # Check first row (values are NOT backtick-wrapped in the table)
+        assert '| .env | JWT_EXPIRY | 60 -> 3600 | Fix timeout - was ambiguous units |' in md
+
+        # Check second row
+        assert '| config.py | TOKEN_ALGORITHM | HS256 -> RS256 | Improve security |' in md
+
+    def test_to_markdown_without_config_changes(self):
+        """Test to_markdown() omits config changes section when empty."""
+        summary = self.create_sample_summary_with_enhancements(config_changes=[])
+        md = summary.to_markdown()
+
+        # Section should NOT appear
+        assert '## Configuration Changes' not in md
+
+    def test_to_markdown_with_test_results(self):
+        """Test to_markdown() renders test results section."""
+        test_results = TestResults(
+            framework='pytest',
+            passed=12,
+            failed=0,
+            coverage=87.3,
+        )
+        summary = self.create_sample_summary_with_enhancements(test_results=test_results)
+        md = summary.to_markdown()
+
+        # Check section exists
+        assert '## Test Results' in md
+
+        # Check framework
+        assert '- **Framework**: pytest' in md
+
+        # Check results
+        assert '- **Results**: 12/12 passed' in md
+
+        # Check coverage
+        assert '- **Coverage**: 87.3%' in md
+
+    def test_to_markdown_with_test_failures(self):
+        """Test to_markdown() shows failures in test results."""
+        test_results = TestResults(
+            framework='pytest',
+            passed=10,
+            failed=2,
+            coverage=75.0,
+        )
+        summary = self.create_sample_summary_with_enhancements(test_results=test_results)
+        md = summary.to_markdown()
+
+        # Check results show passed/total
+        assert '- **Results**: 10/12 passed (2 failed)' in md
+
+    def test_to_markdown_without_coverage(self):
+        """Test to_markdown() works when coverage is None."""
+        test_results = TestResults(
+            framework='mocha',
+            passed=5,
+            failed=0,
+            coverage=None,
+        )
+        summary = self.create_sample_summary_with_enhancements(test_results=test_results)
+        md = summary.to_markdown()
+
+        # Check section exists
+        assert '## Test Results' in md
+
+        # Should have framework and results
+        assert '- **Framework**: mocha' in md
+        assert '- **Results**: 5/5 passed' in md
+
+        # Should NOT show coverage line
+        assert 'Coverage' not in md
+
+    def test_to_markdown_without_test_results(self):
+        """Test to_markdown() omits test results section when None."""
+        summary = self.create_sample_summary_with_enhancements(test_results=None)
+        md = summary.to_markdown()
+
+        # Section should NOT appear
+        assert '## Test Results' not in md
+
+    def test_to_markdown_section_order_with_enhancements(self):
+        """Test that new sections appear in correct order."""
+        config_changes = [
+            ConfigChange(file='.env', setting='KEY', change='old -> new', reason='Update')
+        ]
+        test_results = TestResults(framework='pytest', passed=10, failed=0)
+
+        summary = self.create_sample_summary_with_enhancements(
+            activity_profile='fixing (0.80)',
+            config_changes=config_changes,
+            test_results=test_results,
+        )
+        md = summary.to_markdown()
+
+        # Find positions
+        activity_pos = md.find('Activity Profile')
+        objective_pos = md.find('## Objective')
+        completed_pos = md.find('## Completed')
+        key_decisions_pos = md.find('## Key Decisions')
+        errors_resolved_pos = md.find('## Errors Resolved')
+        config_changes_pos = md.find('## Configuration Changes')
+        test_results_pos = md.find('## Test Results')
+        context_pos = md.find('## Context')
+
+        # Verify order
+        assert activity_pos < objective_pos
+        assert objective_pos < completed_pos
+        assert completed_pos < key_decisions_pos
+        assert key_decisions_pos < errors_resolved_pos
+        assert errors_resolved_pos < config_changes_pos
+        assert config_changes_pos < test_results_pos
+        assert test_results_pos < context_pos
+
+    def test_config_changes_table_escapes_pipes(self):
+        """Test markdown table escapes pipe characters in cell content (Security AC 10.4)."""
+        config_changes = [
+            ConfigChange(
+                file='nginx.conf',
+                setting='server_name',
+                change='localhost -> api.example.com|www.example.com',
+                reason='Multi-domain setup (use | for separation)',
+            )
+        ]
+        summary = self.create_sample_summary_with_enhancements(config_changes=config_changes)
+        md = summary.to_markdown()
+
+        # Pipes should be escaped as \|
+        assert r'localhost -> api.example.com\|www.example.com' in md
+        assert r'Multi-domain setup (use \| for separation)' in md
+
+    def test_backward_compatibility_old_sessions(self):
+        """Test backward compatibility - old SessionSummary without new fields."""
+        # Create a summary without the new fields (simulates old data)
+        old_summary = SessionSummary(
+            sequence_number=1,
+            title='Old Session',
+            slug='old-session',
+            objective='Old objective',
+            completed_tasks=['Task 1'],
+            blocked_items=[],
+            next_steps=['Step 1'],
+            files_modified=[],
+            documentation_referenced=[],
+            key_decisions=[],
+            errors_resolved=[],
+            # New fields default to None/[]
+            activity_profile=None,
+            config_changes=[],
+            test_results=None,
+            mcp_tools_used=[],
+            token_count=None,
+            duration_estimate=None,
+            created_at=datetime.now(timezone.utc),
+        )
+        md = old_summary.to_markdown()
+
+        # Should render without errors
+        assert '# Session 001: Old Session' in md
+        assert '**Objective**: Old objective' in md
+
+        # New sections should NOT appear
+        assert 'Activity Profile' not in md
+        assert '## Configuration Changes' not in md
+        assert '## Test Results' not in md

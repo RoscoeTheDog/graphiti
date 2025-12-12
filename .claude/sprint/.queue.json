@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Enhanced Markdown Rendering",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "10.d",
@@ -393,7 +393,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Enhanced Markdown Rendering",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "phase": "testing",
       "phase_order": 3,
