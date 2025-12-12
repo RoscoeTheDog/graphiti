@@ -23,6 +23,10 @@ from pydantic import BaseModel, Field
 
 from graphiti_core.llm_client import LLMClient
 
+from .activity_detector import ActivityDetector
+from .activity_vector import ActivityVector
+from .prompt_builder import build_extraction_prompt
+from .tool_classifier import UnifiedToolClassifier
 from .types import ConversationContext
 
 logger = logging.getLogger(__name__)
@@ -128,6 +132,7 @@ class SessionSummary:
     token_count: int | None
     duration_estimate: str | None
     created_at: datetime
+    activity_vector: ActivityVector | None = None
     status: str = 'ACTIVE'
 
     def to_markdown(self) -> str:
@@ -150,6 +155,23 @@ class SessionSummary:
             header_lines.append(self.objective)
         else:
             header_lines.append(f'**Objective**: {self.objective}')
+
+        # Add activity vector if present
+        if self.activity_vector:
+            header_lines.append('')
+            header_lines.append('**Activity Vector**:')
+            # Format as dimensions with values > 0.1
+            significant_dims = [
+                (name, getattr(self.activity_vector, name))
+                for name in self.activity_vector.DIMENSIONS
+                if getattr(self.activity_vector, name) > 0.1
+            ]
+            if significant_dims:
+                significant_dims.sort(key=lambda x: x[1], reverse=True)
+                for name, value in significant_dims:
+                    header_lines.append(f'  - {name}: {value:.2f}')
+            else:
+                header_lines.append('  - (neutral)')
 
         markdown = '\n'.join(header_lines) + '\n\n---\n\n## Completed\n\n'
         for task in self.completed_tasks:
@@ -234,7 +256,7 @@ class SessionSummary:
 
     def to_metadata(self) -> dict[str, Any]:
         """Convert summary to metadata dict for Graphiti storage."""
-        return {
+        metadata = {
             'sequence_number': self.sequence_number,
             'slug': self.slug,
             'objective': self.objective,
@@ -247,6 +269,15 @@ class SessionSummary:
             'mcp_tools_used': self.mcp_tools_used,
             'created_at': self.created_at.isoformat(),
         }
+
+        # Add activity vector if present
+        if self.activity_vector:
+            metadata['activity_vector'] = {
+                dim: getattr(self.activity_vector, dim)
+                for dim in self.activity_vector.DIMENSIONS
+            }
+
+        return metadata
 
 
 class SessionSummarizer:
@@ -321,15 +352,20 @@ Extract the following information:
 Focus on actionable information that helps the next session continue work efficiently.
 """
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(
+        self, llm_client: LLMClient, tool_classifier: UnifiedToolClassifier | None = None
+    ):
         """
         Initialize the SessionSummarizer.
 
         Args:
             llm_client: LLM client for generating summaries (uses gpt-4.1-mini for cost efficiency)
+            tool_classifier: Optional UnifiedToolClassifier for activity detection.
+                             If None, ActivityDetector will use heuristics only.
         """
         self.llm_client = llm_client
-        logger.info('SessionSummarizer initialized')
+        self.activity_detector = ActivityDetector()
+        logger.info('SessionSummarizer initialized with activity detection')
 
     async def summarize_session(
         self,
@@ -354,19 +390,24 @@ Focus on actionable information that helps the next session continue work effici
         logger.info(f'Summarizing session with {len(context.messages)} messages')
 
         try:
+            # Detect activity vector
+            try:
+                activity = self.activity_detector.detect(context.messages)
+                logger.debug(f'Activity vector detected: {activity}')
+            except Exception as e:
+                logger.warning(f'Activity detection failed: {e}, using neutral activity')
+                activity = ActivityVector()  # Fallback to neutral
+
             # Count message types
             user_count = sum(1 for m in context.messages if m.role == 'user')
             agent_count = sum(1 for m in context.messages if m.role == 'assistant')
             tool_count = sum(len(m.tool_calls) for m in context.messages if m.tool_calls)
 
-            # Build prompt
-            prompt = self.SUMMARIZATION_PROMPT.format(
-                message_count=len(context.messages),
-                user_count=user_count,
-                agent_count=agent_count,
-                tool_count=tool_count,
-                token_count=context.total_tokens,
-                filtered_content=filtered_content[:15000],  # Limit content to avoid token overflow
+            # Build dynamic prompt based on activity
+            prompt = build_extraction_prompt(
+                activity=activity,
+                content=filtered_content[:15000],
+                threshold=0.3,
             )
 
             # Call LLM with structured output
@@ -404,6 +445,7 @@ Focus on actionable information that helps the next session continue work effici
                 token_count=response.token_count or context.total_tokens,
                 duration_estimate=response.duration_estimate,
                 created_at=datetime.now(timezone.utc),
+                activity_vector=activity,
             )
 
             logger.info(
