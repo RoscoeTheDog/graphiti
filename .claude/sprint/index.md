@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 20:24:18
+**Generated**: 2025-12-11 20:31:31
 
 ---
 
@@ -15,13 +15,11 @@
 ## Sprint Statistics
 
 - **Total Stories**: 60
-- **Completion**: 96.7%
+- **Completion**: 100.0%
 
 ### By Status
 
-- completed: 58
-- in_progress: 1
-- unassigned: 1
+- completed: 60
 
 ### By Type
 
@@ -219,7 +217,7 @@
   - Dependencies: Story 13
 
   ### Story 13.t: Testing: Template Updates
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 13
 
 ---
