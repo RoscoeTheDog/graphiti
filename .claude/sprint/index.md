@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:00:11
+**Generated**: 2025-12-12 01:12:06
 
 ---
 
@@ -15,14 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 14
-- **Completion**: 14.3%
+- **Completion**: 35.7%
 
 ### By Status
 
-- completed: 2
-- in_progress: 1
-- pending: 1
-- unassigned: 10
+- completed: 5
+- unassigned: 9
 
 ### By Type
 
@@ -42,11 +40,11 @@
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Extend GraphitiClients with Preprocessing Fields
-  **Status**: unassigned | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Extend GraphitiClients with Preprocessing Fields
-  **Status**: pending | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 2
 
 ### Story 3: Create Default Session Turn Template

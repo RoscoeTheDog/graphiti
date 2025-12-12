@@ -42,7 +42,7 @@
     },
     "2": {
       "id": "2",
-      "status": "in_progress",
+      "status": "completed",
       "title": "Extend GraphitiClients with Preprocessing Fields",
       "parent": null,
       "file": "stories/2-extend-graphiticlients-preprocessing.md",
@@ -171,7 +171,7 @@
     },
     "2.t": {
       "id": "2.t",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "testing",
       "title": "Testing: Extend GraphitiClients with Preprocessing Fields",
       "parent": "2",
