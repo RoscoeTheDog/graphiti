@@ -147,6 +147,69 @@
       "title": "SessionTrackingResilienceConfig",
       "type": "object"
     },
+    "SummarizationConfig": {
+      "description": "Configuration for intelligent session summarization features. Controls how sessions are analyzed, categorized, and summarized for efficient cross-session retrieval.",
+      "properties": {
+        "template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom summarization template path. If None, uses dynamic extraction.",
+          "title": "Template"
+        },
+        "type_detection": {
+          "default": "auto",
+          "description": "Activity detection mode. 'auto' infers from messages, 'manual' requires explicit config.",
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "title": "Type Detection",
+          "type": "string"
+        },
+        "extraction_threshold": {
+          "default": 0.3,
+          "description": "Minimum priority score to include extraction field",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "title": "Extraction Threshold",
+          "type": "number"
+        },
+        "include_decisions": {
+          "default": true,
+          "description": "Extract key_decisions (prevents repeated debates)",
+          "title": "Include Decisions",
+          "type": "boolean"
+        },
+        "include_errors_resolved": {
+          "default": true,
+          "description": "Extract errors_resolved (debugging continuity)",
+          "title": "Include Errors Resolved",
+          "type": "boolean"
+        },
+        "tool_classification_cache": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to tool classification cache. Default: ~/.graphiti/tool_cache.json",
+          "title": "Tool Classification Cache"
+        }
+      },
+      "title": "SummarizationConfig",
+      "type": "object"
+    },
     "AnthropicProviderConfig": {
       "description": "Anthropic provider configuration",
       "properties": {
@@ -779,6 +842,9 @@
         },
         "resilience": {
           "$ref": "#/$defs/SessionTrackingResilienceConfig"
+        },
+        "summarization": {
+          "$ref": "#/$defs/SummarizationConfig"
         },
         "group_id": {
           "anyOf": [

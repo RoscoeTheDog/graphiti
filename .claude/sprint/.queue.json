@@ -475,7 +475,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Configuration Schema Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "12",
       "phase": "implementation",
       "phase_order": 2,
@@ -502,7 +502,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/12-plan.yaml"
+      }
     },
     "13.d": {
       "type": "discovery",
