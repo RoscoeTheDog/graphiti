@@ -10,16 +10,17 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 4. [Database Configuration](#database-configuration)
 5. [LLM Configuration](#llm-configuration)
 6. [Embedder Configuration](#embedder-configuration)
-7. [Memory Filter Configuration](#memory-filter-configuration)
-8. [Project Configuration](#project-configuration)
-9. [Search Configuration](#search-configuration)
-10. [Resilience Configuration](#resilience-configuration)
-11. [LLM Resilience Configuration](#llm-resilience-configuration) ⭐ New in v1.0.0
-12. [MCP Tools Configuration](#mcp-tools-configuration) ⭐ New in v1.0.0
-13. [Session Tracking Configuration](#session-tracking-configuration)
-14. [Environment Variable Overrides](#environment-variable-overrides)
-15. [Complete Examples](#complete-examples)
-16. [Troubleshooting](#troubleshooting)
+7. [Extraction Configuration](#extraction-configuration) ⭐ New in v1.0.0
+8. [Memory Filter Configuration](#memory-filter-configuration)
+9. [Project Configuration](#project-configuration)
+10. [Search Configuration](#search-configuration)
+11. [Resilience Configuration](#resilience-configuration)
+12. [LLM Resilience Configuration](#llm-resilience-configuration) ⭐ New in v1.0.0
+13. [MCP Tools Configuration](#mcp-tools-configuration) ⭐ New in v1.0.0
+14. [Session Tracking Configuration](#session-tracking-configuration)
+15. [Environment Variable Overrides](#environment-variable-overrides)
+16. [Complete Examples](#complete-examples)
+17. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -296,6 +297,191 @@ Embedders generate vector representations for semantic search.
   }
 }
 ```
+
+---
+
+## Extraction Configuration
+
+**New in v1.0.0** - Turn-based preprocessing prompt injection for entity/edge extraction.
+
+The extraction configuration controls how preprocessing prompts are injected into entity and edge extraction operations. This enables turn-based template resolution with hierarchical template loading, allowing you to customize how Graphiti extracts entities and relationships from your data.
+
+### Configuration
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": false,
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `preprocessing_prompt` | bool \| str \| null | `false` | Preprocessing prompt configuration (see modes below) |
+| `preprocessing_mode` | str | `"prepend"` | Where to inject prompt: `"prepend"` (before extraction) or `"append"` (after extraction) |
+
+### Preprocessing Prompt Modes
+
+The `preprocessing_prompt` field supports three value types:
+
+| Value Type | Example | Behavior |
+|------------|---------|----------|
+| **Disabled** | `false`, `null` | No preprocessing (default) |
+| **Template** | `"default-session-turn.md"` | Load template from hierarchy (project → global → built-in) |
+| **Inline** | `"Consider session context..."` | Use string directly as LLM prompt |
+
+### Template Resolution Hierarchy
+
+When using template-based preprocessing, templates are searched in this order:
+
+1. **Project templates**: `{project}/.graphiti/templates/{template}.md`
+2. **Global templates**: `~/.graphiti/templates/{template}.md`
+3. **Built-in templates**: Packaged with Graphiti (e.g., `default-session-turn.md`)
+
+**Graceful Degradation**: If a template is not found in any location, preprocessing is automatically disabled with a warning logged.
+
+### Configuration Examples
+
+**Example 1: Disabled (Default)**
+
+No preprocessing is applied to extraction operations.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": false,
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+**Example 2: Template-Based (Built-in)**
+
+Uses the built-in `default-session-turn.md` template for session-aware extraction.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "default-session-turn.md",
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+**Example 3: Template-Based (Custom)**
+
+Uses a custom template from your project or global templates directory.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "session-turn-extraction.md",
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+**Example 4: Inline Prompt with Append Mode**
+
+Uses an inline prompt injected after the extraction prompt.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "Consider session context when extracting entities.",
+    "preprocessing_mode": "append"
+  }
+}
+```
+
+### Creating Custom Templates
+
+To create custom extraction templates:
+
+**Project-level template** (specific to one project):
+```bash
+mkdir -p .graphiti/templates
+cat > .graphiti/templates/my-custom-extraction.md << 'EOF'
+Consider the following session context when extracting entities:
+- Focus on user intent and key actions
+- Preserve temporal relationships
+- Link entities across conversation turns
+
+{content}
+EOF
+```
+
+**Global template** (shared across all projects):
+```bash
+mkdir -p ~/.graphiti/templates
+cat > ~/.graphiti/templates/my-custom-extraction.md << 'EOF'
+[Your custom prompt here]
+EOF
+```
+
+Then reference it in your configuration:
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "my-custom-extraction.md"
+  }
+}
+```
+
+### Use Cases
+
+**Session-Aware Extraction**: Inject session context to improve entity extraction during conversation indexing.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "default-session-turn.md",
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+**Domain-Specific Extraction**: Customize extraction for specific domains (medical, legal, technical).
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "medical-terminology-extraction.md",
+    "preprocessing_mode": "prepend"
+  }
+}
+```
+
+**Inline Instructions**: Quick testing or simple instructions without template files.
+
+```json
+{
+  "extraction": {
+    "preprocessing_prompt": "Extract technical terms and preserve acronyms.",
+    "preprocessing_mode": "append"
+  }
+}
+```
+
+### Environment Overrides
+
+Extraction settings can be overridden with environment variables:
+
+```bash
+export GRAPHITI_EXTRACTION_PREPROCESSING_PROMPT="default-session-turn.md"
+export GRAPHITI_EXTRACTION_PREPROCESSING_MODE="prepend"
+```
+
+### Implementation Notes
+
+- **Template caching**: Templates are resolved once and cached per session
+- **Error handling**: Missing templates automatically disable preprocessing (no extraction failure)
+- **Mode flexibility**: `"prepend"` is recommended for most use cases
+- **Performance**: Minimal overhead (~10-20ms for template resolution on first call)
 
 ---
 
@@ -1622,5 +1808,5 @@ The `graphiti.config.schema.json` file enables autocomplete and validation in ID
 
 ---
 
-**Last Updated:** 2025-12-10
-**Version:** 3.1 (Added Global Scope Settings v2.0 for cross-project knowledge sharing)
+**Last Updated:** 2025-12-12
+**Version:** 3.2 (Added Extraction Configuration for turn-based preprocessing injection)

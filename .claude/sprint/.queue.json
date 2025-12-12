@@ -34,7 +34,7 @@
     "11": {
       "type": "implementation",
       "title": "Update CONFIGURATION.md with Extraction Section",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/11-update-configuration-docs.md",
       "parent": null,
       "children": [],
