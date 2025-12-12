@@ -109,6 +109,8 @@ async def extract_edges(
     extract_edges_max_tokens = 16384
     llm_client = clients.llm_client
     error_classifier = LLMErrorClassifier()
+    # AC-5.1: Initialize with preprocessing_prompt if available
+    custom_prompt = clients.preprocessing_prompt if clients.preprocessing_prompt else ''
 
     edge_type_signature_map: dict[str, tuple[str, str]] = {
         edge_type: signature
@@ -139,7 +141,7 @@ async def extract_edges(
         'previous_episodes': [ep.content for ep in previous_episodes],
         'reference_time': episode.valid_at,
         'edge_types': edge_types_context,
-        'custom_prompt': '',
+        'custom_prompt': custom_prompt,
     }
 
     facts_missed = True
@@ -171,9 +173,22 @@ async def extract_edges(
 
                 missing_facts = reflexion_response.get('missing_facts', [])
 
-                custom_prompt = 'The following facts were missed in a previous extraction: '
+                # AC-5.2 & AC-5.3: Build reflexion hint
+                reflexion_hint = 'The following facts were missed in a previous extraction: '
                 for fact in missing_facts:
-                    custom_prompt += f'\n{fact},'
+                    reflexion_hint += f'\n{fact},'
+
+                # AC-5.3: Concatenate based on preprocessing_mode
+                if clients.preprocessing_prompt:
+                    if clients.preprocessing_mode == 'prepend':
+                        # Prepend mode: preprocessing + reflexion
+                        custom_prompt = f"{clients.preprocessing_prompt}\n\n{reflexion_hint}"
+                    else:  # append mode
+                        # Append mode: reflexion + preprocessing
+                        custom_prompt = f"{reflexion_hint}\n\n{clients.preprocessing_prompt}"
+                else:
+                    # AC-5.4: No preprocessing_prompt, preserve existing behavior
+                    custom_prompt = reflexion_hint
 
                 context['custom_prompt'] = custom_prompt
 

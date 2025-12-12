@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:37:34
+**Generated**: 2025-12-12 01:45:27
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 17
-- **Completion**: 58.8%
+- **Completion**: 64.7%
 
 ### By Status
 
-- completed: 10
-- unassigned: 7
+- completed: 11
+- unassigned: 6
 
 ### By Type
 
@@ -65,7 +65,7 @@
 - Blocks: Story 10, Story 5
 
 ### Story 5: Modify Edge Operations Preprocessing
-**Status**: unassigned | **Type**: implementation
+**Status**: completed | **Type**: implementation
 - Dependencies: Story 2, Story 4
 - Blocks: Story 10
 
