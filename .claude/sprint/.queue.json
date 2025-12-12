@@ -962,12 +962,93 @@
       "children": [],
       "blocks": [],
       "file": null
+    },
+    "-9": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Dynamic Prompt Generation",
+      "status": "in_progress",
+      "validates": "9",
+      "children": [
+        "-9.d",
+        "-9.i",
+        "-9.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-9.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Dynamic Prompt Generation",
+      "status": "completed",
+      "parent": "-9",
+      "validates": "9.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.i"
+      ],
+      "file": null
+    },
+    "-9.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Dynamic Prompt Generation",
+      "status": "unassigned",
+      "parent": "-9",
+      "validates": "9.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-9.t"
+      ],
+      "file": null
+    },
+    "-9.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Dynamic Prompt Generation",
+      "status": "unassigned",
+      "parent": "-9",
+      "validates": "9.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
     "-2.d",
     "-2.i",
     "-2.t",
+    "-9.d",
+    "-9.i",
+    "-9.t",
     "1.d",
     "1.i",
     "1.t",

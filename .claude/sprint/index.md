@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 18:18:23
+**Generated**: 2025-12-11 18:48:01
 
 ---
 
@@ -14,13 +14,14 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 56
-- **Completion**: 64.3%
+- **Total Stories**: 60
+- **Completion**: 68.3%
 
 ### By Status
 
-- completed: 36
-- unassigned: 20
+- completed: 41
+- in_progress: 1
+- unassigned: 18
 
 ### By Type
 
@@ -28,10 +29,10 @@
 - feature: 13
 - implementation: 13
 - testing: 13
-- validation: 1
-- validation_discovery: 1
-- validation_implementation: 1
-- validation_testing: 1
+- validation: 2
+- validation_discovery: 2
+- validation_implementation: 2
+- validation_testing: 2
 
 ---
 
@@ -50,6 +51,20 @@
   ### Story -2.t: Validate Testing: Activity Vector Model
   **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
+
+  ### Story -9.d: Validate Discovery: Dynamic Prompt Generation
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -9
+  - Blocks: Story -9.i
+
+  ### Story -9.i: Validate Implementation: Dynamic Prompt Generation
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -9, Story -9.d
+  - Blocks: Story -9.t
+
+  ### Story -9.t: Validate Testing: Dynamic Prompt Generation
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -9, Story -9.i
 
   ### Story 1.d: Discovery: Enhanced Session Summary Schema
   **Status**: completed | **Type**: discovery
@@ -148,15 +163,15 @@
   - Dependencies: Story 8
 
   ### Story 9.d: Discovery: Dynamic Prompt Generation
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 9
 
   ### Story 9.i: Implementation: Dynamic Prompt Generation
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 9
 
   ### Story 9.t: Testing: Dynamic Prompt Generation
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 9
 
   ### Story 10.d: Discovery: Enhanced Markdown Rendering
