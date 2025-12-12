@@ -19,6 +19,7 @@ Core components:
 
 from .activity_detector import ActivityDetector
 from .activity_vector import ActivityVector
+from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
 from .filter import SessionFilter
 from .filter_config import FilterConfig
 from .handoff_exporter import HandoffExporter
@@ -75,6 +76,11 @@ __all__ = [
     "ActivityVector",
     # Activity detection (NEW - Story 3 v3.0.0)
     "ActivityDetector",
+    # Tool classification (NEW - Story 4 v3.0.0)
+    "ToolIntent",
+    "ToolDomain",
+    "ToolClassification",
+    "ToolClassifier",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)

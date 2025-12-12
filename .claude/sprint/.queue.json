@@ -638,7 +638,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Tool Classification Heuristics",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
