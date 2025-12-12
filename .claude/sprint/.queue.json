@@ -1310,7 +1310,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Implement TemplateResolver with Hierarchy",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "8",
       "children": [
         "-8.d",
@@ -1330,7 +1330,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Implement TemplateResolver with Hierarchy",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-8",
       "validates": "8.d",
       "phase": "validation_discovery",
