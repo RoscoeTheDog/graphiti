@@ -137,7 +137,7 @@
     "7": {
       "type": "implementation",
       "title": "Wire Preprocessing in MCP Server Initialization",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/7-wire-preprocessing-mcp-server.md",
       "parent": null,
       "children": [],

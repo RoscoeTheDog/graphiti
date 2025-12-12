@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:57:45
+**Generated**: 2025-12-12 02:06:39
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 20
-- **Completion**: 75.0%
+- **Completion**: 80.0%
 
 ### By Status
 
-- completed: 15
-- unassigned: 5
+- completed: 16
+- unassigned: 4
 
 ### By Type
 
@@ -82,7 +82,7 @@
   - Dependencies: Story 6
 
 ### Story 7: Wire Preprocessing Mcp Server
-**Status**: unassigned | **Type**: implementation
+**Status**: completed | **Type**: implementation
 - Dependencies: Story 2, Story 6
 
 ### Story 8: Implement Templateresolver

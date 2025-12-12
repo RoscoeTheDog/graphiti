@@ -735,6 +735,17 @@ async def initialize_graphiti():
 
         embedder_client = config.embedder.create_client()
 
+        # Resolve preprocessing config from unified config
+        extraction_config = unified_config.extraction
+        resolved_preprocessing_prompt = None
+        if extraction_config.is_enabled():
+            # Resolve template or inline prompt to final string
+            # Note: resolve_prompt() is currently a stub (Story 8 will implement full resolution)
+            resolved_preprocessing_prompt = extraction_config.resolve_prompt()
+            # For now, use the raw value as fallback since resolve_prompt() returns empty string
+            if not resolved_preprocessing_prompt:
+                resolved_preprocessing_prompt = extraction_config.preprocessing_prompt
+
         # Initialize Graphiti client with unified config database
         graphiti_client = Graphiti(
             uri=db_config.uri,
@@ -743,6 +754,8 @@ async def initialize_graphiti():
             llm_client=llm_client,
             embedder=embedder_client,
             max_coroutines=SEMAPHORE_LIMIT,
+            preprocessing_prompt=resolved_preprocessing_prompt,
+            preprocessing_mode=extraction_config.preprocessing_mode,
         )
 
         # Destroy graph if requested
@@ -770,6 +783,20 @@ async def initialize_graphiti():
             f'Custom entity extraction: {"enabled" if config.use_custom_entities else "disabled"}'
         )
         logger.info(f'Using concurrency limit: {SEMAPHORE_LIMIT}')
+
+        # Log preprocessing configuration
+        if extraction_config.is_enabled():
+            # Determine if it's a template or inline prompt
+            prompt_value = extraction_config.preprocessing_prompt
+            if isinstance(prompt_value, str):
+                if prompt_value.endswith('.md'):
+                    logger.info(f'Preprocessing: enabled (template: {prompt_value}, mode: {extraction_config.preprocessing_mode})')
+                else:
+                    # Inline prompt - show truncated version for logging
+                    preview = prompt_value[:50] + '...' if len(prompt_value) > 50 else prompt_value
+                    logger.info(f'Preprocessing: enabled (inline prompt, mode: {extraction_config.preprocessing_mode}, preview: {preview})')
+        else:
+            logger.info('Preprocessing: disabled')
 
     except Exception as e:
         # Track connection failure
