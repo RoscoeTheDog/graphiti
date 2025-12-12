@@ -1233,7 +1233,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Wire Preprocessing in MCP Server Initialization",
-      "status": "blocked",
+      "status": "in_progress",
       "validates": "7",
       "children": [
         "-7.d",
@@ -1253,7 +1253,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Wire Preprocessing in MCP Server Initialization",
-      "status": "blocked",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.d",
       "phase": "validation_discovery",
@@ -1467,7 +1467,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Unit Tests for Preprocessing Injection",
-      "status": "blocked",
+      "status": "in_progress",
       "validates": "10",
       "children": [
         "-10.d",
@@ -1487,7 +1487,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Unit Tests for Preprocessing Injection",
-      "status": "blocked",
+      "status": "completed",
       "parent": "-10",
       "validates": "10.d",
       "phase": "validation_discovery",
@@ -1507,7 +1507,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Unit Tests for Preprocessing Injection",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-10",
       "validates": "10.i",
       "phase": "validation_implementation",
@@ -1621,15 +1621,12 @@
     },
     "10.1": {
       "type": "remediation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "10",
       "children": [],
-      "blocks": [
-        "10.d",
-        "10.i",
-        "10.t"
-      ],
-      "file": "stories/10.1-fix-missing_artifact.md"
+      "blocks": [],
+      "file": "stories/10.1-fix-missing_artifact.md",
+      "resolution": "Missing plan artifact 10-plan.yaml created via agent"
     }
   },
   "execution_queue": [

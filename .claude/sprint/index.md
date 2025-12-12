@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 07:02:15
+**Generated**: 2025-12-12 10:04:15
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 89
-- **Completion**: 89.9%
+- **Completion**: 93.3%
 
 ### By Status
 
-- blocked: 4
-- completed: 80
-- unassigned: 5
+- completed: 83
+- in_progress: 3
+- unassigned: 3
 
 ### By Type
 
@@ -125,7 +125,7 @@
   - Dependencies: Story -6, Story -6.i
 
   ### Story -7.d: Validate Discovery: Wire Preprocessing in MCP Server Initialization
-  **Status**: blocked | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -7
   - Blocks: Story -7.i
 
@@ -167,12 +167,12 @@
   - Dependencies: Story -9, Story -9.i
 
   ### Story -10.d: Validate Discovery: Unit Tests for Preprocessing Injection
-  **Status**: blocked | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -10
   - Blocks: Story -10.i
 
   ### Story -10.i: Validate Implementation: Unit Tests for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: in_progress | **Type**: validation_implementation
   - Dependencies: Story -10, Story -10.d
   - Blocks: Story -10.t
 
@@ -303,21 +303,20 @@
   - Dependencies: Story 9
 
   ### Story 10.1: Fix Missing_Artifact
-  **Status**: unassigned | **Type**: remediation
+  **Status**: completed | **Type**: remediation
   - Dependencies: Story 10
-  - Blocks: Story 10.d, Story 10.i, Story 10.t
 
   ### Story 10.d: Discovery: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: discovery
-  - Dependencies: Story 10, Story 10.1
+  - Dependencies: Story 10
 
   ### Story 10.i: Implementation: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: implementation
-  - Dependencies: Story 10, Story 10.1
+  - Dependencies: Story 10
 
   ### Story 10.t: Testing: Unit Tests for Preprocessing Injection
   **Status**: completed | **Type**: testing
-  - Dependencies: Story 10, Story 10.1
+  - Dependencies: Story 10
 
   ### Story 11.d: Discovery: Update CONFIGURATION.md with Extraction Section
   **Status**: completed | **Type**: discovery
