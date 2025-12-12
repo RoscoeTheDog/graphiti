@@ -1240,8 +1240,9 @@ class TestSummarizerIntegration:
         """Test AC-11.1: Activity vector is computed from messages during summarization."""
         from unittest.mock import AsyncMock, Mock, patch
 
+        from graphiti_core.session_tracking.activity_detector import ActivityDetector
         from graphiti_core.session_tracking.activity_vector import ActivityVector
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage, ToolCall
 
         # Mock LLM client
         llm_client = Mock()
@@ -1264,7 +1265,7 @@ class TestSummarizerIntegration:
                 timestamp=datetime.now(timezone.utc),
                 role='user',
                 content='Fix the bug',
-                tool_calls=None,
+                tool_calls=[],
             ),
             SessionMessage(
                 uuid=str(uuid4()),
@@ -1272,14 +1273,14 @@ class TestSummarizerIntegration:
                 timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Found the issue',
-                tool_calls=[
-                    {'type': 'function', 'function': {'name': 'Read', 'arguments': '{}'}}
-                ],
+                tool_calls=[ToolCall(tool_name='Read', parameters={})],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=100, message_count=2, window_start_idx=0
+            session_id='test-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=50, output_tokens=50),
         )
 
         # Mock activity detector to return specific activity
@@ -1304,7 +1305,7 @@ class TestSummarizerIntegration:
         """Test AC-11.2: build_extraction_prompt is called instead of static prompt."""
         from unittest.mock import AsyncMock, Mock, patch
 
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage
 
         # Mock LLM client
         llm_client = Mock()
@@ -1326,12 +1327,14 @@ class TestSummarizerIntegration:
                 timestamp=datetime.now(timezone.utc),
                 role='user',
                 content='Debug the issue',
-                tool_calls=None,
+                tool_calls=[],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+            session_id='test-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=25, output_tokens=25),
         )
 
         # Mock build_extraction_prompt to verify it's called
@@ -1358,7 +1361,7 @@ class TestSummarizerIntegration:
         from unittest.mock import AsyncMock, Mock
 
         from graphiti_core.session_tracking.activity_vector import ActivityVector
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage
 
         llm_client = Mock()
         llm_client.generate_response = AsyncMock(
@@ -1379,12 +1382,14 @@ class TestSummarizerIntegration:
                 timestamp=datetime.now(timezone.utc),
                 role='user',
                 content='Test message',
-                tool_calls=None,
+                tool_calls=[],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+            session_id='test-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=25, output_tokens=25),
         )
 
         summarizer = SessionSummarizer(llm_client=llm_client)
@@ -1401,8 +1406,9 @@ class TestSummarizerIntegration:
         """Test AC-11.4: Falls back to neutral ActivityVector on detection failure."""
         from unittest.mock import AsyncMock, Mock, patch
 
+        from graphiti_core.session_tracking.activity_detector import ActivityDetector
         from graphiti_core.session_tracking.activity_vector import ActivityVector
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage
 
         llm_client = Mock()
         llm_client.generate_response = AsyncMock(
@@ -1423,12 +1429,14 @@ class TestSummarizerIntegration:
                 timestamp=datetime.now(timezone.utc),
                 role='user',
                 content='Test message',
-                tool_calls=None,
+                tool_calls=[],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=50, message_count=1, window_start_idx=0
+            session_id='test-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=25, output_tokens=25),
         )
 
         # Mock activity detector to raise exception
@@ -1523,9 +1531,11 @@ class TestSummarizerIntegrationE2E:
     @pytest.mark.integration
     async def test_end_to_end_debugging_session(self):
         """Test AC-11.5: End-to-end debugging session shows fixing > 0.5."""
+        from datetime import datetime, timezone
         from unittest.mock import AsyncMock, Mock
+        from uuid import uuid4
 
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage, ToolCall
 
         # Mock LLM to return realistic debugging summary
         llm_client = Mock()
@@ -1547,35 +1557,44 @@ class TestSummarizerIntegrationE2E:
 
         # Simulate debugging session messages
         messages = [
-            SessionMessage(role='user', content='Fix the authentication bug', tool_calls=None),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-debug-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Fix the authentication bug',
+                tool_calls=[],
+            ),
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-debug-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Investigating the issue...',
-                tool_calls=[
-                    {'type': 'function', 'function': {'name': 'Read', 'arguments': '{"file": ".env"}'}}
-                ],
+                tool_calls=[ToolCall(tool_name='Read', parameters={'file': '.env'})],
             ),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-debug-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Found the issue, fixing now',
-                tool_calls=[
-                    {'type': 'function', 'function': {'name': 'Edit', 'arguments': '{"file": ".env"}'}}
-                ],
+                tool_calls=[ToolCall(tool_name='Edit', parameters={'file': '.env'})],
             ),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-debug-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Running tests...',
-                tool_calls=[
-                    {
-                        'type': 'function',
-                        'function': {'name': 'Bash', 'arguments': '{"command": "pytest tests/"}'},
-                    }
-                ],
+                tool_calls=[ToolCall(tool_name='Bash', parameters={'command': 'pytest tests/'})],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=500, message_count=4, window_start_idx=0
+            session_id='test-debug-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=250, output_tokens=250),
         )
 
         summarizer = SessionSummarizer(llm_client=llm_client)
@@ -1593,9 +1612,11 @@ class TestSummarizerIntegrationE2E:
     @pytest.mark.integration
     async def test_end_to_end_exploration_session(self):
         """Test AC-11.5: End-to-end exploration session shows exploring > 0.5."""
+        from datetime import datetime, timezone
         from unittest.mock import AsyncMock, Mock
+        from uuid import uuid4
 
-        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage
+        from graphiti_core.session_tracking.types import ConversationContext, SessionMessage, TokenUsage, ToolCall
 
         # Mock LLM to return realistic exploration summary
         llm_client = Mock()
@@ -1611,35 +1632,44 @@ class TestSummarizerIntegrationE2E:
 
         # Simulate exploration session messages
         messages = [
-            SessionMessage(role='user', content='Show me how the system works', tool_calls=None),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-explore-session',
+                timestamp=datetime.now(timezone.utc),
+                role='user',
+                content='Show me how the system works',
+                tool_calls=[],
+            ),
+            SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-explore-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Reading main files...',
-                tool_calls=[
-                    {
-                        'type': 'function',
-                        'function': {'name': 'Read', 'arguments': '{"file": "README.md"}'},
-                    }
-                ],
+                tool_calls=[ToolCall(tool_name='Read', parameters={'file': 'README.md'})],
             ),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-explore-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Checking architecture...',
-                tool_calls=[
-                    {'type': 'function', 'function': {'name': 'Glob', 'arguments': '{"pattern": "**/*.py"}'}}
-                ],
+                tool_calls=[ToolCall(tool_name='Glob', parameters={'pattern': '**/*.py'})],
             ),
             SessionMessage(
+                uuid=str(uuid4()),
+                session_id='test-explore-session',
+                timestamp=datetime.now(timezone.utc),
                 role='assistant',
                 content='Searching for patterns...',
-                tool_calls=[
-                    {'type': 'function', 'function': {'name': 'Grep', 'arguments': '{"pattern": "class"}'}}
-                ],
+                tool_calls=[ToolCall(tool_name='Grep', parameters={'pattern': 'class'})],
             ),
         ]
 
         context = ConversationContext(
-            messages=messages, total_tokens=400, message_count=4, window_start_idx=0
+            session_id='test-explore-session',
+            messages=messages,
+            total_tokens=TokenUsage(input_tokens=200, output_tokens=200),
         )
 
         summarizer = SessionSummarizer(llm_client=llm_client)
