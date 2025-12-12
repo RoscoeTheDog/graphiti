@@ -49,7 +49,7 @@ class TestUserMessagesTemplate:
         assert template_path.exists(), "default-user-messages.md should exist"
 
     def test_user_messages_length_constraint(self):
-        """Verify default-user-messages.md contains '1 paragraph or less' text."""
+        """Verify default-user-messages.md contains '2 paragraphs or less' text."""
         template_path = (
             Path(__file__).parent.parent.parent
             / "graphiti_core"
@@ -60,10 +60,10 @@ class TestUserMessagesTemplate:
         with open(template_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # AC-13.1: Should contain '1 paragraph or less'
+        # AC-13.1: Should contain '2 paragraphs or less'
         assert (
-            "1 paragraph or less" in content
-        ), "User messages template should specify '1 paragraph or less'"
+            "2 paragraphs or less" in content
+        ), "User messages template should specify '2 paragraphs or less'"
 
         # Should not contain old '1-2 sentences' text
         assert (
@@ -106,7 +106,7 @@ class TestAgentMessagesTemplate:
         assert template_path.exists(), "default-agent-messages.md should exist"
 
     def test_agent_messages_length_constraint(self):
-        """Verify default-agent-messages.md contains '1 paragraph or less' text."""
+        """Verify default-agent-messages.md contains '2 paragraphs or less' text."""
         template_path = (
             Path(__file__).parent.parent.parent
             / "graphiti_core"
@@ -117,10 +117,10 @@ class TestAgentMessagesTemplate:
         with open(template_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # AC-13.2: Should contain '1 paragraph or less'
+        # AC-13.2: Should contain '2 paragraphs or less'
         assert (
-            "1 paragraph or less" in content
-        ), "Agent messages template should specify '1 paragraph or less'"
+            "2 paragraphs or less" in content
+        ), "Agent messages template should specify '2 paragraphs or less'"
 
     def test_agent_messages_prompts_constant_match(self):
         """Verify prompts.py DEFAULT_AGENT_MESSAGES_TEMPLATE matches .md file."""

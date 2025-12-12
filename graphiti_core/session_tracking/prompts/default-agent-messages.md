@@ -1,4 +1,4 @@
-Summarize this agent response in 1 paragraph or less.
+Summarize this agent response in 2 paragraphs or less.
 
 **Context**: {context}
 
@@ -11,4 +11,4 @@ Summarize this agent response in 1 paragraph or less.
 **Original response**:
 {content}
 
-**Summary** (reasoning and decisions, 1 paragraph or less):
+**Summary** (reasoning and decisions, 2 paragraphs or less):
