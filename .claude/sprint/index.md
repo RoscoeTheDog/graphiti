@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 04:12:27
+**Generated**: 2025-12-12 07:02:15
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 89
-- **Completion**: 85.4%
+- **Completion**: 89.9%
 
 ### By Status
 
 - blocked: 4
-- completed: 76
-- unassigned: 9
+- completed: 80
+- unassigned: 5
 
 ### By Type
 
@@ -181,17 +181,17 @@
   - Dependencies: Story -10, Story -10.i
 
   ### Story -11.d: Validate Discovery: Update CONFIGURATION.md with Extraction Section
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -11
   - Blocks: Story -11.i
 
   ### Story -11.i: Validate Implementation: Update CONFIGURATION.md with Extraction Section
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -11, Story -11.d
   - Blocks: Story -11.t
 
   ### Story -11.t: Validate Testing: Update CONFIGURATION.md with Extraction Section
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -11, Story -11.i
 
   ### Story 1.d: Discovery: Create ExtractionConfig Schema
