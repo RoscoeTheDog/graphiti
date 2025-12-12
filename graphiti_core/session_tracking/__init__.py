@@ -19,6 +19,7 @@ Core components:
 
 from .activity_detector import ActivityDetector
 from .activity_vector import ActivityVector
+from .bash_analyzer import BashAnalyzer, BashCommandClassification
 from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
 from .filter import SessionFilter
 from .filter_config import FilterConfig
@@ -81,6 +82,9 @@ __all__ = [
     "ToolDomain",
     "ToolClassification",
     "ToolClassifier",
+    # Bash command analysis (NEW - Story 6 v3.0.0)
+    "BashAnalyzer",
+    "BashCommandClassification",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)
