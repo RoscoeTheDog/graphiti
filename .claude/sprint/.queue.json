@@ -63,7 +63,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Summarizer Integration",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "11.d",
@@ -413,7 +413,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Summarizer Integration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "11",
       "phase": "discovery",
       "phase_order": 1,
@@ -433,7 +433,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/11-plan.yaml"
+      "requires_artifact": "plans/11-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/11-plan.yaml"
+      }
     },
     "11.t": {
       "type": "testing",
