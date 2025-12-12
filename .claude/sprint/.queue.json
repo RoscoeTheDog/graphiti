@@ -155,7 +155,7 @@
     },
     "2.i": {
       "id": "2.i",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "Implementation: Extend GraphitiClients with Preprocessing Fields",
       "parent": "2",
@@ -171,7 +171,7 @@
     },
     "2.t": {
       "id": "2.t",
-      "status": "pending",
+      "status": "unassigned",
       "story_type": "testing",
       "title": "Testing: Extend GraphitiClients with Preprocessing Fields",
       "parent": "2",
@@ -184,7 +184,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
     }
   },
   "execution_queue": [

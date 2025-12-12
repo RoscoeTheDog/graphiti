@@ -17,10 +17,11 @@ limitations under the License.
 import logging
 from datetime import datetime
 from time import time
+from typing import Union
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from typing_extensions import LiteralString
+from typing_extensions import Literal, LiteralString
 
 from graphiti_core.cross_encoder.client import CrossEncoderClient
 from graphiti_core.cross_encoder.openai_reranker_client import OpenAIRerankerClient
@@ -145,6 +146,8 @@ class Graphiti:
         max_coroutines: int | None = None,
         tracer: Tracer | None = None,
         trace_span_prefix: str = 'graphiti',
+        preprocessing_prompt: Union[str, None] = None,
+        preprocessing_mode: Literal["prepend", "append"] = "prepend",
     ):
         """
         Initialize a Graphiti instance.
@@ -181,6 +184,13 @@ class Graphiti:
             An OpenTelemetry tracer instance for distributed tracing. If not provided, tracing is disabled (no-op).
         trace_span_prefix : str, optional
             Prefix to prepend to all span names. Defaults to 'graphiti'.
+        preprocessing_prompt : str | None, optional
+            Preprocessing prompt configuration for entity/edge extraction.
+            None (disabled), "template.md" (template file), or "inline prompt..." (direct LLM prompt).
+            Defaults to None.
+        preprocessing_mode : Literal["prepend", "append"], optional
+            Injection mode for preprocessing prompt: "prepend" (inject before extraction prompt) or
+            "append" (inject after extraction prompt). Defaults to "prepend".
 
         Returns
         -------
@@ -235,6 +245,8 @@ class Graphiti:
             embedder=self.embedder,
             cross_encoder=self.cross_encoder,
             tracer=self.tracer,
+            preprocessing_prompt=preprocessing_prompt,
+            preprocessing_mode=preprocessing_mode,
         )
 
         # Initialize LLM availability manager (AC-17.1, AC-17.13)

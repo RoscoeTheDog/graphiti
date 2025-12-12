@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from typing import Union
+from typing_extensions import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 from graphiti_core.cross_encoder import CrossEncoderClient
@@ -29,5 +32,7 @@ class GraphitiClients(BaseModel):
     embedder: EmbedderClient
     cross_encoder: CrossEncoderClient
     tracer: Tracer
+    preprocessing_prompt: Union[str, None] = None
+    preprocessing_mode: Literal["prepend", "append"] = "prepend"
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
