@@ -67,7 +67,7 @@
     },
     "3": {
       "id": "3",
-      "status": "in_progress",
+      "status": "completed",
       "title": "Create Default Session Turn Template",
       "parent": null,
       "file": "stories/3-create-default-session-turn-template.md",
@@ -232,7 +232,7 @@
     },
     "3.t": {
       "id": "3.t",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "testing",
       "title": "Testing: Create Default Session Turn Template",
       "parent": "3",

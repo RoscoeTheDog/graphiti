@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:25:16
+**Generated**: 2025-12-12 01:29:49
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 17
-- **Completion**: 41.2%
+- **Completion**: 52.9%
 
 ### By Status
 
-- completed: 7
-- in_progress: 1
-- unassigned: 9
+- completed: 9
+- unassigned: 8
 
 ### By Type
 
@@ -57,7 +56,7 @@
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Create Default Session Turn Template
-  **Status**: unassigned | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 3
 
 ### Story 4: Modify Node Operations Preprocessing
