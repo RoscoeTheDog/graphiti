@@ -524,16 +524,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Template Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "13",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
-      "file": null,
+      "file": "stories/13-template-updates.md",
       "requires_artifact": "plans/13-plan.yaml",
       "metadata": {
-        "requires_artifact": "plans/13-plan.yaml"
+        "requires_artifact": "plans/13-plan.yaml",
+        "file": "stories/13-template-updates.md"
       }
     },
     "13.t": {
