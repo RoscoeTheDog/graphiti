@@ -3,21 +3,22 @@
   "phase": "testing",
   "executed_by": "testing:11.t",
   "timestamp": "2025-12-11T20:15:00Z",
+  "updated": "2025-12-11T21:30:00Z",
 
   "summary": {
     "total_tests": 77,
-    "passed": 71,
-    "failed": 6,
+    "passed": 77,
+    "failed": 0,
     "skipped": 1,
-    "pass_rate": 92.2,
-    "duration_ms": 250
+    "pass_rate": 100.0,
+    "duration_ms": 300
   },
 
   "categories": {
     "unit": {
       "total": 74,
-      "passed": 68,
-      "failed": 6,
+      "passed": 74,
+      "failed": 0,
       "coverage": null
     },
     "integration": {
@@ -34,90 +35,50 @@
     }
   },
 
-  "failures": [
-    {
-      "test": "test_activity_vector_computed_from_messages",
-      "category": "unit",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1281",
-      "severity": "medium"
-    },
-    {
-      "test": "test_dynamic_prompt_used_for_extraction",
-      "category": "unit",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1333",
-      "severity": "medium"
-    },
-    {
-      "test": "test_activity_vector_included_in_summary",
-      "category": "unit",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1386",
-      "severity": "medium"
-    },
-    {
-      "test": "test_graceful_fallback_on_activity_detection_failure",
-      "category": "unit",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1430",
-      "severity": "medium"
-    },
-    {
-      "test": "test_end_to_end_debugging_session",
-      "category": "integration",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1534",
-      "severity": "medium"
-    },
-    {
-      "test": "test_end_to_end_exploration_session",
-      "category": "integration",
-      "error": "TypeError: ConversationContext.__init__() got an unexpected keyword argument 'message_count'",
-      "file": "tests/session_tracking/test_summarizer.py:1598",
-      "severity": "medium"
-    }
-  ],
+  "failures": [],
+
+  "fixes_applied": {
+    "commit": "757aabe",
+    "description": "Fixed 6 tests with API mismatches",
+    "changes": [
+      "Added required session_id to ConversationContext",
+      "Changed total_tokens from int to TokenUsage object",
+      "Removed non-existent message_count and window_start_idx params",
+      "Added required SessionMessage fields (uuid, session_id, timestamp)",
+      "Changed tool_calls from dict to ToolCall objects",
+      "Added missing ActivityDetector, TokenUsage, ToolCall imports"
+    ]
+  },
 
   "acceptance_criteria_coverage": {
     "AC-11.1": {
       "covered": true,
-      "tests": ["test_sessionsummarizer_init_with_tool_classifier"],
+      "tests": ["test_sessionsummarizer_init_with_tool_classifier", "test_activity_vector_computed_from_messages"],
       "reason": null
     },
     "AC-11.2": {
-      "covered": false,
-      "tests": [],
-      "reason": "Test failed due to API mismatch in ConversationContext"
+      "covered": true,
+      "tests": ["test_dynamic_prompt_used_for_extraction"],
+      "reason": null
     },
     "AC-11.3": {
       "covered": true,
-      "tests": ["test_activity_vector_in_markdown_output", "test_activity_vector_in_metadata_output"],
+      "tests": ["test_activity_vector_in_markdown_output", "test_activity_vector_in_metadata_output", "test_activity_vector_included_in_summary"],
       "reason": null
     },
     "AC-11.4": {
-      "covered": false,
-      "tests": [],
-      "reason": "Test failed due to API mismatch in ConversationContext"
+      "covered": true,
+      "tests": ["test_graceful_fallback_on_activity_detection_failure"],
+      "reason": null
     },
     "AC-11.5": {
-      "covered": false,
-      "tests": [],
-      "reason": "Integration tests failed due to API mismatch in ConversationContext"
+      "covered": true,
+      "tests": ["test_end_to_end_debugging_session", "test_end_to_end_exploration_session"],
+      "reason": null
     }
   },
 
   "recommendations": [
-    {
-      "type": "improve",
-      "description": "Fix ConversationContext test mocks to match actual API signature",
-      "action": "Update failing tests to use correct ConversationContext parameters (session_id, messages, total_tokens)"
-    },
-    {
-      "type": "improve",
-      "description": "Add missing test coverage for dynamic prompt generation",
-      "action": "Create working tests for AC-11.2 and AC-11.4 after API fix"
-    },
     {
       "type": "optional",
       "description": "Add end-to-end integration tests with real LLM",
@@ -128,9 +89,9 @@
   "threshold_check": {
     "blocking_threshold": 90,
     "result": "above_threshold",
-    "action": "create_warning_advisory"
+    "action": "none"
   },
 
-  "outcome": "warning",
+  "outcome": "success",
   "blocking": false
 }
