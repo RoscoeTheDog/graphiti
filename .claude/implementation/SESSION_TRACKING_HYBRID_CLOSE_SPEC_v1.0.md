@@ -509,53 +509,22 @@ When episode is deleted:
 
 ---
 
-## 8. Configuration Schema
+## 8. Architecture Note (Non-Configurable)
 
-### 8.1 Updated Session Tracking Config
+The hybrid close strategy is the **architecture**, not a configurable option. The four-layer approach (explicit close → lazy indexing → hash dedup → timeout fallback) represents the design of the system.
 
-```json
-{
-  "session_tracking": {
-    "enabled": true,
+**Rationale for non-configurability**:
+1. The layers are interdependent - disabling one would break the fallback chain
+2. Configuration toggles add complexity without meaningful user value
+3. Users who need different behavior would require code changes anyway
+4. The hybrid approach is the optimal balance of cost, latency, and reliability
 
-    "close_strategy": {
-      "_comment": "Hybrid close strategy configuration",
+**What remains configurable** (existing fields):
+- `session_tracking.enabled` - Enable/disable session tracking entirely
+- `session_tracking.inactivity_timeout` - Fallback timeout duration (default: 1800s)
+- `session_tracking.watch_directories` - Directories to monitor
 
-      "explicit_close_enabled": true,
-      "_explicit_close_help": "Enable session_tracking_close() MCP tool",
-
-      "lazy_indexing_enabled": true,
-      "_lazy_indexing_help": "Index unindexed sessions on query",
-
-      "content_hash_dedup": true,
-      "_content_hash_dedup_help": "Skip indexing if content unchanged",
-
-      "inactivity_timeout": 1800,
-      "_inactivity_timeout_help": "Fallback timeout in seconds (0 = disabled)"
-    },
-
-    "state_persistence": {
-      "enabled": true,
-      "path": null,
-      "_path_help": "null = ~/.graphiti/session_states.json"
-    },
-
-    // ... existing fields ...
-  }
-}
-```
-
-### 8.2 Backward Compatibility
-
-If `close_strategy` section missing, defaults to:
-```json
-{
-  "explicit_close_enabled": true,
-  "lazy_indexing_enabled": true,
-  "content_hash_dedup": true,
-  "inactivity_timeout": 1800
-}
-```
+No new configuration fields are added by this feature.
 
 ---
 
@@ -613,9 +582,8 @@ Add lazy indexing pre-check (transparent to caller):
 
 ```python
 async def search_memory_nodes(query: str, ...):
-    # NEW: Lazy index check
-    if unified_config.session_tracking.close_strategy.lazy_indexing_enabled:
-        await _ensure_sessions_indexed(group_ids)
+    # NEW: Lazy index check (always enabled as part of hybrid architecture)
+    await _ensure_sessions_indexed(group_ids)
 
     # Existing search logic
     return await graphiti.search(...)
@@ -673,10 +641,10 @@ Before transitioning to a new task or context:
 | ST-H4 | Implement delete/replace logic in indexer | High | M |
 | ST-H5 | Implement lazy indexing in search tools | Medium | M |
 | ST-H6 | Implement `session_tracking_list_unindexed()` tool | Low | S |
-| ST-H7 | Update configuration schema and validation | Medium | S |
-| ST-H8 | Update `ensure_global_config_exists()` with new fields | Medium | S |
-| ST-H9 | Write integration tests for hybrid flow | High | L |
-| ST-H10 | Update documentation (user guide, dev guide) | Medium | M |
+| ST-H7 | Write integration tests for hybrid flow | High | L |
+| ST-H8 | Update documentation (user guide, dev guide) | Medium | M |
+
+**Note**: Configuration schema stories (ST-H7, ST-H8 in earlier drafts) were removed. The hybrid close strategy is architectural, not configurable. See Section 8.
 
 ### 11.2 File Changes
 
@@ -687,8 +655,6 @@ Before transitioning to a new task or context:
 | `graphiti_core/session_tracking/session_manager.py` | Integrate state manager, hash dedup |
 | `graphiti_core/session_tracking/indexer.py` | Add delete/replace logic |
 | `mcp_server/graphiti_mcp_server.py` | Add new MCP tools, lazy indexing |
-| `mcp_server/unified_config.py` | Add close_strategy config section |
-| `~/.graphiti/graphiti.config.json` | Add new config fields |
 
 ### 11.3 Dependencies
 
@@ -752,33 +718,7 @@ Before transitioning to a new task or context:
 2. New `session_states.json` created on first run
 3. Existing active sessions tracked with state "active"
 4. No data migration required
-
-### Configuration Migration
-
-Old config (implicit defaults):
-```json
-{
-  "session_tracking": {
-    "inactivity_timeout": 900
-  }
-}
-```
-
-New config (explicit):
-```json
-{
-  "session_tracking": {
-    "close_strategy": {
-      "explicit_close_enabled": true,
-      "lazy_indexing_enabled": true,
-      "content_hash_dedup": true,
-      "inactivity_timeout": 1800
-    }
-  }
-}
-```
-
-Backward compatible: missing `close_strategy` uses defaults.
+5. No configuration changes required - hybrid close is the new default architecture
 
 ---
 
@@ -1276,13 +1216,13 @@ Add to Section 11.1 (Story Breakdown):
 
 | Story | Description | Priority | Estimate |
 |-------|-------------|----------|----------|
-| ST-H11 | Implement hook socket server in MCP server | Medium | M |
-| ST-H12 | Create session_close_hook.py script | Medium | S |
-| ST-H13 | Create graphiti_mcp_client.py library | Medium | M |
-| ST-H14 | Add Windows named pipe support | Low | M |
-| ST-H15 | Create hook setup/installation utilities | Medium | S |
-| ST-H16 | Write hook integration tests | Medium | M |
-| ST-H17 | Document hook setup in user guide | Medium | S |
+| ST-H9 | Implement hook socket server in MCP server | Medium | M |
+| ST-H10 | Create session_close_hook.py script | Low | S |
+| ST-H11 | Create graphiti_mcp_client.py library | Medium | M |
+| ST-H12 | Add Windows named pipe support | Medium | M |
+| ST-H13 | Create hook setup/installation utilities | Low | S |
+| ST-H14 | Write hook integration tests | Medium | M |
+| ST-H15 | Document hook setup in user guide | Low | S |
 
 ### 13.10 File Additions
 
