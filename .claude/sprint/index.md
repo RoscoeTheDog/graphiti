@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:17:09
+**Generated**: 2025-12-12 03:18:35
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 61.4%
+- **Completion**: 63.6%
 
 ### By Status
 
-- completed: 54
-- in_progress: 1
-- unassigned: 33
+- completed: 56
+- unassigned: 32
 
 ### By Type
 
@@ -78,7 +77,7 @@
   - Blocks: Story -3.t
 
   ### Story -3.t: Validate Testing: Create Default Session Turn Template
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: Modify node_operations.py for Preprocessing Injection
