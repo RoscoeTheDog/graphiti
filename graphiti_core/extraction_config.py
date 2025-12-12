@@ -136,6 +136,12 @@ class ExtractionConfig(BaseModel):
         2. Global templates: ~/.graphiti/templates/
         3. Built-in templates: graphiti_core/session_tracking/prompts/
 
+        Graceful Degradation:
+        If a template file is specified but not found in any search location,
+        preprocessing is automatically disabled (returns empty string). This allows
+        the system to continue operating without preprocessing rather than failing.
+        A warning is logged with search paths for debugging.
+
         Args:
             project_dir: Optional project root for project-level templates.
                 If None, only global and built-in templates are searched.
@@ -154,6 +160,10 @@ class ExtractionConfig(BaseModel):
             >>> config = ExtractionConfig(preprocessing_prompt=False)
             >>> prompt = config.resolve_prompt()  # Returns empty string
             ''
+
+            >>> config = ExtractionConfig(preprocessing_prompt="missing.md")
+            >>> prompt = config.resolve_prompt()  # Template not found - returns empty string
+            ''
         """
         # If disabled or not set, return empty string
         if not self.is_enabled():
@@ -171,6 +181,13 @@ class ExtractionConfig(BaseModel):
             content = resolver.load(prompt_value)
 
             if content is None:
+                # Graceful degradation: missing template disables preprocessing
+                search_paths = resolver._get_search_paths(prompt_value)
+                logger.info(
+                    "Template '%s' not found - preprocessing disabled. Searched in: %s",
+                    prompt_value,
+                    [str(p) for p in search_paths],
+                )
                 logger.warning(
                     "Template '%s' not found in hierarchy, returning empty string",
                     prompt_value,

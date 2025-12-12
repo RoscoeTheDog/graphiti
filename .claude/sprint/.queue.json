@@ -156,12 +156,24 @@
       ]
     },
     "9": {
-      "type": "implementation",
+      "id": "9",
+      "status": "completed",
       "title": "Add Template Validation and Error Handling",
-      "status": "unassigned",
-      "file": "stories/9-template-validation-error-handling.md",
       "parent": null,
-      "children": [],
+      "file": "stories/9-template-validation-error-handling.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "9.d",
+        "9.i",
+        "9.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": []
     },
     "2.d": {
@@ -310,6 +322,49 @@
       "metadata": {
         "test_requirements_from": "plans/6-plan.yaml"
       }
+    },
+    "9.d": {
+      "id": "9.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/9-plan.yaml"
+    },
+    "9.i": {
+      "id": "9.i",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Implementation: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/9-plan.yaml"
+    },
+    "9.t": {
+      "id": "9.t",
+      "status": "completed",
+      "story_type": "testing",
+      "title": "Testing: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -327,7 +382,9 @@
     "6.t",
     "7",
     "8",
-    "9",
+    "9.d",
+    "9.i",
+    "9.t",
     "10",
     "11"
   ]

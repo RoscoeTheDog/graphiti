@@ -267,6 +267,10 @@ class ConfigValidator:
                         suggestion=f"Set environment variable: export {env_var}='your-api-key'",
                     )
 
+        # Validate extraction template files
+        if config.extraction.preprocessing_prompt:
+            self._validate_extraction_template(config, result, check_paths)
+
         return result
 
     def validate_cross_fields(self, config: GraphitiConfig) -> ValidationResult:
@@ -424,6 +428,59 @@ class ConfigValidator:
             return parsed.scheme in expected_schemes
         except Exception:
             return False
+
+    def _validate_extraction_template(
+        self,
+        config: GraphitiConfig,
+        result: ValidationResult,
+        check_paths: bool,
+    ) -> None:
+        """Validate extraction preprocessing template.
+
+        Checks if specified template file exists in hierarchy.
+        Only validates template files (.md), not inline prompts.
+
+        Args:
+            config: Graphiti configuration
+            result: ValidationResult to add warnings to
+            check_paths: Whether to check file paths exist
+        """
+        prompt = config.extraction.preprocessing_prompt
+
+        # Skip if disabled
+        if not prompt or prompt in (False, None):
+            return
+
+        # Check if it's a template file (not inline prompt)
+        is_template = (
+            prompt.endswith(".md") or "/" in prompt or "\\" in prompt
+        )
+
+        if not is_template:
+            # Inline prompt - no validation needed
+            return
+
+        # Check template exists
+        if check_paths:
+            from pathlib import Path
+
+            from graphiti_core.template_resolver import TemplateResolver
+
+            # Use current working directory as project root for template resolution
+            # In real usage, this would be the directory where graphiti.config.json is loaded from
+            project_dir = Path.cwd()
+            resolver = TemplateResolver(project_dir=project_dir)
+
+            if not resolver.exists(prompt):
+                search_paths = resolver._get_search_paths(prompt)
+                search_paths_str = "\n  ".join(str(p) for p in search_paths)
+
+                result.add_warning(
+                    path="extraction.preprocessing_prompt",
+                    message=f"Template file not found: {prompt}",
+                    suggestion=f"Template searched in:\n  {search_paths_str}\n"
+                    f"Create template file or use inline prompt instead.",
+                )
 
     def _check_env_var(self, env_var_name: str) -> Tuple[bool, str]:
         """Check if environment variable is set.

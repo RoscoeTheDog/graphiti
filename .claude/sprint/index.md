@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 02:15:27
+**Generated**: 2025-12-12 02:29:44
 
 ---
 
@@ -14,18 +14,18 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 20
-- **Completion**: 85.0%
+- **Total Stories**: 23
+- **Completion**: 91.3%
 
 ### By Status
 
-- completed: 17
-- unassigned: 3
+- completed: 21
+- unassigned: 2
 
 ### By Type
 
-- implementation: 8
-- unknown: 12
+- implementation: 7
+- unknown: 16
 
 ---
 
@@ -90,9 +90,17 @@
 - Dependencies: Story 1
 - Blocks: Story 10, Story 9
 
-### Story 9: Template Validation Error Handling
-**Status**: unassigned | **Type**: implementation
-- Dependencies: Story 6, Story 8
+  ### Story 9.d: Discovery: Add Template Validation and Error Handling
+  **Status**: completed | **Type**: unknown
+  - Dependencies: Story 9
+
+  ### Story 9.i: Implementation: Add Template Validation and Error Handling
+  **Status**: completed | **Type**: unknown
+  - Dependencies: Story 9
+
+  ### Story 9.t: Testing: Add Template Validation and Error Handling
+  **Status**: completed | **Type**: unknown
+  - Dependencies: Story 9
 
 ### Story 10: Unit Tests Preprocessing
 **Status**: unassigned | **Type**: implementation

@@ -384,5 +384,150 @@ class TestFormatting:
         assert data["warnings"][0]["path"] == "test.path"
 
 
+class TestExtractionTemplateValidation:
+    """Test extraction template validation."""
+
+    @pytest.fixture
+    def validator(self):
+        """Create validator instance."""
+        return ConfigValidator()
+
+    @pytest.fixture
+    def temp_template_dir(self):
+        """Create temporary template directory with a test template."""
+        temp_dir = tempfile.mkdtemp()
+        template_dir = Path(temp_dir) / ".graphiti" / "templates"
+        template_dir.mkdir(parents=True)
+
+        # Create a test template file
+        test_template = template_dir / "test-template.md"
+        test_template.write_text("# Test Template\n\nThis is a test template.")
+
+        yield temp_dir, test_template
+
+        # Cleanup
+        test_template.unlink()
+        template_dir.rmdir()
+        (Path(temp_dir) / ".graphiti").rmdir()
+        Path(temp_dir).rmdir()
+
+    def test_validate_extraction_template_exists(self, validator, temp_template_dir):
+        """Test validation passes when template file exists."""
+        project_dir, test_template = temp_template_dir
+
+        # Create config with valid template
+        from mcp_server.unified_config import GraphitiConfig
+
+        # Change to temp directory so cwd-based resolution finds the template
+        import os
+
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(project_dir)
+
+            config = GraphitiConfig(
+                extraction={
+                    "preprocessing_prompt": "test-template.md",
+                    "preprocessing_mode": "prepend",
+                }
+            )
+
+            result = ValidationResult(valid=True, config=config)
+            validator._validate_extraction_template(config, result, check_paths=True)
+
+            # Should have no warnings since template exists
+            assert result.valid is True
+            assert len(result.warnings) == 0
+        finally:
+            os.chdir(original_cwd)
+
+    def test_validate_extraction_template_not_found(self, validator):
+        """Test validation warns when template file not found."""
+        from mcp_server.unified_config import GraphitiConfig
+
+        config = GraphitiConfig(
+            extraction={
+                "preprocessing_prompt": "nonexistent-template.md",
+                "preprocessing_mode": "prepend",
+            }
+        )
+
+        result = ValidationResult(valid=True, config=config)
+        validator._validate_extraction_template(config, result, check_paths=True)
+
+        # Should have warning about missing template
+        assert result.valid is True  # Warnings don't affect validity
+        assert len(result.warnings) == 1
+        warning = result.warnings[0]
+        assert warning.path == "extraction.preprocessing_prompt"
+        assert "not found" in warning.message.lower()
+        assert "nonexistent-template.md" in warning.message
+        assert "searched in" in warning.suggestion.lower()
+
+    def test_validate_extraction_inline_prompt_skipped(self, validator):
+        """Test validation skips inline prompts (not template files)."""
+        from mcp_server.unified_config import GraphitiConfig
+
+        config = GraphitiConfig(
+            extraction={
+                "preprocessing_prompt": "Consider session context when extracting entities.",
+                "preprocessing_mode": "prepend",
+            }
+        )
+
+        result = ValidationResult(valid=True, config=config)
+        validator._validate_extraction_template(config, result, check_paths=True)
+
+        # Should have no warnings - inline prompts are not validated
+        assert result.valid is True
+        assert len(result.warnings) == 0
+
+    def test_validate_extraction_disabled_skipped(self, validator):
+        """Test validation skips when preprocessing is disabled."""
+        from mcp_server.unified_config import GraphitiConfig
+
+        # Test with False
+        config_false = GraphitiConfig(
+            extraction={
+                "preprocessing_prompt": False,
+                "preprocessing_mode": "prepend",
+            }
+        )
+
+        result_false = ValidationResult(valid=True, config=config_false)
+        validator._validate_extraction_template(config_false, result_false, check_paths=True)
+        assert len(result_false.warnings) == 0
+
+        # Test with None
+        config_none = GraphitiConfig(
+            extraction={
+                "preprocessing_prompt": None,
+                "preprocessing_mode": "prepend",
+            }
+        )
+
+        result_none = ValidationResult(valid=True, config=config_none)
+        validator._validate_extraction_template(config_none, result_none, check_paths=True)
+        assert len(result_none.warnings) == 0
+
+    def test_validate_extraction_check_paths_disabled(self, validator):
+        """Test validation skips path checking when check_paths=False."""
+        from mcp_server.unified_config import GraphitiConfig
+
+        config = GraphitiConfig(
+            extraction={
+                "preprocessing_prompt": "nonexistent-template.md",
+                "preprocessing_mode": "prepend",
+            }
+        )
+
+        result = ValidationResult(valid=True, config=config)
+        validator._validate_extraction_template(config, result, check_paths=False)
+
+        # Should have no warnings when path checking is disabled
+        assert result.valid is True
+        assert len(result.warnings) == 0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
