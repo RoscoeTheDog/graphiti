@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 10:05:12
+**Generated**: 2025-12-12 10:05:39
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 89
-- **Completion**: 96.6%
+- **Completion**: 97.8%
 
 ### By Status
 
-- completed: 86
-- in_progress: 2
+- completed: 87
+- in_progress: 1
 - unassigned: 1
 
 ### By Type
@@ -130,7 +130,7 @@
   - Blocks: Story -7.i
 
   ### Story -7.i: Validate Implementation: Wire Preprocessing in MCP Server Initialization
-  **Status**: in_progress | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -7, Story -7.d
   - Blocks: Story -7.t
 
