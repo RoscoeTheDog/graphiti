@@ -252,7 +252,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Unified Tool Classifier",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "7.d",
@@ -783,7 +783,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Unified Tool Classifier",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "7",
       "phase": "testing",
       "phase_order": 3,

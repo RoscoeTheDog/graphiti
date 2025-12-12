@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 17:43:58
+**Generated**: 2025-12-11 17:52:52
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 53.6%
+- **Completion**: 57.1%
 
 ### By Status
 
-- completed: 30
-- in_progress: 1
-- unassigned: 25
+- completed: 32
+- unassigned: 24
 
 ### By Type
 
@@ -133,7 +132,7 @@
   - Dependencies: Story 7
 
   ### Story 7.t: Testing: Unified Tool Classifier
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 7
 
   ### Story 8.d: Discovery: Extraction Priority Algorithm
