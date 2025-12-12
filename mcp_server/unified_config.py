@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
+from graphiti_core.extraction_config import ExtractionConfig
 from graphiti_core.session_tracking.filter_config import FilterConfig
 import logging
 
@@ -756,6 +757,7 @@ class GraphitiConfig(BaseModel):
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
     session_tracking: SessionTrackingConfig = Field(default_factory=SessionTrackingConfig)
+    extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
     llm_resilience: LLMResilienceConfig = Field(default_factory=LLMResilienceConfig)
     mcp_tools: MCPToolsBehaviorConfig = Field(default_factory=MCPToolsBehaviorConfig)
 

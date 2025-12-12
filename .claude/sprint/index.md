@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:51:52
+**Generated**: 2025-12-12 01:54:25
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 20
-- **Completion**: 60.0%
+- **Completion**: 65.0%
 
 ### By Status
 
-- completed: 12
+- completed: 13
 - in_progress: 1
-- pending: 1
 - unassigned: 6
 
 ### By Type
@@ -76,11 +75,11 @@
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Add Extraction Config to unified_config.py
-  **Status**: unassigned | **Type**: unknown
+  **Status**: completed | **Type**: unknown
   - Dependencies: Story 6
 
   ### Story 6.t: Testing: Add Extraction Config to unified_config.py
-  **Status**: pending | **Type**: unknown
+  **Status**: unassigned | **Type**: unknown
   - Dependencies: Story 6
 
 ### Story 7: Wire Preprocessing Mcp Server

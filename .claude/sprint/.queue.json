@@ -277,7 +277,7 @@
     },
     "6.i": {
       "id": "6.i",
-      "status": "unassigned",
+      "status": "completed",
       "story_type": "implementation",
       "title": "Implementation: Add Extraction Config to unified_config.py",
       "parent": "6",
@@ -293,7 +293,7 @@
     },
     "6.t": {
       "id": "6.t",
-      "status": "pending",
+      "status": "unassigned",
       "story_type": "testing",
       "title": "Testing: Add Extraction Config to unified_config.py",
       "parent": "6",
@@ -306,7 +306,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/6-plan.yaml"
+      }
     }
   },
   "execution_queue": [
