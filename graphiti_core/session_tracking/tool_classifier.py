@@ -14,14 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from __future__ import annotations
+
+import hashlib
+import json
 import logging
 import re
 from enum import Enum
-from typing import Any, ClassVar, Literal
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from pydantic import BaseModel, Field
 
+if TYPE_CHECKING:
+    from graphiti_core.llm_client import LLMClient
+
 logger = logging.getLogger(__name__)
+
+
+# LLM Classification Prompt Template (Story 5 spec)
+LLM_CLASSIFICATION_PROMPT = """Classify these tool invocations by their intent and domain.
+
+For each tool call, determine:
+1. Intent: create, modify, delete, read, search, execute, configure, communicate, validate, transform
+2. Domain: filesystem, code, database, network, process, version_control, package, documentation, testing, memory, unknown
+3. Activity Signals: Rate 0.0-1.0 contribution to each dimension (building, fixing, configuring, exploring, refactoring, reviewing, testing, documenting)
+
+Respond with a JSON object containing a "classifications" array. Each classification should have:
+- tool_name: The exact tool name from the input
+- intent: One of the intent values above
+- domain: One of the domain values above
+- activity_signals: Object mapping dimension names to float values 0.0-1.0
+
+## Tool Invocations to Classify:
+{tool_calls_json}
+"""
 
 
 class ToolIntent(str, Enum):
@@ -149,16 +176,47 @@ class ToolClassification(BaseModel):
     )
 
 
+class ToolClassificationResult(BaseModel):
+    """Single tool classification result from LLM.
+
+    Used as part of the structured response from LLM classification.
+    """
+
+    tool_name: str = Field(description="Name of the tool classified")
+    intent: str = Field(description="Intent enum value (lowercase)")
+    domain: str = Field(description="Domain enum value (lowercase)")
+    activity_signals: dict[str, float] = Field(
+        default_factory=dict,
+        description="Activity vector contributions (0.0-1.0)"
+    )
+
+
+class LLMToolClassificationResponse(BaseModel):
+    """Pydantic model for LLM structured response.
+
+    Contains a list of classification results for batch tool classification.
+    """
+
+    classifications: list[ToolClassificationResult] = Field(
+        description="List of classification results from LLM"
+    )
+
+
 class ToolClassifier:
-    """Classify tools using heuristic pattern matching.
+    """Classify tools using heuristic pattern matching with LLM fallback.
 
-    The classifier uses a three-step process:
-    1. Check known tool mappings (exact matches, confidence 1.0)
-    2. Pattern matching on tool name parts
-    3. Compute activity signals from intent+domain
+    The classifier uses a multi-level cache hierarchy:
+    1. Exact cache: tool_name + params hash (instant)
+    2. Pattern cache: tool_name only (instant)
+    3. Heuristic: Name pattern matching (instant, ~0.7 confidence)
+    4. LLM inference: Full classification (~1-2s, cached permanently after)
 
-    LLM fallback is not implemented in this class - see Story 5 for
-    LLM classification with caching.
+    For single tool classification, use classify().
+    For batch classification with full cache hierarchy, use classify_batch().
+
+    Args:
+        cache_path: Optional path for persistent cache storage (JSON file).
+        llm_client: Optional LLM client for fallback classification.
 
     Example:
         >>> classifier = ToolClassifier()
@@ -167,6 +225,16 @@ class ToolClassifier:
         <ToolIntent.SEARCH: 'search'>
         >>> result.domain
         <ToolDomain.CODE: 'code'>
+
+        >>> # With LLM fallback and caching
+        >>> from graphiti_core.llm_client import OpenAIClient
+        >>> classifier = ToolClassifier(
+        ...     cache_path=Path("tool_cache.json"),
+        ...     llm_client=OpenAIClient()
+        ... )
+        >>> results = await classifier.classify_batch([
+        ...     ("custom_mcp_tool", {"param": "value"})
+        ... ])
     """
 
     # Known tool mappings: (intent, domain, confidence)
@@ -280,6 +348,31 @@ class ToolClassifier:
     _NAME_SPLIT_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
         r'[_\-.]|(?<=[a-z])(?=[A-Z])'  # Split on _, -, ., or camelCase boundaries
     )
+
+    def __init__(
+        self,
+        cache_path: Path | None = None,
+        llm_client: LLMClient | None = None,
+    ) -> None:
+        """Initialize the ToolClassifier with optional caching and LLM support.
+
+        Args:
+            cache_path: Optional path for persistent cache storage.
+                If provided and file exists, cache is loaded on init.
+            llm_client: Optional LLM client for classifying unknown tools.
+                Without this, unknown tools fall back to low-confidence defaults.
+        """
+        # Instance caches
+        self._exact_cache: dict[str, ToolClassification] = {}
+        self._pattern_cache: dict[str, ToolClassification] = {}
+
+        # Configuration
+        self._cache_path = cache_path
+        self._llm_client = llm_client
+
+        # Load persistent cache if path provided
+        if cache_path is not None:
+            self._load_cache()
 
     def classify(
         self, tool_name: str, parameters: dict[str, Any] | None = None
@@ -503,3 +596,353 @@ class ToolClassifier:
             signals[dim] = min(signals[dim], 1.0)
 
         return signals
+
+    # =========================================================================
+    # Cache Management Methods (Story 5)
+    # =========================================================================
+
+    def _get_cache_key(
+        self, tool_name: str, params: dict[str, Any] | None = None
+    ) -> str:
+        """Generate cache key from tool name and parameters.
+
+        Cache key format: {tool_name}::{md5(normalized_params)[:8]}
+
+        Args:
+            tool_name: The name of the tool.
+            params: Optional parameters dict. If None or empty, key is tool_name::.
+
+        Returns:
+            Cache key string.
+
+        Example:
+            >>> classifier = ToolClassifier()
+            >>> classifier._get_cache_key("Read", {"file_path": "/foo"})
+            'Read::a1b2c3d4'
+            >>> classifier._get_cache_key("Read", None)
+            'Read::'
+        """
+        if not params:
+            return f"{tool_name}::"
+
+        # Normalize params: sort keys, canonical JSON
+        normalized = json.dumps(params, sort_keys=True, separators=(",", ":"))
+        hash_suffix = hashlib.md5(normalized.encode()).hexdigest()[:8]
+        return f"{tool_name}::{hash_suffix}"
+
+    def _update_cache(
+        self,
+        tool_name: str,
+        params: dict[str, Any] | None,
+        classification: ToolClassification,
+    ) -> None:
+        """Update both exact and pattern caches with a classification.
+
+        Args:
+            tool_name: The tool name that was classified.
+            params: The parameters used (for exact cache key).
+            classification: The classification result to cache.
+        """
+        # Update exact cache
+        cache_key = self._get_cache_key(tool_name, params)
+        self._exact_cache[cache_key] = classification
+
+        # Update pattern cache (tool_name only) if not already present
+        if tool_name not in self._pattern_cache:
+            self._pattern_cache[tool_name] = classification
+
+        logger.debug(
+            "Updated cache for '%s': exact=%s, pattern=%s",
+            tool_name,
+            cache_key,
+            tool_name not in self._pattern_cache,
+        )
+
+    def save_cache(self) -> None:
+        """Persist caches to JSON file.
+
+        Uses atomic write (temp file + rename) to prevent corruption.
+        Does nothing if no cache_path was configured.
+        """
+        if self._cache_path is None:
+            return
+
+        cache_data = {
+            "version": "1.0",
+            "exact": {k: v.model_dump() for k, v in self._exact_cache.items()},
+            "pattern": {k: v.model_dump() for k, v in self._pattern_cache.items()},
+        }
+
+        # Atomic write: write to temp file, then rename
+        temp_path = self._cache_path.with_suffix(".tmp")
+        try:
+            with open(temp_path, "w", encoding="utf-8") as f:
+                json.dump(cache_data, f, indent=2)
+            temp_path.replace(self._cache_path)
+            logger.info(
+                "Saved tool classification cache: %d exact, %d pattern entries",
+                len(self._exact_cache),
+                len(self._pattern_cache),
+            )
+        except OSError as e:
+            logger.error("Failed to save cache to %s: %s", self._cache_path, e)
+            # Clean up temp file if it exists
+            if temp_path.exists():
+                temp_path.unlink()
+
+    def _load_cache(self) -> None:
+        """Load caches from JSON file.
+
+        Handles missing files gracefully (starts with empty cache).
+        Handles corrupted JSON gracefully (warns and resets cache).
+        """
+        if self._cache_path is None or not self._cache_path.exists():
+            return
+
+        try:
+            with open(self._cache_path, encoding="utf-8") as f:
+                data = json.load(f)
+
+            # Parse exact cache entries
+            self._exact_cache = {}
+            for k, v in data.get("exact", {}).items():
+                try:
+                    self._exact_cache[k] = ToolClassification(**v)
+                except Exception as e:
+                    logger.warning("Skipping invalid exact cache entry '%s': %s", k, e)
+
+            # Parse pattern cache entries
+            self._pattern_cache = {}
+            for k, v in data.get("pattern", {}).items():
+                try:
+                    self._pattern_cache[k] = ToolClassification(**v)
+                except Exception as e:
+                    logger.warning("Skipping invalid pattern cache entry '%s': %s", k, e)
+
+            logger.info(
+                "Loaded tool classification cache: %d exact, %d pattern entries",
+                len(self._exact_cache),
+                len(self._pattern_cache),
+            )
+
+        except json.JSONDecodeError as e:
+            logger.warning("Cache file corrupted, resetting: %s", e)
+            self._exact_cache = {}
+            self._pattern_cache = {}
+
+        except OSError as e:
+            logger.warning("Could not load cache file: %s", e)
+            self._exact_cache = {}
+            self._pattern_cache = {}
+
+    # =========================================================================
+    # LLM Classification Methods (Story 5)
+    # =========================================================================
+
+    async def _classify_with_llm(
+        self, tool_calls: list[tuple[str, dict[str, Any] | None]]
+    ) -> list[ToolClassification]:
+        """Batch classify unknown tools using LLM.
+
+        Args:
+            tool_calls: List of (tool_name, params) tuples to classify.
+
+        Returns:
+            List of ToolClassification objects in same order as input.
+
+        Raises:
+            ValueError: If no LLM client configured.
+        """
+        if self._llm_client is None:
+            raise ValueError("No LLM client configured for tool classification")
+
+        # Import here to avoid circular dependency
+        from graphiti_core.prompts.models import Message
+
+        # Build prompt from spec
+        tool_calls_json = json.dumps(
+            [{"tool_name": name, "params": params} for name, params in tool_calls],
+            indent=2,
+        )
+        prompt = LLM_CLASSIFICATION_PROMPT.format(tool_calls_json=tool_calls_json)
+
+        logger.debug("Classifying %d tools with LLM", len(tool_calls))
+
+        # Call LLM with structured response
+        response = await self._llm_client.generate_response(
+            messages=[Message(role="user", content=prompt)],
+            response_model=LLMToolClassificationResponse,
+        )
+
+        # Convert to ToolClassification objects
+        results: list[ToolClassification] = []
+        classifications = response.get("classifications", [])
+
+        # Build lookup by tool_name for matching
+        result_map: dict[str, dict[str, Any]] = {}
+        for r in classifications:
+            if isinstance(r, dict):
+                result_map[r.get("tool_name", "")] = r
+            else:
+                # Pydantic model
+                result_map[r.tool_name] = {
+                    "intent": r.intent,
+                    "domain": r.domain,
+                    "activity_signals": r.activity_signals,
+                }
+
+        # Match results to input order
+        for tool_name, _ in tool_calls:
+            if tool_name in result_map:
+                r = result_map[tool_name]
+                try:
+                    results.append(
+                        ToolClassification(
+                            intent=ToolIntent(r["intent"]),
+                            domain=ToolDomain(r["domain"]),
+                            confidence=0.85,  # LLM confidence
+                            activity_signals=r.get("activity_signals", {}),
+                            tool_name=tool_name,
+                            method="llm",
+                        )
+                    )
+                except (ValueError, KeyError) as e:
+                    logger.warning(
+                        "Failed to parse LLM result for '%s': %s", tool_name, e
+                    )
+                    # Fallback to unknown
+                    results.append(
+                        ToolClassification(
+                            intent=ToolIntent.EXECUTE,
+                            domain=ToolDomain.UNKNOWN,
+                            confidence=0.3,
+                            activity_signals={"exploring": 0.3},
+                            tool_name=tool_name,
+                            method="llm",
+                        )
+                    )
+            else:
+                # Tool not in LLM response - fallback
+                logger.warning("LLM did not classify tool '%s'", tool_name)
+                results.append(
+                    ToolClassification(
+                        intent=ToolIntent.EXECUTE,
+                        domain=ToolDomain.UNKNOWN,
+                        confidence=0.3,
+                        activity_signals={"exploring": 0.3},
+                        tool_name=tool_name,
+                        method="llm",
+                    )
+                )
+
+        return results
+
+    async def classify_batch(
+        self, tool_calls: list[tuple[str, dict[str, Any] | None]]
+    ) -> list[ToolClassification]:
+        """Classify multiple tools with cache hierarchy optimization.
+
+        Uses a four-level cache hierarchy:
+        1. Exact cache: tool_name + params hash (instant hit)
+        2. Pattern cache: tool_name only (instant hit)
+        3. Heuristic: Pattern matching (instant, if confidence >= 0.7)
+        4. LLM inference: Batch unknown tools (cached after)
+
+        Args:
+            tool_calls: List of (tool_name, params) tuples to classify.
+
+        Returns:
+            List of ToolClassification objects in same order as input.
+
+        Example:
+            >>> classifier = ToolClassifier(llm_client=my_llm)
+            >>> results = await classifier.classify_batch([
+            ...     ("Read", {"file_path": "/foo"}),
+            ...     ("custom_tool", {"arg": "value"}),
+            ... ])
+        """
+        results: list[ToolClassification | None] = []
+        unknown_tools: list[tuple[str, dict[str, Any] | None, int]] = []
+
+        for idx, (tool_name, params) in enumerate(tool_calls):
+            # 1. Try exact cache
+            cache_key = self._get_cache_key(tool_name, params)
+            if cache_key in self._exact_cache:
+                cached = self._exact_cache[cache_key]
+                # Return cached classification with method='cached'
+                results.append(
+                    ToolClassification(
+                        intent=cached.intent,
+                        domain=cached.domain,
+                        confidence=cached.confidence,
+                        activity_signals=cached.activity_signals,
+                        tool_name=tool_name,
+                        method="cached",
+                    )
+                )
+                logger.debug("Exact cache hit for '%s'", tool_name)
+                continue
+
+            # 2. Try pattern cache
+            if tool_name in self._pattern_cache:
+                cached = self._pattern_cache[tool_name]
+                results.append(
+                    ToolClassification(
+                        intent=cached.intent,
+                        domain=cached.domain,
+                        confidence=cached.confidence,
+                        activity_signals=cached.activity_signals,
+                        tool_name=tool_name,
+                        method="cached",
+                    )
+                )
+                logger.debug("Pattern cache hit for '%s'", tool_name)
+                continue
+
+            # 3. Try heuristic
+            heuristic = self._try_heuristic(tool_name, params)
+            if heuristic is not None and heuristic.confidence >= 0.7:
+                results.append(heuristic)
+                # Also update caches with high-confidence heuristic results
+                self._update_cache(tool_name, params, heuristic)
+                logger.debug("Heuristic match for '%s' (conf=%.2f)", tool_name, heuristic.confidence)
+                continue
+
+            # 4. Queue for LLM classification
+            unknown_tools.append((tool_name, params, idx))
+            results.append(None)  # Placeholder
+
+        # 5. Batch LLM classification for unknown tools
+        if unknown_tools:
+            if self._llm_client is None:
+                # No LLM client - use low-confidence fallback
+                logger.debug(
+                    "No LLM client, using fallback for %d unknown tools",
+                    len(unknown_tools),
+                )
+                for tool_name, params, idx in unknown_tools:
+                    fallback = ToolClassification(
+                        intent=ToolIntent.EXECUTE,
+                        domain=ToolDomain.UNKNOWN,
+                        confidence=0.3,
+                        activity_signals={"exploring": 0.3},
+                        tool_name=tool_name,
+                        method="heuristic",
+                    )
+                    results[idx] = fallback
+            else:
+                # Classify with LLM
+                logger.debug("Classifying %d unknown tools with LLM", len(unknown_tools))
+                llm_results = await self._classify_with_llm(
+                    [(name, params) for name, params, _ in unknown_tools]
+                )
+
+                # Update results and caches
+                for (tool_name, params, idx), llm_result in zip(
+                    unknown_tools, llm_results
+                ):
+                    results[idx] = llm_result
+                    self._update_cache(tool_name, params, llm_result)
+
+        # All placeholders should be filled
+        return [r for r in results if r is not None]

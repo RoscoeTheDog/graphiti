@@ -681,7 +681,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: LLM Tool Classification with Caching",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
