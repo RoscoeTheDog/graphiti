@@ -1194,7 +1194,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Add Extraction Config to unified_config.py",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.i",
       "phase": "validation_implementation",
