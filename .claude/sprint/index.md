@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 17:06:58
+**Generated**: 2025-12-11 17:12:51
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 42.9%
+- **Completion**: 44.6%
 
 ### By Status
 
-- completed: 24
-- unassigned: 32
+- completed: 25
+- in_progress: 1
+- unassigned: 30
 
 ### By Type
 
@@ -112,7 +113,7 @@
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Bash Command Analysis
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Bash Command Analysis

@@ -228,7 +228,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Bash Command Analysis",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "6.d",
@@ -711,7 +711,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Bash Command Analysis",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "discovery",
       "phase_order": 1,
