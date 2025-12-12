@@ -179,7 +179,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Tool Classification Heuristics",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "4.d",
@@ -625,7 +625,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Tool Classification Heuristics",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,

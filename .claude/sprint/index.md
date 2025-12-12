@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 15:53:57
+**Generated**: 2025-12-11 16:00:33
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 28.6%
+- **Completion**: 30.4%
 
 ### By Status
 
-- completed: 16
-- unassigned: 40
+- completed: 17
+- in_progress: 1
+- unassigned: 38
 
 ### By Type
 
@@ -88,7 +89,7 @@
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Tool Classification Heuristics
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Tool Classification Heuristics
