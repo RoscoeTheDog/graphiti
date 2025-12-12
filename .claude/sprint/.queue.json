@@ -110,12 +110,24 @@
       ]
     },
     "6": {
-      "type": "implementation",
+      "id": "6",
+      "status": "in_progress",
       "title": "Add Extraction Config to unified_config.py",
-      "status": "unassigned",
-      "file": "stories/6-add-extraction-config-unified.md",
       "parent": null,
-      "children": [],
+      "file": "stories/6-add-extraction-config-unified.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "11",
         "7",
@@ -249,6 +261,52 @@
       "metadata": {
         "test_requirements_from": "plans/3-plan.yaml"
       }
+    },
+    "6.d": {
+      "id": "6.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "id": "6.i",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "Implementation: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/6-plan.yaml"
+      }
+    },
+    "6.t": {
+      "id": "6.t",
+      "status": "pending",
+      "story_type": "testing",
+      "title": "Testing: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -261,7 +319,9 @@
     "3.t",
     "4",
     "5",
-    "6",
+    "6.d",
+    "6.i",
+    "6.t",
     "7",
     "8",
     "9",
