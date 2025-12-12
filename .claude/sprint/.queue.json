@@ -85,7 +85,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Configuration Schema Updates",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "12.d",
@@ -462,7 +462,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Configuration Schema Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "12",
       "phase": "discovery",
       "phase_order": 1,
@@ -482,7 +482,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/12-plan.yaml"
+      "requires_artifact": "plans/12-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/12-plan.yaml"
+      }
     },
     "12.t": {
       "type": "testing",
