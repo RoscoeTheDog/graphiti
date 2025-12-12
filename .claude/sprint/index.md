@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:24:52
+**Generated**: 2025-12-12 03:27:52
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 65.9%
+- **Completion**: 68.2%
 
 ### By Status
 
-- completed: 58
-- in_progress: 1
-- unassigned: 29
+- completed: 60
+- unassigned: 28
 
 ### By Type
 
@@ -92,7 +91,7 @@
   - Blocks: Story -4.t
 
   ### Story -4.t: Validate Testing: Modify node_operations.py for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Modify edge_operations.py for Preprocessing Injection
