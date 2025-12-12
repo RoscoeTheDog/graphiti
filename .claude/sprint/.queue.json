@@ -960,7 +960,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Create Default Session Turn Template",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.i",
       "phase": "validation_implementation",
