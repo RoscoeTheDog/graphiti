@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 03:34:17
+**Generated**: 2025-12-12 03:39:21
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 88
-- **Completion**: 72.7%
+- **Completion**: 73.9%
 
 ### By Status
 
-- completed: 64
-- unassigned: 24
+- completed: 65
+- in_progress: 1
+- unassigned: 22
 
 ### By Type
 
@@ -109,7 +110,7 @@
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Add Extraction Config to unified_config.py
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -6
   - Blocks: Story -6.i
 

@@ -1154,7 +1154,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Add Extraction Config to unified_config.py",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "6",
       "children": [
         "-6.d",
@@ -1174,7 +1174,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Add Extraction Config to unified_config.py",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.d",
       "phase": "validation_discovery",
