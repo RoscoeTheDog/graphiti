@@ -1,6 +1,6 @@
 # Story 4: Modify node_operations.py for Preprocessing Injection
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-12 00:39
 
 ## Description
