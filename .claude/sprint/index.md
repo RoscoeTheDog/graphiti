@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 10:04:15
+**Generated**: 2025-12-12 10:05:12
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 89
-- **Completion**: 93.3%
+- **Completion**: 96.6%
 
 ### By Status
 
-- completed: 83
-- in_progress: 3
-- unassigned: 3
+- completed: 86
+- in_progress: 2
+- unassigned: 1
 
 ### By Type
 
@@ -130,7 +130,7 @@
   - Blocks: Story -7.i
 
   ### Story -7.i: Validate Implementation: Wire Preprocessing in MCP Server Initialization
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: in_progress | **Type**: validation_implementation
   - Dependencies: Story -7, Story -7.d
   - Blocks: Story -7.t
 
@@ -172,12 +172,12 @@
   - Blocks: Story -10.i
 
   ### Story -10.i: Validate Implementation: Unit Tests for Preprocessing Injection
-  **Status**: in_progress | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -10, Story -10.d
   - Blocks: Story -10.t
 
   ### Story -10.t: Validate Testing: Unit Tests for Preprocessing Injection
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -10, Story -10.i
 
   ### Story -11.d: Validate Discovery: Update CONFIGURATION.md with Extraction Section
