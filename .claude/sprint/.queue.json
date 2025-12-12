@@ -179,7 +179,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Tool Classification Heuristics",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "4.d",
@@ -651,7 +651,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Tool Classification Heuristics",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,

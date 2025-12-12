@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-11 16:32:07
+**Generated**: 2025-12-11 16:42:07
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 32.1%
+- **Completion**: 35.7%
 
 ### By Status
 
-- completed: 18
-- in_progress: 1
-- unassigned: 37
+- completed: 20
+- unassigned: 36
 
 ### By Type
 
@@ -97,7 +96,7 @@
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Tool Classification Heuristics
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: LLM Tool Classification with Caching
