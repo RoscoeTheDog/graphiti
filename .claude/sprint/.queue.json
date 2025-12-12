@@ -816,7 +816,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Extraction Priority Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "8",
       "phase": "implementation",
       "phase_order": 2,

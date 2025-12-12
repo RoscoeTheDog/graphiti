@@ -20,6 +20,12 @@ Core components:
 from .activity_detector import ActivityDetector
 from .activity_vector import ActivityVector
 from .bash_analyzer import BashAnalyzer, BashCommandClassification
+from .extraction_priority import (
+    EXTRACTION_AFFINITIES,
+    compute_extraction_priority,
+    get_extraction_fields,
+    get_extraction_priorities,
+)
 from .tool_classifier import ToolClassification, ToolClassifier, ToolDomain, ToolIntent
 from .unified_classifier import UnifiedToolClassifier
 from .filter import SessionFilter
@@ -88,6 +94,11 @@ __all__ = [
     "BashCommandClassification",
     # Unified tool classification (NEW - Story 7 v3.0.0)
     "UnifiedToolClassifier",
+    # Extraction priority (NEW - Story 8 v3.0.0)
+    "EXTRACTION_AFFINITIES",
+    "compute_extraction_priority",
+    "get_extraction_fields",
+    "get_extraction_priorities",
     # Episode metadata (NEW - Global Session Tracking Story 4)
     "build_episode_metadata_header",
     # Indexing (NEW - Story 4 refactoring)
