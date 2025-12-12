@@ -66,12 +66,24 @@
       ]
     },
     "3": {
-      "type": "implementation",
+      "id": "3",
+      "status": "in_progress",
       "title": "Create Default Session Turn Template",
-      "status": "unassigned",
-      "file": "stories/3-create-default-session-turn-template.md",
       "parent": null,
-      "children": [],
+      "file": "stories/3-create-default-session-turn-template.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": []
     },
     "4": {
@@ -188,6 +200,52 @@
       "metadata": {
         "test_requirements_from": "plans/2-plan.yaml"
       }
+    },
+    "3.d": {
+      "id": "3.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "id": "3.i",
+      "status": "unassigned",
+      "story_type": "implementation",
+      "title": "Implementation: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
+    },
+    "3.t": {
+      "id": "3.t",
+      "status": "pending",
+      "story_type": "testing",
+      "title": "Testing: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -195,7 +253,9 @@
     "2.d",
     "2.i",
     "2.t",
-    "3",
+    "3.d",
+    "3.i",
+    "3.t",
     "4",
     "5",
     "6",

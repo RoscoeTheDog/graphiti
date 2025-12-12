@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 01:12:06
+**Generated**: 2025-12-12 01:19:40
 
 ---
 
@@ -14,18 +14,20 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 14
-- **Completion**: 35.7%
+- **Total Stories**: 17
+- **Completion**: 35.3%
 
 ### By Status
 
-- completed: 5
+- completed: 6
+- in_progress: 1
+- pending: 1
 - unassigned: 9
 
 ### By Type
 
-- implementation: 10
-- unknown: 4
+- implementation: 9
+- unknown: 8
 
 ---
 
@@ -47,8 +49,17 @@
   **Status**: completed | **Type**: unknown
   - Dependencies: Story 2
 
-### Story 3: Create Default Session Turn Template
-**Status**: unassigned | **Type**: implementation
+  ### Story 3.d: Discovery: Create Default Session Turn Template
+  **Status**: completed | **Type**: unknown
+  - Dependencies: Story 3
+
+  ### Story 3.i: Implementation: Create Default Session Turn Template
+  **Status**: unassigned | **Type**: unknown
+  - Dependencies: Story 3
+
+  ### Story 3.t: Testing: Create Default Session Turn Template
+  **Status**: pending | **Type**: unknown
+  - Dependencies: Story 3
 
 ### Story 4: Modify Node Operations Preprocessing
 **Status**: unassigned | **Type**: implementation
