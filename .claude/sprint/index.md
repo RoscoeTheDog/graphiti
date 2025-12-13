@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 20:45:43
+**Generated**: 2025-12-12 20:50:37
 
 ---
 
@@ -14,12 +14,12 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 56
-- **Completion**: 58.9%
+- **Total Stories**: 57
+- **Completion**: 59.6%
 
 ### By Status
 
-- completed: 33
+- completed: 34
 - in_progress: 1
 - unassigned: 22
 
@@ -28,6 +28,7 @@
 - discovery: 7
 - feature: 7
 - implementation: 7
+- remediation: 1
 - testing: 7
 - validation: 7
 - validation_discovery: 7
@@ -58,7 +59,7 @@
   - Blocks: Story -2.i
 
   ### Story -2.i: Validate Implementation: Remove Session Manager Time-Based Logic
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -2, Story -2.d
   - Blocks: Story -2.t
 
@@ -148,17 +149,22 @@
   **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
+  ### Story 2.1: Fix Test_Coverage_Gap
+  **Status**: unassigned | **Type**: remediation
+  - Dependencies: Story 2
+  - Blocks: Story 2.d, Story 2.i, Story 2.t
+
   ### Story 2.d: Discovery: Remove Session Manager Time-Based Logic
   **Status**: completed | **Type**: discovery
-  - Dependencies: Story 2
+  - Dependencies: Story 2, Story 2.1
 
   ### Story 2.i: Implementation: Remove Session Manager Time-Based Logic
   **Status**: completed | **Type**: implementation
-  - Dependencies: Story 2
+  - Dependencies: Story 2, Story 2.1
 
   ### Story 2.t: Testing: Remove Session Manager Time-Based Logic
   **Status**: completed | **Type**: testing
-  - Dependencies: Story 2
+  - Dependencies: Story 2, Story 2.1
 
   ### Story 3.d: Discovery: Remove File Watcher Module
   **Status**: completed | **Type**: discovery
