@@ -1031,7 +1031,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.i",
       "phase": "validation_implementation",
@@ -1043,7 +1043,10 @@
       "blocks": [
         "-7.t"
       ],
-      "file": null
+      "file": null,
+      "metadata": {
+        "file": "validation-stories/-7.i-validate-implementation-documentation-updates.md"
+      }
     },
     "-7.t": {
       "type": "validation_testing",
