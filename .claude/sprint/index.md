@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 21:15:49
+**Generated**: 2025-12-12 21:22:29
 
 ---
 
@@ -15,13 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 66.7%
+- **Completion**: 68.4%
 
 ### By Status
 
 - blocked: 2
-- completed: 38
-- unassigned: 17
+- completed: 39
+- in_progress: 1
+- unassigned: 15
 
 ### By Type
 
@@ -81,8 +82,8 @@
   **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
-  ### Story -4.d: Validate Discovery: Clean Up MCP Server Session Initialization
-  **Status**: unassigned | **Type**: validation_discovery
+  ### Story -4.d: Validation Discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -4
   - Blocks: Story -4.i
 
