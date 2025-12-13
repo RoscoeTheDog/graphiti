@@ -161,7 +161,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Documentation Updates",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "7.d",
@@ -471,7 +471,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "7",
       "phase": "discovery",
       "phase_order": 1,
@@ -491,7 +491,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/7-plan.yaml"
+      "requires_artifact": "plans/7-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/7-plan.yaml"
+      }
     },
     "7.t": {
       "type": "testing",
