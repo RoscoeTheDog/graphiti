@@ -114,7 +114,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Update CLI Tools",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "5.d",
@@ -370,7 +370,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Update CLI Tools",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "discovery",
       "phase_order": 1,
@@ -390,7 +390,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/5-plan.yaml"
+      "requires_artifact": "plans/5-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/5-plan.yaml"
+      }
     },
     "5.t": {
       "type": "testing",
