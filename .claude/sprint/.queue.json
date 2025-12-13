@@ -337,7 +337,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Clean Up MCP Server Session Initialization",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,

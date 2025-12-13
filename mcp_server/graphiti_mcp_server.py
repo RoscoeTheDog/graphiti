@@ -2812,17 +2812,8 @@ async def run_mcp_server():
         except asyncio.CancelledError:
             logger.info('Metrics logging task cancelled successfully')
 
-        # Clean up session manager and inactivity checker on shutdown
-        global session_manager, _inactivity_checker_task, resilient_indexer
-
-        # Cancel inactivity checker task first
-        if _inactivity_checker_task is not None:
-            logger.info('Stopping session inactivity checker...')
-            _inactivity_checker_task.cancel()
-            try:
-                await _inactivity_checker_task
-            except asyncio.CancelledError:
-                logger.info('Session inactivity checker cancelled successfully')
+        # Clean up session manager on shutdown
+        global session_manager, resilient_indexer
 
         # Stop session manager
         if session_manager is not None:
