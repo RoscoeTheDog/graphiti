@@ -204,8 +204,7 @@ class TestConfigValidator:
                 "openai": {"api_key_env": "OPENAI_API_KEY"},
             },
             "session_tracking": {
-                "enabled": False,
-                "inactivity_timeout": "not_a_number",  # Should be int
+                "enabled": "not_a_boolean",  # Should be bool
             },
         }
         with open(temp_config_file, "w") as f:
@@ -305,7 +304,7 @@ class TestConfigValidator:
 
     def test_suggest_field_name(self, validator):
         """Test field name suggestion."""
-        valid_fields = ["watch_path", "enabled", "check_interval"]
+        valid_fields = ["watch_path", "enabled"]
 
         # Test close match
         suggestion = validator._suggest_field_name("enabledd", valid_fields)

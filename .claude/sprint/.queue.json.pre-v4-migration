@@ -1,0 +1,90 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "session-tracking-deprecation-cleanup-v1.0",
+    "name": "Session Tracking Deprecation Cleanup",
+    "version": "1.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-12 17:46"
+  },
+  "stories": {
+    "1": {
+      "type": "implementation",
+      "title": "Remove Deprecated Config Parameters",
+      "status": "unassigned",
+      "file": "stories/1-remove-deprecated-config-parameters.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "2",
+        "5"
+      ]
+    },
+    "2": {
+      "type": "implementation",
+      "title": "Remove Session Manager Time-Based Logic",
+      "status": "unassigned",
+      "file": "stories/2-remove-session-manager-time-based-logic.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "3"
+      ]
+    },
+    "3": {
+      "type": "implementation",
+      "title": "Remove File Watcher Module",
+      "status": "unassigned",
+      "file": "stories/3-remove-file-watcher-module.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "4": {
+      "type": "implementation",
+      "title": "Clean Up MCP Server Session Initialization",
+      "status": "unassigned",
+      "file": "stories/4-clean-up-mcp-server-session-initialization.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "5": {
+      "type": "implementation",
+      "title": "Update CLI Tools",
+      "status": "unassigned",
+      "file": "stories/5-update-cli-tools.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "6": {
+      "type": "implementation",
+      "title": "Clean Up Test Files",
+      "status": "unassigned",
+      "file": "stories/6-clean-up-test-files.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "7": {
+      "type": "implementation",
+      "title": "Documentation Updates",
+      "status": "unassigned",
+      "file": "stories/7-documentation-updates.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    }
+  },
+  "execution_queue": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+  ]
+}

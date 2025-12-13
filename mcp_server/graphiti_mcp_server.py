@@ -106,9 +106,6 @@ SEMAPHORE_LIMIT = int(os.getenv('SEMAPHORE_LIMIT', 10))
 # Global session manager instance (initialized in initialize_server)
 session_manager: SessionManager | None = None
 
-# Global inactivity checker task (initialized in initialize_session_tracking)
-_inactivity_checker_task: asyncio.Task | None = None
-
 # Session tracking resilience components (Story 19)
 resilient_indexer: ResilientSessionIndexer | None = None
 status_aggregator: SessionTrackingStatusAggregator | None = None
@@ -2038,9 +2035,7 @@ async def session_tracking_status(session_id: str | None = None) -> str:
             "enabled": bool (from global config),
             "global_config": {
                 "enabled": bool,
-                "watch_path": str,
-                "inactivity_timeout": int (seconds),
-                "check_interval": int (seconds)
+                "watch_path": str
             },
             "session_manager": {
                 "running": bool,
@@ -2075,9 +2070,7 @@ async def session_tracking_status(session_id: str | None = None) -> str:
         # Get global configuration
         global_config = {
             "enabled": unified_config.session_tracking.enabled,
-            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None,
-            "inactivity_timeout": unified_config.session_tracking.inactivity_timeout,
-            "check_interval": unified_config.session_tracking.check_interval
+            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None
         }
 
         # Session tracking is now config-only (no runtime overrides)
@@ -2445,41 +2438,6 @@ async def get_status() -> StatusResponse:
         )
 
 
-async def check_inactive_sessions_periodically(
-    manager: SessionManager,
-    interval_seconds: int
-) -> None:
-    """Periodically check for inactive sessions and close them.
-
-    This function runs in a loop, checking for inactive sessions at regular intervals.
-    When inactive sessions are found, they are closed and indexed to Graphiti.
-
-    Args:
-        manager: SessionManager instance to check for inactive sessions
-        interval_seconds: How often to check for inactive sessions (in seconds)
-
-    Raises:
-        asyncio.CancelledError: When the task is cancelled (expected on shutdown)
-    """
-    logger.info(f"Started periodic session inactivity checker (interval: {interval_seconds}s)")
-
-    try:
-        while True:
-            await asyncio.sleep(interval_seconds)
-
-            try:
-                closed_count = manager.check_inactive_sessions()
-                if closed_count > 0:
-                    logger.info(f"Closed {closed_count} inactive session(s)")
-            except Exception as e:
-                logger.error(f"Error checking inactive sessions: {e}", exc_info=True)
-
-    except asyncio.CancelledError:
-        logger.info("Session inactivity checker stopped")
-        raise
-
-
-
 def ensure_global_config_exists() -> Path:
     """Ensure global configuration file exists with sensible defaults.
 
@@ -2524,12 +2482,6 @@ def ensure_global_config_exists() -> Path:
             "_enabled_help": "Set to true to enable session tracking (opt-in)",
             "watch_path": None,
             "_watch_path_help": "null = ~/.claude/projects/ | Set to specific project path",
-            "inactivity_timeout": 900,
-            "_inactivity_timeout_help": "Seconds before session closed (900 = 15 minutes, handles long operations)",
-            "check_interval": 60,
-            "_check_interval_help": "Seconds between inactivity checks (60 = 1 minute, responsive)",
-            "auto_summarize": False,
-            "_auto_summarize_help": "Use LLM to summarize sessions (costs money, set to true to enable)",
             "store_in_graph": True,
             "_store_in_graph_help": "Store in Neo4j graph (required for cross-session memory)",
             "keep_length_days": 7,
@@ -2732,7 +2684,6 @@ async def initialize_session_tracking() -> None:
         # Create session manager
         session_manager = SessionManager(
             path_resolver=path_resolver,
-            inactivity_timeout=unified_config.session_tracking.inactivity_timeout,
             keep_length_days=unified_config.session_tracking.keep_length_days,
             on_session_closed=on_session_closed
         )
@@ -2743,14 +2694,7 @@ async def initialize_session_tracking() -> None:
         # Start session manager
         session_manager.start()
 
-        # Start periodic inactivity checker
-        global _inactivity_checker_task
-        check_interval = unified_config.session_tracking.check_interval
-        _inactivity_checker_task = asyncio.create_task(
-            check_inactive_sessions_periodically(session_manager, check_interval)
-        )
-
-        logger.info(f"Session tracking initialized and started successfully (check_interval: {check_interval}s)")
+        logger.info("Session tracking initialized and started successfully")
 
     except Exception as e:
         logger.error(f"Error initializing session tracking: {e}", exc_info=True)
@@ -2868,17 +2812,8 @@ async def run_mcp_server():
         except asyncio.CancelledError:
             logger.info('Metrics logging task cancelled successfully')
 
-        # Clean up session manager and inactivity checker on shutdown
-        global session_manager, _inactivity_checker_task, resilient_indexer
-
-        # Cancel inactivity checker task first
-        if _inactivity_checker_task is not None:
-            logger.info('Stopping session inactivity checker...')
-            _inactivity_checker_task.cancel()
-            try:
-                await _inactivity_checker_task
-            except asyncio.CancelledError:
-                logger.info('Session inactivity checker cancelled successfully')
+        # Clean up session manager on shutdown
+        global session_manager, resilient_indexer
 
         # Stop session manager
         if session_manager is not None:

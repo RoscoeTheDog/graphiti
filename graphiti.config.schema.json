@@ -931,24 +931,6 @@
           "description": "Path to directory containing Claude Code session files. If None, defaults to ~/.claude/projects/. Must be an absolute path (native OS format: C:\\ on Windows, / on Unix).",
           "title": "Watch Path"
         },
-        "inactivity_timeout": {
-          "default": 900,
-          "description": "Inactivity timeout in seconds before a session is considered closed. After this timeout, the session will be indexed into Graphiti. Default: 900 seconds (15 minutes) to accommodate long-running operations.",
-          "title": "Inactivity Timeout",
-          "type": "integer"
-        },
-        "check_interval": {
-          "default": 60,
-          "description": "Interval in seconds to check for inactive sessions. The file watcher checks for inactive sessions at this interval.",
-          "title": "Check Interval",
-          "type": "integer"
-        },
-        "auto_summarize": {
-          "default": false,
-          "description": "Automatically summarize closed sessions using Graphiti's LLM. If False, sessions are stored as raw episodes without summarization (no LLM costs).",
-          "title": "Auto Summarize",
-          "type": "boolean"
-        },
         "store_in_graph": {
           "default": true,
           "description": "Store session summaries in the Graphiti knowledge graph. If False, sessions are logged but not persisted to Neo4j.",

@@ -819,9 +819,6 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
   "session_tracking": {
     "enabled": false,
     "watch_path": null,
-    "inactivity_timeout": 900,
-    "check_interval": 60,
-    "auto_summarize": false,
     "store_in_graph": true,
     "keep_length_days": 7,
     "filter": {
@@ -840,9 +837,6 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 |-------|------|---------|-------------|
 | `enabled` | bool | `false` | Enable/disable automatic session tracking (opt-in model for security, **disabled by default**) |
 | `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
-| `inactivity_timeout` | int | 900 | **Seconds** of inactivity before session is considered closed and indexed (default: 15 minutes) |
-| `check_interval` | int | 60 | **Seconds** between checks for inactive sessions (default: 1 minute) |
-| `auto_summarize` | bool | `false` | Automatically summarize closed sessions using Graphiti's LLM (disabled by default to avoid LLM costs) |
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 | `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
 | `keep_length_days` | int\|null | 7 | **Days** to retain sessions in rolling window (default: 7 days). If null, discovers all sessions (use with caution - may cause bulk LLM costs). **New in v1.1.0** |
@@ -1155,19 +1149,18 @@ When a session is indexed:
 ### Behavior
 
 **When enabled:**
-1. File watcher monitors `watch_path` directory for new/modified `.jsonl` files
-2. Sessions are tracked in-memory with incremental message parsing
-3. After `inactivity_timeout` seconds of no activity, session is closed and indexed
-4. Filtered session content (93% token reduction) is added as an episode to Graphiti
+1. Session tracking monitors `watch_path` directory for Claude Code session files (`.jsonl` format)
+2. Sessions are discovered using rolling window filter (`keep_length_days`) to limit scope
+3. Session content is filtered for token reduction (up to 93% with default configuration)
+4. Filtered session content is added as an episode to Graphiti knowledge graph
 5. Graphiti automatically extracts entities, relationships, and enables semantic search
 
 **Session lifecycle:**
 ```
-New JSONL file detected
-  → Parse messages incrementally
-  → Track activity (updates extend timeout)
-  → Inactivity timeout reached
-  → Filter messages (93% token reduction)
+Session discovery (rolling window filter)
+  → Parse session messages
+  → Apply content filtering (93% token reduction)
+  → Generate episode content
   → Index to Graphiti as episode
   → Link to previous session (if exists)
 ```
@@ -1247,49 +1240,55 @@ Session tracking settings can be overridden with environment variables:
 
 ```bash
 export GRAPHITI_SESSION_TRACKING_ENABLED=false
-export GRAPHITI_SESSION_TRACKING_WATCH_DIRECTORIES='["~/.claude/projects"]'
-export GRAPHITI_SESSION_TRACKING_INACTIVITY_TIMEOUT_MINUTES=15
-export GRAPHITI_SESSION_TRACKING_SCAN_INTERVAL_SECONDS=5
+export GRAPHITI_SESSION_TRACKING_WATCH_PATH="~/.claude/projects"
+export GRAPHITI_SESSION_TRACKING_KEEP_LENGTH_DAYS=7
 ```
 
 ### Example Configurations
 
-**Default (Recommended)**:
+**Default (Recommended)** - 7-day rolling window:
 ```json
 {
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
-    "inactivity_timeout": 900,
-    "check_interval": 60,
-    "auto_summarize": false,
-    "keep_length_days": 7
+    "store_in_graph": true,
+    "keep_length_days": 7,
+    "filter": {
+      "tool_calls": true,
+      "tool_content": "default-tool-content.md",
+      "user_messages": true,
+      "agent_messages": true
+    }
   }
 }
 ```
 
-**High-Volume Environment** (faster session closure, more frequent checks):
-```json
-{
-  "session_tracking": {
-    "enabled": true,
-    "watch_path": "~/.claude/projects/active",
-    "inactivity_timeout": 300,
-    "check_interval": 30,
-    "keep_length_days": 7
-  }
-}
-```
-
-**Low-Resource System** (longer timeout, less frequent checks):
+**Extended History** - 30-day rolling window:
 ```json
 {
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
-    "inactivity_timeout": 1800,
-    "check_interval": 120,
-    "keep_length_days": 7
+    "store_in_graph": true,
+    "keep_length_days": 30
+  }
+}
+```
+
+**Aggressive Filtering** - Maximum token reduction:
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_path": "~/.claude/projects",
+    "keep_length_days": 7,
+    "filter": {
+      "tool_calls": true,
+      "tool_content": false,
+      "user_messages": true,
+      "agent_messages": true
+    }
   }
 }
 ```

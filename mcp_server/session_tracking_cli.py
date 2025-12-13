@@ -123,6 +123,7 @@ def cmd_enable(args: argparse.Namespace) -> None:
     print("\n✅ Session tracking enabled")
     print(f"   Config location: {config_path}")
     print("\nSession tracking will start on next MCP server startup.")
+    print("Session tracking now uses a turn-based architecture for efficient indexing.")
     print("To customize settings, edit the config file or see documentation:")
     print("  https://github.com/getzep/graphiti/blob/main/CONFIGURATION.md#session-tracking")
 
@@ -150,6 +151,7 @@ def cmd_disable(args: argparse.Namespace) -> None:
     print("\n✅ Session tracking disabled")
     print(f"   Config location: {config_path}")
     print("\nSession tracking will stop on next MCP server startup.")
+    print("Note: Turn-based indexing will no longer process new sessions.")
 
 
 def cmd_status(args: argparse.Namespace) -> None:
@@ -171,9 +173,6 @@ def cmd_status(args: argparse.Namespace) -> None:
     session_config = config.get("session_tracking", {})
     enabled = session_config.get("enabled", False)
     watch_path = session_config.get("watch_path", None)
-    inactivity_timeout = session_config.get("inactivity_timeout", 300)
-    check_interval = session_config.get("check_interval", 60)
-    auto_summarize = session_config.get("auto_summarize", True)
     store_in_graph = session_config.get("store_in_graph", True)
 
     # Get filter config
@@ -188,9 +187,6 @@ def cmd_status(args: argparse.Namespace) -> None:
     if enabled:
         print(f"\nConfiguration:")
         print(f"  Watch path:       {watch_path or '~/.claude/projects/ (default)'}")
-        print(f"  Inactivity:       {inactivity_timeout}s")
-        print(f"  Check interval:   {check_interval}s")
-        print(f"  Auto summarize:   {auto_summarize}")
         print(f"  Store in graph:   {store_in_graph}")
 
         if filter_config:

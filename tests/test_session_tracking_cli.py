@@ -216,6 +216,22 @@ class TestEnableCommand:
         assert "session_tracking" in config
         assert config["session_tracking"]["enabled"] is True
 
+    def test_enable_help_mentions_turn_based_architecture(self, tmp_path, capsys, monkeypatch):
+        """Enable command mentions turn-based architecture in output"""
+        from argparse import Namespace
+
+        monkeypatch.chdir(tmp_path)
+
+        config_file = tmp_path / "graphiti.config.json"
+        config = {"session_tracking": {"enabled": False}}
+        config_file.write_text(json.dumps(config))
+
+        args = Namespace()
+        cmd_enable(args)
+
+        captured = capsys.readouterr()
+        assert "turn-based" in captured.out.lower()
+
 
 class TestDisableCommand:
     """Test session-tracking disable command"""
@@ -261,6 +277,22 @@ class TestDisableCommand:
         assert "No config file found" in captured.out
         assert "already disabled" in captured.out
 
+    def test_disable_help_mentions_turn_based_architecture(self, tmp_path, capsys, monkeypatch):
+        """Disable command mentions turn-based architecture in output"""
+        from argparse import Namespace
+
+        monkeypatch.chdir(tmp_path)
+
+        config_file = tmp_path / "graphiti.config.json"
+        config = {"session_tracking": {"enabled": True}}
+        config_file.write_text(json.dumps(config))
+
+        args = Namespace()
+        cmd_disable(args)
+
+        captured = capsys.readouterr()
+        assert "turn-based" in captured.out.lower()
+
 
 class TestStatusCommand:
     """Test session-tracking status command"""
@@ -287,14 +319,16 @@ class TestStatusCommand:
         monkeypatch.chdir(tmp_path)
 
         # Create config with session tracking enabled
+        # Note: Config may still contain deprecated params (backward compat)
+        # but CLI should not display them
         config_file = tmp_path / "graphiti.config.json"
         config = {
             "session_tracking": {
                 "enabled": True,
                 "watch_path": "/custom/path",
-                "inactivity_timeout": 600,
-                "check_interval": 120,
-                "auto_summarize": False,
+                "inactivity_timeout": 600,  # Deprecated, should not display
+                "check_interval": 120,  # Deprecated, should not display
+                "auto_summarize": False,  # Deprecated, should not display
                 "store_in_graph": True,
                 "filter": {
                     "tool_calls": True,
@@ -312,9 +346,13 @@ class TestStatusCommand:
         captured = capsys.readouterr()
         assert "Enabled" in captured.out
         assert "/custom/path" in captured.out
-        assert "600s" in captured.out
-        assert "120s" in captured.out
-        assert "False" in captured.out  # auto_summarize
+        # Deprecated parameters should NOT be displayed
+        assert "600s" not in captured.out  # inactivity_timeout
+        assert "120s" not in captured.out  # check_interval
+        assert "Inactivity" not in captured.out
+        assert "Check interval" not in captured.out
+        assert "Auto summarize" not in captured.out
+        # Non-deprecated parameter should still be displayed
         assert "True" in captured.out   # store_in_graph
 
     def test_status_shows_disabled_config(self, tmp_path, capsys, monkeypatch):

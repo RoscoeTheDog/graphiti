@@ -37,8 +37,6 @@ class TestSessionTrackingStatus:
         mock_config = Mock()
         mock_config.session_tracking.enabled = True
         mock_config.session_tracking.watch_path = "/test/path"
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
         mock_config.session_tracking.filter = Mock()
         mock_config.session_tracking.filter.tool_calls.value = "SUMMARY"
         mock_config.session_tracking.filter.tool_content.value = "SUMMARY"
@@ -54,8 +52,6 @@ class TestSessionTrackingStatus:
             assert result_dict["enabled"] is True
             assert result_dict["global_config"]["enabled"] is True
             assert result_dict["global_config"]["watch_path"] == "/test/path"
-            assert result_dict["global_config"]["inactivity_timeout"] == 300
-            assert result_dict["global_config"]["check_interval"] == 60
             assert result_dict["session_manager"]["running"] is True
             assert result_dict["session_manager"]["active_sessions"] == 3
             assert result_dict["filter_config"]["tool_calls"] == "SUMMARY"
@@ -76,8 +72,6 @@ class TestSessionTrackingStatus:
         mock_config = Mock()
         mock_config.session_tracking.enabled = False
         mock_config.session_tracking.watch_path = None
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
         mock_config.session_tracking.filter = None
         mcp_server.unified_config = mock_config
 
@@ -108,8 +102,6 @@ class TestSessionTrackingStatus:
         mock_config = Mock()
         mock_config.session_tracking.enabled = False
         mock_config.session_tracking.watch_path = None
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
         mock_config.session_tracking.filter = None
         mcp_server.unified_config = mock_config
 
@@ -128,8 +120,6 @@ class TestSessionTrackingStatus:
             # Verify nested structures
             assert "enabled" in result_dict["global_config"]
             assert "watch_path" in result_dict["global_config"]
-            assert "inactivity_timeout" in result_dict["global_config"]
-            assert "check_interval" in result_dict["global_config"]
 
             assert "running" in result_dict["session_manager"]
             assert "active_sessions" in result_dict["session_manager"]
@@ -157,8 +147,6 @@ class TestSessionTrackingStatus:
         mock_config = Mock()
         mock_config.session_tracking.enabled = True
         mock_config.session_tracking.watch_path = None
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
         mock_config.session_tracking.filter = Mock()
         mock_config.session_tracking.filter.tool_calls.value = "SUMMARY"
         mock_config.session_tracking.filter.tool_content.value = "SUMMARY"

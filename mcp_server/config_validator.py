@@ -240,21 +240,6 @@ class ConfigValidator:
                     suggestion="Create directory or update path",
                 )
 
-        # Validate timeouts are positive
-        if config.session_tracking.inactivity_timeout <= 0:
-            result.add_error(
-                path="session_tracking.inactivity_timeout",
-                message="Inactivity timeout must be positive",
-                suggestion="Use a positive integer (recommended: 300 seconds)",
-            )
-
-        if config.session_tracking.check_interval <= 0:
-            result.add_error(
-                path="session_tracking.check_interval",
-                message="Check interval must be positive",
-                suggestion="Use a positive integer (recommended: 60 seconds)",
-            )
-
         # Validate LLM API key environment variable
         if check_env:
             if config.llm.provider == "openai" and config.llm.openai:
