@@ -34,7 +34,6 @@ class ActiveSession:
         project_hash: Project hash (from directory structure)
         offset: Current read offset in file (bytes)
         last_modified: Last modification timestamp
-        last_activity: Last activity timestamp (for inactivity detection)
         message_count: Total messages processed
     """
 
@@ -43,7 +42,6 @@ class ActiveSession:
     project_hash: str
     offset: int = 0
     last_modified: float = field(default_factory=time.time)
-    last_activity: float = field(default_factory=time.time)
     message_count: int = 0
 
 
@@ -53,7 +51,6 @@ class SessionManager:
     This class orchestrates session tracking:
     - Maintains registry of active sessions
     - Detects new sessions and session updates
-    - Tracks inactivity and triggers session close
     - Handles auto-compaction (new JSONL = continuation)
     - Triggers summarization on session close
     """
@@ -61,7 +58,6 @@ class SessionManager:
     def __init__(
         self,
         path_resolver: ClaudePathResolver,
-        inactivity_timeout: int = 300,  # 5 minutes
         keep_length_days: Optional[int] = 7,  # Rolling window (days)
         on_session_closed: Optional[Callable[[str, Path, ConversationContext], None]] = None,
     ):
@@ -69,12 +65,10 @@ class SessionManager:
 
         Args:
             path_resolver: Path resolver for Claude directories
-            inactivity_timeout: Seconds of inactivity before closing session
             keep_length_days: Only auto-discover sessions modified within last N days (None = all sessions)
             on_session_closed: Callback when session closes (session_id, file_path, context)
         """
         self.path_resolver = path_resolver
-        self.inactivity_timeout = inactivity_timeout
         self.keep_length_days = keep_length_days
         self.on_session_closed = on_session_closed
 
@@ -135,27 +129,6 @@ class SessionManager:
 
         self._is_running = False
         logger.info("Session manager stopped")
-
-    def check_inactive_sessions(self) -> int:
-        """Check for inactive sessions and close them.
-
-        Returns:
-            Number of sessions closed due to inactivity
-        """
-        current_time = time.time()
-        closed_count = 0
-
-        for session_id, session in list(self.active_sessions.items()):
-            inactive_duration = current_time - session.last_activity
-
-            if inactive_duration > self.inactivity_timeout:
-                logger.info(
-                    f"Session {session_id} inactive for {inactive_duration:.0f}s, closing..."
-                )
-                self._close_session(session_id, reason="inactivity")
-                closed_count += 1
-
-        return closed_count
 
     def get_active_session_count(self) -> int:
         """Get number of active sessions.
@@ -314,7 +287,6 @@ class SessionManager:
             project_hash=project_hash,
             offset=0,
             last_modified=time.time(),
-            last_activity=time.time(),
             message_count=0,
         )
 
@@ -346,7 +318,6 @@ class SessionManager:
             if new_messages:
                 session.offset = new_offset
                 session.last_modified = time.time()
-                session.last_activity = time.time()
                 session.message_count += len(new_messages)
 
                 logger.debug(

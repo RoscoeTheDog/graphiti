@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 18:41:14
+**Generated**: 2025-12-12 18:47:20
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 17.9%
+- **Completion**: 21.4%
 
 ### By Status
 
-- completed: 5
+- completed: 6
 - in_progress: 1
-- unassigned: 22
+- unassigned: 21
 
 ### By Type
 
@@ -51,7 +51,7 @@
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Remove Session Manager Time-Based Logic
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Remove Session Manager Time-Based Logic

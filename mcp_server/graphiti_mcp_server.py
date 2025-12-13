@@ -106,9 +106,6 @@ SEMAPHORE_LIMIT = int(os.getenv('SEMAPHORE_LIMIT', 10))
 # Global session manager instance (initialized in initialize_server)
 session_manager: SessionManager | None = None
 
-# Global inactivity checker task (initialized in initialize_session_tracking)
-_inactivity_checker_task: asyncio.Task | None = None
-
 # Session tracking resilience components (Story 19)
 resilient_indexer: ResilientSessionIndexer | None = None
 status_aggregator: SessionTrackingStatusAggregator | None = None
@@ -2441,41 +2438,6 @@ async def get_status() -> StatusResponse:
         )
 
 
-async def check_inactive_sessions_periodically(
-    manager: SessionManager,
-    interval_seconds: int
-) -> None:
-    """Periodically check for inactive sessions and close them.
-
-    This function runs in a loop, checking for inactive sessions at regular intervals.
-    When inactive sessions are found, they are closed and indexed to Graphiti.
-
-    Args:
-        manager: SessionManager instance to check for inactive sessions
-        interval_seconds: How often to check for inactive sessions (in seconds)
-
-    Raises:
-        asyncio.CancelledError: When the task is cancelled (expected on shutdown)
-    """
-    logger.info(f"Started periodic session inactivity checker (interval: {interval_seconds}s)")
-
-    try:
-        while True:
-            await asyncio.sleep(interval_seconds)
-
-            try:
-                closed_count = manager.check_inactive_sessions()
-                if closed_count > 0:
-                    logger.info(f"Closed {closed_count} inactive session(s)")
-            except Exception as e:
-                logger.error(f"Error checking inactive sessions: {e}", exc_info=True)
-
-    except asyncio.CancelledError:
-        logger.info("Session inactivity checker stopped")
-        raise
-
-
-
 def ensure_global_config_exists() -> Path:
     """Ensure global configuration file exists with sensible defaults.
 
@@ -2722,7 +2684,6 @@ async def initialize_session_tracking() -> None:
         # Create session manager
         session_manager = SessionManager(
             path_resolver=path_resolver,
-            inactivity_timeout=unified_config.session_tracking.inactivity_timeout,
             keep_length_days=unified_config.session_tracking.keep_length_days,
             on_session_closed=on_session_closed
         )
@@ -2733,14 +2694,7 @@ async def initialize_session_tracking() -> None:
         # Start session manager
         session_manager.start()
 
-        # Start periodic inactivity checker
-        global _inactivity_checker_task
-        check_interval = unified_config.session_tracking.check_interval
-        _inactivity_checker_task = asyncio.create_task(
-            check_inactive_sessions_periodically(session_manager, check_interval)
-        )
-
-        logger.info(f"Session tracking initialized and started successfully (check_interval: {check_interval}s)")
+        logger.info("Session tracking initialized and started successfully")
 
     except Exception as e:
         logger.error(f"Error initializing session tracking: {e}", exc_info=True)

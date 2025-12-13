@@ -236,7 +236,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remove Session Manager Time-Based Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
@@ -263,7 +263,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
     },
     "3.d": {
       "type": "discovery",

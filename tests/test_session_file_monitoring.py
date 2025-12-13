@@ -162,7 +162,6 @@ def test_session_manager_tracks_new_sessions(temp_claude_dir: Path, mock_session
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10
     )
 
     session_manager.start()
@@ -184,7 +183,6 @@ def test_session_manager_reads_new_messages(temp_claude_dir: Path, mock_session_
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10
     )
 
     session_manager.start()
@@ -222,7 +220,6 @@ def test_session_manager_detects_inactivity(temp_claude_dir: Path, mock_session_
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=2,  # 2 seconds for testing
         on_session_closed=on_closed
     )
 
@@ -264,7 +261,6 @@ def test_session_manager_callback_on_close(temp_claude_dir: Path, mock_session_f
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=2,
         on_session_closed=on_closed
     )
 
@@ -292,7 +288,6 @@ def test_session_manager_handles_deleted_files(temp_claude_dir: Path, mock_sessi
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10
     )
 
     session_manager.start()
@@ -389,7 +384,6 @@ def test_rolling_period_filter_recent_sessions(temp_claude_dir: Path):
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10,
         keep_length_days=7  # Only discover sessions modified in last 7 days
     )
 
@@ -432,7 +426,6 @@ def test_rolling_period_filter_null_discovers_all(temp_claude_dir: Path):
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10,
         keep_length_days=None  # Discover all sessions, no filter
     )
 
@@ -469,7 +462,6 @@ def test_rolling_period_filter_all_old_sessions(temp_claude_dir: Path):
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10,
         keep_length_days=7
     )
 
@@ -508,7 +500,6 @@ def test_rolling_period_filter_edge_case_exact_cutoff(temp_claude_dir: Path):
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10,
         keep_length_days=7
     )
 
@@ -550,7 +541,6 @@ def test_rolling_period_filter_default_7_days(temp_claude_dir: Path):
     path_resolver = ClaudePathResolver(claude_dir=temp_claude_dir)
     session_manager = SessionManager(
         path_resolver=path_resolver,
-        inactivity_timeout=10
         # keep_length_days not specified, should default to 7
     )
 
