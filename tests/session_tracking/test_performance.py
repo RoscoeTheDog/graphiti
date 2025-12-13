@@ -93,8 +93,6 @@ class TestSessionDiscoveryPerformance:
             start = time.time()
             manager = SessionManager(
                 path_resolver=path_resolver,
-                inactivity_timeout=300,
-                check_interval=60,
                 keep_length_days=7
             )
             await manager._discover_existing_sessions()
@@ -105,8 +103,6 @@ class TestSessionDiscoveryPerformance:
             start = time.time()
             manager = SessionManager(
                 path_resolver=path_resolver,
-                inactivity_timeout=300,
-                check_interval=60,
                 keep_length_days=None  # No filtering
             )
             await manager._discover_existing_sessions()
@@ -139,9 +135,7 @@ class TestSessionDiscoveryPerformance:
         with patch.object(path_resolver, 'get_sessions_directory', return_value=session_dir):
             start = time.time()
             manager = SessionManager(
-                path_resolver=path_resolver,
-                inactivity_timeout=300,
-                check_interval=60
+                path_resolver=path_resolver
             )
             await manager._discover_existing_sessions()
             glob_time = time.time() - start

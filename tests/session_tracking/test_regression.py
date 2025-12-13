@@ -172,8 +172,6 @@ class TestOriginalMCPToolsFunctionality:
         mock_config = Mock()
         mock_config.session_tracking.enabled = True
         mock_config.session_tracking.watch_path = None
-        mock_config.session_tracking.inactivity_timeout = 300
-        mock_config.session_tracking.check_interval = 60
         mock_config.session_tracking.filter = Mock()
         mock_config.session_tracking.filter.tool_calls.value = "SUMMARY"
         mock_config.session_tracking.filter.tool_content.value = "SUMMARY"

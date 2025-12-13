@@ -48,18 +48,6 @@ class TestSafeDefaults:
         # Auto-summarize disabled = no summarization LLM costs
         assert config.auto_summarize is False
 
-    def test_default_inactivity_timeout_safe(self):
-        """Verify default inactivity timeout is reasonable (15 minutes)."""
-        config = SessionTrackingConfig()
-
-        assert config.inactivity_timeout == 900, "Default timeout should be 900s (15 min)"
-
-    def test_default_check_interval_safe(self):
-        """Verify default check interval is reasonable (1 minute)."""
-        config = SessionTrackingConfig()
-
-        assert config.check_interval == 60, "Default check interval should be 60s (1 min)"
-
 
 class TestOptInModel:
     """Test opt-in model and explicit confirmation requirements."""
@@ -157,14 +145,16 @@ class TestNoUnintendedIndexing:
 
         # Initialize session manager with default 7-day window
         from graphiti_core.session_tracking.session_manager import SessionManager
+        from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
+
+        path_resolver = ClaudePathResolver(hostname="testhost", pwd_hash="testhash")
 
         with patch('graphiti_core.session_tracking.session_manager.watchdog'):
-            manager = SessionManager(
-                watch_path=session_dir,
-                inactivity_timeout=300,
-                check_interval=60,
-                keep_length_days=7  # Default rolling window
-            )
+            with patch.object(path_resolver, 'get_sessions_directory', return_value=session_dir):
+                manager = SessionManager(
+                    path_resolver=path_resolver,
+                    keep_length_days=7  # Default rolling window
+                )
             manager.start()
             await manager._discover_existing_sessions()
             manager.stop()
@@ -196,15 +186,17 @@ class TestNoUnintendedIndexing:
             session_files.append((age, session_file))
 
         from graphiti_core.session_tracking.session_manager import SessionManager
+        from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
+
+        path_resolver = ClaudePathResolver(hostname="testhost", pwd_hash="testhash")
 
         # Test with 7-day window
         with patch('graphiti_core.session_tracking.session_manager.watchdog'):
-            manager = SessionManager(
-                watch_path=session_dir,
-                inactivity_timeout=300,
-                check_interval=60,
-                keep_length_days=7
-            )
+            with patch.object(path_resolver, 'get_sessions_directory', return_value=session_dir):
+                manager = SessionManager(
+                    path_resolver=path_resolver,
+                    keep_length_days=7
+                )
             manager.start()
             await manager._discover_existing_sessions()
 
@@ -259,19 +251,21 @@ class TestSecurityBoundaries:
     def test_watch_path_validation(self, tmp_path):
         """Verify watch_path is validated (must exist)."""
         from graphiti_core.session_tracking.session_manager import SessionManager
+        from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
 
         # Valid path
         valid_path = tmp_path / "sessions"
         valid_path.mkdir()
 
+        path_resolver = ClaudePathResolver(hostname="testhost", pwd_hash="testhash")
+
         with patch('graphiti_core.session_tracking.session_manager.watchdog'):
-            manager = SessionManager(
-                watch_path=valid_path,
-                inactivity_timeout=300,
-                check_interval=60
-            )
-            manager.start()
-            manager.stop()
+            with patch.object(path_resolver, 'get_sessions_directory', return_value=valid_path):
+                manager = SessionManager(
+                    path_resolver=path_resolver
+                )
+                manager.start()
+                manager.stop()
 
         # Invalid path should fail gracefully
         invalid_path = tmp_path / "nonexistent"
@@ -302,15 +296,17 @@ class TestSecurityBoundaries:
         session_file.write_text(session_content + "\n")
 
         from graphiti_core.session_tracking.session_manager import SessionManager
+        from graphiti_core.session_tracking.path_resolver import ClaudePathResolver
+
+        path_resolver = ClaudePathResolver(hostname="testhost", pwd_hash="testhash")
 
         with patch('graphiti_core.session_tracking.session_manager.watchdog'):
-            manager = SessionManager(
-                watch_path=session_dir,
-                inactivity_timeout=300,
-                check_interval=60
-            )
-            manager.start()
-            manager.stop()
+            with patch.object(path_resolver, 'get_sessions_directory', return_value=session_dir):
+                manager = SessionManager(
+                    path_resolver=path_resolver
+                )
+                manager.start()
+                manager.stop()
 
         # Check logs don't contain sensitive data
         log_text = "\n".join(record.message for record in caplog.records)

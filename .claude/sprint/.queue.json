@@ -1114,7 +1114,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Complete test cleanup for deprecated parameters",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6.i.1",
       "phase": "implementation",
       "phase_order": 2,
