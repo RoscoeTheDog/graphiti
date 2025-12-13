@@ -1,6 +1,6 @@
 # Story 5: Update CLI Tools
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-12 17:46
 
 ## Description
