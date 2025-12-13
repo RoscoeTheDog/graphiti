@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 18:25:03
+**Generated**: 2025-12-12 18:34:57
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 7.1%
+- **Completion**: 14.3%
 
 ### By Status
 
-- completed: 2
-- in_progress: 1
-- unassigned: 25
+- completed: 4
+- unassigned: 24
 
 ### By Type
 
@@ -43,7 +42,7 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Remove Deprecated Config Parameters
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Remove Session Manager Time-Based Logic

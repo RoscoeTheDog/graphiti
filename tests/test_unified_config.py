@@ -671,4 +671,126 @@ def test_extraction_config_dos_prevention():
     # Note: Length/size validation would be in LLM client layer, not config
 
 
+# =============================================================================
+# DEPRECATED PARAMETER REMOVAL TESTS (Story 1 - Testing Phase)
+# =============================================================================
+
+def test_session_tracking_config_without_deprecated_fields():
+    """Test SessionTrackingConfig instantiation without deprecated fields.
+
+    Validates AC-1.1: Deprecated fields (inactivity_timeout, check_interval,
+    auto_summarize) are removed from SessionTrackingConfig.
+    """
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    # Create config without deprecated fields
+    config = SessionTrackingConfig(
+        enabled=True,
+        group_id="test_group"
+    )
+
+    # Verify deprecated fields are not present
+    assert not hasattr(config, 'inactivity_timeout'), \
+        "inactivity_timeout should be removed from SessionTrackingConfig"
+    assert not hasattr(config, 'check_interval'), \
+        "check_interval should be removed from SessionTrackingConfig"
+    assert not hasattr(config, 'auto_summarize'), \
+        "auto_summarize should be removed from SessionTrackingConfig"
+
+    # Verify existing fields still work
+    assert config.enabled is True
+    assert config.group_id == "test_group"
+
+
+def test_session_tracking_config_rejects_deprecated_fields():
+    """Test that SessionTrackingConfig silently ignores deprecated field names.
+
+    Validates AC-1.1: Deprecated fields are removed and ignored if passed.
+    Note: Pydantic with extra="allow" accepts unknown fields without raising errors.
+    """
+    from mcp_server.unified_config import SessionTrackingConfig
+
+    # Create config with deprecated fields (will be ignored)
+    config = SessionTrackingConfig(
+        enabled=True,
+        inactivity_timeout=300  # Deprecated field - will be ignored
+    )
+
+    # Verify the deprecated field is not actually set on the config
+    assert not hasattr(config, 'inactivity_timeout'), \
+        "inactivity_timeout should not be accessible as attribute"
+
+    # Verify normal fields still work
+    assert config.enabled is True
+
+
+def test_config_validator_ignores_deprecated_fields():
+    """Test that config validator does not check for deprecated fields.
+
+    Validates AC-1.2: Validation logic for deprecated fields removed from
+    config_validator.py.
+    """
+    from mcp_server.unified_config import GraphitiConfig
+    from mcp_server.config_validator import ConfigValidator
+
+    # Create a minimal valid config
+    config = GraphitiConfig(
+        session_tracking={
+            "enabled": True,
+            "group_id": "test"
+        }
+    )
+
+    validator = ConfigValidator()
+    result = validator.validate_semantics(config)
+
+    # Should not have errors about missing deprecated fields
+    for error in result.errors:
+        assert 'inactivity_timeout' not in error.message.lower(), \
+            "Validator should not check for inactivity_timeout"
+        assert 'check_interval' not in error.message.lower(), \
+            "Validator should not check for check_interval"
+        assert 'auto_summarize' not in error.message.lower(), \
+            "Validator should not check for auto_summarize"
+
+
+def test_schema_validation_accepts_config_without_deprecated_fields():
+    """Test that JSON schema validation accepts configs without deprecated fields.
+
+    Validates AC-1.4: graphiti.config.schema.json updated to remove deprecated fields.
+    """
+    import jsonschema
+    import json
+    from pathlib import Path
+
+    # Load the JSON schema
+    schema_path = Path("graphiti.config.schema.json")
+    if not schema_path.exists():
+        pytest.skip("Schema file not found")
+
+    schema = json.loads(schema_path.read_text())
+
+    # Config without deprecated fields
+    config_instance = {
+        "session_tracking": {
+            "enabled": True,
+            "group_id": "test_group",
+            "cross_project_search": True
+        }
+    }
+
+    # Should validate successfully
+    jsonschema.validate(instance=config_instance, schema=schema)
+
+    # Verify deprecated fields are not in schema properties
+    session_tracking_properties = schema.get("properties", {}).get("session_tracking", {}).get("properties", {})
+
+    assert "inactivity_timeout" not in session_tracking_properties, \
+        "inactivity_timeout should be removed from schema"
+    assert "check_interval" not in session_tracking_properties, \
+        "check_interval should be removed from schema"
+    assert "auto_summarize" not in session_tracking_properties, \
+        "auto_summarize should be removed from schema"
+
+
 # Run with: pytest tests/test_unified_config.py -v --cov=mcp_server.unified_config --cov-report=term
