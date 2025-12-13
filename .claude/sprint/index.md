@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 21:08:57
+**Generated**: 2025-12-12 21:15:49
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 63.2%
+- **Completion**: 66.7%
 
 ### By Status
 
 - blocked: 2
-- completed: 36
-- in_progress: 1
-- unassigned: 18
+- completed: 38
+- unassigned: 17
 
 ### By Type
 
@@ -79,7 +78,7 @@
   - Blocks: Story -3.t
 
   ### Story -3.t: Validate Testing: Remove File Watcher Module
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: Clean Up MCP Server Session Initialization
