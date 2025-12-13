@@ -520,7 +520,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Remove Deprecated Config Parameters",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "1",
       "children": [
         "-1.d",
@@ -578,7 +578,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Remove Deprecated Config Parameters",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.t",
       "phase": "validation_testing",
