@@ -1,0 +1,89 @@
+{
+  "created": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "version": "1.0",
+  "stories": {
+    "1": {
+      "issues": [
+        {"story_id": "1", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "2": {
+      "issues": [
+        {"story_id": "2", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "3": {
+      "issues": [
+        {"story_id": "3", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "4": {
+      "issues": [
+        {"story_id": "4", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "5": {
+      "issues": [
+        {"story_id": "5", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "6": {
+      "issues": [
+        {"story_id": "6", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "7": {
+      "issues": [
+        {"story_id": "7", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "8": {
+      "issues": [
+        {"story_id": "8", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "9": {
+      "issues": [
+        {"story_id": "9", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "10": {
+      "issues": [
+        {"story_id": "10", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    },
+    "11": {
+      "issues": [
+        {"story_id": "11", "type": "incomplete_metadata", "severity": "minor", "auto_fixable": true, "missing_fields": ["type"], "reasoning": "Can infer defaults for missing fields"}
+      ],
+      "detected_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+      "auto_heal_attempts": 0
+    }
+  },
+  "summary": {
+    "total_stories_with_issues": 11,
+    "auto_fixable_count": 11,
+    "needs_llm_count": 0
+  }
+}

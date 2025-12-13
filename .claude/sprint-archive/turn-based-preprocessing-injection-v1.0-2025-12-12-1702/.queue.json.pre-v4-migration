@@ -1,0 +1,391 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "turn-based-preprocessing-injection-v1.0",
+    "name": "Turn-Based Preprocessing Injection",
+    "version": "1.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-12 00:39"
+  },
+  "stories": {
+    "1": {
+      "type": "implementation",
+      "title": "Create ExtractionConfig Schema",
+      "status": "completed",
+      "file": "stories/1-create-extractionconfig-schema.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "2",
+        "6",
+        "8"
+      ]
+    },
+    "10": {
+      "type": "implementation",
+      "title": "Unit Tests for Preprocessing Injection",
+      "status": "completed",
+      "file": "stories/10-unit-tests-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "11": {
+      "type": "implementation",
+      "title": "Update CONFIGURATION.md with Extraction Section",
+      "status": "completed",
+      "file": "stories/11-update-configuration-docs.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "2": {
+      "id": "2",
+      "status": "completed",
+      "title": "Extend GraphitiClients with Preprocessing Fields",
+      "parent": null,
+      "file": "stories/2-extend-graphiticlients-preprocessing.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "4",
+        "5",
+        "7"
+      ]
+    },
+    "3": {
+      "id": "3",
+      "status": "completed",
+      "title": "Create Default Session Turn Template",
+      "parent": null,
+      "file": "stories/3-create-default-session-turn-template.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": []
+    },
+    "4": {
+      "type": "implementation",
+      "title": "Modify node_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "file": "stories/4-modify-node-operations-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10",
+        "5"
+      ]
+    },
+    "5": {
+      "type": "implementation",
+      "title": "Modify edge_operations.py for Preprocessing Injection",
+      "status": "completed",
+      "file": "stories/5-modify-edge-operations-preprocessing.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10"
+      ]
+    },
+    "6": {
+      "id": "6",
+      "status": "completed",
+      "title": "Add Extraction Config to unified_config.py",
+      "parent": null,
+      "file": "stories/6-add-extraction-config-unified.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "11",
+        "7",
+        "9"
+      ]
+    },
+    "7": {
+      "type": "implementation",
+      "title": "Wire Preprocessing in MCP Server Initialization",
+      "status": "completed",
+      "file": "stories/7-wire-preprocessing-mcp-server.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    },
+    "8": {
+      "type": "implementation",
+      "title": "Implement TemplateResolver with Hierarchy",
+      "status": "completed",
+      "file": "stories/8-implement-templateresolver.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "10",
+        "9"
+      ]
+    },
+    "9": {
+      "id": "9",
+      "status": "completed",
+      "title": "Add Template Validation and Error Handling",
+      "parent": null,
+      "file": "stories/9-template-validation-error-handling.md",
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "story_type": "feature",
+      "children": [
+        "9.d",
+        "9.i",
+        "9.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": []
+    },
+    "2.d": {
+      "id": "2.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "id": "2.i",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Implementation: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "id": "2.t",
+      "status": "completed",
+      "story_type": "testing",
+      "title": "Testing: Extend GraphitiClients with Preprocessing Fields",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
+    },
+    "3.d": {
+      "id": "3.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "id": "3.i",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Implementation: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
+    },
+    "3.t": {
+      "id": "3.t",
+      "status": "completed",
+      "story_type": "testing",
+      "title": "Testing: Create Default Session Turn Template",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
+    },
+    "6.d": {
+      "id": "6.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "id": "6.i",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Implementation: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/6-plan.yaml"
+      }
+    },
+    "6.t": {
+      "id": "6.t",
+      "status": "completed",
+      "story_type": "testing",
+      "title": "Testing: Add Extraction Config to unified_config.py",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/6-plan.yaml"
+      }
+    },
+    "9.d": {
+      "id": "9.d",
+      "status": "completed",
+      "story_type": "discovery",
+      "title": "Discovery: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/9-plan.yaml"
+    },
+    "9.i": {
+      "id": "9.i",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Implementation: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/9-plan.yaml"
+    },
+    "9.t": {
+      "id": "9.t",
+      "status": "completed",
+      "story_type": "testing",
+      "title": "Testing: Add Template Validation and Error Handling",
+      "parent": "9",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    }
+  },
+  "execution_queue": [
+    "1",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4",
+    "5",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7",
+    "8",
+    "9.d",
+    "9.i",
+    "9.t",
+    "10",
+    "11"
+  ]
+}
