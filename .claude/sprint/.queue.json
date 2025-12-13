@@ -833,7 +833,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Update CLI Tools",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "5",
       "children": [
         "-5.d",
@@ -891,7 +891,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Update CLI Tools",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.t",
       "phase": "validation_testing",
