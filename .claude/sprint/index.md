@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 22:30:57
+**Generated**: 2025-12-13 09:44:06
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 61
-- **Completion**: 88.5%
+- **Completion**: 90.2%
 
 ### By Status
 
 - blocked: 2
-- completed: 54
-- unassigned: 5
+- completed: 55
+- unassigned: 4
 
 ### By Type
 
@@ -230,17 +230,17 @@
     **Status**: unassigned | **Type**: remediation
     - Dependencies: Story 6.i
 
-      ### Story 6.i.1.d: Discovery: Complete test cleanup for deprecated parameters
-      **Status**: unassigned | **Type**: discovery
+      ### Story 6.i.1.d: 6.I.1 Complete Test Cleanup For Deprecated Parameters
+      **Status**: completed | **Type**: discovery
       - Dependencies: Story 6.i.1
       - Blocks: Story 6.i.1.i
 
-      ### Story 6.i.1.i: Implementation: Complete test cleanup for deprecated parameters
+      ### Story 6.i.1.i: 6.I.1 Complete Test Cleanup For Deprecated Parameters
       **Status**: unassigned | **Type**: implementation
       - Dependencies: Story 6.i.1, Story 6.i.1.d
       - Blocks: Story 6.i.1.t
 
-      ### Story 6.i.1.t: Testing: Complete test cleanup for deprecated parameters
+      ### Story 6.i.1.t: 6.I.1 Complete Test Cleanup For Deprecated Parameters
       **Status**: unassigned | **Type**: testing
       - Dependencies: Story 6.i.1, Story 6.i.1.i
 
