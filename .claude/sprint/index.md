@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 20:50:37
+**Generated**: 2025-12-12 20:56:17
 
 ---
 
@@ -19,9 +19,9 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 34
-- in_progress: 1
-- unassigned: 22
+- unassigned: 21
 
 ### By Type
 
@@ -64,7 +64,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Remove Session Manager Time-Based Logic
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: blocked | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Remove File Watcher Module
