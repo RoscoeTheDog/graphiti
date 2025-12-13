@@ -285,7 +285,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remove File Watcher Module",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -312,7 +312,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
     },
     "4.d": {
       "type": "discovery",

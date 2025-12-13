@@ -69,8 +69,6 @@ from .types import (
     ToolCallStatus,
     TokenUsage,
 )
-from .watcher import SessionFileEventHandler, SessionFileWatcher
-
 __all__ = [
     # Parser
     "JSONLParser",
@@ -133,9 +131,6 @@ __all__ = [
     "RecentFailure",
     # Optional handoff export (NEW - Story 4 refactoring)
     "HandoffExporter",
-    # File watching
-    "SessionFileWatcher",
-    "SessionFileEventHandler",
     # Session management
     "SessionManager",
     "ActiveSession",
