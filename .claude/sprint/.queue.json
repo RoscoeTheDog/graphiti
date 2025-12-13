@@ -40,7 +40,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Remove Session Manager Time-Based Logic",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -252,7 +252,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Remove Session Manager Time-Based Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
