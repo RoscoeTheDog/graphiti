@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 19:17:32
+**Generated**: 2025-12-12 19:23:32
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 42.9%
+- **Completion**: 46.4%
 
 ### By Status
 
-- completed: 12
-- unassigned: 16
+- completed: 13
+- in_progress: 1
+- unassigned: 14
 
 ### By Type
 
@@ -70,7 +71,7 @@
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Clean Up MCP Server Session Initialization
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Clean Up MCP Server Session Initialization
