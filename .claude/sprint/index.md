@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 22:22:26
+**Generated**: 2025-12-12 22:30:57
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 61
-- **Completion**: 85.2%
+- **Completion**: 88.5%
 
 ### By Status
 
 - blocked: 2
-- completed: 52
-- in_progress: 1
-- unassigned: 6
+- completed: 54
+- unassigned: 5
 
 ### By Type
 
@@ -135,7 +134,7 @@
   - Blocks: Story -7.t
 
   ### Story -7.t: Validate Testing: Documentation Updates
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -7, Story -7.i
 
   ### Story 1.d: Discovery: Remove Deprecated Config Parameters

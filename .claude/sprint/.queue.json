@@ -991,7 +991,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Documentation Updates",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "7",
       "children": [
         "-7.d",
@@ -1052,7 +1052,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.t",
       "phase": "validation_testing",
@@ -1066,7 +1066,10 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": null,
+      "metadata": {
+        "file": "validation-stories/-7.t-validate-testing-documentation-updates.md"
+      }
     },
     "2.1": {
       "type": "remediation",
