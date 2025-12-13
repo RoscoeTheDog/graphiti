@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 20:26:19
+**Generated**: 2025-12-12 20:34:07
 
 ---
 
@@ -14,12 +14,14 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 28
-- **Completion**: 100.0%
+- **Total Stories**: 56
+- **Completion**: 51.8%
 
 ### By Status
 
-- completed: 28
+- completed: 29
+- in_progress: 1
+- unassigned: 26
 
 ### By Type
 
@@ -27,10 +29,112 @@
 - feature: 7
 - implementation: 7
 - testing: 7
+- validation: 7
+- validation_discovery: 7
+- validation_implementation: 7
+- validation_testing: 7
 
 ---
 
 ## Stories (Execution Order)
+
+  ### Story -1.d: Validate Discovery: Remove Deprecated Config Parameters
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -1
+  - Blocks: Story -1.i
+
+  ### Story -1.i: Validate Implementation: Remove Deprecated Config Parameters
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -1, Story -1.d
+  - Blocks: Story -1.t
+
+  ### Story -1.t: Validate Testing: Remove Deprecated Config Parameters
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -1, Story -1.i
+
+  ### Story -2.d: Validate Discovery: Remove Session Manager Time-Based Logic
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -2
+  - Blocks: Story -2.i
+
+  ### Story -2.i: Validate Implementation: Remove Session Manager Time-Based Logic
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -2, Story -2.d
+  - Blocks: Story -2.t
+
+  ### Story -2.t: Validate Testing: Remove Session Manager Time-Based Logic
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -2, Story -2.i
+
+  ### Story -3.d: Validate Discovery: Remove File Watcher Module
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -3
+  - Blocks: Story -3.i
+
+  ### Story -3.i: Validate Implementation: Remove File Watcher Module
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -3, Story -3.d
+  - Blocks: Story -3.t
+
+  ### Story -3.t: Validate Testing: Remove File Watcher Module
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -3, Story -3.i
+
+  ### Story -4.d: Validate Discovery: Clean Up MCP Server Session Initialization
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -4
+  - Blocks: Story -4.i
+
+  ### Story -4.i: Validate Implementation: Clean Up MCP Server Session Initialization
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -4, Story -4.d
+  - Blocks: Story -4.t
+
+  ### Story -4.t: Validate Testing: Clean Up MCP Server Session Initialization
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -4, Story -4.i
+
+  ### Story -5.d: Validate Discovery: Update CLI Tools
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -5
+  - Blocks: Story -5.i
+
+  ### Story -5.i: Validate Implementation: Update CLI Tools
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -5, Story -5.d
+  - Blocks: Story -5.t
+
+  ### Story -5.t: Validate Testing: Update CLI Tools
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -5, Story -5.i
+
+  ### Story -6.d: Validate Discovery: Clean Up Test Files
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -6
+  - Blocks: Story -6.i
+
+  ### Story -6.i: Validate Implementation: Clean Up Test Files
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -6, Story -6.d
+  - Blocks: Story -6.t
+
+  ### Story -6.t: Validate Testing: Clean Up Test Files
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -6, Story -6.i
+
+  ### Story -7.d: Validate Discovery: Documentation Updates
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -7
+  - Blocks: Story -7.i
+
+  ### Story -7.i: Validate Implementation: Documentation Updates
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -7, Story -7.d
+  - Blocks: Story -7.t
+
+  ### Story -7.t: Validate Testing: Documentation Updates
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -7, Story -7.i
 
   ### Story 1.d: Discovery: Remove Deprecated Config Parameters
   **Status**: completed | **Type**: discovery
