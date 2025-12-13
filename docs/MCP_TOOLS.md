@@ -302,8 +302,8 @@ session_tracking_status(session_id="abc123-def456")
   "global_config": {
     "enabled": true,
     "watch_path": "/home/user/.claude/projects",
-    "inactivity_timeout": 300,
-    "check_interval": 60
+    "store_in_graph": true,
+    "keep_length_days": 7
   },
   "runtime_override": null,
   "session_manager": {
