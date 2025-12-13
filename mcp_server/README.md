@@ -21,6 +21,7 @@ The Graphiti MCP server exposes the following key high-level functions of Graphi
 - **Group Management**: Organize and manage groups of related data with group_id filtering
 - **Graph Maintenance**: Clear the graph and rebuild indices
 - **Resilience & Monitoring**: Automatic reconnection, health checks, episode timeouts, and metrics tracking
+- **Session Tracking** (NEW): Automatic JSONL session tracking for Claude Code with smart filtering and cross-session continuity
 
 ## Quick Start
 
@@ -266,6 +267,23 @@ The Graphiti MCP server exposes the following tools:
 - `get_entity_edge`: Get an entity edge by its UUID
 - `get_episodes`: Get the most recent episodes for a specific group
 - `clear_graph`: Clear all data from the knowledge graph and rebuild indices
+
+### Session Tracking (NEW)
+- `session_tracking_start`: Enable automatic session tracking for Claude Code sessions
+  - Monitors Claude Code JSONL session files
+  - Smart filtering reduces token usage by ~35-70%
+  - Indexes filtered conversations into Graphiti for cross-session memory
+  - Respects global configuration with optional force override
+- `session_tracking_stop`: Disable session tracking for specific sessions
+  - Per-session runtime control
+  - Does not affect global configuration or other sessions
+- `session_tracking_status`: Get comprehensive tracking status
+  - Global configuration details
+  - Runtime state per session
+  - Session manager status
+  - Filter configuration settings
+
+See [Session Tracking Configuration](../CONFIGURATION.md#session-tracking-configuration) for setup details.
 
 ### Monitoring & Health
 - `health_check`: Check database connection health and return status with metrics

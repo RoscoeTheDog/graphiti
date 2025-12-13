@@ -1,0 +1,76 @@
+{
+  "archived_at": "2025-12-03-1002",
+  "validation_id": "-19",
+  "story_data": {
+    "-19": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Session Tracking Resilience",
+      "status": "unassigned",
+      "validates": "19",
+      "children": [
+        "-19.d",
+        "-19.i",
+        "-19.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-19.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate 19 - Validation Discovery",
+      "status": "unassigned",
+      "parent": "-19",
+      "validates": "19",
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "blocks": [],
+      "file": null
+    },
+    "-19.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate 19 - Validation Implementation",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "checks": [
+        "I"
+      ],
+      "blocks": [],
+      "file": null
+    },
+    "-19.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate 19 - Validation Testing",
+      "status": "pending",
+      "parent": "-19",
+      "validates": "19",
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "children": [
+    "-19.d",
+    "-19.i",
+    "-19.t"
+  ]
+}

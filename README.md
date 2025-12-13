@@ -305,9 +305,11 @@ This allows runtime configuration without editing files.
 
 Graphiti looks for configuration in this order:
 1. **Project directory** - `./graphiti.config.json`
-2. **Global directory** - `~/.claude/graphiti.config.json`
+2. **Global directory** - `~/.graphiti/graphiti.config.json`
 3. **Built-in defaults** - Sensible defaults for all settings
 4. **Environment overrides** - Environment variables override all above
+
+**Note**: Configurations from the old `~/.claude/graphiti.config.json` location are automatically migrated to `~/.graphiti/` on first use.
 
 ### Migration from Old .env System
 
@@ -455,11 +457,39 @@ allows AI assistants to interact with Graphiti's knowledge graph capabilities th
 
 Key features of the MCP server include:
 
-- Episode management (add, retrieve, delete)
-- Entity management and relationship handling
-- Semantic and hybrid search capabilities
-- Group management for organizing related data
-- Graph maintenance operations
+- **Episode management** (add, retrieve, delete)
+- **Entity management and relationship handling**
+- **Semantic and hybrid search capabilities**
+- **Group management** for organizing related data
+- **Graph maintenance operations**
+- **Automatic session tracking** (v0.4.0+) - Capture Claude Code conversations automatically
+
+### Session Tracking (New in v0.4.0)
+
+Graphiti MCP server now includes automatic session tracking for Claude Code, enabling your AI assistant to remember past work and maintain context across sessions.
+
+**Features:**
+- ✅ Automatic conversation capture from `~/.claude/projects/` directories
+- ✅ Smart filtering for 93% token reduction (cost-effective)
+- ✅ Cross-session memory and decision tracking
+- ✅ Semantic search across past work
+- ✅ Enabled by default (opt-out available)
+
+**Getting Started:**
+```bash
+# Check status
+graphiti-mcp session-tracking status
+
+# Disable if desired (enabled by default)
+graphiti-mcp session-tracking disable
+```
+
+**Documentation:**
+- [Session Tracking User Guide](docs/SESSION_TRACKING_USER_GUIDE.md)
+- [Developer Guide](docs/SESSION_TRACKING_DEV_GUIDE.md)
+- [Troubleshooting](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
+
+**Cost:** ~$0.17 per session (with smart filtering)
 
 The MCP server can be deployed using Docker with Neo4j, making it easy to integrate Graphiti into your AI assistant
 workflows.
@@ -747,9 +777,29 @@ Ensure Ollama is running (`ollama serve`) and that you have pulled the models yo
 
 ## Documentation
 
-- [Guides and API documentation](https://help.getzep.com/graphiti).
+### Official Guides
+- [Guides and API documentation](https://help.getzep.com/graphiti)
 - [Quick Start](https://help.getzep.com/graphiti/graphiti/quick-start)
 - [Building an agent with LangChain's LangGraph and Graphiti](https://help.getzep.com/graphiti/integrations/lang-graph-agent)
+
+### Local Documentation (Session Tracking v1.0.0)
+
+**Complete documentation for Graphiti's session tracking system**:
+
+- **[Documentation Index](docs/README.md)** - Complete navigation guide
+- **[API Reference](docs/API_REFERENCE.md)** - Python API (parser, filter, indexer, MCP tools)
+- **[CLI Reference](docs/CLI_REFERENCE.md)** - Command-line interface (`graphiti-mcp-session-tracking`, validation)
+- **[Architecture Overview](docs/ARCHITECTURE.md)** - System design, data flow, components
+- **[MCP Tools Reference](docs/MCP_TOOLS.md)** - MCP tool documentation
+- **[Configuration Guide](CONFIGURATION.md)** - Complete config schema and examples
+- **[Migration Guide](claude-mcp-installer/instance/SESSION_TRACKING_MIGRATION.md)** - Upgrade from v0.3.x to v1.0.0
+
+**Quick Access**:
+- Enable/disable session tracking: [CLI Reference: Session Tracking CLI](docs/CLI_REFERENCE.md#session-tracking-cli)
+- Configure filtering: [Configuration: Filtering](CONFIGURATION.md#filtering-configuration)
+- Understand architecture: [Architecture: Component Architecture](docs/ARCHITECTURE.md#component-architecture)
+- Use MCP tools: [MCP Tools: Session Tracking Tools](docs/MCP_TOOLS.md#session-tracking-operations)
+- Troubleshoot errors: [Troubleshooting Guide](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
 
 ## Telemetry
 

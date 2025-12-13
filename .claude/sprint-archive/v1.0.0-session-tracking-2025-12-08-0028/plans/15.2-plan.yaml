@@ -1,0 +1,210 @@
+# Story 15.2: Documentation Accuracy Remediation - Discovery Plan
+# Generated: 2025-12-04
+# Phase: discovery
+
+story_id: "15.2"
+story_title: "Documentation Accuracy Remediation"
+parent: "15"
+type: remediation
+
+## Discovery Summary
+
+discovery_status: complete
+discovery_date: 2025-12-04
+
+## Target Files
+
+target_files:
+  - path: docs/SESSION_TRACKING_USER_GUIDE.md
+    issues_count: 4
+    verified: true
+  - path: docs/SESSION_TRACKING_MIGRATION.md
+    issues_count: 4
+    verified: true
+
+## Implementation Reference Files
+
+reference_files:
+  - path: mcp_server/unified_config.py
+    symbol: SessionTrackingConfig
+    verified: true
+    notes: "Confirms correct defaults: watch_path=null, inactivity_timeout=900, check_interval=60"
+  - path: graphiti_core/session_tracking/filter_config.py
+    symbol: FilterConfig
+    verified: true
+    notes: "Confirms template system uses Markdown {content} placeholders, not Jinja2"
+  - path: graphiti_core/session_tracking/prompts/default-tool-content.md
+    type: template
+    verified: true
+    notes: "Built-in template using {context} and {content} placeholders"
+
+## Verified Issues - USER_GUIDE.md
+
+user_guide_issues:
+  - line: 106
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    current: '"watch_path": "~/.claude/projects"'
+    correct: '"watch_path": null'
+    validation_source: mcp_server/unified_config.py:561 (watch_path: Optional[str] = Field(default=None))
+    verified: true
+
+  - line: 119
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    current: "inactivity_timeout - Minutes of inactivity before session is considered closed (default: 30)"
+    correct: "inactivity_timeout - Seconds of inactivity before session is considered closed (default: 900)"
+    validation_source: mcp_server/unified_config.py:569 (inactivity_timeout: int = Field(default=900))
+    verified: true
+
+  - line: 120
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    current: "check_interval - How often to check for file changes (default: 2)"
+    correct: "check_interval - How often to check for file changes in seconds (default: 60)"
+    validation_source: mcp_server/unified_config.py:577 (check_interval: int = Field(default=60))
+    verified: true
+
+  - line: 349
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    current: "Check scan interval setting (default: 2 seconds)"
+    correct: "Check check_interval setting (default: 60 seconds)"
+    validation_source: mcp_server/unified_config.py:577 (check_interval: int = Field(default=60))
+    verified: true
+
+## Verified Issues - MIGRATION.md
+
+migration_issues:
+  - line: 71
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    current: "Configurable Jinja2 templates"
+    correct: "Configurable Markdown templates"
+    validation_source: graphiti_core/session_tracking/filter_config.py:12 (uses .md files, not Jinja2)
+    verified: true
+
+  - lines: [76, 234, 279, 316]
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    current: '"templates/tool_summary.md"'
+    correct: '"default-tool-content.md"'
+    validation_source: graphiti_core/session_tracking/filter_config.py:60 (default="default-tool-content.md")
+    note: "Multiple occurrences need updating"
+    verified: true
+
+  - lines: [246, 325, 466]
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    current: "{tool_name}, {status}"
+    correct: "{content}"
+    validation_source: graphiti_core/session_tracking/prompts/default-tool-content.md (uses {content} placeholder)
+    note: "Template uses {content} and {context}, not {tool_name}/{status}"
+    verified: true
+
+  - line: 374
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    current: "Custom Jinja2 template"
+    correct: "Custom Markdown template"
+    validation_source: graphiti_core/session_tracking/filter_config.py (Markdown templates)
+    verified: true
+
+## Implementation Plan
+
+implementation_steps:
+  - step: 1
+    action: "Edit USER_GUIDE.md line 106"
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    change: 'Replace "~/.claude/projects" with null'
+    priority: high
+
+  - step: 2
+    action: "Edit USER_GUIDE.md line 119"
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    change: "Update inactivity_timeout description: Minutes→Seconds, 30→900"
+    priority: high
+
+  - step: 3
+    action: "Edit USER_GUIDE.md line 120"
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    change: "Update check_interval default: 2→60, add 'seconds' unit"
+    priority: high
+
+  - step: 4
+    action: "Edit USER_GUIDE.md line 349"
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    change: "Replace 'scan interval setting (default: 2 seconds)' with 'check_interval (default: 60 seconds)'"
+    priority: high
+
+  - step: 5
+    action: "Edit MIGRATION.md line 71"
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    change: "Replace 'Jinja2 templates' with 'Markdown templates'"
+    priority: high
+
+  - step: 6
+    action: "Edit MIGRATION.md template path references"
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    change: 'Replace all "templates/tool_summary.md" with "default-tool-content.md"'
+    lines: [76, 234, 279, 316]
+    priority: high
+
+  - step: 7
+    action: "Edit MIGRATION.md template placeholder examples"
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    change: "Replace Jinja2 placeholders {tool_name}, {status} with {content}"
+    lines: [246, 325, 466]
+    priority: high
+
+  - step: 8
+    action: "Edit MIGRATION.md line 374"
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    change: "Replace 'Custom Jinja2 template' with 'Custom Markdown template'"
+    priority: high
+
+  - step: 9
+    action: "Validate JSON examples"
+    file: docs/SESSION_TRACKING_USER_GUIDE.md
+    change: "Verify JSON syntax in all code blocks"
+    priority: medium
+
+  - step: 10
+    action: "Validate JSON examples"
+    file: docs/SESSION_TRACKING_MIGRATION.md
+    change: "Verify JSON syntax in all code blocks"
+    priority: medium
+
+## Testing Plan
+
+testing_steps:
+  - test: "JSON validation"
+    description: "Parse all JSON code blocks to verify valid syntax"
+    files:
+      - docs/SESSION_TRACKING_USER_GUIDE.md
+      - docs/SESSION_TRACKING_MIGRATION.md
+
+  - test: "Cross-reference validation"
+    description: "Verify documentation matches implementation defaults"
+    validation_against:
+      - mcp_server/unified_config.py
+      - graphiti_core/session_tracking/filter_config.py
+
+  - test: "Consistency check"
+    description: "Ensure terminology is consistent across both files"
+    terms:
+      - "Markdown templates" (not Jinja2)
+      - "default-tool-content.md" (not templates/tool_summary.md)
+      - "{content}" placeholder (not {tool_name}/{status})
+
+## Estimated Effort
+
+effort:
+  implementation: "30 minutes"
+  testing: "15 minutes"
+  total: "45 minutes"
+
+## Dependencies
+
+dependencies: []
+blockers: []
+
+## Notes
+
+notes:
+  - "Story 15.1 marked complete but fixes were not applied to actual files"
+  - "All issues verified against implementation source code"
+  - "Documentation files have SESSION_TRACKING_ prefix (not USER_GUIDE.md directly)"
+  - "Template system uses simple Markdown with {content} placeholder, not Jinja2"

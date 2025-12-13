@@ -1,0 +1,1167 @@
+{
+  "$defs": {
+    "AnthropicProviderConfig": {
+      "description": "Anthropic provider configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "ANTHROPIC_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        }
+      },
+      "title": "AnthropicProviderConfig",
+      "type": "object"
+    },
+    "AzureOpenAIProviderConfig": {
+      "description": "Azure OpenAI provider configuration",
+      "properties": {
+        "endpoint_env": {
+          "default": "AZURE_OPENAI_ENDPOINT",
+          "title": "Endpoint Env",
+          "type": "string"
+        },
+        "api_key_env": {
+          "default": "AZURE_OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "api_version": {
+          "default": "2025-01-01-preview",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "deployment_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deployment Name"
+        },
+        "use_managed_identity": {
+          "default": false,
+          "title": "Use Managed Identity",
+          "type": "boolean"
+        }
+      },
+      "title": "AzureOpenAIProviderConfig",
+      "type": "object"
+    },
+    "CircuitBreakerConfig": {
+      "description": "Circuit breaker configuration for LLM failure protection.\n\nImplements the circuit breaker pattern to prevent cascading failures\nwhen the LLM service is experiencing issues. After a threshold of\nfailures, the circuit opens and fast-fails requests without attempting\nLLM calls, allowing the service to recover.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable circuit breaker for LLM calls",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "failure_threshold": {
+          "default": 5,
+          "description": "Number of consecutive failures before opening circuit",
+          "title": "Failure Threshold",
+          "type": "integer"
+        },
+        "recovery_timeout_seconds": {
+          "default": 300,
+          "description": "Time to wait before attempting recovery (half-open state)",
+          "title": "Recovery Timeout Seconds",
+          "type": "integer"
+        },
+        "half_open_max_calls": {
+          "default": 3,
+          "description": "Maximum calls allowed in half-open state to test recovery",
+          "title": "Half Open Max Calls",
+          "type": "integer"
+        }
+      },
+      "title": "CircuitBreakerConfig",
+      "type": "object"
+    },
+    "DatabaseConfig": {
+      "description": "Database backend configuration",
+      "properties": {
+        "backend": {
+          "default": "neo4j",
+          "enum": [
+            "neo4j",
+            "falkordb"
+          ],
+          "title": "Backend",
+          "type": "string"
+        },
+        "neo4j": {
+          "$ref": "#/$defs/Neo4jConfig"
+        },
+        "falkordb": {
+          "$ref": "#/$defs/FalkorDBConfig"
+        }
+      },
+      "title": "DatabaseConfig",
+      "type": "object"
+    },
+    "EmbedderAzureOpenAIConfig": {
+      "description": "Azure OpenAI embedder configuration",
+      "properties": {
+        "endpoint_env": {
+          "default": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
+          "title": "Endpoint Env",
+          "type": "string"
+        },
+        "api_key_env": {
+          "default": "AZURE_OPENAI_EMBEDDING_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "api_version": {
+          "default": "2023-05-15",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "deployment_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deployment Name"
+        },
+        "use_managed_identity": {
+          "default": false,
+          "title": "Use Managed Identity",
+          "type": "boolean"
+        }
+      },
+      "title": "EmbedderAzureOpenAIConfig",
+      "type": "object"
+    },
+    "EmbedderConfig": {
+      "description": "Embedder configuration",
+      "properties": {
+        "provider": {
+          "default": "openai",
+          "enum": [
+            "openai",
+            "azure_openai"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "default": "text-embedding-3-small",
+          "title": "Model",
+          "type": "string"
+        },
+        "dimensions": {
+          "default": 1536,
+          "title": "Dimensions",
+          "type": "integer"
+        },
+        "batch_size": {
+          "default": 100,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "openai": {
+          "$ref": "#/$defs/EmbedderOpenAIConfig"
+        },
+        "azure_openai": {
+          "$ref": "#/$defs/EmbedderAzureOpenAIConfig"
+        }
+      },
+      "title": "EmbedderConfig",
+      "type": "object"
+    },
+    "EmbedderOpenAIConfig": {
+      "description": "OpenAI embedder configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        }
+      },
+      "title": "EmbedderOpenAIConfig",
+      "type": "object"
+    },
+    "ExtractionConfig": {
+      "description": "Configuration for entity/edge extraction preprocessing.\n\nControls how preprocessing prompts are injected into extraction operations.\nSupports turn-based template resolution with hierarchical template loading.\n\nPreprocessing prompt values use bool | str type system:\n- None/False: Disable preprocessing (no injection)\n- \"template.md\": Load template from hierarchy (project > global > built-in)\n- \"inline prompt...\": Use string as direct LLM prompt\n\nAttributes:\n    preprocessing_prompt: Preprocessing prompt configuration (default: False)\n    preprocessing_mode: Where to inject prompt - prepend or append (default: \"prepend\")\n\nExamples:\n    # No preprocessing (default)\n    config = ExtractionConfig()\n\n    # Template-based preprocessing (built-in template)\n    config = ExtractionConfig(\n        preprocessing_prompt=\"default-session-turn.md\"\n    )\n\n    # Custom template-based preprocessing\n    config = ExtractionConfig(\n        preprocessing_prompt=\"session-turn-extraction.md\"\n    )\n\n    # Inline prompt with append mode\n    config = ExtractionConfig(\n        preprocessing_prompt=\"Consider session context when extracting entities.\",\n        preprocessing_mode=\"append\"\n    )\n\n    # Explicitly disabled\n    config = ExtractionConfig(\n        preprocessing_prompt=False\n    )",
+      "examples": [
+        {
+          "preprocessing_mode": "prepend",
+          "preprocessing_prompt": false
+        },
+        {
+          "preprocessing_mode": "prepend",
+          "preprocessing_prompt": "default-session-turn.md"
+        },
+        {
+          "preprocessing_mode": "prepend",
+          "preprocessing_prompt": "session-turn-extraction.md"
+        },
+        {
+          "preprocessing_mode": "append",
+          "preprocessing_prompt": "Consider session context when extracting entities."
+        }
+      ],
+      "properties": {
+        "preprocessing_prompt": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": false,
+          "description": "Preprocessing prompt configuration: None/False (disabled), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "Preprocessing Prompt"
+        },
+        "preprocessing_mode": {
+          "default": "prepend",
+          "description": "Injection mode for preprocessing prompt: \"prepend\" (inject before extraction prompt) or \"append\" (inject after extraction prompt)",
+          "enum": [
+            "prepend",
+            "append"
+          ],
+          "title": "Preprocessing Mode",
+          "type": "string"
+        }
+      },
+      "title": "ExtractionConfig",
+      "type": "object"
+    },
+    "FalkorDBConfig": {
+      "description": "FalkorDB database configuration",
+      "properties": {
+        "uri": {
+          "default": "redis://localhost:6379",
+          "title": "Uri",
+          "type": "string"
+        },
+        "user": {
+          "default": "default",
+          "title": "User",
+          "type": "string"
+        },
+        "password_env": {
+          "default": "FALKORDB_PASSWORD",
+          "title": "Password Env",
+          "type": "string"
+        },
+        "database": {
+          "default": "graphiti",
+          "title": "Database",
+          "type": "string"
+        },
+        "pool_size": {
+          "default": 50,
+          "title": "Pool Size",
+          "type": "integer"
+        }
+      },
+      "title": "FalkorDBConfig",
+      "type": "object"
+    },
+    "FilterConfig": {
+      "description": "Configuration for session message filtering.\n\nControls how different message types are filtered during session tracking.\nAllows fine-grained control over token reduction vs information preservation.\n\nFilter values use bool | str type system:\n- true: Preserve full content (no filtering)\n- false: Omit content entirely\n- \"template.md\": Load template from hierarchy (project > global > built-in)\n- \"inline prompt...\": Use string as direct LLM prompt\n\nAttributes:\n    tool_calls: Whether to preserve tool call structure (default: True)\n    tool_content: How to handle tool result content (default: \"default-tool-content.md\")\n    user_messages: How to handle user message content (default: True to preserve user intent)\n    agent_messages: How to handle agent text responses (default: True for context continuity)\n\nExamples:\n    # Default configuration (template-based tool summarization)\n    config = FilterConfig()\n\n    # Maximum token reduction (omit all tool results)\n    config = FilterConfig(tool_content=False)\n\n    # No filtering (preserve everything)\n    config = FilterConfig(\n        tool_content=True,\n        user_messages=True,\n        agent_messages=True\n    )\n\n    # Custom template for tool content\n    config = FilterConfig(\n        tool_content=\"my-custom-template.md\"\n    )\n\n    # Inline prompt for agent messages\n    config = FilterConfig(\n        agent_messages=\"Summarize this message in 1 sentence.\"\n    )",
+      "examples": [
+        {
+          "agent_messages": true,
+          "tool_calls": true,
+          "tool_content": "default-tool-content.md",
+          "user_messages": true
+        },
+        {
+          "agent_messages": "Summarize in 1 sentence.",
+          "tool_calls": true,
+          "tool_content": false,
+          "user_messages": true
+        }
+      ],
+      "properties": {
+        "tool_calls": {
+          "default": true,
+          "description": "Preserve tool call structure (names, parameters) even when filtering content",
+          "title": "Tool Calls",
+          "type": "boolean"
+        },
+        "tool_content": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "default-tool-content.md",
+          "description": "Content mode for tool results: true (no filtering), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "Tool Content"
+        },
+        "user_messages": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": true,
+          "description": "Content mode for user messages: true (preserve), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "User Messages"
+        },
+        "agent_messages": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": true,
+          "description": "Content mode for agent text responses: true (preserve), false (omit), \"template.md\" (template file), or \"inline prompt...\" (direct LLM prompt)",
+          "title": "Agent Messages"
+        }
+      },
+      "title": "FilterConfig",
+      "type": "object"
+    },
+    "LLMConfig": {
+      "description": "LLM provider configuration",
+      "properties": {
+        "provider": {
+          "default": "openai",
+          "enum": [
+            "openai",
+            "azure_openai",
+            "anthropic"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "default_model": {
+          "default": "gpt-4.1-mini",
+          "title": "Default Model",
+          "type": "string"
+        },
+        "small_model": {
+          "default": "gpt-4.1-nano",
+          "title": "Small Model",
+          "type": "string"
+        },
+        "temperature": {
+          "default": 0.0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "semaphore_limit": {
+          "default": 10,
+          "title": "Semaphore Limit",
+          "type": "integer"
+        },
+        "max_retries": {
+          "default": 3,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "timeout": {
+          "default": 60,
+          "title": "Timeout",
+          "type": "integer"
+        },
+        "openai": {
+          "$ref": "#/$defs/OpenAIProviderConfig"
+        },
+        "azure_openai": {
+          "$ref": "#/$defs/AzureOpenAIProviderConfig"
+        },
+        "anthropic": {
+          "$ref": "#/$defs/AnthropicProviderConfig"
+        }
+      },
+      "title": "LLMConfig",
+      "type": "object"
+    },
+    "LLMHealthCheckConfig": {
+      "description": "LLM health check configuration for proactive availability monitoring.\n\nThe health check system periodically validates LLM connectivity and responsiveness,\nenabling proactive detection of outages before they impact user operations.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable periodic LLM health checks",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "interval_seconds": {
+          "default": 60,
+          "description": "Interval between health checks in seconds",
+          "title": "Interval Seconds",
+          "type": "integer"
+        },
+        "on_startup": {
+          "default": true,
+          "description": "Run health check on server startup",
+          "title": "On Startup",
+          "type": "boolean"
+        },
+        "timeout_seconds": {
+          "default": 10,
+          "description": "Timeout for health check requests",
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "LLMHealthCheckConfig",
+      "type": "object"
+    },
+    "LLMResilienceConfig": {
+      "description": "Unified LLM resilience configuration.\n\nConsolidates all LLM resilience features:\n- Health checks for proactive monitoring\n- Retry policies for transient failures\n- Circuit breaker for failure protection",
+      "properties": {
+        "health_check": {
+          "$ref": "#/$defs/LLMHealthCheckConfig",
+          "description": "Health check configuration"
+        },
+        "retry": {
+          "$ref": "#/$defs/LLMRetryConfig",
+          "description": "Retry policy configuration"
+        },
+        "circuit_breaker": {
+          "$ref": "#/$defs/CircuitBreakerConfig",
+          "description": "Circuit breaker configuration"
+        }
+      },
+      "title": "LLMResilienceConfig",
+      "type": "object"
+    },
+    "LLMRetryConfig": {
+      "description": "LLM retry policy configuration with exponential backoff.\n\nConfigures automatic retry behavior for transient LLM failures such as\nrate limits, timeouts, and temporary service unavailability.",
+      "properties": {
+        "max_attempts": {
+          "default": 4,
+          "description": "Maximum number of retry attempts (including initial attempt)",
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "initial_delay_seconds": {
+          "default": 5.0,
+          "description": "Initial delay before first retry in seconds",
+          "title": "Initial Delay Seconds",
+          "type": "number"
+        },
+        "max_delay_seconds": {
+          "default": 120.0,
+          "description": "Maximum delay between retries in seconds",
+          "title": "Max Delay Seconds",
+          "type": "number"
+        },
+        "exponential_base": {
+          "default": 2.0,
+          "description": "Base for exponential backoff calculation",
+          "title": "Exponential Base",
+          "type": "number"
+        },
+        "retry_on_rate_limit": {
+          "default": true,
+          "description": "Retry on rate limit errors (429)",
+          "title": "Retry On Rate Limit",
+          "type": "boolean"
+        },
+        "retry_on_timeout": {
+          "default": true,
+          "description": "Retry on timeout errors",
+          "title": "Retry On Timeout",
+          "type": "boolean"
+        }
+      },
+      "title": "LLMRetryConfig",
+      "type": "object"
+    },
+    "LoggingConfig": {
+      "description": "Logging configuration",
+      "properties": {
+        "level": {
+          "default": "INFO",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "log_filter_decisions": {
+          "default": true,
+          "title": "Log Filter Decisions",
+          "type": "boolean"
+        },
+        "log_llm_calls": {
+          "default": false,
+          "title": "Log Llm Calls",
+          "type": "boolean"
+        },
+        "log_database_queries": {
+          "default": false,
+          "title": "Log Database Queries",
+          "type": "boolean"
+        },
+        "log_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log File"
+        },
+        "format": {
+          "default": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "title": "LoggingConfig",
+      "type": "object"
+    },
+    "MCPServerConfig": {
+      "description": "MCP server configuration",
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Host"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Port"
+        },
+        "enable_cors": {
+          "default": false,
+          "title": "Enable Cors",
+          "type": "boolean"
+        },
+        "allowed_origins": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Origins",
+          "type": "array"
+        }
+      },
+      "title": "MCPServerConfig",
+      "type": "object"
+    },
+    "MCPToolsBehaviorConfig": {
+      "description": "MCP tools behavior configuration when LLM is unavailable.\n\nDefines how MCP tools behave when the underlying LLM service is\nunavailable or degraded. This provides explicit control over\nfailure modes for different operational requirements.",
+      "properties": {
+        "on_llm_unavailable": {
+          "default": "FAIL",
+          "description": "Behavior when LLM is unavailable:\n- FAIL: Immediately return error (best for interactive use)\n- STORE_RAW: Store data without LLM processing (best for data preservation)\n- QUEUE_RETRY: Queue for later retry when LLM recovers (best for batch operations)",
+          "enum": [
+            "FAIL",
+            "STORE_RAW",
+            "QUEUE_RETRY"
+          ],
+          "title": "On Llm Unavailable",
+          "type": "string"
+        },
+        "wait_for_completion_default": {
+          "default": true,
+          "description": "Default wait behavior for async operations",
+          "title": "Wait For Completion Default",
+          "type": "boolean"
+        },
+        "timeout_seconds": {
+          "default": 60,
+          "description": "Default timeout for MCP tool operations",
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "MCPToolsBehaviorConfig",
+      "type": "object"
+    },
+    "Neo4jConfig": {
+      "description": "Neo4j database configuration",
+      "properties": {
+        "uri": {
+          "default": "bolt://localhost:7687",
+          "title": "Uri",
+          "type": "string"
+        },
+        "user": {
+          "default": "neo4j",
+          "title": "User",
+          "type": "string"
+        },
+        "password_env": {
+          "default": "NEO4J_PASSWORD",
+          "title": "Password Env",
+          "type": "string"
+        },
+        "database": {
+          "default": "neo4j",
+          "title": "Database",
+          "type": "string"
+        },
+        "pool_size": {
+          "default": 50,
+          "title": "Pool Size",
+          "type": "integer"
+        },
+        "connection_timeout": {
+          "default": 30,
+          "title": "Connection Timeout",
+          "type": "integer"
+        },
+        "max_connection_lifetime": {
+          "default": 3600,
+          "title": "Max Connection Lifetime",
+          "type": "integer"
+        }
+      },
+      "title": "Neo4jConfig",
+      "type": "object"
+    },
+    "OpenAIProviderConfig": {
+      "description": "OpenAI provider configuration",
+      "properties": {
+        "api_key_env": {
+          "default": "OPENAI_API_KEY",
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization"
+        }
+      },
+      "title": "OpenAIProviderConfig",
+      "type": "object"
+    },
+    "PerformanceConfig": {
+      "description": "Performance tuning configuration",
+      "properties": {
+        "use_parallel_runtime": {
+          "default": true,
+          "title": "Use Parallel Runtime",
+          "type": "boolean"
+        },
+        "enable_caching": {
+          "default": true,
+          "title": "Enable Caching",
+          "type": "boolean"
+        },
+        "cache_ttl_seconds": {
+          "default": 3600,
+          "title": "Cache Ttl Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "PerformanceConfig",
+      "type": "object"
+    },
+    "ProjectConfig": {
+      "description": "Project-specific configuration",
+      "properties": {
+        "default_group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Group Id"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        },
+        "enable_entity_types": {
+          "default": true,
+          "title": "Enable Entity Types",
+          "type": "boolean"
+        },
+        "custom_entity_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Custom Entity Types",
+          "type": "array"
+        },
+        "max_reflexion_iterations": {
+          "default": 3,
+          "title": "Max Reflexion Iterations",
+          "type": "integer"
+        }
+      },
+      "title": "ProjectConfig",
+      "type": "object"
+    },
+    "ResilienceConfig": {
+      "description": "Resilience and error recovery configuration (legacy).\n\nNote: This section is maintained for backward compatibility.\nNew resilience configuration should use the llm.resilience section\nfor LLM-specific settings and session_tracking.resilience for\nsession-specific settings.",
+      "properties": {
+        "max_retries": {
+          "default": 3,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "retry_backoff_base": {
+          "default": 2,
+          "title": "Retry Backoff Base",
+          "type": "integer"
+        },
+        "episode_timeout": {
+          "default": 60,
+          "title": "Episode Timeout",
+          "type": "integer"
+        },
+        "health_check_interval": {
+          "default": 300,
+          "title": "Health Check Interval",
+          "type": "integer"
+        }
+      },
+      "title": "ResilienceConfig",
+      "type": "object"
+    },
+    "RetryQueueConfig": {
+      "description": "Retry queue configuration for session tracking resilience.\n\nConfigures the persistent queue used to retry failed session processing\nwhen the LLM becomes available again. Ensures no session data is lost\nduring LLM outages.",
+      "properties": {
+        "max_retries": {
+          "default": 5,
+          "description": "Maximum retry attempts per session",
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "retry_delays_seconds": {
+          "description": "Delay in seconds before each retry attempt. Default: 5m, 15m, 45m, 2h, 6h (progressive backoff)",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Retry Delays Seconds",
+          "type": "array"
+        },
+        "max_queue_size": {
+          "default": 1000,
+          "description": "Maximum number of sessions in retry queue",
+          "title": "Max Queue Size",
+          "type": "integer"
+        },
+        "persist_to_disk": {
+          "default": true,
+          "description": "Persist retry queue to disk for crash recovery",
+          "title": "Persist To Disk",
+          "type": "boolean"
+        }
+      },
+      "title": "RetryQueueConfig",
+      "type": "object"
+    },
+    "SearchConfig": {
+      "description": "Search configuration",
+      "properties": {
+        "default_max_nodes": {
+          "default": 10,
+          "title": "Default Max Nodes",
+          "type": "integer"
+        },
+        "default_max_facts": {
+          "default": 10,
+          "title": "Default Max Facts",
+          "type": "integer"
+        },
+        "default_method": {
+          "default": "hybrid_rrf",
+          "enum": [
+            "hybrid_rrf",
+            "hybrid_node_distance",
+            "vector",
+            "text"
+          ],
+          "title": "Default Method",
+          "type": "string"
+        },
+        "vector_weight": {
+          "default": 0.7,
+          "title": "Vector Weight",
+          "type": "number"
+        },
+        "text_weight": {
+          "default": 0.3,
+          "title": "Text Weight",
+          "type": "number"
+        }
+      },
+      "title": "SearchConfig",
+      "type": "object"
+    },
+    "SessionNotificationsConfig": {
+      "description": "Notification configuration for session tracking failures.",
+      "properties": {
+        "on_permanent_failure": {
+          "default": true,
+          "description": "Notify on permanent processing failure (after all retries exhausted)",
+          "title": "On Permanent Failure",
+          "type": "boolean"
+        },
+        "notification_method": {
+          "default": "log",
+          "description": "Method for sending failure notifications",
+          "enum": [
+            "log",
+            "webhook",
+            "both"
+          ],
+          "title": "Notification Method",
+          "type": "string"
+        },
+        "webhook_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Webhook URL for failure notifications (if method includes webhook)",
+          "title": "Webhook Url"
+        }
+      },
+      "title": "SessionNotificationsConfig",
+      "type": "object"
+    },
+    "SessionTrackingConfig": {
+      "description": "Session tracking configuration for automatic JSONL monitoring.\n\nConfigures the session tracking system that monitors Claude Code session files\n(JSONL format) and automatically indexes them into the Graphiti knowledge graph.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable or disable session tracking (opt-in model, disabled by default for security)",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "watch_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to directory containing Claude Code session files. If None, defaults to ~/.claude/projects/. Must be an absolute path (native OS format: C:\\ on Windows, / on Unix).",
+          "title": "Watch Path"
+        },
+        "inactivity_timeout": {
+          "default": 900,
+          "description": "Inactivity timeout in seconds before a session is considered closed. After this timeout, the session will be indexed into Graphiti. Default: 900 seconds (15 minutes) to accommodate long-running operations.",
+          "title": "Inactivity Timeout",
+          "type": "integer"
+        },
+        "check_interval": {
+          "default": 60,
+          "description": "Interval in seconds to check for inactive sessions. The file watcher checks for inactive sessions at this interval.",
+          "title": "Check Interval",
+          "type": "integer"
+        },
+        "auto_summarize": {
+          "default": false,
+          "description": "Automatically summarize closed sessions using Graphiti's LLM. If False, sessions are stored as raw episodes without summarization (no LLM costs).",
+          "title": "Auto Summarize",
+          "type": "boolean"
+        },
+        "store_in_graph": {
+          "default": true,
+          "description": "Store session summaries in the Graphiti knowledge graph. If False, sessions are logged but not persisted to Neo4j.",
+          "title": "Store In Graph",
+          "type": "boolean"
+        },
+        "keep_length_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 7,
+          "description": "Rolling window filter for session discovery in days. Only sessions modified within the last N days will be indexed. Set to null to index all sessions (not recommended, may cause bulk LLM costs).",
+          "title": "Keep Length Days"
+        },
+        "filter": {
+          "$ref": "#/$defs/FilterConfig",
+          "description": "Filtering configuration for session content. Controls how messages and tool results are filtered for token reduction. Default: template-based tool summarization, preserve user/agent messages."
+        },
+        "resilience": {
+          "$ref": "#/$defs/SessionTrackingResilienceConfig",
+          "description": "Resilience configuration for session tracking. Defines behavior when LLM is unavailable during session processing."
+        },
+        "summarization": {
+          "$ref": "#/$defs/SummarizationConfig",
+          "description": "Intelligent session summarization configuration. Controls activity detection, dynamic extraction, and summary generation."
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Global group ID for all indexed sessions. If None, defaults to '{hostname}__global' at runtime. All sessions from all projects are indexed to this single group, enabling cross-project knowledge sharing.",
+          "title": "Group Id"
+        },
+        "cross_project_search": {
+          "default": true,
+          "description": "Allow searching across all project namespaces. When True, search results include sessions from all indexed projects. When False, results are filtered to the current project namespace only.",
+          "title": "Cross Project Search",
+          "type": "boolean"
+        },
+        "trusted_namespaces": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "List of project namespace hashes to trust for cross-project search. If specified, only sessions from these namespaces are included in search results. Each namespace must be a valid hexadecimal hash (e.g., 'a1b2c3d4'). If None, all namespaces are trusted (when cross_project_search is True).",
+          "title": "Trusted Namespaces"
+        },
+        "include_project_path": {
+          "default": true,
+          "description": "Include human-readable project path in episode metadata. When True, the full project directory path is embedded in indexed sessions. Set to False to redact paths for privacy (only namespace hash is stored).",
+          "title": "Include Project Path",
+          "type": "boolean"
+        }
+      },
+      "title": "SessionTrackingConfig",
+      "type": "object"
+    },
+    "SessionTrackingResilienceConfig": {
+      "description": "Session tracking resilience configuration.\n\nDefines how session tracking handles LLM unavailability to ensure\nno session data is lost. The default STORE_RAW_AND_RETRY mode\nstores sessions with raw content and queues them for LLM processing\nwhen service recovers.",
+      "properties": {
+        "on_llm_unavailable": {
+          "default": "STORE_RAW_AND_RETRY",
+          "description": "Behavior when LLM is unavailable during session processing:\n- FAIL: Skip session (data loss risk)\n- STORE_RAW: Store raw session content without summarization\n- STORE_RAW_AND_RETRY: Store raw and queue for later processing (recommended)",
+          "enum": [
+            "FAIL",
+            "STORE_RAW",
+            "STORE_RAW_AND_RETRY"
+          ],
+          "title": "On Llm Unavailable",
+          "type": "string"
+        },
+        "retry_queue": {
+          "$ref": "#/$defs/RetryQueueConfig",
+          "description": "Retry queue configuration for failed sessions"
+        },
+        "notifications": {
+          "$ref": "#/$defs/SessionNotificationsConfig",
+          "description": "Notification configuration for session failures"
+        }
+      },
+      "title": "SessionTrackingResilienceConfig",
+      "type": "object"
+    },
+    "SummarizationConfig": {
+      "description": "Configuration for intelligent session summarization features.\n\nControls how sessions are analyzed, categorized, and summarized for\nefficient cross-session retrieval. Uses dynamic extraction based on\nactivity priority to balance detail preservation with token efficiency.",
+      "properties": {
+        "template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom summarization template path. If None, uses dynamic extraction.",
+          "title": "Template"
+        },
+        "type_detection": {
+          "default": "auto",
+          "description": "Activity detection mode. 'auto' infers from messages, 'manual' requires explicit config.",
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "title": "Type Detection",
+          "type": "string"
+        },
+        "extraction_threshold": {
+          "default": 0.3,
+          "description": "Minimum priority score to include extraction field",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Extraction Threshold",
+          "type": "number"
+        },
+        "include_decisions": {
+          "default": true,
+          "description": "Extract key_decisions (prevents repeated debates)",
+          "title": "Include Decisions",
+          "type": "boolean"
+        },
+        "include_errors_resolved": {
+          "default": true,
+          "description": "Extract errors_resolved (debugging continuity)",
+          "title": "Include Errors Resolved",
+          "type": "boolean"
+        },
+        "tool_classification_cache": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to tool classification cache. Default: ~/.graphiti/tool_cache.json",
+          "title": "Tool Classification Cache"
+        }
+      },
+      "title": "SummarizationConfig",
+      "type": "object"
+    }
+  },
+  "description": "Root Graphiti configuration",
+  "properties": {
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "database": {
+      "$ref": "#/$defs/DatabaseConfig"
+    },
+    "llm": {
+      "$ref": "#/$defs/LLMConfig"
+    },
+    "embedder": {
+      "$ref": "#/$defs/EmbedderConfig"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectConfig"
+    },
+    "search": {
+      "$ref": "#/$defs/SearchConfig"
+    },
+    "logging": {
+      "$ref": "#/$defs/LoggingConfig"
+    },
+    "performance": {
+      "$ref": "#/$defs/PerformanceConfig"
+    },
+    "mcp_server": {
+      "$ref": "#/$defs/MCPServerConfig"
+    },
+    "resilience": {
+      "$ref": "#/$defs/ResilienceConfig"
+    },
+    "session_tracking": {
+      "$ref": "#/$defs/SessionTrackingConfig"
+    },
+    "extraction": {
+      "$ref": "#/$defs/ExtractionConfig"
+    },
+    "llm_resilience": {
+      "$ref": "#/$defs/LLMResilienceConfig"
+    },
+    "mcp_tools": {
+      "$ref": "#/$defs/MCPToolsBehaviorConfig"
+    }
+  },
+  "title": "GraphitiConfig",
+  "type": "object"
+}

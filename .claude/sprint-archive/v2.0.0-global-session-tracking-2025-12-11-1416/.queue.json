@@ -1,0 +1,724 @@
+{
+  "version": "4.0.0",
+  "created": "2025-12-08T00:35:00Z",
+  "sprint": {
+    "name": "Global Session Tracking",
+    "version": "2.0",
+    "goal": "Implement global session tracking with namespace tagging as specified in GLOBAL_SESSION_TRACKING_SPEC_v2.0.md",
+    "branch": "sprint/v2.0.0/global-session-tracking",
+    "base_branch": "dev",
+    "spec": "../implementation/GLOBAL_SESSION_TRACKING_SPEC_v2.0.md",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
+  },
+  "stories": {
+    "1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Configuration Schema Updates",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/1-configuration-schema-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "JSON Schema and Config File Updates",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/2-json-schema-and-config-file-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Path Resolver Enhancements",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/3-path-resolver-enhancements.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "4": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Episode Metadata Builder",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4-episode-metadata-builder.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "5": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Graphiti Storage Integration",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/5-graphiti-storage-integration.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "6": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Session Manager Updates",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/6-session-manager-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "7": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "MCP Server Search Filter Implementation",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/7-mcp-server-search-filter-implementation.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "8": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Unit Tests for New Components",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "8.d",
+        "8.i",
+        "8.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/8-unit-tests-for-new-components.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "9": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Integration Tests for Cross-Project Search",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "9.d",
+        "9.i",
+        "9.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/9-integration-tests-for-cross-project-search.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "10": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Documentation Updates",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "10.d",
+        "10.i",
+        "10.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/10-documentation-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml"
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Configuration Schema Updates",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "10.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Documentation Updates",
+      "status": "completed",
+      "parent": "10",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/10-plan.yaml"
+    },
+    "10.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Documentation Updates",
+      "status": "completed",
+      "parent": "10",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/10-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/10-plan.yaml"
+      }
+    },
+    "10.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Documentation Updates",
+      "status": "completed",
+      "parent": "10",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: JSON Schema and Config File Updates",
+      "status": "completed",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: JSON Schema and Config File Updates",
+      "status": "completed",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: JSON Schema and Config File Updates",
+      "status": "completed",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Path Resolver Enhancements",
+      "status": "completed",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Path Resolver Enhancements",
+      "status": "completed",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Path Resolver Enhancements",
+      "status": "completed",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Episode Metadata Builder",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Episode Metadata Builder",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4-plan.yaml"
+      }
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Episode Metadata Builder",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Graphiti Storage Integration",
+      "status": "completed",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Graphiti Storage Integration",
+      "status": "completed",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/5-plan.yaml"
+      }
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Graphiti Storage Integration",
+      "status": "completed",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Session Manager Updates",
+      "status": "completed",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Session Manager Updates",
+      "status": "completed",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Session Manager Updates",
+      "status": "completed",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: MCP Server Search Filter Implementation",
+      "status": "completed",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: MCP Server Search Filter Implementation",
+      "status": "completed",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/7-plan.yaml"
+      }
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: MCP Server Search Filter Implementation",
+      "status": "completed",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "8.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Unit Tests for New Components",
+      "status": "completed",
+      "parent": "8",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/8-plan.yaml"
+    },
+    "8.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Unit Tests for New Components",
+      "status": "completed",
+      "parent": "8",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/8-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/8-plan.yaml"
+      }
+    },
+    "8.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Unit Tests for New Components",
+      "status": "completed",
+      "parent": "8",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "9.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Integration Tests for Cross-Project Search",
+      "status": "completed",
+      "parent": "9",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/9-plan.yaml"
+    },
+    "9.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Integration Tests for Cross-Project Search",
+      "status": "completed",
+      "parent": "9",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/9-plan.yaml"
+    },
+    "9.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Integration Tests for Cross-Project Search",
+      "status": "completed",
+      "parent": "9",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    }
+  },
+  "execution_queue": [
+    "1.d",
+    "1.i",
+    "1.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7.d",
+    "7.i",
+    "7.t",
+    "8.d",
+    "8.i",
+    "8.t",
+    "10.d",
+    "10.i",
+    "10.t",
+    "9.d",
+    "9.i",
+    "9.t"
+  ],
+  "completed": [],
+  "blocked": []
+}

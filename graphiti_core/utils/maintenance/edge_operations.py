@@ -30,7 +30,8 @@ from graphiti_core.edges import (
 )
 from graphiti_core.graphiti_types import GraphitiClients
 from graphiti_core.helpers import MAX_REFLEXION_ITERATIONS, semaphore_gather
-from graphiti_core.llm_client import LLMClient
+from graphiti_core.llm_client import LLMClient, LLMUnavailableError
+from graphiti_core.llm_client.availability import LLMErrorClassifier, LLMErrorType
 from graphiti_core.llm_client.config import ModelSize
 from graphiti_core.nodes import CommunityNode, EntityNode, EpisodicNode
 from graphiti_core.prompts import prompt_library
@@ -95,10 +96,21 @@ async def extract_edges(
     group_id: str = '',
     edge_types: dict[str, type[BaseModel]] | None = None,
 ) -> list[EntityEdge]:
+    """Extract entity edges (facts/relationships) from an episode using LLM.
+
+    AC-17.12: Wrapped with error handling that classifies LLM errors
+    and raises appropriate exceptions.
+
+    Raises:
+        LLMUnavailableError: If the LLM is unavailable after retries.
+    """
     start = time()
 
     extract_edges_max_tokens = 16384
     llm_client = clients.llm_client
+    error_classifier = LLMErrorClassifier()
+    # AC-5.1: Initialize with preprocessing_prompt if available
+    custom_prompt = clients.preprocessing_prompt if clients.preprocessing_prompt else ''
 
     edge_type_signature_map: dict[str, tuple[str, str]] = {
         edge_type: signature
@@ -129,42 +141,73 @@ async def extract_edges(
         'previous_episodes': [ep.content for ep in previous_episodes],
         'reference_time': episode.valid_at,
         'edge_types': edge_types_context,
-        'custom_prompt': '',
+        'custom_prompt': custom_prompt,
     }
 
     facts_missed = True
     reflexion_iterations = 0
-    while facts_missed and reflexion_iterations <= MAX_REFLEXION_ITERATIONS:
-        llm_response = await llm_client.generate_response(
-            prompt_library.extract_edges.edge(context),
-            response_model=ExtractedEdges,
-            max_tokens=extract_edges_max_tokens,
-            group_id=group_id,
-            prompt_name='extract_edges.edge',
-        )
-        edges_data = ExtractedEdges(**llm_response).edges
+    edges_data = []
 
-        context['extracted_facts'] = [edge_data.fact for edge_data in edges_data]
-
-        reflexion_iterations += 1
-        if reflexion_iterations < MAX_REFLEXION_ITERATIONS:
-            reflexion_response = await llm_client.generate_response(
-                prompt_library.extract_edges.reflexion(context),
-                response_model=MissingFacts,
+    try:
+        while facts_missed and reflexion_iterations <= MAX_REFLEXION_ITERATIONS:
+            llm_response = await llm_client.generate_response(
+                prompt_library.extract_edges.edge(context),
+                response_model=ExtractedEdges,
                 max_tokens=extract_edges_max_tokens,
                 group_id=group_id,
-                prompt_name='extract_edges.reflexion',
+                prompt_name='extract_edges.edge',
             )
+            edges_data = ExtractedEdges(**llm_response).edges
 
-            missing_facts = reflexion_response.get('missing_facts', [])
+            context['extracted_facts'] = [edge_data.fact for edge_data in edges_data]
 
-            custom_prompt = 'The following facts were missed in a previous extraction: '
-            for fact in missing_facts:
-                custom_prompt += f'\n{fact},'
+            reflexion_iterations += 1
+            if reflexion_iterations < MAX_REFLEXION_ITERATIONS:
+                reflexion_response = await llm_client.generate_response(
+                    prompt_library.extract_edges.reflexion(context),
+                    response_model=MissingFacts,
+                    max_tokens=extract_edges_max_tokens,
+                    group_id=group_id,
+                    prompt_name='extract_edges.reflexion',
+                )
 
-            context['custom_prompt'] = custom_prompt
+                missing_facts = reflexion_response.get('missing_facts', [])
 
-            facts_missed = len(missing_facts) != 0
+                # AC-5.2 & AC-5.3: Build reflexion hint
+                reflexion_hint = 'The following facts were missed in a previous extraction: '
+                for fact in missing_facts:
+                    reflexion_hint += f'\n{fact},'
+
+                # AC-5.3: Concatenate based on preprocessing_mode
+                if clients.preprocessing_prompt:
+                    if clients.preprocessing_mode == 'prepend':
+                        # Prepend mode: preprocessing + reflexion
+                        custom_prompt = f"{clients.preprocessing_prompt}\n\n{reflexion_hint}"
+                    else:  # append mode
+                        # Append mode: reflexion + preprocessing
+                        custom_prompt = f"{reflexion_hint}\n\n{clients.preprocessing_prompt}"
+                else:
+                    # AC-5.4: No preprocessing_prompt, preserve existing behavior
+                    custom_prompt = reflexion_hint
+
+                context['custom_prompt'] = custom_prompt
+
+                facts_missed = len(missing_facts) != 0
+    except Exception as e:
+        # AC-17.12: Classify the error and raise appropriate exception
+        llm_error = error_classifier.classify(e)
+        if llm_error.error_type == LLMErrorType.TRANSIENT:
+            logger.warning(f'Transient LLM error during edge extraction: {e}')
+            raise LLMUnavailableError(
+                message=f'LLM temporarily unavailable during edge extraction: {e}',
+                retryable=True,
+            ) from e
+        else:
+            logger.error(f'Permanent LLM error during edge extraction: {e}')
+            raise LLMUnavailableError(
+                message=f'LLM unavailable during edge extraction: {e}',
+                retryable=False,
+            ) from e
 
     end = time()
     logger.debug(f'Extracted new edges: {edges_data} in {(end - start) * 1000} ms')

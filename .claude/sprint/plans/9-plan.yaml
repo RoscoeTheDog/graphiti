@@ -1,0 +1,216 @@
+story_id: "9"
+title: "Add Template Validation and Error Handling"
+phase: discovery
+created: 2025-12-12
+
+# Discovery Analysis
+
+## Current State
+
+### ExtractionConfig (graphiti_core/extraction_config.py)
+- Has `resolve_prompt()` method that loads templates via TemplateResolver
+- Returns empty string if template not found (line 178)
+- Logs warning but no validation at config load time
+- No distinction between template files and inline prompts in error messages
+
+### TemplateResolver (graphiti_core/template_resolver.py)
+- Has `load()` method that returns None if template not found
+- Has `exists()` method to check template existence
+- Logs warning with search paths when template not found (line 127-131)
+- Three-tier hierarchy: project -> global -> built-in
+
+### ConfigValidator (mcp_server/config_validator.py)
+- Validates syntax, schema, semantics, and cross-fields
+- No current validation for extraction.preprocessing_prompt
+- Has patterns for path validation (session_tracking.watch_path)
+- Has patterns for env var validation
+
+## Acceptance Criteria Analysis
+
+### AC1 (P0): Config validation warns if specified template file doesn't exist
+**Current**: No validation at config load time
+**Required**: Add validation in `ConfigValidator.validate_semantics()`
+**Approach**:
+1. Check if `config.extraction.preprocessing_prompt` is a template file (ends with .md)
+2. Use TemplateResolver to check if template exists
+3. Add warning if template not found, include search paths
+
+### AC2 (P1): Validation distinguishes template files from inline prompts
+**Current**: ExtractionConfig has logic (line 166) but not exposed in validation
+**Required**: Use same logic in validator
+**Approach**:
+1. Extract template detection logic: `prompt.endswith(".md") or "/" in prompt or "\\" in prompt`
+2. Only validate existence for template files, skip inline prompts
+
+### AC3 (P1): Error message includes template search paths for debugging
+**Current**: TemplateResolver logs search paths but not in validation errors
+**Required**: Include search paths in validation warning message
+**Approach**:
+1. Get search paths from TemplateResolver._get_search_paths()
+2. Include in validation warning message for debugging
+
+### AC4 (P2): Graceful degradation: missing template -> disable preprocessing with warning
+**Current**: resolve_prompt() returns empty string (effectively disables)
+**Required**: Document this behavior, add runtime warning
+**Approach**:
+1. resolve_prompt() already handles this (line 173-178)
+2. Add INFO-level log when preprocessing disabled due to missing template
+3. Document behavior in resolve_prompt() docstring
+
+## Implementation Plan
+
+### Phase 1: Enhance ConfigValidator
+
+**File**: mcp_server/config_validator.py
+
+**Changes**:
+1. Add extraction validation to `validate_semantics()` method (after line 269)
+   ```python
+   # Validate extraction template files
+   if config.extraction.preprocessing_prompt:
+       self._validate_extraction_template(config, result, check_paths)
+   ```
+
+2. Add new private method `_validate_extraction_template()`:
+   ```python
+   def _validate_extraction_template(
+       self,
+       config: GraphitiConfig,
+       result: ValidationResult,
+       check_paths: bool,
+   ) -> None:
+       """Validate extraction preprocessing template.
+
+       Checks if specified template file exists in hierarchy.
+       Only validates template files (.md), not inline prompts.
+       """
+       prompt = config.extraction.preprocessing_prompt
+
+       # Skip if disabled
+       if not prompt or prompt in (False, None):
+           return
+
+       # Check if it's a template file (not inline prompt)
+       is_template = (
+           prompt.endswith(".md") or
+           "/" in prompt or
+           "\\" in prompt
+       )
+
+       if not is_template:
+           # Inline prompt - no validation needed
+           return
+
+       # Check template exists
+       if check_paths:
+           from graphiti_core.template_resolver import TemplateResolver
+
+           project_dir = Path(config.project.project_root).expanduser() if config.project.project_root else None
+           resolver = TemplateResolver(project_dir=project_dir)
+
+           if not resolver.exists(prompt):
+               search_paths = resolver._get_search_paths(prompt)
+               search_paths_str = "\n  ".join(str(p) for p in search_paths)
+
+               result.add_warning(
+                   path="extraction.preprocessing_prompt",
+                   message=f"Template file not found: {prompt}",
+                   suggestion=f"Template searched in:\n  {search_paths_str}\n"
+                              f"Create template file or use inline prompt instead."
+               )
+   ```
+
+### Phase 2: Enhance ExtractionConfig
+
+**File**: graphiti_core/extraction_config.py
+
+**Changes**:
+1. Update `resolve_prompt()` docstring to document graceful degradation (line 126-157)
+   - Add note about missing template behavior
+   - Document that empty string disables preprocessing
+
+2. Add INFO-level log when template missing (replace line 174-178):
+   ```python
+   if content is None:
+       logger.info(
+           "Template '%s' not found - preprocessing disabled. "
+           "Searched in: %s",
+           prompt_value,
+           [str(p) for p in resolver._get_search_paths(prompt_value)],
+       )
+       logger.warning(
+           "Template '%s' not found in hierarchy, returning empty string",
+           prompt_value,
+       )
+       return ""
+   ```
+
+### Phase 3: Add Tests
+
+**File**: tests/test_config_validator.py (or new file if doesn't exist)
+
+**Test Cases**:
+1. Test valid template file exists
+2. Test missing template file produces warning
+3. Test inline prompt skips validation
+4. Test disabled preprocessing skips validation
+5. Test warning includes search paths
+
+**File**: tests/test_extraction_config.py
+
+**Test Cases**:
+1. Test resolve_prompt() with missing template returns empty string
+2. Test resolve_prompt() logs INFO when template missing
+3. Test resolve_prompt() distinguishes templates from inline prompts
+
+## Dependencies
+
+- Story 6: ExtractionConfig must be integrated in GraphitiConfig (COMPLETED)
+- Story 8: TemplateResolver must exist with hierarchy (COMPLETED)
+
+## Files to Modify
+
+1. `mcp_server/config_validator.py` - Add extraction template validation
+2. `graphiti_core/extraction_config.py` - Enhance logging, update docs
+3. `tests/test_config_validator.py` - Add validation tests
+4. `tests/test_extraction_config.py` - Add resolve_prompt tests
+
+## Testing Strategy
+
+### Unit Tests
+- ConfigValidator._validate_extraction_template() with various inputs
+- ExtractionConfig.resolve_prompt() with missing templates
+- Template vs inline prompt detection logic
+
+### Integration Tests
+- Full config validation with missing template
+- Template resolution through full hierarchy
+- Graceful degradation in real usage
+
+### Manual Testing
+1. Create config with valid template -> no warnings
+2. Create config with missing template -> warning with paths
+3. Create config with inline prompt -> no warnings
+4. Run with missing template -> preprocessing disabled
+
+## Risk Assessment
+
+**Low Risk**: All changes are additive validation and logging
+- No breaking changes to existing behavior
+- Graceful degradation already implemented
+- Only adding warnings, not errors
+
+## Token Estimates
+
+- Implementation: ~1,500 tokens (2 files modified, method additions)
+- Tests: ~1,000 tokens (5-8 test cases)
+- Total: ~2,500 tokens
+
+## Success Criteria
+
+- [ ] ConfigValidator checks template existence at config load time
+- [ ] Validation distinguishes templates from inline prompts
+- [ ] Warning messages include search paths for debugging
+- [ ] Missing templates disable preprocessing gracefully (already working)
+- [ ] All acceptance criteria verified by tests
+- [ ] Tests pass with >80% coverage of new code

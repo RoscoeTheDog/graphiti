@@ -1,0 +1,85 @@
+{
+  "archived_at": "2025-12-04-0658",
+  "validation_id": "-15",
+  "story_data": {
+    "-15": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Documentation Update - Comprehensive User Guide",
+      "status": "unassigned",
+      "validates": "15",
+      "children": [
+        "-15.d",
+        "-15.i",
+        "-15.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-15.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Documentation Update - Comprehensive User Guide",
+      "status": "unassigned",
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-15.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Documentation Update - Comprehensive User Guide",
+      "status": "pending",
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-15.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Documentation Update - Comprehensive User Guide",
+      "status": "pending",
+      "parent": "-15",
+      "validates": "15",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "children": [
+    "-15.d",
+    "-15.i",
+    "-15.t"
+  ]
+}

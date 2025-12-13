@@ -63,23 +63,55 @@ The MCP server includes automatic recovery and monitoring:
 
 ### When Working on Code
 
-1. **Type Safety**: Graphiti uses Pydantic for configuration validation
+1. **Platform-Agnostic Path Handling**: **CRITICAL REQUIREMENT**
+   - **All path operations MUST be platform-agnostic**
+   - **Hashing/Internal**: Always normalize to UNIX format (`/c/Users/...` on Windows)
+   - **Return Values**: Always use native OS format (`C:\Users\...` on Windows, `/home/...` on Unix)
+   - Use Python's `pathlib.Path` for all path operations (handles platform automatically)
+   - Test on both Windows and Unix platforms
+   - See: `.claude/implementation/PLATFORM_AGNOSTIC_PATHS.md`
+
+2. **Type Safety**: Graphiti uses Pydantic for configuration validation
    - Maintain type hints in all code
    - Use Pydantic models for config schemas
+   - All functions must have type-annotated parameters and return values
 
-2. **Testing**: Tests are in `tests/` directory
+3. **Testing**: Tests are in `tests/` directory
    - Run tests with `pytest tests/`
-   - Maintain test coverage for new features
+   - Maintain >80% test coverage for new features
+   - Include platform-specific tests (Windows + Unix)
+   - Test error conditions and edge cases
 
-3. **Configuration Changes**:
+4. **Configuration Changes**:
    - Update `graphiti.config.json` schema if adding new config options
    - Update `CONFIGURATION.md` with new options
    - Maintain backward compatibility or document breaking changes
+   - Use unified configuration system (no scattered config files)
 
-4. **Memory Operations**:
+5. **Error Handling and Logging**:
+   - All file I/O wrapped in try-except blocks
+   - Use appropriate logging levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+   - Include context in error messages (file paths, IDs)
+   - Log unexpected errors with stack traces (`exc_info=True`)
+
+6. **Memory Operations**:
    - Episodes are stored in Neo4j graph database
    - Support for text, JSON, and message sources
    - Automatic temporal tracking
+
+### Cross-Cutting Requirements
+
+**ALL new code must satisfy requirements in `.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md`**
+
+Key requirements:
+- Platform-agnostic path handling
+- Comprehensive error handling and logging
+- Type safety with Pydantic models
+- >80% test coverage with platform-specific tests
+- <5% performance overhead
+- No exposure of sensitive information
+- Unified configuration system
+- Complete user and developer documentation
 
 ### Migration Notes
 
@@ -140,12 +172,20 @@ Graphiti requires Neo4j database:
 
 ## Related Files
 
+**Configuration & Requirements**:
 - **[CONFIGURATION.md](CONFIGURATION.md)** - Configuration schema and reference
+- **[.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md](.claude/implementation/CROSS_CUTTING_REQUIREMENTS.md)** - Cross-cutting requirements for all code
+- **[.claude/implementation/PLATFORM_AGNOSTIC_PATHS.md](.claude/implementation/PLATFORM_AGNOSTIC_PATHS.md)** - Platform-agnostic path handling guide
+
+**User Documentation**:
 - **[README.md](README.md)** - User-facing quick start
 - **[docs/MCP_TOOLS.md](docs/MCP_TOOLS.md)** - MCP tools user documentation
 - **[claude-mcp-installer/instance/CLAUDE_INSTALL.md](claude-mcp-installer/instance/CLAUDE_INSTALL.md)** - Installation guide
 
+**Implementation**:
+- **[.claude/implementation/index.md](.claude/implementation/index.md)** - Sprint tracking and implementation plans
+
 ---
 
-**Last Updated:** 2025-11-06
-**Version:** 3.0 (Agent Directives Only)
+**Last Updated:** 2025-11-13
+**Version:** 3.1 (Added Platform-Agnostic Requirements)

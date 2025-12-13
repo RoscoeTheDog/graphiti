@@ -1,0 +1,131 @@
+# Plan: R3 - Make sync_history MCP tool read-only (dry_run enforced)
+# Generated: 2025-12-07 (Discovery Phase R3.d)
+
+story_id: R3
+title: Make sync_history MCP tool read-only (dry_run enforced)
+type: remediation
+priority: HIGH
+
+discovery_summary:
+  current_implementation:
+    mcp_tool:
+      file: mcp_server/graphiti_mcp_server.py
+      lines: 2259-2300
+      function: session_tracking_sync_history
+      parameters: [project, days, max_sessions, dry_run]
+      dry_run_default: true
+      issue: dry_run can be overridden to False by MCP clients
+
+    backend_function:
+      file: mcp_server/manual_sync.py
+      lines: 29-204
+      function: session_tracking_sync_history
+      note: Full implementation, used by both MCP tool and CLI
+
+    cli:
+      file: mcp_server/session_tracking_cli.py
+      lines: 211-303
+      function: cmd_sync
+      flags: [--dry-run (default), --no-dry-run, --confirm]
+      note: CLI should retain full capability
+
+  problem:
+    - MCP tool exposes dry_run parameter to AI clients
+    - AI assistants can set dry_run=False, triggering actual indexing
+    - No user consent for potentially expensive operations ($0.17/session)
+    - CLI already has proper safeguards (--confirm for all-history)
+
+  solution:
+    - Remove dry_run parameter from MCP tool signature
+    - Always pass dry_run=True to backend function
+    - MCP tool becomes read-only (preview mode only)
+    - Actual sync requires explicit CLI invocation
+
+implementation:
+  phase: R3.i
+
+  files_to_modify:
+    - path: mcp_server/graphiti_mcp_server.py
+      changes:
+        - location: lines 2259-2300
+          action: modify
+          description: |
+            1. Remove dry_run parameter from function signature
+            2. Update docstring to explain read-only behavior
+            3. Hardcode dry_run=True in call to backend function
+            4. Update examples to show preview-only behavior
+
+    - path: docs/MCP_TOOLS.md
+      changes:
+        - action: update
+          description: |
+            Update session_tracking_sync_history documentation:
+            - Remove dry_run parameter from signature
+            - Note that tool is read-only (preview mode)
+            - Direct users to CLI for actual sync
+
+    - path: docs/SESSION_TRACKING_USER_GUIDE.md
+      changes:
+        - action: update
+          description: |
+            Update manual sync section:
+            - Clarify MCP tool is preview-only
+            - Show CLI workflow for actual sync
+
+  files_unchanged:
+    - path: mcp_server/manual_sync.py
+      reason: Backend function stays unchanged for CLI compatibility
+    - path: mcp_server/session_tracking_cli.py
+      reason: CLI retains full capability
+
+testing:
+  phase: R3.t
+
+  files_to_modify:
+    - path: tests/mcp/test_session_tracking_tools.py
+      changes:
+        - action: update
+          description: |
+            1. Remove tests that expect dry_run=False via MCP
+            2. Add test that MCP tool always returns dry_run=True in response
+            3. Verify MCP tool ignores any dry_run parameter passed
+
+  verification_steps:
+    - description: MCP tool returns preview JSON
+      command: session_tracking_sync_history()
+      expected: {"dry_run": true, "sessions_found": N, "message": "..."}
+
+    - description: CLI actual sync still works
+      command: graphiti-mcp session-tracking sync --no-dry-run --days 1 --max-sessions 1
+      expected: {"dry_run": false, "sessions_indexed": N}
+
+acceptance_criteria:
+  - id: AC1
+    description: MCP tool signature no longer exposes dry_run parameter
+    verification: Check function signature in graphiti_mcp_server.py
+
+  - id: AC2
+    description: MCP tool always operates in dry_run mode
+    verification: Call MCP tool, verify response has dry_run=true
+
+  - id: AC3
+    description: MCP tool docstring states read-only behavior
+    verification: Review docstring text
+
+  - id: AC4
+    description: CLI retains full capability
+    verification: Run CLI with --no-dry-run, verify actual indexing
+
+  - id: AC5
+    description: Tests updated for new behavior
+    verification: pytest tests/mcp/test_session_tracking_tools.py passes
+
+  - id: AC6
+    description: Documentation updated
+    verification: Review MCP_TOOLS.md and USER_GUIDE changes
+
+estimated_tokens:
+  discovery: 800  # completed
+  implementation: 1500
+  testing: 500
+  total: 2800

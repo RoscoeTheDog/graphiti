@@ -23,7 +23,8 @@ from pydantic import BaseModel
 
 from graphiti_core.graphiti_types import GraphitiClients
 from graphiti_core.helpers import MAX_REFLEXION_ITERATIONS, semaphore_gather
-from graphiti_core.llm_client import LLMClient
+from graphiti_core.llm_client import LLMClient, LLMUnavailableError
+from graphiti_core.llm_client.availability import LLMErrorClassifier, LLMErrorType
 from graphiti_core.llm_client.config import ModelSize
 from graphiti_core.nodes import (
     EntityNode,
@@ -92,12 +93,22 @@ async def extract_nodes(
     entity_types: dict[str, type[BaseModel]] | None = None,
     excluded_entity_types: list[str] | None = None,
 ) -> list[EntityNode]:
+    """Extract entity nodes from an episode using LLM.
+
+    AC-17.12: Wrapped with error handling that classifies LLM errors
+    and raises appropriate exceptions.
+
+    Raises:
+        LLMUnavailableError: If the LLM is unavailable after retries.
+    """
     start = time()
     llm_client = clients.llm_client
     llm_response = {}
-    custom_prompt = ''
+    # AC-4.1: Initialize with preprocessing_prompt if available
+    custom_prompt = clients.preprocessing_prompt if clients.preprocessing_prompt else ''
     entities_missed = True
     reflexion_iterations = 0
+    error_classifier = LLMErrorClassifier()
 
     entity_types_context = [
         {
@@ -120,57 +131,87 @@ async def extract_nodes(
         else []
     )
 
-    context = {
-        'episode_content': episode.content,
-        'episode_timestamp': episode.valid_at.isoformat(),
-        'previous_episodes': [ep.content for ep in previous_episodes],
-        'custom_prompt': custom_prompt,
-        'entity_types': entity_types_context,
-        'source_description': episode.source_description,
-    }
+    try:
+        while entities_missed and reflexion_iterations <= MAX_REFLEXION_ITERATIONS:
+            # AC-4.5: Update context with current custom_prompt in each iteration
+            context = {
+                'episode_content': episode.content,
+                'episode_timestamp': episode.valid_at.isoformat(),
+                'previous_episodes': [ep.content for ep in previous_episodes],
+                'custom_prompt': custom_prompt,
+                'entity_types': entity_types_context,
+                'source_description': episode.source_description,
+            }
 
-    while entities_missed and reflexion_iterations <= MAX_REFLEXION_ITERATIONS:
-        if episode.source == EpisodeType.message:
-            llm_response = await llm_client.generate_response(
-                prompt_library.extract_nodes.extract_message(context),
-                response_model=ExtractedEntities,
-                group_id=episode.group_id,
-                prompt_name='extract_nodes.extract_message',
-            )
-        elif episode.source == EpisodeType.text:
-            llm_response = await llm_client.generate_response(
-                prompt_library.extract_nodes.extract_text(context),
-                response_model=ExtractedEntities,
-                group_id=episode.group_id,
-                prompt_name='extract_nodes.extract_text',
-            )
-        elif episode.source == EpisodeType.json:
-            llm_response = await llm_client.generate_response(
-                prompt_library.extract_nodes.extract_json(context),
-                response_model=ExtractedEntities,
-                group_id=episode.group_id,
-                prompt_name='extract_nodes.extract_json',
-            )
+            if episode.source == EpisodeType.message:
+                llm_response = await llm_client.generate_response(
+                    prompt_library.extract_nodes.extract_message(context),
+                    response_model=ExtractedEntities,
+                    group_id=episode.group_id,
+                    prompt_name='extract_nodes.extract_message',
+                )
+            elif episode.source == EpisodeType.text:
+                llm_response = await llm_client.generate_response(
+                    prompt_library.extract_nodes.extract_text(context),
+                    response_model=ExtractedEntities,
+                    group_id=episode.group_id,
+                    prompt_name='extract_nodes.extract_text',
+                )
+            elif episode.source == EpisodeType.json:
+                llm_response = await llm_client.generate_response(
+                    prompt_library.extract_nodes.extract_json(context),
+                    response_model=ExtractedEntities,
+                    group_id=episode.group_id,
+                    prompt_name='extract_nodes.extract_json',
+                )
 
-        response_object = ExtractedEntities(**llm_response)
+            response_object = ExtractedEntities(**llm_response)
 
-        extracted_entities: list[ExtractedEntity] = response_object.extracted_entities
+            extracted_entities: list[ExtractedEntity] = response_object.extracted_entities
 
-        reflexion_iterations += 1
-        if reflexion_iterations < MAX_REFLEXION_ITERATIONS:
-            missing_entities = await extract_nodes_reflexion(
-                llm_client,
-                episode,
-                previous_episodes,
-                [entity.name for entity in extracted_entities],
-                episode.group_id,
-            )
+            reflexion_iterations += 1
+            if reflexion_iterations < MAX_REFLEXION_ITERATIONS:
+                missing_entities = await extract_nodes_reflexion(
+                    llm_client,
+                    episode,
+                    previous_episodes,
+                    [entity.name for entity in extracted_entities],
+                    episode.group_id,
+                )
 
-            entities_missed = len(missing_entities) != 0
+                entities_missed = len(missing_entities) != 0
 
-            custom_prompt = 'Make sure that the following entities are extracted: '
-            for entity in missing_entities:
-                custom_prompt += f'\n{entity},'
+                # AC-4.2 & AC-4.3: Build reflexion hint
+                reflexion_hint = 'Make sure that the following entities are extracted: '
+                for entity in missing_entities:
+                    reflexion_hint += f'\n{entity},'
+
+                # AC-4.3: Concatenate based on preprocessing_mode
+                if clients.preprocessing_prompt:
+                    if clients.preprocessing_mode == 'prepend':
+                        # Prepend mode: preprocessing + reflexion
+                        custom_prompt = f"{clients.preprocessing_prompt}\n\n{reflexion_hint}"
+                    else:  # append mode
+                        # Append mode: reflexion + preprocessing
+                        custom_prompt = f"{reflexion_hint}\n\n{clients.preprocessing_prompt}"
+                else:
+                    # AC-4.4: No preprocessing_prompt, preserve existing behavior
+                    custom_prompt = reflexion_hint
+    except Exception as e:
+        # AC-17.12: Classify the error and raise appropriate exception
+        llm_error = error_classifier.classify(e)
+        if llm_error.error_type == LLMErrorType.TRANSIENT:
+            logger.warning(f'Transient LLM error during node extraction: {e}')
+            raise LLMUnavailableError(
+                message=f'LLM temporarily unavailable during node extraction: {e}',
+                retryable=True,
+            ) from e
+        else:
+            logger.error(f'Permanent LLM error during node extraction: {e}')
+            raise LLMUnavailableError(
+                message=f'LLM unavailable during node extraction: {e}',
+                retryable=False,
+            ) from e
 
     filtered_extracted_entities = [entity for entity in extracted_entities if entity.name.strip()]
     end = time()

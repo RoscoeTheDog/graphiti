@@ -1,0 +1,549 @@
+# Discovery Plan: Story 4 - Tool Classification Heuristics
+# Generated: 2025-12-11
+# Phase: discovery (4.d)
+
+story:
+  id: "4"
+  title: "Tool Classification Heuristics"
+  dependency: "Story 2 (Activity Vector Model)"
+
+# =============================================================================
+# DISCOVERY FINDINGS
+# =============================================================================
+
+codebase_analysis:
+  existing_files:
+    - path: "graphiti_core/session_tracking/activity_vector.py"
+      purpose: "ActivityVector model (8 dimensions) - Story 2"
+      key_interfaces:
+        - "ActivityVector.from_signals(signals: dict[str, float]) -> ActivityVector"
+        - "ActivityVector.DIMENSIONS: list[str] = ['building', 'fixing', 'configuring', 'exploring', 'refactoring', 'reviewing', 'testing', 'documenting']"
+        - "ActivityVector.dominant_activities: list[str]"
+        - "ActivityVector.primary_activity: str"
+
+    - path: "graphiti_core/session_tracking/activity_detector.py"
+      purpose: "Activity detection from messages - Story 3"
+      key_interfaces:
+        - "ActivityDetector.detect(messages: list[SessionMessage]) -> ActivityVector"
+        - "INTENT_KEYWORDS: ClassVar[dict[str, list[str]]]"
+        - "ERROR_PATTERNS: ClassVar[list[str]]"
+        - "FILE_PATTERNS: ClassVar[dict[str, list[str]]]"
+      patterns_to_reuse:
+        - "Keyword-based detection with signal caps"
+        - "Combining multiple signal sources"
+        - "ActivityVector.from_signals() for final output"
+
+    - path: "graphiti_core/session_tracking/types.py"
+      purpose: "Type definitions for session tracking"
+      key_interfaces:
+        - "ToolCall: dataclass with tool_name, parameters, status"
+        - "ToolCallStatus: SUCCESS/ERROR/TIMEOUT enum"
+
+  patterns_found:
+    - pattern: "Pydantic models with Field validation and ClassVar constants"
+      location: "activity_vector.py, activity_detector.py"
+      reuse: "Follow same pattern for ToolClassifier enums and models"
+
+    - pattern: "Pattern matching dictionaries with confidence scores"
+      location: "activity_detector.py (INTENT_KEYWORDS, FILE_PATTERNS)"
+      reuse: "Similar structure for tool name pattern matching"
+
+    - pattern: "Signal combination with capping at 1.0"
+      location: "activity_detector.py (_combine_signals method)"
+      reuse: "Same approach for combining intent and domain confidences"
+
+# =============================================================================
+# IMPLEMENTATION PLAN
+# =============================================================================
+
+implementation:
+  file_to_create: "graphiti_core/session_tracking/tool_classifier.py"
+
+  enums:
+    - name: "ToolIntent"
+      purpose: "Enumeration of tool operation intents"
+      values:
+        - CREATE: "Creating new files or resources"
+        - MODIFY: "Modifying existing files or resources"
+        - DELETE: "Deleting files or resources"
+        - READ: "Reading files or data"
+        - SEARCH: "Searching for content or patterns"
+        - EXECUTE: "Running commands or processes"
+        - CONFIGURE: "Setting up or modifying configuration"
+        - COMMUNICATE: "Communication or messaging"
+        - VALIDATE: "Testing or validation operations"
+        - TRANSFORM: "Converting or transforming data"
+
+    - name: "ToolDomain"
+      purpose: "Enumeration of tool operation domains"
+      values:
+        - FILESYSTEM: "File and directory operations"
+        - CODE: "Code analysis and manipulation"
+        - DATABASE: "Database operations"
+        - NETWORK: "Network and web operations"
+        - PROCESS: "Process and shell operations"
+        - VERSION_CONTROL: "Git and version control"
+        - PACKAGE: "Package management (npm, pip, etc.)"
+        - DOCUMENTATION: "Documentation operations"
+        - TESTING: "Test-related operations"
+        - MEMORY: "Memory/context operations (MCP)"
+        - UNKNOWN: "Unclassified operations"
+
+  models:
+    - name: "ToolClassification"
+      purpose: "Classification result for a tool call"
+      base_class: "pydantic.BaseModel"
+      fields:
+        - name: "intent"
+          type: "ToolIntent"
+          description: "The detected intent of the tool operation"
+
+        - name: "domain"
+          type: "ToolDomain"
+          description: "The domain this tool operates in"
+
+        - name: "confidence"
+          type: "float"
+          description: "0.0-1.0 confidence in the classification"
+          validation: "ge=0.0, le=1.0"
+
+        - name: "activity_signals"
+          type: "dict[str, float]"
+          description: "Mapping to ActivityVector dimensions"
+          default: "{}"
+
+        - name: "tool_name"
+          type: "str"
+          description: "Original tool name that was classified"
+
+        - name: "method"
+          type: 'Literal["heuristic", "llm", "cached"]'
+          description: "Classification method used"
+          default: '"heuristic"'
+
+  classes:
+    - name: "ToolClassifier"
+      purpose: "Classify tools using heuristics (LLM fallback in Story 5)"
+      methods:
+        - name: "classify"
+          signature: "classify(tool_name: str, parameters: dict[str, Any] | None = None) -> ToolClassification"
+          description: "Main entry point - classifies a tool call"
+          public: true
+
+        - name: "_try_heuristic"
+          signature: "_try_heuristic(tool_name: str, parameters: dict[str, Any] | None = None) -> ToolClassification | None"
+          description: "Try to classify using heuristic patterns, return None if no match"
+          private: true
+
+        - name: "_match_intent"
+          signature: "_match_intent(tool_name_lower: str) -> tuple[ToolIntent, float] | None"
+          description: "Match tool name to intent with confidence score"
+          private: true
+
+        - name: "_match_domain"
+          signature: "_match_domain(tool_name_lower: str) -> tuple[ToolDomain, float] | None"
+          description: "Match tool name to domain with confidence score"
+          private: true
+
+        - name: "_compute_activity_signals"
+          signature: "_compute_activity_signals(intent: ToolIntent, domain: ToolDomain) -> dict[str, float]"
+          description: "Map intent+domain combination to ActivityVector contributions"
+          private: true
+
+# =============================================================================
+# HEURISTIC PATTERNS
+# =============================================================================
+
+heuristic_patterns:
+  intent_patterns:
+    description: "Pattern tuples map to (ToolIntent, confidence)"
+    patterns:
+      - keywords: ["read", "get", "fetch", "list", "show", "view", "cat", "head", "tail"]
+        intent: "READ"
+        confidence: 0.8
+
+      - keywords: ["write", "create", "add", "new", "insert", "touch", "mkdir"]
+        intent: "CREATE"
+        confidence: 0.8
+
+      - keywords: ["edit", "update", "modify", "replace", "patch", "change"]
+        intent: "MODIFY"
+        confidence: 0.8
+
+      - keywords: ["delete", "remove", "rm", "unlink", "drop"]
+        intent: "DELETE"
+        confidence: 0.8
+
+      - keywords: ["search", "find", "grep", "glob", "query", "lookup"]
+        intent: "SEARCH"
+        confidence: 0.85
+
+      - keywords: ["bash", "shell", "exec", "run", "execute", "command"]
+        intent: "EXECUTE"
+        confidence: 0.75
+
+      - keywords: ["test", "check", "validate", "verify", "assert", "lint"]
+        intent: "VALIDATE"
+        confidence: 0.8
+
+      - keywords: ["config", "setup", "init", "set", "configure"]
+        intent: "CONFIGURE"
+        confidence: 0.75
+
+  domain_patterns:
+    description: "Pattern tuples map to ToolDomain"
+    patterns:
+      - keywords: ["file", "dir", "path", "folder", "fs"]
+        domain: "FILESYSTEM"
+        confidence: 0.85
+
+      - keywords: ["symbol", "code", "ast", "serena", "class", "function", "method"]
+        domain: "CODE"
+        confidence: 0.9
+
+      - keywords: ["git", "commit", "branch", "merge", "pr", "push", "pull"]
+        domain: "VERSION_CONTROL"
+        confidence: 0.95
+
+      - keywords: ["npm", "pip", "yarn", "pnpm", "cargo", "bundle", "package"]
+        domain: "PACKAGE"
+        confidence: 0.9
+
+      - keywords: ["test", "pytest", "jest", "spec", "coverage"]
+        domain: "TESTING"
+        confidence: 0.9
+
+      - keywords: ["memory", "graphiti", "context", "episode"]
+        domain: "MEMORY"
+        confidence: 0.9
+
+      - keywords: ["web", "http", "fetch", "url", "api"]
+        domain: "NETWORK"
+        confidence: 0.85
+
+      - keywords: ["doc", "readme", "markdown", "md"]
+        domain: "DOCUMENTATION"
+        confidence: 0.8
+
+  known_tool_mappings:
+    description: "Direct mappings for known Claude Code tools"
+    mappings:
+      - tool_name: "Read"
+        intent: "READ"
+        domain: "FILESYSTEM"
+        confidence: 1.0
+
+      - tool_name: "Write"
+        intent: "CREATE"
+        domain: "FILESYSTEM"
+        confidence: 1.0
+
+      - tool_name: "Edit"
+        intent: "MODIFY"
+        domain: "FILESYSTEM"
+        confidence: 1.0
+
+      - tool_name: "Glob"
+        intent: "SEARCH"
+        domain: "FILESYSTEM"
+        confidence: 1.0
+
+      - tool_name: "Grep"
+        intent: "SEARCH"
+        domain: "FILESYSTEM"
+        confidence: 1.0
+
+      - tool_name: "Bash"
+        intent: "EXECUTE"
+        domain: "PROCESS"
+        confidence: 1.0
+
+      - tool_name: "Task"
+        intent: "EXECUTE"
+        domain: "PROCESS"
+        confidence: 0.9
+
+      - tool_name: "TodoWrite"
+        intent: "CREATE"
+        domain: "MEMORY"
+        confidence: 0.9
+
+      - tool_name: "WebFetch"
+        intent: "READ"
+        domain: "NETWORK"
+        confidence: 1.0
+
+      - tool_name: "WebSearch"
+        intent: "SEARCH"
+        domain: "NETWORK"
+        confidence: 1.0
+
+      - tool_name: "AskUserQuestion"
+        intent: "COMMUNICATE"
+        domain: "UNKNOWN"
+        confidence: 0.9
+
+      # MCP Serena tools
+      - tool_name: "mcp__serena__find_symbol"
+        intent: "SEARCH"
+        domain: "CODE"
+        confidence: 1.0
+
+      - tool_name: "mcp__serena__replace_symbol_body"
+        intent: "MODIFY"
+        domain: "CODE"
+        confidence: 1.0
+
+      - tool_name: "mcp__serena__get_symbols_overview"
+        intent: "READ"
+        domain: "CODE"
+        confidence: 1.0
+
+      - tool_name: "mcp__serena__find_referencing_symbols"
+        intent: "SEARCH"
+        domain: "CODE"
+        confidence: 1.0
+
+      # MCP Claude Context tools
+      - tool_name: "mcp__claude-context__search_code"
+        intent: "SEARCH"
+        domain: "CODE"
+        confidence: 1.0
+
+      - tool_name: "mcp__claude-context__index_codebase"
+        intent: "CONFIGURE"
+        domain: "CODE"
+        confidence: 0.9
+
+      # MCP Graphiti tools
+      - tool_name: "mcp__graphiti-memory__add_memory"
+        intent: "CREATE"
+        domain: "MEMORY"
+        confidence: 1.0
+
+      - tool_name: "mcp__graphiti-memory__search_memory_nodes"
+        intent: "SEARCH"
+        domain: "MEMORY"
+        confidence: 1.0
+
+# =============================================================================
+# ACTIVITY SIGNAL MAPPING
+# =============================================================================
+
+activity_signal_mapping:
+  description: "Maps (intent, domain) combinations to ActivityVector contributions"
+
+  intent_to_activity:
+    CREATE:
+      building: 0.6
+    MODIFY:
+      building: 0.4
+      refactoring: 0.3
+    DELETE:
+      refactoring: 0.4
+    READ:
+      exploring: 0.5
+      reviewing: 0.3
+    SEARCH:
+      exploring: 0.6
+    EXECUTE:
+      building: 0.3
+      testing: 0.2
+    CONFIGURE:
+      configuring: 0.7
+    COMMUNICATE:
+      exploring: 0.3
+    VALIDATE:
+      testing: 0.6
+
+  domain_modifiers:
+    description: "Boost specific activities based on domain"
+    TESTING:
+      testing: 0.3
+    DOCUMENTATION:
+      documenting: 0.5
+    VERSION_CONTROL:
+      reviewing: 0.2
+    CODE:
+      building: 0.1
+      refactoring: 0.1
+
+# =============================================================================
+# ALGORITHM DESIGN
+# =============================================================================
+
+algorithm:
+  step_1_known_tool_check:
+    description: "Check if tool_name exactly matches known tools"
+    input: "tool_name: str"
+    output: "ToolClassification | None"
+    logic: |
+      1. Lookup tool_name in KNOWN_TOOL_MAPPINGS
+      2. If found: return ToolClassification with confidence 1.0
+      3. If not found: return None, proceed to step 2
+
+  step_2_pattern_matching:
+    description: "Try to match tool name patterns to intent/domain"
+    input: "tool_name: str (lowercase)"
+    output: "tuple[ToolIntent, ToolDomain, float] | None"
+    logic: |
+      1. Split tool_name into parts (underscore, camelCase, dots)
+      2. For each INTENT_PATTERNS entry:
+         - Check if any keyword appears in tool_name parts
+         - Track highest confidence match
+      3. For each DOMAIN_PATTERNS entry:
+         - Check if any keyword appears in tool_name parts
+         - Track highest confidence match
+      4. If both intent and domain found:
+         - Combined confidence = min(intent_conf, domain_conf)
+         - Return (intent, domain, confidence)
+      5. If only intent or domain found:
+         - Use default UNKNOWN for missing
+         - Return with reduced confidence (0.5)
+
+  step_3_activity_signal_computation:
+    description: "Compute activity vector contributions from classification"
+    input: "intent: ToolIntent, domain: ToolDomain"
+    output: "dict[str, float]"
+    logic: |
+      1. Start with INTENT_TO_ACTIVITY mapping for the intent
+      2. Apply DOMAIN_MODIFIERS for the domain (additive)
+      3. Cap each signal at 1.0
+      4. Return signals dict
+
+  step_4_create_classification:
+    description: "Create final ToolClassification result"
+    input: "intent, domain, confidence, activity_signals, tool_name"
+    output: "ToolClassification"
+    logic: |
+      Return ToolClassification(
+          intent=intent,
+          domain=domain,
+          confidence=confidence,
+          activity_signals=activity_signals,
+          tool_name=tool_name,
+          method="heuristic"
+      )
+
+# =============================================================================
+# TESTING REQUIREMENTS
+# =============================================================================
+
+testing:
+  unit_tests:
+    - name: "test_known_tool_read"
+      description: "Read tool classified as READ/FILESYSTEM with confidence 1.0"
+
+    - name: "test_known_tool_write"
+      description: "Write tool classified as CREATE/FILESYSTEM with confidence 1.0"
+
+    - name: "test_known_tool_edit"
+      description: "Edit tool classified as MODIFY/FILESYSTEM with confidence 1.0"
+
+    - name: "test_known_tool_bash"
+      description: "Bash tool classified as EXECUTE/PROCESS with confidence 1.0"
+
+    - name: "test_known_tool_grep"
+      description: "Grep tool classified as SEARCH/FILESYSTEM with confidence 1.0"
+
+    - name: "test_mcp_serena_tool"
+      description: "mcp__serena__find_symbol classified as SEARCH/CODE"
+
+    - name: "test_pattern_match_git_command"
+      description: "'git_commit' pattern matches VERSION_CONTROL domain"
+
+    - name: "test_pattern_match_pytest"
+      description: "'pytest' pattern matches VALIDATE/TESTING"
+
+    - name: "test_unknown_tool_fallback"
+      description: "Unknown tool returns UNKNOWN domain with low confidence"
+
+    - name: "test_activity_signals_read_filesystem"
+      description: "READ/FILESYSTEM produces exploring signal"
+
+    - name: "test_activity_signals_modify_code"
+      description: "MODIFY/CODE produces building and refactoring signals"
+
+    - name: "test_activity_signals_validate_testing"
+      description: "VALIDATE/TESTING produces high testing signal"
+
+    - name: "test_confidence_capping"
+      description: "All confidence and signal values stay in 0.0-1.0 range"
+
+  integration_tests:
+    - name: "test_classify_from_tool_call"
+      description: "Test with actual ToolCall object from types.py"
+
+    - name: "test_activity_vector_compatibility"
+      description: "activity_signals dict compatible with ActivityVector.from_signals()"
+
+# =============================================================================
+# DEPENDENCIES & INTEGRATION
+# =============================================================================
+
+dependencies:
+  internal:
+    - module: "graphiti_core.session_tracking.activity_vector"
+      imports: ["ActivityVector"]
+      purpose: "For activity signal compatibility"
+
+  external:
+    - package: "pydantic"
+      imports: ["BaseModel", "Field"]
+      purpose: "Model validation"
+
+    - package: "enum"
+      imports: ["Enum", "auto"]
+      purpose: "Enum definitions"
+
+    - package: "typing"
+      imports: ["Any", "Literal", "ClassVar"]
+      purpose: "Type hints"
+
+    - package: "re"
+      purpose: "Pattern matching for tool name splitting"
+
+    - package: "logging"
+      purpose: "Structured logging"
+
+exports_to_add:
+  - module: "graphiti_core/session_tracking/__init__.py"
+    exports:
+      - "ToolIntent"
+      - "ToolDomain"
+      - "ToolClassification"
+      - "ToolClassifier"
+
+integration_points:
+  - target: "Story 5 - LLM Tool Classification with Caching"
+    description: "ToolClassifier will be extended to support LLM fallback for unknown tools"
+    interface: |
+      # Story 5 will add:
+      # - _try_llm_classification() method
+      # - LLM caching layer
+      # - classify() will call _try_heuristic() first, then _try_llm() if needed
+
+  - target: "Story 6 - Bash Command Analysis"
+    description: "When tool is Bash, extract and classify the command within"
+    interface: |
+      # Story 6 will handle:
+      # - Parsing bash command string from parameters
+      # - Classifying git, npm, pytest, etc. commands
+      # - More granular activity signals
+
+  - target: "Story 7 - Unified Tool Classifier"
+    description: "Combines heuristics, LLM, and bash analysis"
+    interface: |
+      # Story 7 orchestrates:
+      # - ToolClassifier (heuristic, Story 4)
+      # - LLM classifier (Story 5)
+      # - Bash command analyzer (Story 6)
+
+# =============================================================================
+# DISCOVERY COMPLETE
+# =============================================================================
+
+discovery_complete: true
+ready_for_implementation: true
+estimated_implementation_complexity: "medium"
+estimated_loc: 250-350

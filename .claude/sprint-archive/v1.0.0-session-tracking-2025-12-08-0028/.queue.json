@@ -1,0 +1,1995 @@
+{
+  "version": "1.0.0",
+  "sprint": {
+    "id": "v1.0.0",
+    "status": "in_progress",
+    "created": "2025-11-13T09:30:00Z",
+    "branch": "sprint/v1.0.0/session-tracking-integration"
+  },
+  "execution_queue": [
+    "R1.d",
+    "R1.i",
+    "R1.t",
+    "R2.d",
+    "R2.i",
+    "R2.t",
+    "R3.d",
+    "R3.i",
+    "R3.t",
+    "R4.d",
+    "R4.i",
+    "R4.t",
+    "R5.d",
+    "R5.i",
+    "R5.t",
+    "R6.d",
+    "R6.i",
+    "R6.t"
+  ],
+  "stories": {
+    "1": {
+      "id": "1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Foundation Infrastructure",
+      "parent": null,
+      "children": [
+        "1.1",
+        "1.2",
+        "1.3"
+      ],
+      "blocks": [
+        "2",
+        "3",
+        "5"
+      ],
+      "blocked_by": [],
+      "file": "stories/1-foundation-infrastructure.md",
+      "type": "implementation"
+    },
+    "1.1": {
+      "id": "1.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Core Types Module",
+      "parent": "1",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/1.1-core-types-module.md",
+      "type": "implementation"
+    },
+    "1.2": {
+      "id": "1.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "JSONL Parser",
+      "parent": "1",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/1.2-jsonl-parser.md",
+      "type": "implementation"
+    },
+    "1.3": {
+      "id": "1.3",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Path Resolution",
+      "parent": "1",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/1.3-path-resolution.md",
+      "type": "implementation"
+    },
+    "2": {
+      "id": "2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Smart Filtering",
+      "parent": null,
+      "children": [
+        "2.1",
+        "2.2",
+        "2.3"
+      ],
+      "blocks": [
+        "4"
+      ],
+      "blocked_by": [
+        "1"
+      ],
+      "file": "stories/2-smart-filtering.md",
+      "type": "implementation"
+    },
+    "2.1": {
+      "id": "2.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Filtering Logic",
+      "parent": "2",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/2.1-filtering-logic.md",
+      "type": "implementation"
+    },
+    "2.2": {
+      "id": "2.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Tool Output Summarization",
+      "parent": "2",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/2.2-tool-output-summarization.md",
+      "type": "implementation"
+    },
+    "2.3": {
+      "id": "2.3",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Configurable Filtering System (REMEDIATION)",
+      "parent": "2",
+      "children": [
+        "2.3.1",
+        "2.3.2",
+        "2.3.3",
+        "2.3.4"
+      ],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/2.3-configurable-filtering-system-remediation.md",
+      "type": "remediation"
+    },
+    "2.3.1": {
+      "id": "2.3.1",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Configuration Architecture Fix",
+      "parent": "2.3",
+      "children": [],
+      "blocks": [
+        "2.3.2"
+      ],
+      "blocked_by": [],
+      "file": "stories/2.3.1-configuration-architecture-fix.md",
+      "type": "remediation"
+    },
+    "2.3.2": {
+      "id": "2.3.2",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Configuration Schema Mismatch Fixes",
+      "parent": "2.3",
+      "children": [],
+      "blocks": [
+        "2.3.3"
+      ],
+      "blocked_by": [
+        "2.3.1"
+      ],
+      "file": "stories/2.3.2-configuration-schema-mismatch-fixes.md",
+      "type": "remediation"
+    },
+    "2.3.3": {
+      "id": "2.3.3",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Configuration Validator Implementation",
+      "parent": "2.3",
+      "children": [],
+      "blocks": [
+        "2.3.4"
+      ],
+      "blocked_by": [
+        "2.3.2"
+      ],
+      "file": "stories/2.3.3-configuration-validator-implementation.md",
+      "type": "remediation"
+    },
+    "2.3.4": {
+      "id": "2.3.4",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "LLM Summarization for ContentMode.SUMMARY",
+      "parent": "2.3",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "2.3.3"
+      ],
+      "file": "stories/2.3.4-llm-summarization-for-contentmodesummary.md",
+      "type": "remediation"
+    },
+    "3": {
+      "id": "3",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "File Monitoring",
+      "parent": null,
+      "children": [
+        "3.1",
+        "3.2",
+        "3.3"
+      ],
+      "blocks": [
+        "4",
+        "6"
+      ],
+      "blocked_by": [
+        "1"
+      ],
+      "file": "stories/3-file-monitoring.md",
+      "type": "implementation"
+    },
+    "3.1": {
+      "id": "3.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "File Watcher",
+      "parent": "3",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/3.1-file-watcher.md",
+      "type": "implementation"
+    },
+    "3.2": {
+      "id": "3.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Session Manager",
+      "parent": "3",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/3.2-session-manager.md",
+      "type": "implementation"
+    },
+    "3.3": {
+      "id": "3.3",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Configuration Integration",
+      "parent": "3",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/3.3-configuration-integration.md",
+      "type": "implementation"
+    },
+    "4": {
+      "id": "4",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Graphiti Integration (REFACTORED)",
+      "parent": null,
+      "children": [
+        "4.1",
+        "4.2",
+        "4.3"
+      ],
+      "blocks": [
+        "7"
+      ],
+      "blocked_by": [
+        "2",
+        "3"
+      ],
+      "file": "stories/4-graphiti-integration-refactored.md",
+      "type": "implementation"
+    },
+    "4.1": {
+      "id": "4.1",
+      "status": "superseded",
+      "story_type": "implementation",
+      "title": "Session Summarizer (DEPRECATED)",
+      "parent": "4",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/4.1-session-summarizer-deprecated.md",
+      "type": "implementation"
+    },
+    "4.2": {
+      "id": "4.2",
+      "status": "superseded",
+      "story_type": "implementation",
+      "title": "Graphiti Storage Integration (DEPRECATED)",
+      "parent": "4",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/4.2-graphiti-storage-integration-deprecated.md",
+      "type": "implementation"
+    },
+    "4.3": {
+      "id": "4.3",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Clean Up Refactoring Artifacts (ALIGNMENT REMEDIATION)",
+      "parent": "4",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/4.3-clean-up-refactoring-artifacts-alignment-remediati.md",
+      "type": "remediation"
+    },
+    "5": {
+      "id": "5",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "CLI Integration",
+      "parent": null,
+      "children": [
+        "5.1",
+        "5.2"
+      ],
+      "blocks": [
+        "6"
+      ],
+      "blocked_by": [
+        "1",
+        "2",
+        "3"
+      ],
+      "file": "stories/5-cli-integration.md",
+      "type": "implementation"
+    },
+    "5.1": {
+      "id": "5.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "CLI Commands",
+      "parent": "5",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/5.1-cli-commands.md",
+      "type": "implementation"
+    },
+    "5.2": {
+      "id": "5.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Configuration Persistence",
+      "parent": "5",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/5.2-configuration-persistence.md",
+      "type": "implementation"
+    },
+    "6": {
+      "id": "6",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "MCP Tool Integration",
+      "parent": null,
+      "children": [
+        "6.1",
+        "6.2"
+      ],
+      "blocks": [
+        "7"
+      ],
+      "blocked_by": [
+        "3",
+        "5"
+      ],
+      "file": "stories/6-mcp-tool-integration.md",
+      "type": "implementation"
+    },
+    "6.1": {
+      "id": "6.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "MCP Tool Implementation",
+      "parent": "6",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/6.1-mcp-tool-implementation.md",
+      "type": "implementation"
+    },
+    "6.2": {
+      "id": "6.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Runtime State Management",
+      "parent": "6",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/6.2-runtime-state-management.md",
+      "type": "implementation"
+    },
+    "7": {
+      "id": "7",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Testing & Validation",
+      "parent": null,
+      "children": [
+        "7.1",
+        "7.2",
+        "7.3",
+        "7.4"
+      ],
+      "blocks": [
+        "8"
+      ],
+      "blocked_by": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "file": "stories/7-testing-validation.md",
+      "type": "implementation"
+    },
+    "7.1": {
+      "id": "7.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Integration Testing",
+      "parent": "7",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/7.1-integration-testing.md",
+      "type": "implementation"
+    },
+    "7.2": {
+      "id": "7.2",
+      "status": "superseded",
+      "story_type": "implementation",
+      "title": "Cost Validation (DEPRECATED)",
+      "parent": "7",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/7.2-cost-validation-deprecated.md",
+      "type": "implementation"
+    },
+    "7.3": {
+      "id": "7.3",
+      "status": "superseded",
+      "story_type": "implementation",
+      "title": "Performance Testing (DEPRECATED)",
+      "parent": "7",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/7.3-performance-testing-deprecated.md",
+      "type": "implementation"
+    },
+    "7.4": {
+      "id": "7.4",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Documentation",
+      "parent": "7",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "file": "stories/7.4-documentation.md",
+      "type": "implementation"
+    },
+    "8": {
+      "id": "8",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Refinement & Launch",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "7"
+      ],
+      "file": "stories/8-refinement-launch.md",
+      "type": "implementation"
+    },
+    "9": {
+      "id": "9",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Critical Bug Fix - Periodic Checker Implementation",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "10",
+        "12"
+      ],
+      "file": "stories/9-critical-bug-fix-periodic-checker-implementation.md",
+      "type": "implementation"
+    },
+    "10": {
+      "id": "10",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Configuration Schema Changes - Safe Defaults & Simplification",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "9",
+        "11",
+        "12"
+      ],
+      "blocked_by": [],
+      "file": "stories/10-configuration-schema-changes-safe-defaults-simplif.md",
+      "type": "implementation"
+    },
+    "11": {
+      "id": "11",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Template System Implementation - Pluggable Summarization",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "14"
+      ],
+      "blocked_by": [
+        "10"
+      ],
+      "file": "stories/11-template-system-implementation-pluggable-summariza.md",
+      "type": "implementation"
+    },
+    "12": {
+      "id": "12",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Rolling Period Filter - Prevent Bulk Indexing",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "9",
+        "13"
+      ],
+      "blocked_by": [
+        "10"
+      ],
+      "file": "stories/12-rolling-period-filter-prevent-bulk-indexing.md",
+      "type": "implementation"
+    },
+    "13": {
+      "id": "13",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Manual Sync Command - Historical Data Indexing",
+      "parent": null,
+      "children": [
+        "13.1",
+        "13.2",
+        "13.3"
+      ],
+      "blocks": [],
+      "blocked_by": [
+        "12"
+      ],
+      "file": "stories/13-manual-sync-command-historical-data-indexing.md",
+      "type": "implementation",
+      "supersedes": [
+        "13.2",
+        "13.2.d",
+        "13.2.i",
+        "13.2.t"
+      ]
+    },
+    "14": {
+      "id": "14",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Configuration Auto-Generation - First-Run Experience",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "11"
+      ],
+      "file": "stories/14-configuration-auto-generation-first-run-experience.md",
+      "type": "implementation"
+    },
+    "15": {
+      "id": "15",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Documentation Update - Comprehensive User Guide",
+      "parent": null,
+      "children": [
+        "15.1",
+        "15.2"
+      ],
+      "blocks": [
+        "16"
+      ],
+      "blocked_by": [
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "file": "stories/15-documentation-update-comprehensive-user-guide.md",
+      "type": "implementation"
+    },
+    "15.1": {
+      "id": "15.1",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Documentation Remediation - USER_GUIDE and MIGRATION Fixes",
+      "parent": "15",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "15"
+      ],
+      "file": "stories/15.1-documentation-remediation-user_guide-and-migration.md",
+      "type": "remediation"
+    },
+    "16": {
+      "id": "16",
+      "status": "superseded",
+      "story_type": "implementation",
+      "title": "Testing & Validation - Comprehensive Coverage",
+      "parent": null,
+      "children": [
+        "16.1",
+        "16.2",
+        "16.3",
+        "16.4"
+      ],
+      "blocks": [],
+      "blocked_by": [
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "file": "stories/16-testing-validation-comprehensive-coverage.md",
+      "type": "implementation"
+    },
+    "16.1": {
+      "id": "16.1",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Unit Test Validation",
+      "parent": "16",
+      "children": [],
+      "blocks": [
+        "16.2"
+      ],
+      "blocked_by": [
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "file": "stories/16.1-unit-test-validation.md",
+      "type": "implementation"
+    },
+    "16.2": {
+      "id": "16.2",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Integration Test Validation",
+      "parent": "16",
+      "children": [],
+      "blocks": [
+        "16.3"
+      ],
+      "blocked_by": [
+        "16.1"
+      ],
+      "file": "stories/16.2-integration-test-validation.md",
+      "type": "implementation"
+    },
+    "16.3": {
+      "id": "16.3",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Performance and Security Validation",
+      "parent": "16",
+      "children": [],
+      "blocks": [
+        "16.4"
+      ],
+      "blocked_by": [
+        "16.2"
+      ],
+      "file": "stories/16.3-performance-and-security-validation.md",
+      "type": "implementation"
+    },
+    "16.4": {
+      "id": "16.4",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Regression and Compliance Validation",
+      "parent": "16",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "16.3"
+      ],
+      "file": "stories/16.4-regression-and-compliance-validation.md",
+      "type": "implementation"
+    },
+    "17": {
+      "id": "17",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "LLM Availability Layer",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "18",
+        "19"
+      ],
+      "blocked_by": [
+        "20"
+      ],
+      "file": "stories/17-llm-availability-layer.md",
+      "type": "implementation"
+    },
+    "18": {
+      "id": "18",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "MCP Tools Error Handling",
+      "parent": null,
+      "children": [
+        "18.1",
+        "18.2",
+        "18.3"
+      ],
+      "blocks": [],
+      "blocked_by": [
+        "17",
+        "20"
+      ],
+      "file": "stories/18-mcp-tools-error-handling.md",
+      "type": "implementation"
+    },
+    "18.1": {
+      "id": "18.1",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Add episode_id and processing_time_ms to Response Types",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P0",
+      "file": "stories/18.1-response-fields-remediation.md",
+      "type": "remediation"
+    },
+    "18.2": {
+      "id": "18.2",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Add Network and Quota Error Factory Functions",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P1",
+      "file": "stories/18.2-error-factories-remediation.md",
+      "type": "remediation"
+    },
+    "18.3": {
+      "id": "18.3",
+      "status": "completed",
+      "story_type": "remediation",
+      "title": "Implement wait_for_completion Parameter",
+      "parent": "18",
+      "children": [],
+      "blocks": [],
+      "blocked_by": [],
+      "priority": "P1",
+      "file": "stories/18.3-wait-for-completion-remediation.md",
+      "type": "remediation"
+    },
+    "19": {
+      "id": "19",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Session Tracking Resilience",
+      "parent": null,
+      "children": [],
+      "blocks": [],
+      "blocked_by": [
+        "17",
+        "20"
+      ],
+      "file": "stories/19-session-tracking-resilience.md",
+      "type": "implementation"
+    },
+    "20": {
+      "id": "20",
+      "status": "completed",
+      "story_type": "implementation",
+      "title": "Unified LLM Configuration",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "17",
+        "18",
+        "19"
+      ],
+      "blocked_by": [],
+      "file": "stories/20-unified-llm-configuration.md",
+      "type": "implementation"
+    },
+    "15.2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Documentation Accuracy Remediation",
+      "status": "resolved",
+      "parent": "15",
+      "children": [
+        "15.2.d",
+        "15.2.i",
+        "15.2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/15.2-documentation-accuracy-remediation.md",
+      "priority": "P1",
+      "blocking": false
+    },
+    "15.2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Documentation Accuracy Remediation",
+      "status": "completed",
+      "parent": "15.2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "15.2.i"
+      ],
+      "file": null,
+      "artifact": "plans/15.2-plan.yaml"
+    },
+    "15.2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Documentation Accuracy Remediation",
+      "status": "completed",
+      "parent": "15.2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "15.2.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/15.2-plan.yaml"
+    },
+    "15.2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Documentation Accuracy Remediation",
+      "status": "completed",
+      "parent": "15.2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "-20": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Unified LLM Configuration",
+      "status": "superseded",
+      "validates": "20",
+      "children": [
+        "-20.d",
+        "-20.i",
+        "-20.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-20.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Unified LLM Configuration",
+      "status": "superseded",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-20.i"
+      ],
+      "file": null
+    },
+    "-20.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Unified LLM Configuration",
+      "status": "superseded",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-20.t"
+      ],
+      "file": null
+    },
+    "-20.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Unified LLM Configuration",
+      "status": "superseded",
+      "parent": "-20",
+      "validates": "20",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-19": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Session Tracking Resilience",
+      "status": "superseded",
+      "validates": "19",
+      "children": [
+        "-19.d",
+        "-19.i",
+        "-19.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-19.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Session Tracking Resilience",
+      "status": "superseded",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-19.i"
+      ],
+      "file": null
+    },
+    "-19.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Session Tracking Resilience",
+      "status": "superseded",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-19.t"
+      ],
+      "file": null
+    },
+    "-19.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Session Tracking Resilience",
+      "status": "superseded",
+      "parent": "-19",
+      "validates": "19",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Implement wait_for_completion Parameter",
+      "status": "superseded",
+      "validates": "18.3",
+      "children": [
+        "-18.3.d",
+        "-18.3.i",
+        "-18.3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Implement wait_for_completion Parameter",
+      "status": "superseded",
+      "parent": "-18.3",
+      "validates": "18.3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.3.i"
+      ],
+      "file": null
+    },
+    "-18.3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Implement wait_for_completion Parameter",
+      "status": "superseded",
+      "parent": "-18.3",
+      "validates": "18.3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.3.t"
+      ],
+      "file": null
+    },
+    "-18.3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Implement wait_for_completion Parameter",
+      "status": "superseded",
+      "parent": "-18.3",
+      "validates": "18.3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add Network and Quota Error Factory Functions",
+      "status": "superseded",
+      "validates": "18.2",
+      "children": [
+        "-18.2.d",
+        "-18.2.i",
+        "-18.2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add Network and Quota Error Factory Functions",
+      "status": "superseded",
+      "parent": "-18.2",
+      "validates": "18.2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.2.i"
+      ],
+      "file": null
+    },
+    "-18.2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add Network and Quota Error Factory Functions",
+      "status": "superseded",
+      "parent": "-18.2",
+      "validates": "18.2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.2.t"
+      ],
+      "file": null
+    },
+    "-18.2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add Network and Quota Error Factory Functions",
+      "status": "superseded",
+      "parent": "-18.2",
+      "validates": "18.2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18.1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Add episode_id and processing_time_ms to Response Types",
+      "status": "superseded",
+      "validates": "18.1",
+      "children": [
+        "-18.1.d",
+        "-18.1.i",
+        "-18.1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-18.1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Add episode_id and processing_time_ms to Response Types",
+      "status": "superseded",
+      "parent": "-18.1",
+      "validates": "18.1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.1.i"
+      ],
+      "file": null
+    },
+    "-18.1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Add episode_id and processing_time_ms to Response Types",
+      "status": "superseded",
+      "parent": "-18.1",
+      "validates": "18.1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.1.t"
+      ],
+      "file": null
+    },
+    "-18.1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Add episode_id and processing_time_ms to Response Types",
+      "status": "superseded",
+      "parent": "-18.1",
+      "validates": "18.1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-18": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: MCP Tools Error Handling",
+      "status": "superseded",
+      "validates": "18",
+      "children": [
+        "-18.d",
+        "-18.i",
+        "-18.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": false,
+      "blocks": [],
+      "file": null
+    },
+    "-18.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: MCP Tools Error Handling",
+      "status": "superseded",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.i"
+      ],
+      "file": null
+    },
+    "-18.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: MCP Tools Error Handling",
+      "status": "superseded",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-18.t"
+      ],
+      "file": null
+    },
+    "-18.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: MCP Tools Error Handling",
+      "status": "superseded",
+      "parent": "-18",
+      "validates": "18",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "13.1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "MCP Tool Wiring for Manual Sync",
+      "status": "resolved",
+      "parent": "13",
+      "children": [
+        "13.1.d",
+        "13.1.i",
+        "13.1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/13.1-mcp-tool-wiring-for-manual-syn.md"
+    },
+    "13.1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: MCP Tool Wiring for Manual Sync",
+      "status": "completed",
+      "parent": "13.1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "13.1.i"
+      ],
+      "file": null,
+      "artifact": "plans/13.1-plan.yaml"
+    },
+    "13.1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: MCP Tool Wiring for Manual Sync",
+      "status": "completed",
+      "parent": "13.1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "13.1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/13.1-plan.yaml"
+    },
+    "13.1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: MCP Tool Wiring for Manual Sync",
+      "status": "completed",
+      "parent": "13.1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "13.2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "CLI Command for Manual Sync",
+      "status": "superseded",
+      "parent": "13",
+      "children": [
+        "13.2.d",
+        "13.2.i",
+        "13.2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/13.2-cli-command-for-manual-sync.md",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:25.445032",
+      "superseded_reason": "Story 13 already implemented all CLI sync functionality in commit 865440f. Story 13.2 was created later as a duplicate requirement."
+    },
+    "13.2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: CLI Command for Manual Sync",
+      "status": "superseded",
+      "parent": "13.2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "13.2.i"
+      ],
+      "file": null,
+      "artifact": "plans/13.2-plan.yaml",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:36.254729",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
+    },
+    "13.2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: CLI Command for Manual Sync",
+      "status": "superseded",
+      "parent": "13.2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "13.2.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/13.2-plan.yaml",
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:39.276158",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
+    },
+    "13.2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: CLI Command for Manual Sync",
+      "status": "superseded",
+      "parent": "13.2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "superseded_by": "13",
+      "superseded_at": "2025-12-04T01:00:42.393471",
+      "superseded_reason": "Parent story 13.2 superseded - functionality already in Story 13"
+    },
+    "13.3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Resilience Integration for Manual Sync",
+      "status": "resolved",
+      "parent": "13",
+      "children": [
+        "13.3.d",
+        "13.3.i",
+        "13.3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/13.3-resilience-integration-for-man.md"
+    },
+    "13.3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Resilience Integration for Manual Sync",
+      "status": "completed",
+      "parent": "13.3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "13.3.i"
+      ],
+      "file": null,
+      "artifact": "plans/13.3-plan.yaml"
+    },
+    "13.3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Resilience Integration for Manual Sync",
+      "status": "completed",
+      "parent": "13.3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "13.3.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/13.3-plan.yaml"
+    },
+    "13.3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Resilience Integration for Manual Sync",
+      "status": "completed",
+      "parent": "13.3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Update docs: retroactive sync capability in FAQ",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R1.d",
+        "R1.i",
+        "R1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R1-update-docs-retroactive-sync-capability-in-faq.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update docs: retroactive sync capability in FAQ",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R1.i"
+      ],
+      "file": null,
+      "artifact": "plans/R1-plan.yaml"
+    },
+    "R1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update docs: retroactive sync capability in FAQ",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R1-plan.yaml"
+    },
+    "R1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update docs: retroactive sync capability in FAQ",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Remove session_tracking_start/stop MCP tools",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R2.d",
+        "R2.i",
+        "R2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R2-remove-session_tracking_start/.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Remove session_tracking_start/stop MCP tools",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R2.i"
+      ],
+      "file": null,
+      "artifact": "plans/R2-plan.yaml"
+    },
+    "R2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Remove session_tracking_start/stop MCP tools",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R2.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/R2-plan.yaml"
+      }
+    },
+    "R2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Remove session_tracking_start/stop MCP tools",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R3": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R3.d",
+        "R3.i",
+        "R3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R3-make-sync_history-mcp-tool-rea.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "completed",
+      "parent": "R3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R3.i"
+      ],
+      "file": null,
+      "artifact": "plans/R3-plan.yaml"
+    },
+    "R3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "completed",
+      "parent": "R3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R3.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R3-plan.yaml"
+    },
+    "R3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Make sync_history MCP tool read-only (dry_run enforced)",
+      "status": "completed",
+      "parent": "R3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R4": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Add CLI entry point for manual sync execution",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R4.d",
+        "R4.i",
+        "R4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R4-add-cli-entry-point-for-manual.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Add CLI entry point for manual sync execution",
+      "status": "completed",
+      "parent": "R4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R4.i"
+      ],
+      "file": null,
+      "artifact": "plans/R4-plan.yaml"
+    },
+    "R4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Add CLI entry point for manual sync execution",
+      "status": "completed",
+      "parent": "R4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R4.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R4-plan.yaml"
+    },
+    "R4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Add CLI entry point for manual sync execution",
+      "status": "completed",
+      "parent": "R4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R5": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Document circuit breaker restart behavior",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R5.d",
+        "R5.i",
+        "R5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R5-document-circuit-breaker-resta.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Document circuit breaker restart behavior",
+      "status": "completed",
+      "parent": "R5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R5.i"
+      ],
+      "file": null,
+      "artifact": "plans/R5-plan.yaml"
+    },
+    "R5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Document circuit breaker restart behavior",
+      "status": "completed",
+      "parent": "R5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R5.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R5-plan.yaml"
+    },
+    "R5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Document circuit breaker restart behavior",
+      "status": "completed",
+      "parent": "R5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "R6": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Update MCP_TOOLS.md to reflect tool changes",
+      "status": "resolved",
+      "parent": null,
+      "children": [
+        "R6.d",
+        "R6.i",
+        "R6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R6-update-mcp_tools.md-to-reflect.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "R6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "completed",
+      "parent": "R6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "R6.i"
+      ],
+      "file": null,
+      "artifact": "plans/R6-plan.yaml"
+    },
+    "R6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "completed",
+      "parent": "R6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "R6.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/R6-plan.yaml"
+    },
+    "R6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update MCP_TOOLS.md to reflect tool changes",
+      "status": "completed",
+      "parent": "R6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    }
+  }
+}

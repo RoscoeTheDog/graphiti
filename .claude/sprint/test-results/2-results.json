@@ -1,0 +1,94 @@
+{
+  "story_id": "2",
+  "phase": "testing",
+  "executed_by": "testing:2.t",
+  "timestamp": "2025-12-12T00:00:00Z",
+
+  "summary": {
+    "total_tests": 18,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100,
+    "duration_ms": 2960
+  },
+
+  "categories": {
+    "unit": {
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "coverage": null
+    },
+    "integration": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null
+    },
+    "security": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-2.1": {
+      "covered": true,
+      "tests": [
+        "test_default_preprocessing_prompt_is_none",
+        "test_explicit_preprocessing_prompt_string",
+        "test_explicit_preprocessing_prompt_none",
+        "test_preprocessing_prompt_accepts_none",
+        "test_preprocessing_prompt_accepts_string"
+      ],
+      "reason": null
+    },
+    "AC-2.2": {
+      "covered": true,
+      "tests": [
+        "test_default_preprocessing_mode_is_prepend",
+        "test_explicit_preprocessing_mode_prepend",
+        "test_explicit_preprocessing_mode_append",
+        "test_preprocessing_mode_accepts_prepend",
+        "test_preprocessing_mode_accepts_append",
+        "test_preprocessing_mode_rejects_invalid_value"
+      ],
+      "reason": null
+    },
+    "AC-2.3": {
+      "covered": true,
+      "tests": [
+        "test_graphiti_accepts_preprocessing_prompt",
+        "test_graphiti_accepts_preprocessing_mode",
+        "test_graphiti_passes_both_preprocessing_params",
+        "test_full_graphiti_initialization_with_preprocessing",
+        "test_graphiti_clients_accessible_with_preprocessing"
+      ],
+      "reason": null
+    },
+    "AC-2.4": {
+      "covered": true,
+      "tests": [
+        "test_graphiti_without_preprocessing_params",
+        "test_graphiti_with_only_required_params"
+      ],
+      "reason": null
+    }
+  },
+
+  "recommendations": [],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false
+}
