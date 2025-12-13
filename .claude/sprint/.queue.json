@@ -6,85 +6,496 @@
     "version": "1.0",
     "status": "active",
     "branch": "dev",
-    "created": "2025-12-12 17:46"
+    "created": "2025-12-12 17:46",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
   },
   "stories": {
     "1": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Remove Deprecated Config Parameters",
-      "status": "unassigned",
-      "file": "stories/1-remove-deprecated-config-parameters.md",
+      "status": "in_progress",
       "parent": null,
-      "children": [],
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "2",
         "5"
-      ]
+      ],
+      "file": "stories/1-remove-deprecated-config-parameters.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "2": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Remove Session Manager Time-Based Logic",
       "status": "unassigned",
-      "file": "stories/2-remove-session-manager-time-based-logic.md",
       "parent": null,
-      "children": [],
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
       "blocks": [
         "3"
-      ]
+      ],
+      "file": "stories/2-remove-session-manager-time-based-logic.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "3": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Remove File Watcher Module",
       "status": "unassigned",
-      "file": "stories/3-remove-file-watcher-module.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/3-remove-file-watcher-module.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "4": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Clean Up MCP Server Session Initialization",
       "status": "unassigned",
-      "file": "stories/4-clean-up-mcp-server-session-initialization.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4-clean-up-mcp-server-session-initialization.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "5": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Update CLI Tools",
       "status": "unassigned",
-      "file": "stories/5-update-cli-tools.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/5-update-cli-tools.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "6": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Clean Up Test Files",
       "status": "unassigned",
-      "file": "stories/6-clean-up-test-files.md",
       "parent": null,
-      "children": [],
-      "blocks": []
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/6-clean-up-test-files.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
     },
     "7": {
-      "type": "implementation",
+      "type": "feature",
+      "story_type": "feature",
       "title": "Documentation Updates",
       "status": "unassigned",
-      "file": "stories/7-documentation-updates.md",
       "parent": null,
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/7-documentation-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Remove Deprecated Config Parameters",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
       "children": [],
-      "blocks": []
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Remove Deprecated Config Parameters",
+      "status": "unassigned",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Remove Deprecated Config Parameters",
+      "status": "unassigned",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Remove Session Manager Time-Based Logic",
+      "status": "unassigned",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Remove Session Manager Time-Based Logic",
+      "status": "unassigned",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml"
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Remove Session Manager Time-Based Logic",
+      "status": "unassigned",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Remove File Watcher Module",
+      "status": "unassigned",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Remove File Watcher Module",
+      "status": "unassigned",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml"
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Remove File Watcher Module",
+      "status": "unassigned",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Clean Up MCP Server Session Initialization",
+      "status": "unassigned",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Clean Up MCP Server Session Initialization",
+      "status": "unassigned",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml"
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Clean Up MCP Server Session Initialization",
+      "status": "unassigned",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update CLI Tools",
+      "status": "unassigned",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update CLI Tools",
+      "status": "unassigned",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update CLI Tools",
+      "status": "unassigned",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Clean Up Test Files",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Clean Up Test Files",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Clean Up Test Files",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Documentation Updates",
+      "status": "unassigned",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Documentation Updates",
+      "status": "unassigned",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml"
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Documentation Updates",
+      "status": "unassigned",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7"
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7.d",
+    "7.i",
+    "7.t"
   ]
 }
