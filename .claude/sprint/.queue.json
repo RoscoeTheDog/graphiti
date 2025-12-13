@@ -89,7 +89,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Clean Up MCP Server Session Initialization",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "4.d",
@@ -105,7 +105,10 @@
       "file": "stories/4-clean-up-mcp-server-session-initialization.md",
       "advisories": [],
       "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
+      "_migration_version": "v4.0.0",
+      "metadata": {
+        "advisories": "[{\"severity\": \"low\", \"category\": \"test_warning\", \"message\": \"Test pass rate 96.4% - 31 tests require Graphiti MCP server connectivity (non-blocking, pre-existing)\"}]"
+      }
     },
     "5": {
       "type": "feature",
@@ -350,7 +353,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Clean Up MCP Server Session Initialization",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
