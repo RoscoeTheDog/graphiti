@@ -913,7 +913,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Clean Up Test Files",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "6",
       "children": [
         "-6.d",
@@ -971,7 +971,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Clean Up Test Files",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.t",
       "phase": "validation_testing",
