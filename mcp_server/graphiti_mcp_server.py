@@ -2038,9 +2038,7 @@ async def session_tracking_status(session_id: str | None = None) -> str:
             "enabled": bool (from global config),
             "global_config": {
                 "enabled": bool,
-                "watch_path": str,
-                "inactivity_timeout": int (seconds),
-                "check_interval": int (seconds)
+                "watch_path": str
             },
             "session_manager": {
                 "running": bool,
@@ -2075,9 +2073,7 @@ async def session_tracking_status(session_id: str | None = None) -> str:
         # Get global configuration
         global_config = {
             "enabled": unified_config.session_tracking.enabled,
-            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None,
-            "inactivity_timeout": unified_config.session_tracking.inactivity_timeout,
-            "check_interval": unified_config.session_tracking.check_interval
+            "watch_path": str(unified_config.session_tracking.watch_path) if unified_config.session_tracking.watch_path else None
         }
 
         # Session tracking is now config-only (no runtime overrides)
@@ -2524,12 +2520,6 @@ def ensure_global_config_exists() -> Path:
             "_enabled_help": "Set to true to enable session tracking (opt-in)",
             "watch_path": None,
             "_watch_path_help": "null = ~/.claude/projects/ | Set to specific project path",
-            "inactivity_timeout": 900,
-            "_inactivity_timeout_help": "Seconds before session closed (900 = 15 minutes, handles long operations)",
-            "check_interval": 60,
-            "_check_interval_help": "Seconds between inactivity checks (60 = 1 minute, responsive)",
-            "auto_summarize": False,
-            "_auto_summarize_help": "Use LLM to summarize sessions (costs money, set to true to enable)",
             "store_in_graph": True,
             "_store_in_graph_help": "Store in Neo4j graph (required for cross-session memory)",
             "keep_length_days": 7,

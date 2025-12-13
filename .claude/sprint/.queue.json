@@ -187,7 +187,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remove Deprecated Config Parameters",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
@@ -214,7 +214,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1-plan.yaml"
+      }
     },
     "2.d": {
       "type": "discovery",

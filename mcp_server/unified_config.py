@@ -616,28 +616,6 @@ class SessionTrackingConfig(BaseModel):
             "Must be an absolute path (native OS format: C:\\ on Windows, / on Unix)."
         )
     )
-    inactivity_timeout: int = Field(
-        default=900,
-        description=(
-            "Inactivity timeout in seconds before a session is considered closed. "
-            "After this timeout, the session will be indexed into Graphiti. "
-            "Default: 900 seconds (15 minutes) to accommodate long-running operations."
-        )
-    )
-    check_interval: int = Field(
-        default=60,
-        description=(
-            "Interval in seconds to check for inactive sessions. "
-            "The file watcher checks for inactive sessions at this interval."
-        )
-    )
-    auto_summarize: bool = Field(
-        default=False,
-        description=(
-            "Automatically summarize closed sessions using Graphiti's LLM. "
-            "If False, sessions are stored as raw episodes without summarization (no LLM costs)."
-        )
-    )
     store_in_graph: bool = Field(
         default=True,
         description=(
