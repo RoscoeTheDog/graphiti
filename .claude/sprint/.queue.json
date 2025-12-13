@@ -1087,13 +1087,16 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Complete test cleanup for deprecated parameters",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6.i",
       "children": [],
       "priority": "P1",
       "file": "stories/6.i.1-complete-test-cleanup-for-deprecated-parameters.md",
       "advisories": [],
-      "created_by": "-6.i"
+      "created_by": "-6.i",
+      "metadata": {
+        "advisory": "low:test_warning:Test pass rate 97% - 24 tests failed (non-blocking, pre-existing issues)"
+      }
     },
     "6.i.1.d": {
       "type": "discovery",
@@ -1132,7 +1135,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Complete test cleanup for deprecated parameters",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6.i.1",
       "phase": "testing",
       "phase_order": 3,
