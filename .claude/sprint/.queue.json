@@ -40,7 +40,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Remove Session Manager Time-Based Logic",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "2.d",
@@ -223,7 +223,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Remove Session Manager Time-Based Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -243,7 +243,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/2-plan.yaml"
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
     },
     "2.t": {
       "type": "testing",
