@@ -139,7 +139,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Clean Up Test Files",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "6.d",
@@ -422,7 +422,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Clean Up Test Files",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "discovery",
       "phase_order": 1,
@@ -442,7 +442,10 @@
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/6-plan.yaml"
+      "requires_artifact": "plans/6-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/6-plan.yaml"
+      }
     },
     "6.t": {
       "type": "testing",
