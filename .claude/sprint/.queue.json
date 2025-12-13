@@ -991,7 +991,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Documentation Updates",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "7",
       "children": [
         "-7.d",
@@ -1011,7 +1011,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Documentation Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.d",
       "phase": "validation_discovery",
@@ -1025,7 +1025,7 @@
       "blocks": [
         "-7.i"
       ],
-      "file": null
+      "file": "stories/-7.d-validation-discovery.md"
     },
     "-7.i": {
       "type": "validation_implementation",
