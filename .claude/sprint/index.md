@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 21:03:14
+**Generated**: 2025-12-12 21:08:57
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 61.4%
+- **Completion**: 63.2%
 
 ### By Status
 
 - blocked: 2
-- completed: 35
+- completed: 36
 - in_progress: 1
-- unassigned: 19
+- unassigned: 18
 
 ### By Type
 
@@ -74,7 +74,7 @@
   - Blocks: Story -3.i
 
   ### Story -3.i: Validate Implementation: Remove File Watcher Module
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -3, Story -3.d
   - Blocks: Story -3.t
 
