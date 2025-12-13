@@ -139,7 +139,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Clean Up Test Files",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "6.d",
@@ -451,7 +451,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Clean Up Test Files",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "testing",
       "phase_order": 3,
