@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-12 21:54:35
+**Generated**: 2025-12-12 22:03:55
 
 ---
 
@@ -14,23 +14,23 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 57
-- **Completion**: 82.5%
+- **Total Stories**: 61
+- **Completion**: 78.7%
 
 ### By Status
 
 - blocked: 2
-- completed: 47
+- completed: 48
 - in_progress: 1
-- unassigned: 7
+- unassigned: 10
 
 ### By Type
 
-- discovery: 7
+- discovery: 8
 - feature: 7
-- implementation: 7
-- remediation: 1
-- testing: 7
+- implementation: 8
+- remediation: 2
+- testing: 8
 - validation: 7
 - validation_discovery: 7
 - validation_implementation: 7
@@ -116,7 +116,7 @@
   - Blocks: Story -6.i
 
   ### Story -6.i: Validate Implementation: Clean Up Test Files
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -6, Story -6.d
   - Blocks: Story -6.t
 
@@ -226,6 +226,24 @@
   ### Story 7.t: Testing: Documentation Updates
   **Status**: completed | **Type**: testing
   - Dependencies: Story 7
+
+    ### Story 6.i.1: Complete Test Cleanup For Deprecated Parameters
+    **Status**: unassigned | **Type**: remediation
+    - Dependencies: Story 6.i
+
+      ### Story 6.i.1.d: Discovery: Complete test cleanup for deprecated parameters
+      **Status**: unassigned | **Type**: discovery
+      - Dependencies: Story 6.i.1
+      - Blocks: Story 6.i.1.i
+
+      ### Story 6.i.1.i: Implementation: Complete test cleanup for deprecated parameters
+      **Status**: unassigned | **Type**: implementation
+      - Dependencies: Story 6.i.1, Story 6.i.1.d
+      - Blocks: Story 6.i.1.t
+
+      ### Story 6.i.1.t: Testing: Complete test cleanup for deprecated parameters
+      **Status**: unassigned | **Type**: testing
+      - Dependencies: Story 6.i.1, Story 6.i.1.i
 
 ---
 

@@ -440,7 +440,9 @@
       "parent": "6",
       "phase": "implementation",
       "phase_order": 2,
-      "children": [],
+      "children": [
+        "6.i.1"
+      ],
       "blocks": [],
       "file": null,
       "requires_artifact": "plans/6-plan.yaml",
@@ -951,7 +953,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Clean Up Test Files",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.i",
       "phase": "validation_implementation",
@@ -1074,6 +1076,65 @@
         "2.t"
       ],
       "file": "stories/2.1-fix-test_coverage_gap.md"
+    },
+    "6.i.1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Complete test cleanup for deprecated parameters",
+      "status": "unassigned",
+      "parent": "6.i",
+      "children": [],
+      "priority": "P1",
+      "file": "stories/6.i.1-complete-test-cleanup-for-deprecated-parameters.md",
+      "advisories": [],
+      "created_by": "-6.i"
+    },
+    "6.i.1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Complete test cleanup for deprecated parameters",
+      "status": "unassigned",
+      "parent": "6.i.1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "6.i.1.i"
+      ],
+      "file": null,
+      "artifact": "plans/6.i.1-plan.yaml"
+    },
+    "6.i.1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Complete test cleanup for deprecated parameters",
+      "status": "unassigned",
+      "parent": "6.i.1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "6.i.1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/6.i.1-plan.yaml"
+    },
+    "6.i.1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Complete test cleanup for deprecated parameters",
+      "status": "unassigned",
+      "parent": "6.i.1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -1119,6 +1180,10 @@
     "6.t",
     "7.d",
     "7.i",
-    "7.t"
+    "7.t",
+    "6.i.1",
+    "6.i.1.d",
+    "6.i.1.i",
+    "6.i.1.t"
   ]
 }
