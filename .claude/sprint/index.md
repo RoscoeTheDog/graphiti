@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 10:01:06
+**Generated**: 2025-12-14 10:04:48
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 60.0%
+- **Completion**: 63.3%
 
 ### By Status
 
-- completed: 18
-- unassigned: 12
+- completed: 19
+- in_progress: 1
+- unassigned: 10
 
 ### By Type
 
@@ -77,7 +78,7 @@
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: Platform Service Installation (Windows/macOS/Linux)
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -4
   - Blocks: Story -4.i
 
