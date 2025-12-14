@@ -471,7 +471,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Testing & Documentation",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "6",
       "children": [
         "-6.d",
@@ -491,7 +491,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Testing & Documentation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6",
       "phase": "validation_discovery",
