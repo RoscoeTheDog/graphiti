@@ -1,0 +1,89 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "daemon-architecture-vv1.0",
+    "name": "daemon-architecture",
+    "version": "v1.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-13 23:51"
+  },
+  "stories": {
+    "1": {
+      "type": "implementation",
+      "title": "Core Infrastructure (Management API + HTTP Client)",
+      "status": "unassigned",
+      "file": "stories/1-core-infrastructure-management-api-http-client.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "2",
+        "3",
+        "5"
+      ]
+    },
+    "2": {
+      "type": "implementation",
+      "title": "Bootstrap Service (Config Watcher + MCP Lifecycle)",
+      "status": "unassigned",
+      "file": "stories/2-bootstrap-service-config-watcher-mcp-lifecycle.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    "3": {
+      "type": "implementation",
+      "title": "CLI Refactoring (HTTP Client + Error Messages)",
+      "status": "unassigned",
+      "file": "stories/3-cli-refactoring-http-client-error-messages.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "6"
+      ]
+    },
+    "4": {
+      "type": "implementation",
+      "title": "Platform Service Installation (Windows/macOS/Linux)",
+      "status": "unassigned",
+      "file": "stories/4-platform-service-installation.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "6"
+      ]
+    },
+    "5": {
+      "type": "implementation",
+      "title": "Claude Code Integration (HTTP Transport)",
+      "status": "unassigned",
+      "file": "stories/5-claude-code-integration-http-transport.md",
+      "parent": null,
+      "children": [],
+      "blocks": [
+        "6"
+      ]
+    },
+    "6": {
+      "type": "implementation",
+      "title": "Testing & Documentation",
+      "status": "unassigned",
+      "file": "stories/6-testing-and-documentation.md",
+      "parent": null,
+      "children": [],
+      "blocks": []
+    }
+  },
+  "execution_queue": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+  ]
+}
