@@ -33,10 +33,10 @@ class TestSafeDefaults:
         assert config.auto_summarize is False, "Auto-summarize should be disabled by default"
 
     def test_rolling_window_prevents_bulk_indexing(self):
-        """Verify rolling window prevents bulk indexing (keep_length_days: 7)."""
+        """Verify rolling window prevents bulk indexing (keep_length_days: 1)."""
         config = SessionTrackingConfig()
 
-        assert config.keep_length_days == 7, "Default rolling window should be 7 days"
+        assert config.keep_length_days == 1, "Default rolling window should be 1 day"
 
     def test_no_llm_costs_by_default(self):
         """Verify default config incurs no LLM costs."""

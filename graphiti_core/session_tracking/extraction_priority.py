@@ -36,9 +36,20 @@ if TYPE_CHECKING:
     from .activity_vector import ActivityVector
 
 
+# =============================================================================
+# UNVALIDATED ASSUMPTIONS - Extraction Field Affinities
+# =============================================================================
+# All weights below are engineering estimates with NO empirical basis.
+# These weights determine which fields are prioritized in session summaries
+# based on activity type.
+#
+# Risk: If weights are wrong, summaries may emphasize wrong information
+# Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+# =============================================================================
+
 # Mapping of extraction fields to activity dimension weights
 # Each field specifies which activity dimensions contribute to its priority
-# and with what weight (0.0-1.0)
+# and with what weight (0.0-1.0) [ALL WEIGHTS UNVALIDATED]
 EXTRACTION_AFFINITIES: dict[str, dict[str, float]] = {
     "completed_tasks": {
         "building": 1.0,
@@ -147,6 +158,7 @@ def get_extraction_fields(
         activity: The activity vector representing session activities
         threshold: Minimum priority score (0.0-1.0) for inclusion. Default 0.3
                    matches ActivityVector.DEFAULT_THRESHOLD.
+                   [UNVALIDATED - basis: matches activity_vector.py default]
 
     Returns:
         List of field names with priority >= threshold, sorted by priority

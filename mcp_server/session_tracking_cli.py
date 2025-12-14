@@ -93,9 +93,9 @@ def save_config(config_path: Path, config: dict) -> None:
     """
     try:
         config_path.write_text(json.dumps(config, indent=2))
-        print(f"✅ Configuration saved to {config_path}")
+        print(f"[OK] Configuration saved to {config_path}")
     except Exception as e:
-        print(f"❌ Error saving config file: {e}")
+        print(f"[ERROR] Error saving config file: {e}")
         sys.exit(1)
 
 
@@ -120,7 +120,7 @@ def cmd_enable(args: argparse.Namespace) -> None:
     # Save updated config
     save_config(config_path, config)
 
-    print("\n✅ Session tracking enabled")
+    print("\n[OK] Session tracking enabled")
     print(f"   Config location: {config_path}")
     print("\nSession tracking will start on next MCP server startup.")
     print("Session tracking now uses a turn-based architecture for efficient indexing.")
@@ -148,7 +148,7 @@ def cmd_disable(args: argparse.Namespace) -> None:
     # Save updated config
     save_config(config_path, config)
 
-    print("\n✅ Session tracking disabled")
+    print("\n[OK] Session tracking disabled")
     print(f"   Config location: {config_path}")
     print("\nSession tracking will stop on next MCP server startup.")
     print("Note: Turn-based indexing will no longer process new sessions.")
@@ -162,7 +162,7 @@ def cmd_status(args: argparse.Namespace) -> None:
         print("Session Tracking Status")
         print("=" * 50)
         print("Config file:  Not found")
-        print("Status:       ❌ Disabled (default)")
+        print("Status:       [DISABLED] (default)")
         print("\nNo configuration file found. Session tracking is disabled.")
         print(f"Run 'graphiti-mcp session-tracking enable' to enable.")
         return
@@ -182,7 +182,7 @@ def cmd_status(args: argparse.Namespace) -> None:
     print("\nSession Tracking Status")
     print("=" * 50)
     print(f"Config file:        {config_path}")
-    print(f"Status:             {'✅ Enabled' if enabled else '❌ Disabled'}")
+    print(f"Status:             {'[ENABLED]' if enabled else '[DISABLED]'}")
 
     if enabled:
         print(f"\nConfiguration:")
@@ -205,98 +205,85 @@ def cmd_status(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    """Execute sync command.
+    """Execute sync command via HTTP client to daemon.
 
-    Uses resilient_indexer if available from MCP server for graceful degradation.
-    Failed sessions are queued for retry instead of being lost.
+    Connects to running Graphiti daemon and triggers session sync via Management API.
     """
-    import asyncio
-    from mcp_server.manual_sync import session_tracking_sync_history
-    from mcp_server.graphiti_mcp_server import (
-        session_manager,
-        graphiti_client,
-        unified_config,
-        resilient_indexer,  # Story 13.3: Resilience integration
-    )
+    from mcp_server.api.client import GraphitiClient
 
     # Validate dangerous operations
     if args.days == 0 and not args.confirm:
-        print("❌ Error: --days 0 (all history) requires --confirm flag")
+        print("[ERROR] --days 0 (all history) requires --confirm flag")
         print("   This could index thousands of sessions and cost hundreds of dollars!")
         sys.exit(1)
 
-    # Progress callback for CLI
-    def progress_callback(current: int, total: int) -> None:
-        """Display progress during sync."""
-        if not args.quiet:
-            print(f"\r  Progress: {current}/{total} sessions", end="", flush=True)
-
-    # Call MCP tool
+    # Create HTTP client (auto-discovers daemon URL)
     try:
-        result_json = asyncio.run(
-            session_tracking_sync_history(
-                session_manager=session_manager,
-                graphiti_client=graphiti_client,
-                unified_config=unified_config,
-                project=args.project,
-                days=args.days,
-                max_sessions=args.max_sessions,
-                dry_run=args.dry_run,
-                resilient_indexer=resilient_indexer,  # Story 13.3
-                progress_callback=progress_callback if not args.dry_run else None,
-            )
+        client = GraphitiClient()
+    except ImportError:
+        print("[ERROR] httpx library is required for CLI commands.")
+        print("   Install with: pip install httpx")
+        sys.exit(1)
+
+    # Check daemon health
+    if not client.health_check():
+        # Client will print actionable error message and exit
+        client._handle_connection_error("sync sessions")
+
+    # Call sync API
+    try:
+        if not args.quiet:
+            print(f"Syncing sessions (last {args.days} days)...")
+
+        result = client.sync_sessions(
+            days=args.days,
+            dry_run=args.dry_run
         )
 
-        # Clear progress line if shown
-        if not args.dry_run and not args.quiet:
-            print()  # New line after progress
+        # Display results
+        print("\n=== Session Sync Summary ===\n")
+        print(f"  Mode:             {result.get('mode', 'UNKNOWN')}")
+        print(f"  Sessions found:   {result.get('sessions_found', 0)}")
 
-        # Parse and display results
-        data = json.loads(result_json)
+        details = result.get('details', {})
+        if details.get('estimated_cost'):
+            print(f"  Estimated cost:   ${details['estimated_cost']:.2f}")
 
-        if data.get("status") == "error":
-            print(f"❌ Error: {data['error']}")
-            sys.exit(1)
+        if not args.dry_run:
+            print(f"  Sessions indexed: {details.get('sessions_indexed', 0)}")
+            print(f"  Sessions failed:  {details.get('sessions_failed', 0)}")
+            if details.get('actual_cost'):
+                print(f"  Actual cost:      ${details['actual_cost']:.2f}")
 
-        # Display table
-        print("""
-📊 Session Sync Summary
-""")
-        print(f"  Mode:             {'DRY RUN (preview)' if data['dry_run'] else 'ACTUAL SYNC'}")
-        print(f"  Sessions found:   {data['sessions_found']}")
-        print(f"  Estimated cost:   {data['estimated_cost']}")
-        if not data['dry_run']:
-            print(f"  Sessions indexed: {data['sessions_indexed']}")
-            print(f"  Sessions failed:  {data.get('sessions_failed', 0)}")
-            print(f"  Actual cost:      {data['actual_cost']}")
-
-            # Display resilience status (Story 13.3)
-            if data.get('resilience_enabled'):
+            # Display resilience status if available
+            if details.get('resilience_enabled'):
                 print(f"\n  Resilience:")
-                print(f"    Enabled:        ✅")
-                print(f"    LLM available:  {'✅' if data.get('llm_available') else '⚠️ No'}")
-                print(f"    Degradation:    {data.get('degradation_level', 'unknown')}")
-                queued = data.get('sessions_queued_for_retry', 0)
+                print(f"    Enabled:        [YES]")
+                print(f"    LLM available:  {'[YES]' if details.get('llm_available') else '[NO]'}")
+                print(f"    Degradation:    {details.get('degradation_level', 'unknown')}")
+                queued = details.get('sessions_queued_for_retry', 0)
                 if queued > 0:
                     print(f"    Queued retry:   {queued} sessions (will retry when LLM available)")
-            else:
-                print(f"\n  Resilience:       ❌ Not available (run from MCP server)")
 
-        if data['dry_run']:
-            print("\n💡 Tip: Run with --no-dry-run to perform actual sync")
+        if args.dry_run:
+            print("\nTip: Run with --no-dry-run to perform actual sync")
 
-        # Show sample sessions
-        if "sessions" in data and data["sessions"]:
-            print("\n📄 Sample Sessions (first 10):\n")
-            for session in data["sessions"]:
-                print(f"  {session['path']}")
-                print(f"    Modified: {session['modified']}, Messages: {session['messages']}")
+        # Show sample sessions if available
+        if details.get("sessions"):
+            print("\n=== Sample Sessions (first 10) ===\n")
+            for session in details["sessions"][:10]:
+                print(f"  {session.get('path', 'unknown')}")
+                modified = session.get('modified', 'unknown')
+                messages = session.get('messages', 0)
+                print(f"    Modified: {modified}, Messages: {messages}")
 
         print()
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"[ERROR] {e}")
         sys.exit(1)
+    finally:
+        client.close()
 
 def main() -> None:
     """Main entry point for session tracking CLI."""

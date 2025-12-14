@@ -1,6 +1,11 @@
 """Smart filtering for session messages to reduce token overhead.
 
-This module implements 93% token reduction by:
+.. warning:: UNVALIDATED CLAIMS
+    The "93% token reduction" claim below is an engineering estimate,
+    NOT empirically measured. Actual reduction depends on session composition.
+    See `docs/SESSION_TRACKING_ASSUMPTIONS.md` for validation status.
+
+This module implements ~93% token reduction [UNVALIDATED] by:
 1. Keeping user messages (full)
 2. Keeping agent responses (full)
 3. Keeping tool use structure (parameters only)
@@ -447,10 +452,17 @@ class SessionFilter:
 
         Returns:
             Estimated token usage after filtering
+
+        .. warning:: UNVALIDATED ASSUMPTIONS
+            The 90% reduction estimate below is an engineering guess.
+            See `docs/SESSION_TRACKING_ASSUMPTIONS.md` for validation status.
         """
-        # Rough estimation: Each tool result summary saves ~90% of tokens
-        # This is a conservative estimate based on handoff design
-        tool_result_reduction = len(filtered_tool_calls) * 0.9
+        # UNVALIDATED ASSUMPTION: 90% token savings per tool result summary
+        # Basis: Engineering guess ("1-line summary vs full output")
+        # Risk: If wrong, token estimates mislead capacity planning
+        # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+        TOOL_RESULT_REDUCTION_FACTOR = 0.9  # UNVALIDATED
+        tool_result_reduction = len(filtered_tool_calls) * TOOL_RESULT_REDUCTION_FACTOR
 
         # Calculate reduced output tokens
         original_output = original_message.tokens.output_tokens

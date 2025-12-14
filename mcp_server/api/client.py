@@ -143,7 +143,7 @@ class GraphitiClient:
         """
         if not self._check_daemon_enabled():
             # Daemon is disabled in config
-            print(f"❌ Error: Graphiti daemon is disabled.", file=sys.stderr)
+            print(f"[ERROR] Graphiti daemon is disabled.", file=sys.stderr)
             print(f"", file=sys.stderr)
             print(f"   To enable, edit: {self.config_path}", file=sys.stderr)
             print(f"   Set: \"daemon\": {{ \"enabled\": true }}", file=sys.stderr)
@@ -152,7 +152,7 @@ class GraphitiClient:
             print(f"   (Requires bootstrap service to be installed)", file=sys.stderr)
         else:
             # Daemon enabled but not responding
-            print(f"❌ Error: Cannot connect to Graphiti daemon at {self.base_url}", file=sys.stderr)
+            print(f"[ERROR] Cannot connect to Graphiti daemon at {self.base_url}", file=sys.stderr)
             print(f"", file=sys.stderr)
             print(f"   Config shows daemon.enabled: true", file=sys.stderr)
             print(f"   But server is not responding.", file=sys.stderr)

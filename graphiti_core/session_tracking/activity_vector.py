@@ -94,7 +94,14 @@ class ActivityVector(BaseModel):
         'testing',
         'documenting',
     ]
-    DEFAULT_THRESHOLD: ClassVar[float] = 0.3
+    # =========================================================================
+    # UNVALIDATED ASSUMPTION: 0.3 activity threshold
+    # Basis: Engineering guess (0.3 = "significant enough" to be dominant)
+    # Risk: Too low = everything is dominant; Too high = nothing is dominant
+    # Used by: dominant_activities, primary_activity, extraction_priority.py
+    # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+    # =========================================================================
+    DEFAULT_THRESHOLD: ClassVar[float] = 0.3  # UNVALIDATED
 
     @classmethod
     def from_signals(cls, signals: dict[str, float]) -> 'ActivityVector':

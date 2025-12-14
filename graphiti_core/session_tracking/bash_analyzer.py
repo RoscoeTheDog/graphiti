@@ -645,29 +645,39 @@ class BashAnalyzer:
         ),
     }
 
+    # =========================================================================
+    # UNVALIDATED ASSUMPTIONS - Activity Signal Mappings
+    # =========================================================================
+    # All weights below are engineering estimates with NO empirical basis.
+    # NOTE: These are DUPLICATED from tool_classifier.py and could drift!
+    #
+    # Risk: If wrong, activity vectors misrepresent session type
+    # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+    # =========================================================================
+
     # Activity signal mapping: intent -> activity dimension contributions
-    # (Reusing pattern from ToolClassifier)
+    # (Reusing pattern from ToolClassifier) [ALL WEIGHTS UNVALIDATED]
     INTENT_TO_ACTIVITY: ClassVar[dict[ToolIntent, dict[str, float]]] = {
-        ToolIntent.CREATE: {"building": 0.6},
-        ToolIntent.MODIFY: {"building": 0.4, "refactoring": 0.3},
-        ToolIntent.DELETE: {"refactoring": 0.4},
-        ToolIntent.READ: {"exploring": 0.5, "reviewing": 0.3},
-        ToolIntent.SEARCH: {"exploring": 0.6},
-        ToolIntent.EXECUTE: {"building": 0.3, "testing": 0.2},
-        ToolIntent.CONFIGURE: {"configuring": 0.7},
-        ToolIntent.COMMUNICATE: {"exploring": 0.3},
-        ToolIntent.VALIDATE: {"testing": 0.9},
-        ToolIntent.TRANSFORM: {"building": 0.3, "refactoring": 0.2},
+        ToolIntent.CREATE: {"building": 0.6},  # UNVALIDATED
+        ToolIntent.MODIFY: {"building": 0.4, "refactoring": 0.3},  # UNVALIDATED
+        ToolIntent.DELETE: {"refactoring": 0.4},  # UNVALIDATED
+        ToolIntent.READ: {"exploring": 0.5, "reviewing": 0.3},  # UNVALIDATED
+        ToolIntent.SEARCH: {"exploring": 0.6},  # UNVALIDATED
+        ToolIntent.EXECUTE: {"building": 0.3, "testing": 0.2},  # UNVALIDATED
+        ToolIntent.CONFIGURE: {"configuring": 0.7},  # UNVALIDATED
+        ToolIntent.COMMUNICATE: {"exploring": 0.3},  # UNVALIDATED
+        ToolIntent.VALIDATE: {"testing": 0.9},  # UNVALIDATED (differs from tool_classifier: 0.6!)
+        ToolIntent.TRANSFORM: {"building": 0.3, "refactoring": 0.2},  # UNVALIDATED
     }
 
     # Domain modifiers: domain -> additional activity boosts
-    # (Reusing pattern from ToolClassifier)
+    # (Reusing pattern from ToolClassifier) [ALL WEIGHTS UNVALIDATED]
     DOMAIN_MODIFIERS: ClassVar[dict[ToolDomain, dict[str, float]]] = {
-        ToolDomain.TESTING: {"testing": 0.3},
-        ToolDomain.DOCUMENTATION: {"documenting": 0.5},
-        ToolDomain.VERSION_CONTROL: {"reviewing": 0.2},
-        ToolDomain.CODE: {"building": 0.1, "refactoring": 0.1},
-        ToolDomain.PACKAGE: {"configuring": 0.2},
+        ToolDomain.TESTING: {"testing": 0.3},  # UNVALIDATED
+        ToolDomain.DOCUMENTATION: {"documenting": 0.5},  # UNVALIDATED
+        ToolDomain.VERSION_CONTROL: {"reviewing": 0.2},  # UNVALIDATED
+        ToolDomain.CODE: {"building": 0.1, "refactoring": 0.1},  # UNVALIDATED
+        ToolDomain.PACKAGE: {"configuring": 0.2},  # UNVALIDATED
     }
 
     def __init__(
@@ -789,16 +799,46 @@ class BashAnalyzer:
         results: list[BashCommandClassification | None] = []
         unknown_commands: list[tuple[str, int]] = []
 
+        # =================================================================
+        # UNVALIDATED ASSUMPTION: 0.7 confidence gate
+        # Basis: Engineering guess (0.7 = "good enough" threshold)
+        # Risk: Too low = accept bad heuristics; Too high = waste LLM calls
+        # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+        # =================================================================
+        CONFIDENCE_GATE = 0.7  # UNVALIDATED threshold
+
         for idx, command in enumerate(commands):
             # Try heuristic classification
             result = self.classify(command)
 
-            if result.confidence >= 0.7:
+            if result.confidence >= CONFIDENCE_GATE:
                 results.append(result)
+                # INSTRUMENTATION: Log gate decision for validation analysis
+                logger.info(
+                    "ASSUMPTION_GATE bash_analyzer confidence_gate=%.2f "
+                    "command=%s confidence=%.3f passed=True intent=%s domain=%s method=%s",
+                    CONFIDENCE_GATE,
+                    result.base_command,
+                    result.confidence,
+                    result.intent.value,
+                    result.domain.value,
+                    result.method,
+                )
             else:
                 # Queue for LLM classification
                 unknown_commands.append((command, idx))
                 results.append(None)  # Placeholder
+                # INSTRUMENTATION: Log gate rejection for validation analysis
+                logger.info(
+                    "ASSUMPTION_GATE bash_analyzer confidence_gate=%.2f "
+                    "command=%s confidence=%.3f passed=False intent=%s domain=%s method=%s",
+                    CONFIDENCE_GATE,
+                    result.base_command,
+                    result.confidence,
+                    result.intent.value,
+                    result.domain.value,
+                    result.method,
+                )
 
         # Batch LLM classification for unknown commands
         if unknown_commands and self._llm_client is not None:

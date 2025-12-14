@@ -50,7 +50,7 @@ class TestOldConfigFormatLoads:
             assert config.session_tracking.check_interval == 60
 
             # Verify new fields have defaults
-            assert config.session_tracking.keep_length_days == 7  # New default
+            assert config.session_tracking.keep_length_days == 1  # New default
             assert config.session_tracking.auto_summarize is False  # New default
             assert config.session_tracking.filter is not None  # Auto-generated
 
@@ -81,7 +81,7 @@ class TestOldConfigFormatLoads:
             # Should get all new defaults
             assert config.session_tracking.enabled is False  # New opt-in default
             assert config.session_tracking.inactivity_timeout == 900  # New default (15 min)
-            assert config.session_tracking.keep_length_days == 7
+            assert config.session_tracking.keep_length_days == 1
             assert config.session_tracking.auto_summarize is False
 
         finally:
@@ -141,11 +141,11 @@ class TestMigrationFromOldDefaults:
         assert config.inactivity_timeout == 900
 
     def test_migration_adds_rolling_window_filter(self):
-        """Verify keep_length_days added with 7-day default (Story 12)."""
+        """Verify keep_length_days added with 1-day default (Story 12)."""
         config = SessionTrackingConfig()
 
         # Should have rolling window to prevent bulk indexing
-        assert config.keep_length_days == 7
+        assert config.keep_length_days == 1
 
 
 class TestDeprecatedFieldHandling:
