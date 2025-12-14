@@ -237,7 +237,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: CLI Refactoring (HTTP Client + Error Messages)",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "3",
       "children": [
         "-3.d",
@@ -295,7 +295,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: CLI Refactoring (HTTP Client + Error Messages)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3",
       "phase": "validation_testing",
