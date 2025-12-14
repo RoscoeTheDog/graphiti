@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 10:38:09
+**Generated**: 2025-12-14 10:41:58
 
 ---
 
@@ -15,13 +15,11 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 93.3%
+- **Completion**: 100.0%
 
 ### By Status
 
-- completed: 28
-- in_progress: 1
-- unassigned: 1
+- completed: 30
 
 ### By Type
 
@@ -116,7 +114,7 @@
   - Blocks: Story -6.t
 
   ### Story -6.t: Validate Testing: Testing & Documentation
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -6, Story -6.i
 
 ### Story 1: Core Infrastructure Management Api Http Client
