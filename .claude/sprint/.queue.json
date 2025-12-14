@@ -25,7 +25,7 @@
     "2": {
       "type": "implementation",
       "title": "Bootstrap Service (Config Watcher + MCP Lifecycle)",
-      "status": "unassigned",
+      "status": "completed",
       "file": "stories/2-bootstrap-service-config-watcher-mcp-lifecycle.md",
       "parent": null,
       "children": [],
