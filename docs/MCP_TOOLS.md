@@ -16,6 +16,91 @@ Graphiti provides an MCP server that exposes memory operations as tools for AI a
 
 ---
 
+## Transport Options
+
+The Graphiti MCP server supports two transport modes:
+
+### 1. HTTP Transport (Recommended - Daemon Architecture)
+
+**Benefits:**
+- **Persistent server** - Single process shared across all Claude Code sessions
+- **Shared state** - All clients see the same knowledge graph
+- **CLI access** - Use `graphiti-mcp` commands while Claude Code is connected
+- **Lower resource usage** - One Neo4j connection vs. one per session
+- **Auto-start** - Daemon service starts on system boot
+
+**Configuration** (`~/.claude/settings.json`):
+```json
+{
+  "mcpServers": {
+    "graphiti": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything",
+        "http://127.0.0.1:8321"
+      ],
+      "transport": "sse"
+    }
+  }
+}
+```
+
+**Setup:**
+```bash
+# Install daemon service (one-time)
+graphiti-mcp daemon install
+
+# Enable in config
+# Edit ~/.graphiti/graphiti.config.json:
+{
+  "daemon": {
+    "enabled": true
+  }
+}
+
+# Check status
+graphiti-mcp daemon status
+```
+
+**Platform Support:**
+- Windows (via Windows Service)
+- macOS (via launchd)
+- Linux (via systemd)
+
+See [CONFIGURATION.md - Daemon Configuration](../CONFIGURATION.md#daemon-configuration) for details.
+
+### 2. Stdio Transport (Legacy)
+
+**Use when:**
+- Testing or development
+- Isolated per-session state desired
+- Daemon architecture not available
+
+**Configuration** (`~/.claude/settings.json`):
+```json
+{
+  "mcpServers": {
+    "graphiti": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_server.graphiti_mcp_server"
+      ],
+      "transport": "stdio"
+    }
+  }
+}
+```
+
+**Limitations:**
+- Each Claude Code session spawns its own MCP server process
+- No shared state between sessions
+- CLI commands cannot connect to running server
+- Higher resource usage (multiple Neo4j connections)
+
+---
+
 ## Available Tools
 
 ### Memory Operations
@@ -303,7 +388,7 @@ session_tracking_status(session_id="abc123-def456")
     "enabled": true,
     "watch_path": "/home/user/.claude/projects",
     "store_in_graph": true,
-    "keep_length_days": 7
+    "keep_length_days": 1
   },
   "runtime_override": null,
   "session_manager": {

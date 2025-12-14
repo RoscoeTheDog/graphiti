@@ -192,7 +192,7 @@ Session tracking configuration is stored in `graphiti.config.json`:
     "inactivity_timeout": 900,
     "check_interval": 60,
     "auto_summarize": false,
-    "keep_length_days": 7
+    "keep_length_days": 1
   }
 }
 ```

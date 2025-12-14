@@ -131,7 +131,7 @@ class TestConfigGeneration:
             assert st["check_interval"] == 60  # 1 minute
             assert st["auto_summarize"] is False
             assert st["store_in_graph"] is True
-            assert st["keep_length_days"] == 7  # Rolling window
+            assert st["keep_length_days"] == 1  # Rolling window
 
     def test_config_directory_created_if_missing(self, tmp_path):
         """Test that .graphiti directory is created if missing."""

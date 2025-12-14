@@ -169,8 +169,8 @@ class TestRollingPeriodFilter:
             finally:
                 manager.stop()
 
-    def test_default_keep_length_days_is_seven(self):
-        """Test that default keep_length_days is 7 days."""
+    def test_default_keep_length_days_is_one(self):
+        """Test that default keep_length_days is 1 day."""
         with tempfile.TemporaryDirectory() as tmpdir:
             claude_dir = Path(tmpdir)
             path_resolver = ClaudePathResolver(claude_dir=claude_dir)
@@ -178,11 +178,11 @@ class TestRollingPeriodFilter:
             # Create manager without specifying keep_length_days
             manager = SessionManager(
                 path_resolver=path_resolver,
-                # keep_length_days not specified, should default to 7
+                # keep_length_days not specified, should default to 1
             )
 
-            # Verify default is 7
-            assert manager.keep_length_days == 7
+            # Verify default is 1
+            assert manager.keep_length_days == 1
 
     def test_discovery_logging(self, caplog):
         """Test that discovery logs filter statistics."""

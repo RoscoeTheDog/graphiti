@@ -1,0 +1,30 @@
+# Systemd user service unit for Graphiti Bootstrap Service
+# This is a REFERENCE TEMPLATE - the actual service file is generated dynamically
+# by SystemdServiceManager._create_service_unit()
+#
+# Installation location: ~/.config/systemd/user/graphiti-bootstrap.service
+#
+# Manual installation (if not using graphiti-mcp daemon install):
+#   1. Copy this file to ~/.config/systemd/user/
+#   2. Update ExecStart path to point to your bootstrap.py
+#   3. Run: systemctl --user daemon-reload
+#   4. Run: systemctl --user enable graphiti-bootstrap
+#   5. Run: systemctl --user start graphiti-bootstrap
+
+[Unit]
+Description=Graphiti MCP Bootstrap Service
+Documentation=https://github.com/getzep/graphiti
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /path/to/mcp_server/daemon/bootstrap.py
+Restart=always
+RestartSec=5
+WorkingDirectory=/path/to/mcp_server/daemon
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+StandardOutput=append:/home/user/.graphiti/logs/bootstrap-stdout.log
+StandardError=append:/home/user/.graphiti/logs/bootstrap-stderr.log
+
+[Install]
+WantedBy=default.target

@@ -1,6 +1,6 @@
 # Story 2: Bootstrap Service (Config Watcher + MCP Lifecycle)
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-13 23:51
 
 ## Description
@@ -9,12 +9,12 @@ Create the config-watching bootstrap layer that manages MCP server lifecycle bas
 
 ## Acceptance Criteria
 
-- [ ] (P0) `bootstrap.py` implemented with config file polling (5s default, configurable)
-- [ ] (P0) MCP server starts when `daemon.enabled` changes to `true`
-- [ ] (P0) MCP server stops when `daemon.enabled` changes to `false`
-- [ ] (P1) Crash detection and automatic restart of MCP server
-- [ ] (P1) Graceful shutdown handling (SIGTERM/SIGINT)
-- [ ] (P2) Health check interval configurable for MCP server monitoring
+- [x] (P0) `bootstrap.py` implemented with config file polling (5s default, configurable)
+- [x] (P0) MCP server starts when `daemon.enabled` changes to `true`
+- [x] (P0) MCP server stops when `daemon.enabled` changes to `false`
+- [x] (P1) Crash detection and automatic restart of MCP server
+- [x] (P1) Graceful shutdown handling (SIGTERM/SIGINT)
+- [x] (P2) Health check interval configurable for MCP server monitoring
 
 ## Dependencies
 

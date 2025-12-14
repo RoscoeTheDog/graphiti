@@ -1,0 +1,110 @@
+{
+  "version": "1.4",
+  "started_at": "2025-12-14T16:30:00Z",
+  "status": "completed",
+  "current_phase": "validation",
+  "current_section": 0,
+  "completed_sections": [],
+  "completed_stories": [
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "-4.d",
+    "-4.i",
+    "-4.t",
+    "-5.d",
+    "-5.i",
+    "-5.t",
+    "-6.d",
+    "-6.i",
+    "-6.t"
+  ],
+  "failed_stories": [],
+  "args": {
+    "validation_only": true,
+    "skip_validation": false,
+    "parallel_limit": 3,
+    "story_filter": null,
+    "from_story": null,
+    "validate_story_filter": null,
+    "from_validation": null
+  },
+  "execution_plan": {
+    "sections": [
+      {
+        "id": "validation-1",
+        "type": "sequential",
+        "stories": [
+          "-1.d",
+          "-1.i",
+          "-1.t"
+        ]
+      },
+      {
+        "id": "validation-2",
+        "type": "sequential",
+        "stories": [
+          "-2.d",
+          "-2.i",
+          "-2.t"
+        ]
+      },
+      {
+        "id": "validation-3",
+        "type": "sequential",
+        "stories": [
+          "-3.d",
+          "-3.i",
+          "-3.t"
+        ]
+      },
+      {
+        "id": "validation-4",
+        "type": "sequential",
+        "stories": [
+          "-4.d",
+          "-4.i",
+          "-4.t"
+        ]
+      },
+      {
+        "id": "validation-5",
+        "type": "sequential",
+        "stories": [
+          "-5.d",
+          "-5.i",
+          "-5.t"
+        ]
+      },
+      {
+        "id": "validation-6",
+        "type": "sequential",
+        "stories": [
+          "-6.d",
+          "-6.i",
+          "-6.t"
+        ]
+      }
+    ],
+    "total_stories": 18,
+    "parallel_groups": 0
+  },
+  "phase_helpers": {
+    "recovery": "resources/commands/sprint/helpers/orchestrate-recovery.md",
+    "validation": "resources/commands/sprint/helpers/orchestrate-validation-phase.md",
+    "validation_story": "resources/commands/sprint/execute-validation-story.md"
+  },
+  "completed_at": "2025-12-14T18:42:46Z",
+  "summary": {
+    "stories_completed": 18,
+    "stories_failed": 0,
+    "validations_passed": 18,
+    "remediations_executed": 0
+  }
+}

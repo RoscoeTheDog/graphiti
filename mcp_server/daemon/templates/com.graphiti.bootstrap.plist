@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+Launchd plist for Graphiti Bootstrap Service
+This is a REFERENCE TEMPLATE - the actual plist is generated dynamically
+by LaunchdServiceManager._create_plist()
+
+Installation location: ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
+
+Manual installation (if not using graphiti-mcp daemon install):
+  1. Copy this file to ~/Library/LaunchAgents/
+  2. Update ProgramArguments paths to point to your Python and bootstrap.py
+  3. Run: launchctl load ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.graphiti.bootstrap</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/python3</string>
+        <string>/path/to/mcp_server/daemon/bootstrap.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/username/.graphiti/logs/bootstrap-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/username/.graphiti/logs/bootstrap-stderr.log</string>
+    <key>WorkingDirectory</key>
+    <string>/path/to/mcp_server/daemon</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>

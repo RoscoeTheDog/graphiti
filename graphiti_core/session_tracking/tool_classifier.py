@@ -321,27 +321,39 @@ class ToolClassifier:
         (["bash", "shell", "process", "command"], ToolDomain.PROCESS, 0.8),
     ]
 
+    # =========================================================================
+    # UNVALIDATED ASSUMPTIONS - Activity Signal Mappings
+    # =========================================================================
+    # All weights below are engineering estimates with NO empirical basis.
+    # These determine how tool intents/domains map to activity dimensions.
+    #
+    # Risk: If wrong, activity vectors misrepresent session type
+    # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+    # =========================================================================
+
     # Activity signal mapping: intent -> activity dimension contributions
+    # [ALL WEIGHTS UNVALIDATED]
     INTENT_TO_ACTIVITY: ClassVar[dict[ToolIntent, dict[str, float]]] = {
-        ToolIntent.CREATE: {"building": 0.6},
-        ToolIntent.MODIFY: {"building": 0.4, "refactoring": 0.3},
-        ToolIntent.DELETE: {"refactoring": 0.4},
-        ToolIntent.READ: {"exploring": 0.5, "reviewing": 0.3},
-        ToolIntent.SEARCH: {"exploring": 0.6},
-        ToolIntent.EXECUTE: {"building": 0.3, "testing": 0.2},
-        ToolIntent.CONFIGURE: {"configuring": 0.7},
-        ToolIntent.COMMUNICATE: {"exploring": 0.3},
-        ToolIntent.VALIDATE: {"testing": 0.6},
-        ToolIntent.TRANSFORM: {"building": 0.3, "refactoring": 0.2},
+        ToolIntent.CREATE: {"building": 0.6},  # UNVALIDATED
+        ToolIntent.MODIFY: {"building": 0.4, "refactoring": 0.3},  # UNVALIDATED
+        ToolIntent.DELETE: {"refactoring": 0.4},  # UNVALIDATED
+        ToolIntent.READ: {"exploring": 0.5, "reviewing": 0.3},  # UNVALIDATED
+        ToolIntent.SEARCH: {"exploring": 0.6},  # UNVALIDATED
+        ToolIntent.EXECUTE: {"building": 0.3, "testing": 0.2},  # UNVALIDATED
+        ToolIntent.CONFIGURE: {"configuring": 0.7},  # UNVALIDATED
+        ToolIntent.COMMUNICATE: {"exploring": 0.3},  # UNVALIDATED
+        ToolIntent.VALIDATE: {"testing": 0.6},  # UNVALIDATED
+        ToolIntent.TRANSFORM: {"building": 0.3, "refactoring": 0.2},  # UNVALIDATED
     }
 
     # Domain modifiers: domain -> additional activity boosts
+    # [ALL WEIGHTS UNVALIDATED]
     DOMAIN_MODIFIERS: ClassVar[dict[ToolDomain, dict[str, float]]] = {
-        ToolDomain.TESTING: {"testing": 0.3},
-        ToolDomain.DOCUMENTATION: {"documenting": 0.5},
-        ToolDomain.VERSION_CONTROL: {"reviewing": 0.2},
-        ToolDomain.CODE: {"building": 0.1, "refactoring": 0.1},
-        ToolDomain.PACKAGE: {"configuring": 0.2},
+        ToolDomain.TESTING: {"testing": 0.3},  # UNVALIDATED
+        ToolDomain.DOCUMENTATION: {"documenting": 0.5},  # UNVALIDATED
+        ToolDomain.VERSION_CONTROL: {"reviewing": 0.2},  # UNVALIDATED
+        ToolDomain.CODE: {"building": 0.1, "refactoring": 0.1},  # UNVALIDATED
+        ToolDomain.PACKAGE: {"configuring": 0.2},  # UNVALIDATED
     }
 
     # Regex pattern for splitting tool names into parts
@@ -474,7 +486,11 @@ class ToolClassifier:
         if intent_match:
             intent, intent_conf = intent_match
             domain = ToolDomain.UNKNOWN
-            confidence = intent_conf * 0.7  # Reduced confidence
+            # UNVALIDATED ASSUMPTION: 0.7 confidence penalty for partial match
+            # Basis: Engineering guess (partial match = 70% as confident)
+            # Risk: May reject good heuristics or accept bad ones
+            # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+            confidence = intent_conf * 0.7  # UNVALIDATED: 0.7 penalty factor
             activity_signals = self._compute_activity_signals(intent, domain)
             return ToolClassification(
                 intent=intent,
@@ -489,7 +505,9 @@ class ToolClassifier:
         if domain_match:
             domain, domain_conf = domain_match
             intent = ToolIntent.EXECUTE  # Safe default
-            confidence = domain_conf * 0.7  # Reduced confidence
+            # UNVALIDATED ASSUMPTION: 0.7 confidence penalty for partial match
+            # (Same as intent-only case above)
+            confidence = domain_conf * 0.7  # UNVALIDATED: 0.7 penalty factor
             activity_signals = self._compute_activity_signals(intent, domain)
             return ToolClassification(
                 intent=intent,
@@ -901,16 +919,51 @@ class ToolClassifier:
 
             # 3. Try heuristic
             heuristic = self._try_heuristic(tool_name, params)
-            if heuristic is not None and heuristic.confidence >= 0.7:
+            # =================================================================
+            # UNVALIDATED ASSUMPTION: 0.7 confidence gate
+            # Basis: Engineering guess (0.7 = "good enough" threshold)
+            # Risk: Too low = accept bad heuristics; Too high = waste LLM calls
+            # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+            # =================================================================
+            CONFIDENCE_GATE = 0.7  # UNVALIDATED threshold
+            if heuristic is not None and heuristic.confidence >= CONFIDENCE_GATE:
                 results.append(heuristic)
                 # Also update caches with high-confidence heuristic results
                 self._update_cache(tool_name, params, heuristic)
                 logger.debug("Heuristic match for '%s' (conf=%.2f)", tool_name, heuristic.confidence)
+                # INSTRUMENTATION: Log gate decision for validation analysis
+                logger.info(
+                    "ASSUMPTION_GATE tool_classifier confidence_gate=%.2f "
+                    "tool=%s confidence=%.3f passed=True intent=%s domain=%s method=heuristic",
+                    CONFIDENCE_GATE,
+                    tool_name,
+                    heuristic.confidence,
+                    heuristic.intent.value,
+                    heuristic.domain.value,
+                )
                 continue
 
             # 4. Queue for LLM classification
             unknown_tools.append((tool_name, params, idx))
             results.append(None)  # Placeholder
+            # INSTRUMENTATION: Log gate rejection for validation analysis
+            if heuristic is not None:
+                logger.info(
+                    "ASSUMPTION_GATE tool_classifier confidence_gate=%.2f "
+                    "tool=%s confidence=%.3f passed=False intent=%s domain=%s method=heuristic",
+                    CONFIDENCE_GATE,
+                    tool_name,
+                    heuristic.confidence,
+                    heuristic.intent.value,
+                    heuristic.domain.value,
+                )
+            else:
+                logger.info(
+                    "ASSUMPTION_GATE tool_classifier confidence_gate=%.2f "
+                    "tool=%s confidence=0.000 passed=False intent=none domain=none method=no_match",
+                    CONFIDENCE_GATE,
+                    tool_name,
+                )
 
         # 5. Batch LLM classification for unknown tools
         if unknown_tools:

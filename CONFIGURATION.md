@@ -18,9 +18,10 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 12. [LLM Resilience Configuration](#llm-resilience-configuration) ⭐ New in v1.0.0
 13. [MCP Tools Configuration](#mcp-tools-configuration) ⭐ New in v1.0.0
 14. [Session Tracking Configuration](#session-tracking-configuration)
-15. [Environment Variable Overrides](#environment-variable-overrides)
-16. [Complete Examples](#complete-examples)
-17. [Troubleshooting](#troubleshooting)
+15. [Daemon Configuration](#daemon-configuration) ⭐ New in v1.1.0
+16. [Environment Variable Overrides](#environment-variable-overrides)
+17. [Complete Examples](#complete-examples)
+18. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -820,7 +821,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
     "enabled": false,
     "watch_path": null,
     "store_in_graph": true,
-    "keep_length_days": 7,
+    "keep_length_days": 1,
     "filter": {
       "tool_calls": true,
       "tool_content": "default-tool-content.md",
@@ -839,7 +840,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 | `watch_path` | str\|null | `null` | Path to directory containing Claude Code session files. If null, defaults to `~/.claude/projects/`. Must be an absolute path. |
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 | `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
-| `keep_length_days` | int\|null | 7 | **Days** to retain sessions in rolling window (default: 7 days). If null, discovers all sessions (use with caution - may cause bulk LLM costs). **New in v1.1.0** |
+| `keep_length_days` | int\|null | 1 | **Days** to retain sessions in rolling window (default: 1 day). If null, discovers all sessions (use with caution - may cause bulk LLM costs). **New in v1.1.0** |
 
 ### Filtering Configuration
 
@@ -1246,14 +1247,14 @@ export GRAPHITI_SESSION_TRACKING_KEEP_LENGTH_DAYS=7
 
 ### Example Configurations
 
-**Default (Recommended)** - 7-day rolling window:
+**Default (Recommended)** - 1-day rolling window:
 ```json
 {
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
     "store_in_graph": true,
-    "keep_length_days": 7,
+    "keep_length_days": 1,
     "filter": {
       "tool_calls": true,
       "tool_content": "default-tool-content.md",
@@ -1264,14 +1265,14 @@ export GRAPHITI_SESSION_TRACKING_KEEP_LENGTH_DAYS=7
 }
 ```
 
-**Extended History** - 30-day rolling window:
+**Extended History** - 7-day rolling window:
 ```json
 {
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
     "store_in_graph": true,
-    "keep_length_days": 30
+    "keep_length_days": 7
   }
 }
 ```
@@ -1282,7 +1283,7 @@ export GRAPHITI_SESSION_TRACKING_KEEP_LENGTH_DAYS=7
   "session_tracking": {
     "enabled": true,
     "watch_path": "~/.claude/projects",
-    "keep_length_days": 7,
+    "keep_length_days": 1,
     "filter": {
       "tool_calls": true,
       "tool_content": false,
@@ -1368,6 +1369,243 @@ For detailed session tracking documentation:
 - **User Guide**: [docs/SESSION_TRACKING_USER_GUIDE.md](docs/SESSION_TRACKING_USER_GUIDE.md)
 - **Developer Guide**: [docs/SESSION_TRACKING_DEV_GUIDE.md](docs/SESSION_TRACKING_DEV_GUIDE.md)
 - **Troubleshooting**: [docs/SESSION_TRACKING_TROUBLESHOOTING.md](docs/SESSION_TRACKING_TROUBLESHOOTING.md)
+
+---
+
+## Daemon Configuration
+
+**New in v1.1.0** - Persistent daemon architecture for improved performance and multi-client support.
+
+The daemon architecture runs the Graphiti MCP server as a persistent background service, enabling:
+- **Shared state** across multiple Claude Code sessions
+- **Lower resource usage** (single Neo4j connection)
+- **CLI commands** work while Claude Code is connected
+- **Auto-start** on system boot (if installed as service)
+
+### Architecture
+
+The daemon uses a two-layer architecture:
+
+1. **Bootstrap Service** - Lightweight service that monitors the config file
+2. **MCP Server** - Only runs when `daemon.enabled: true`
+
+This design ensures minimal resource usage when disabled (~5MB RAM for bootstrap only).
+
+### Configuration
+
+```json
+{
+  "daemon": {
+    "enabled": false,
+    "host": "127.0.0.1",
+    "port": 8321,
+    "config_watch_interval_seconds": 5,
+    "log_file": null
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `false` | Enable/disable the MCP server (bootstrap service always runs after install) |
+| `host` | str | `"127.0.0.1"` | Host address for HTTP server (use 127.0.0.1 for localhost-only) |
+| `port` | int | `8321` | Port number for HTTP server |
+| `config_watch_interval_seconds` | int | `5` | How often bootstrap checks config for changes (in seconds) |
+| `log_file` | str\|null | `null` | Log file path (null = platform default: Windows Event Log, syslog, or journalctl) |
+
+### Installation
+
+**Platform Support:**
+- Windows (via Windows Service using NSSM)
+- macOS (via launchd)
+- Linux (via systemd)
+
+**Install Daemon Service (one-time):**
+```bash
+# Install bootstrap service (auto-start on boot)
+graphiti-mcp daemon install
+
+# Check status
+graphiti-mcp daemon status
+
+# View logs
+graphiti-mcp daemon logs
+
+# Uninstall service
+graphiti-mcp daemon uninstall
+```
+
+**Enable/Disable MCP Server:**
+```bash
+# Option 1: Edit config file
+# Edit ~/.graphiti/graphiti.config.json:
+{
+  "daemon": {
+    "enabled": true
+  }
+}
+# Changes take effect automatically within 5 seconds
+
+# Option 2: Use environment variable
+export GRAPHITI_DAEMON_ENABLED=true
+```
+
+### Claude Code Integration
+
+Update your Claude Code MCP settings (`~/.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "graphiti": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything",
+        "http://127.0.0.1:8321"
+      ],
+      "transport": "sse"
+    }
+  }
+}
+```
+
+**Key differences from stdio transport:**
+- `transport: "sse"` instead of `"stdio"`
+- Uses HTTP URL (`http://127.0.0.1:8321`) instead of Python command
+- Multiple Claude Code windows can connect simultaneously
+- Server persists between sessions
+
+### HTTP Client Usage
+
+Python applications can connect to the daemon using the `GraphitiClient`:
+
+```python
+from mcp_server.api.client import GraphitiClient
+
+# Auto-discover daemon URL (env var -> config -> default)
+client = GraphitiClient()
+
+# Or specify URL explicitly
+client = GraphitiClient(base_url="http://localhost:8321")
+
+# Check if daemon is running
+if client.health_check():
+    # Get server status
+    status = client.get_status()
+    print(f"Server uptime: {status['uptime_seconds']}s")
+
+    # Sync sessions
+    result = client.sync_sessions(days=7, dry_run=False)
+    print(f"Synced {result['episodes_created']} episodes")
+```
+
+### URL Discovery
+
+The daemon URL is discovered using this priority chain:
+
+1. **Environment variable** - `GRAPHITI_URL` (highest priority)
+2. **Config file** - `daemon.host` + `daemon.port`
+3. **Default** - `http://127.0.0.1:8321`
+
+Example:
+```bash
+# Override URL via environment
+export GRAPHITI_URL=http://localhost:9999
+```
+
+### Environment Overrides
+
+Daemon settings can be overridden with environment variables:
+
+```bash
+export GRAPHITI_DAEMON_ENABLED=true
+export GRAPHITI_DAEMON_HOST=127.0.0.1
+export GRAPHITI_DAEMON_PORT=8321
+export GRAPHITI_DAEMON_CONFIG_WATCH_INTERVAL_SECONDS=10
+export GRAPHITI_DAEMON_LOG_FILE=/var/log/graphiti-daemon.log
+```
+
+### Example Configurations
+
+**Minimal (Recommended):**
+```json
+{
+  "daemon": {
+    "enabled": true
+  }
+}
+```
+Uses defaults: `127.0.0.1:8321`, 5-second config watch interval.
+
+**Custom Port:**
+```json
+{
+  "daemon": {
+    "enabled": true,
+    "port": 9999
+  }
+}
+```
+
+**Custom Log File:**
+```json
+{
+  "daemon": {
+    "enabled": true,
+    "log_file": "/var/log/graphiti-daemon.log"
+  }
+}
+```
+
+**Development Mode (faster config updates):**
+```json
+{
+  "daemon": {
+    "enabled": true,
+    "config_watch_interval_seconds": 1
+  }
+}
+```
+
+### Troubleshooting
+
+**Problem: "Connection refused" error**
+- **Cause**: MCP server not running
+- **Check**: `graphiti-mcp daemon status`
+- **Fix**: Set `"daemon": { "enabled": true }` in config
+
+**Problem: Changes to config not taking effect**
+- **Cause**: Config watch interval (default 5 seconds)
+- **Wait**: Up to 5 seconds after saving config
+- **Check logs**: `graphiti-mcp daemon logs`
+
+**Problem: Multiple Claude Code sessions conflict**
+- **This shouldn't happen** - daemon architecture supports multiple clients
+- **Check**: Verify all Claude Code instances use HTTP transport (not stdio)
+- **Verify**: `~/.claude/settings.json` has `"transport": "sse"`
+
+### Documentation
+
+For detailed daemon architecture documentation:
+- **Installation Guide**: [claude-mcp-installer/instance/CLAUDE_INSTALL.md](claude-mcp-installer/instance/CLAUDE_INSTALL.md)
+- **Architecture Spec**: [.claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md](.claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md)
+- **Troubleshooting**: [docs/TROUBLESHOOTING_DAEMON.md](docs/TROUBLESHOOTING_DAEMON.md)
+
+### Performance Notes
+
+**Resource Usage:**
+- Bootstrap service (always running): ~5MB RAM
+- MCP server (when enabled): ~100MB RAM
+- Total (enabled): ~105MB RAM
+- Single Neo4j connection (vs. one per Claude Code session)
+
+**Latency:**
+- HTTP overhead: ~1-5ms per request
+- Config changes: Take effect within 5 seconds (default watch interval)
+- Auto-start: Server starts within 5 seconds of config change
 
 ---
 

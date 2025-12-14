@@ -126,43 +126,62 @@ class FilterConfig(BaseModel):
         Returns:
             Estimated reduction (0.0-1.0) based on configuration.
 
+        .. warning:: UNVALIDATED ASSUMPTIONS
+            All values in this method are engineering estimates, NOT empirically
+            measured. Actual token reduction may vary significantly. See
+            `docs/SESSION_TRACKING_ASSUMPTIONS.md` for validation status.
+
         Notes:
             - True (full content): 0% reduction
             - Template/inline prompt: ~70% reduction for tool results, ~50% for messages
-            - False (omit): ~95% reduction
+              [UNVALIDATED - basis: engineering guess]
+            - False (omit): ~95% reduction [UNVALIDATED - basis: engineering guess]
 
         Examples:
             >>> config = FilterConfig()  # Default (template for tools)
             >>> config.estimate_token_reduction()
-            0.42  # ~42% reduction (template-based tool summarization)
+            0.42  # ~42% reduction (template-based tool summarization) [UNVALIDATED]
 
             >>> config = FilterConfig(tool_content=False)
             >>> config.estimate_token_reduction()
-            0.57  # ~57% reduction (omit tool results)
+            0.57  # ~57% reduction (omit tool results) [UNVALIDATED]
         """
-        # Weights based on typical Claude Code session composition
-        # Tool results: ~60% of tokens
-        # User messages: ~15% of tokens
-        # Agent messages: ~25% of tokens
+        # =======================================================================
+        # UNVALIDATED ASSUMPTIONS - Token Composition Weights
+        # Basis: Engineering estimate, no empirical measurement
+        # Risk: If wrong, estimate_token_reduction() misleads callers
+        # Validation: See docs/SESSION_TRACKING_ASSUMPTIONS.md
+        # =======================================================================
+        # Tool results: ~60% of tokens [UNVALIDATED]
+        # User messages: ~15% of tokens [UNVALIDATED]
+        # Agent messages: ~25% of tokens [UNVALIDATED]
+        TOOL_WEIGHT = 0.60  # UNVALIDATED
+        USER_WEIGHT = 0.15  # UNVALIDATED
+        AGENT_WEIGHT = 0.25  # UNVALIDATED
 
         def get_reduction(value: Union[bool, str]) -> float:
             if value is True:
                 return 0.0  # No filtering
             elif value is False:
-                return 0.95  # Omit
+                # UNVALIDATED ASSUMPTION: 95% reduction when omitting
+                # Basis: Engineering guess (omit = ~5% overhead for markers)
+                return 0.95
             else:
-                # Template or inline prompt (estimate ~70% for tools, ~50% for messages)
+                # UNVALIDATED ASSUMPTION: 70% reduction for templates
+                # Basis: Engineering guess, not measured against real sessions
+                # Risk: Agents may make decisions based on this estimate
                 return 0.7
 
         tool_reduction = get_reduction(self.tool_content)
 
-        # For user/agent, templates are less effective (preserve more context)
+        # UNVALIDATED ASSUMPTION: 50% reduction for user/agent templates
+        # Basis: Engineering guess (messages need more context than tool results)
         user_reduction = 0.5 if isinstance(self.user_messages, str) else get_reduction(self.user_messages)
         agent_reduction = 0.5 if isinstance(self.agent_messages, str) else get_reduction(self.agent_messages)
 
-        # Weighted average
+        # Weighted average using UNVALIDATED weights
         return (
-            0.60 * tool_reduction +
-            0.15 * user_reduction +
-            0.25 * agent_reduction
+            TOOL_WEIGHT * tool_reduction +
+            USER_WEIGHT * user_reduction +
+            AGENT_WEIGHT * agent_reduction
         )

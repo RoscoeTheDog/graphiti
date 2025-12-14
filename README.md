@@ -524,7 +524,64 @@ graphiti-mcp session-tracking disable
 
 **Cost:** ~$0.17 per session (with smart filtering)
 
-The MCP server can be deployed using Docker with Neo4j, making it easy to integrate Graphiti into your AI assistant
+### Daemon Architecture (Recommended)
+
+The MCP server supports a **persistent daemon architecture** for improved performance and multi-client support:
+
+**Benefits:**
+- One persistent server process (no per-session spawning)
+- Shared state across multiple Claude Code sessions
+- CLI commands work while Claude Code is connected
+- Auto-starts on system boot (if installed as service)
+- Lower resource usage (single Neo4j connection)
+
+**Quick Setup:**
+```bash
+# Install daemon service (one-time)
+graphiti-mcp daemon install
+
+# Enable in config
+# Edit ~/.graphiti/graphiti.config.json:
+{
+  "daemon": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 8321
+  }
+}
+
+# Check status
+graphiti-mcp daemon status
+```
+
+**Claude Code Configuration:**
+Update your Claude Code MCP settings (`~/.claude/settings.json`):
+```json
+{
+  "mcpServers": {
+    "graphiti": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything",
+        "http://127.0.0.1:8321"
+      ],
+      "transport": "sse"
+    }
+  }
+}
+```
+
+**Platform Support:**
+- Windows (via Windows Service)
+- macOS (via launchd)
+- Linux (via systemd)
+
+**Documentation:**
+- [Installation Guide](claude-mcp-installer/instance/CLAUDE_INSTALL.md)
+- [Troubleshooting](docs/TROUBLESHOOTING_DAEMON.md)
+
+The MCP server can also be deployed using Docker with Neo4j, making it easy to integrate Graphiti into your AI assistant
 workflows.
 
 For detailed setup instructions and usage examples, see the [MCP server README](./mcp_server/README.md).
