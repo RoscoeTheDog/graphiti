@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 09:26:02
+**Generated**: 2025-12-14 09:31:20
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 26.7%
+- **Completion**: 33.3%
 
 ### By Status
 
-- completed: 8
-- in_progress: 1
-- unassigned: 21
+- completed: 10
+- unassigned: 20
 
 ### By Type
 
@@ -46,7 +45,7 @@
   - Blocks: Story -1.t
 
   ### Story -1.t: Validate Testing: Core Infrastructure (Management API + HTTP Client)
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -1, Story -1.i
 
   ### Story -2.d: Validate Discovery: Bootstrap Service (Config Watcher + MCP Lifecycle)
