@@ -589,11 +589,17 @@ class MCPConfig(BaseModel):
     """Configuration for MCP server."""
 
     transport: str = 'sse'  # Default to SSE transport
+    host: Optional[str] = None  # Host for HTTP/SSE transport
+    port: Optional[int] = None  # Port for HTTP transport
 
     @classmethod
     def from_cli(cls, args: argparse.Namespace) -> 'MCPConfig':
         """Create MCP configuration from CLI arguments."""
-        return cls(transport=args.transport)
+        return cls(
+            transport=args.transport,
+            host=args.host if hasattr(args, 'host') else None,
+            port=args.port if hasattr(args, 'port') else None
+        )
 
 
 # Configure logging with file rotation
@@ -2484,8 +2490,8 @@ def ensure_global_config_exists() -> Path:
             "_watch_path_help": "null = ~/.claude/projects/ | Set to specific project path",
             "store_in_graph": True,
             "_store_in_graph_help": "Store in Neo4j graph (required for cross-session memory)",
-            "keep_length_days": 7,
-            "_keep_length_days_help": "Track sessions from last N days (7 = safe, null = all)",
+            "keep_length_days": 1,
+            "_keep_length_days_help": "Track sessions from last N days (1 = safe, null = all)",
             "filter": {
                 "_comment": "Message filtering for token reduction",
                 "tool_calls": True,
@@ -2723,7 +2729,7 @@ async def initialize_server() -> MCPConfig:
     )
     parser.add_argument(
         '--transport',
-        choices=['sse', 'stdio'],
+        choices=['sse', 'stdio', 'http'],
         default='sse',
         help='Transport to use for communication with the client. (default: sse)',
     )
@@ -2749,6 +2755,12 @@ async def initialize_server() -> MCPConfig:
         '--host',
         default=os.environ.get('MCP_SERVER_HOST'),
         help='Host to bind the MCP server to (default: MCP_SERVER_HOST environment variable)',
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=None,
+        help='Port to bind the HTTP server to (default: 8321 for http transport)',
     )
 
     args = parser.parse_args()
@@ -2804,6 +2816,64 @@ async def run_mcp_server():
                 f'Running MCP server with SSE transport on {mcp.settings.host}:{mcp.settings.port}'
             )
             await mcp.run_sse_async()
+        elif mcp_config.transport == 'http':
+            # HTTP transport with management API
+            from datetime import datetime, timezone
+            try:
+                import uvicorn
+                from fastapi import FastAPI
+                from mcp_server.api.management import router as management_router, set_server_state
+            except ImportError as e:
+                logger.error(f"HTTP transport requires fastapi and uvicorn: {e}")
+                logger.error("Install with: pip install fastapi uvicorn")
+                raise
+
+            # Get host and port
+            host = mcp_config.host or unified_config.daemon.host or "127.0.0.1"
+            port = mcp_config.port or unified_config.daemon.port or 8321
+
+            # Create FastAPI app
+            app = FastAPI(
+                title="Graphiti MCP Server",
+                description="Model Context Protocol server for Graphiti knowledge graph",
+                version="1.0.0"
+            )
+
+            # Mount management API
+            app.include_router(management_router)
+
+            # Set server state for management API
+            set_server_state(
+                start_time=datetime.now(timezone.utc),
+                graphiti_client=graphiti_client,
+                session_manager=session_manager,
+                unified_config=unified_config,
+                status_aggregator=status_aggregator if session_manager else None
+            )
+
+            # Add health endpoint
+            @app.get("/health")
+            async def health():
+                return {"status": "ok", "service": "graphiti-mcp"}
+
+            # Add MCP endpoint (TODO: integrate MCP protocol over HTTP)
+            @app.post("/mcp/")
+            async def mcp_endpoint():
+                return {"message": "MCP over HTTP not yet implemented. Use SSE transport for MCP protocol."}
+
+            logger.info(f'Starting HTTP server on {host}:{port}')
+            logger.info(f'Management API available at http://{host}:{port}/api/v1/')
+
+            # Run with uvicorn
+            config_obj = uvicorn.Config(
+                app,
+                host=host,
+                port=port,
+                log_level="info",
+                access_log=True
+            )
+            server = uvicorn.Server(config_obj)
+            await server.serve()
     finally:
         # Clean up metrics task on shutdown
         metrics_task.cancel()

@@ -573,6 +573,110 @@ class SummarizationConfig(BaseModel):
 
 
 # ============================================================================
+# Daemon Configuration
+# ============================================================================
+
+
+class DaemonLogRotationConfig(BaseModel):
+    """Log rotation configuration for daemon."""
+
+    max_bytes: int = Field(
+        default=10485760,  # 10MB
+        description="Maximum log file size before rotation"
+    )
+    backup_count: int = Field(
+        default=5,
+        description="Number of rotated log files to keep"
+    )
+
+
+class DaemonConfig(BaseModel):
+    """Daemon service configuration (Two-Layer Architecture).
+
+    The daemon architecture consists of:
+    1. Bootstrap service (always running) - watches config, manages MCP server lifecycle
+    2. MCP server (conditional) - only runs when daemon.enabled is true
+
+    See: .claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md
+    """
+
+    enabled: bool = Field(
+        default=False,
+        description=(
+            "Master switch for daemon mode. "
+            "false (default) = MCP server stopped, true = MCP server running. "
+            "Bootstrap service watches this flag and starts/stops the MCP server accordingly."
+        )
+    )
+    host: str = Field(
+        default="127.0.0.1",
+        description=(
+            "Bind address for HTTP API. "
+            "Use 127.0.0.1 (localhost-only, secure). "
+            "WARNING: Binding to 0.0.0.0 exposes server to network."
+        )
+    )
+    port: int = Field(
+        default=8321,
+        description=(
+            "HTTP port for MCP API. "
+            "8321 is default (mnemonic: 8=graphiti, 321=countdown/launch). "
+            "Change if port conflict occurs."
+        ),
+        ge=1024,
+        le=65535
+    )
+    config_poll_seconds: int = Field(
+        default=5,
+        description=(
+            "How often bootstrap service checks config file for changes (seconds). "
+            "Changes take effect within this interval (default: 5s)."
+        ),
+        ge=1,
+        le=300
+    )
+    pid_file: Optional[str] = Field(
+        default=None,
+        description=(
+            "Path to PID file for daemon process. "
+            "null = ~/.graphiti/graphiti-mcp.pid"
+        )
+    )
+    log_file: Optional[str] = Field(
+        default=None,
+        description=(
+            "Path to daemon log file. "
+            "null = ~/.graphiti/logs/graphiti-mcp.log"
+        )
+    )
+    log_level: str = Field(
+        default="INFO",
+        description="Log level for daemon (DEBUG | INFO | WARNING | ERROR | CRITICAL)"
+    )
+    log_rotation: DaemonLogRotationConfig = Field(
+        default_factory=DaemonLogRotationConfig,
+        description="Log rotation settings"
+    )
+    health_check_interval: int = Field(
+        default=30,
+        description=(
+            "Seconds between MCP server health checks by bootstrap service. "
+            "If server crashes, bootstrap will restart it within this interval."
+        ),
+        ge=5,
+        le=300
+    )
+
+    @field_validator('log_level')
+    def validate_log_level(cls, v):
+        """Validate log level is a valid Python logging level."""
+        valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+        if v.upper() not in valid_levels:
+            raise ValueError(f"log_level must be one of: {', '.join(valid_levels)}")
+        return v.upper()
+
+
+# ============================================================================
 # Resilience Configuration (Legacy - kept for backward compatibility)
 # ============================================================================
 
@@ -624,7 +728,7 @@ class SessionTrackingConfig(BaseModel):
         )
     )
     keep_length_days: Optional[int] = Field(
-        default=7,
+        default=1,
         description=(
             "Rolling window filter for session discovery in days. "
             "Only sessions modified within the last N days will be indexed. "
@@ -733,6 +837,7 @@ class GraphitiConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     performance: PerformanceConfig = Field(default_factory=PerformanceConfig)
     mcp_server: MCPServerConfig = Field(default_factory=MCPServerConfig)
+    daemon: DaemonConfig = Field(default_factory=DaemonConfig)
     resilience: ResilienceConfig = Field(default_factory=ResilienceConfig)
     session_tracking: SessionTrackingConfig = Field(default_factory=SessionTrackingConfig)
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
@@ -964,18 +1069,22 @@ class GraphitiConfig(BaseModel):
 _config_instance: Optional[GraphitiConfig] = None
 
 
-def get_config(reload: bool = False) -> GraphitiConfig:
+def get_config(reload: bool = False, force_reload: bool = False) -> GraphitiConfig:
     """Get the global configuration instance.
 
     Args:
-        reload: Force reload from file
+        reload: Force reload from file (deprecated, use force_reload)
+        force_reload: Force reload from file
 
     Returns:
         GraphitiConfig instance
     """
     global _config_instance
 
-    if _config_instance is None or reload:
+    # Support both reload and force_reload for compatibility
+    should_reload = reload or force_reload
+
+    if _config_instance is None or should_reload:
         _config_instance = GraphitiConfig.from_file()
         _config_instance.apply_env_overrides()
 
