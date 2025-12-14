@@ -159,7 +159,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Bootstrap Service (Config Watcher + MCP Lifecycle)",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "2",
       "children": [
         "-2.d",
@@ -217,7 +217,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Bootstrap Service (Config Watcher + MCP Lifecycle)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2",
       "phase": "validation_testing",
