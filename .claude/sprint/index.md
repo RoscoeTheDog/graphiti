@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 09:45:54
+**Generated**: 2025-12-14 09:51:09
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 46.7%
+- **Completion**: 50.0%
 
 ### By Status
 
-- completed: 14
-- unassigned: 16
+- completed: 15
+- in_progress: 1
+- unassigned: 14
 
 ### By Type
 
@@ -63,7 +64,7 @@
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: CLI Refactoring (HTTP Client + Error Messages)
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -3
   - Blocks: Story -3.i
 

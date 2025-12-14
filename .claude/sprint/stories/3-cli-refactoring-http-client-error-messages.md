@@ -1,6 +1,6 @@
 # Story 3: CLI Refactoring (HTTP Client + Error Messages)
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-13 23:51
 
 ## Description
@@ -9,12 +9,12 @@ Refactor CLI to use HTTP client instead of module imports, with actionable error
 
 ## Acceptance Criteria
 
-- [ ] (P0) `session_tracking_cli.py` refactored to use `GraphitiClient` HTTP client
-- [ ] (P0) Actionable error message when daemon is disabled: shows config path and how to enable
-- [ ] (P0) Actionable error message when daemon unreachable: shows troubleshooting steps
-- [ ] (P1) `graphiti-mcp daemon status` command shows installed/enabled/running state
-- [ ] (P1) `graphiti-mcp daemon logs` command tails daemon log file
-- [ ] (P2) All existing CLI commands work through HTTP API
+- [x] (P0) `session_tracking_cli.py` refactored to use `GraphitiClient` HTTP client
+- [x] (P0) Actionable error message when daemon is disabled: shows config path and how to enable
+- [x] (P0) Actionable error message when daemon unreachable: shows troubleshooting steps
+- [x] (P1) `graphiti-mcp daemon status` command shows installed/enabled/running state
+- [x] (P1) `graphiti-mcp daemon logs` command tails daemon log file
+- [x] (P2) All existing CLI commands work through HTTP API
 
 ## Dependencies
 
