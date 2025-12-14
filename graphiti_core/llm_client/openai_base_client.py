@@ -31,10 +31,10 @@ from .errors import RateLimitError, RefusalError
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = 'gpt-5-mini'
-DEFAULT_SMALL_MODEL = 'gpt-5-nano'
-DEFAULT_REASONING = None  # Only o1/o3 models support reasoning.effort parameter
-DEFAULT_VERBOSITY = None  # Verbosity support varies by model
+DEFAULT_MODEL = 'gpt-4o-mini'
+DEFAULT_SMALL_MODEL = 'gpt-4o-mini'
+DEFAULT_REASONING = 'minimal'
+DEFAULT_VERBOSITY = 'low'
 
 
 class BaseOpenAIClient(LLMClient):
@@ -165,8 +165,20 @@ class BaseOpenAIClient(LLMClient):
             raise Exception(f'Output length exceeded max tokens {self.max_tokens}: {e}') from e
         except openai.RateLimitError as e:
             raise RateLimitError from e
+        except openai.AuthenticationError as e:
+            logger.error(
+                f'OpenAI Authentication Error: {e}. Please verify your API key is correct.'
+            )
+            raise
         except Exception as e:
-            logger.error(f'Error in generating LLM response: {e}')
+            # Provide more context for connection errors
+            error_msg = str(e)
+            if 'Connection error' in error_msg or 'connection' in error_msg.lower():
+                logger.error(
+                    f'Connection error communicating with OpenAI API. Please check your network connection and API key. Error: {e}'
+                )
+            else:
+                logger.error(f'Error in generating LLM response: {e}')
             raise
 
     async def generate_response(

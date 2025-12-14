@@ -1,7 +1,7 @@
 [project]
 name = "graphiti-core"
 description = "A temporal graph building library"
-version = "0.22.0"
+version = "0.24.3"
 authors = [
     { name = "Paul Paliychuk", email = "paul@getzep.com" },
     { name = "Preston Rasmussen", email = "preston@getzep.com" },
@@ -90,6 +90,10 @@ select = [
 ]
 ignore = ["E501"]
 
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# Required by Pydantic on Python < 3.12
+"typing.TypedDict".msg = "Use typing_extensions.TypedDict instead."
+
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
@@ -99,3 +103,4 @@ docstring-code-format = true
 include = ["graphiti_core"]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
+
