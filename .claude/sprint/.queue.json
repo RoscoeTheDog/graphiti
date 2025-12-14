@@ -393,7 +393,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Claude Code Integration (HTTP Transport)",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "5",
       "children": [
         "-5.d",
@@ -413,7 +413,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Claude Code Integration (HTTP Transport)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5",
       "phase": "validation_discovery",
