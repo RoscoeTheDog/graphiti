@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 10:19:39
+**Generated**: 2025-12-14 10:23:15
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 76.7%
+- **Completion**: 80.0%
 
 ### By Status
 
-- completed: 23
+- completed: 24
 - in_progress: 1
-- unassigned: 6
+- unassigned: 5
 
 ### By Type
 
@@ -97,7 +97,7 @@
   - Blocks: Story -5.i
 
   ### Story -5.i: Validate Implementation: Claude Code Integration (HTTP Transport)
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -5, Story -5.d
   - Blocks: Story -5.t
 
