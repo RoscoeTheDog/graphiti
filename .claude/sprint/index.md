@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 10:04:48
+**Generated**: 2025-12-14 10:15:09
 
 ---
 
@@ -15,13 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 30
-- **Completion**: 63.3%
+- **Completion**: 73.3%
 
 ### By Status
 
-- completed: 19
-- in_progress: 1
-- unassigned: 10
+- completed: 22
+- unassigned: 8
 
 ### By Type
 
@@ -83,12 +82,12 @@
   - Blocks: Story -4.i
 
   ### Story -4.i: Validate Implementation: Platform Service Installation (Windows/macOS/Linux)
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 
   ### Story -4.t: Validate Testing: Platform Service Installation (Windows/macOS/Linux)
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Claude Code Integration (HTTP Transport)

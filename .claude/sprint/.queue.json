@@ -315,7 +315,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Platform Service Installation (Windows/macOS/Linux)",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "4",
       "children": [
         "-4.d",
@@ -373,7 +373,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Platform Service Installation (Windows/macOS/Linux)",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4",
       "phase": "validation_testing",
