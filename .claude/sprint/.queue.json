@@ -822,7 +822,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: CLI Wrapper Script Generation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.i",
       "phase": "validation_implementation",
