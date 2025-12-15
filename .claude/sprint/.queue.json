@@ -370,7 +370,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Bootstrap Service Update",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
@@ -386,7 +386,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Bootstrap Service Update",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
@@ -397,7 +397,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/5-plan.yaml"
+      }
     },
     "6.d": {
       "type": "discovery",

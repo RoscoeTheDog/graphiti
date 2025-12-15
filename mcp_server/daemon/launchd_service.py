@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from .venv_manager import VenvManager, VenvCreationError
+
 
 class LaunchdServiceManager:
     """Manages Graphiti bootstrap service on macOS via launchd."""
@@ -21,9 +23,19 @@ class LaunchdServiceManager:
     name = "launchd (macOS Service Manager)"
     service_id = "com.graphiti.bootstrap"
 
-    def __init__(self):
-        """Initialize launchd service manager."""
-        self.python_exe = sys.executable
+    def __init__(self, venv_manager: Optional[VenvManager] = None):
+        """Initialize launchd service manager.
+
+        Args:
+            venv_manager: Optional VenvManager instance. If None, creates default instance.
+        """
+        self.venv_manager = venv_manager or VenvManager()
+        try:
+            self.python_exe = self.venv_manager.get_python_executable()
+        except VenvCreationError:
+            # Fallback to sys.executable if venv not available
+            # (will be created by DaemonManager.install() before service installation)
+            self.python_exe = Path(sys.executable)
         self.bootstrap_script = self._get_bootstrap_path()
         self.plist_path = Path.home() / "Library" / "LaunchAgents" / f"{self.service_id}.plist"
         self.log_dir = Path.home() / ".graphiti" / "logs"

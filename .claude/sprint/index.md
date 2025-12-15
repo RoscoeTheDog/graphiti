@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 19:32:44
+**Generated**: 2025-12-14 19:37:57
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 31
-- **Completion**: 64.5%
+- **Completion**: 67.7%
 
 ### By Status
 
 - blocked: 2
-- completed: 20
+- completed: 21
 - in_progress: 2
-- pending: 4
+- pending: 3
 - unassigned: 3
 
 ### By Type
@@ -102,11 +102,11 @@
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: Bootstrap Service Update
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Bootstrap Service Update
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Documentation and Testing

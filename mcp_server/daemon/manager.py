@@ -42,20 +42,20 @@ class DaemonManager:
     def __init__(self):
         """Initialize manager with platform-specific implementation."""
         self.platform = platform.system()
+        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
         self.service_manager = self._get_service_manager()
         self.config_path = self._get_config_path()
-        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
         self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
         self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
         """Get platform-specific service manager."""
         if self.platform == "Windows":
-            return WindowsServiceManager()
+            return WindowsServiceManager(venv_manager=self.venv_manager)
         elif self.platform == "Darwin":
-            return LaunchdServiceManager()
+            return LaunchdServiceManager(venv_manager=self.venv_manager)
         elif self.platform == "Linux":
-            return SystemdServiceManager()
+            return SystemdServiceManager(venv_manager=self.venv_manager)
         else:
             raise UnsupportedPlatformError(
                 f"Platform '{self.platform}' is not supported. "
