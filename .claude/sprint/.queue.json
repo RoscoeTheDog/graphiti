@@ -88,7 +88,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "PATH Integration",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "4.d",
@@ -335,7 +335,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: PATH Integration",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
