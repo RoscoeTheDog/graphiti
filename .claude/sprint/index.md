@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 20:33:32
+**Generated**: 2025-12-14 20:42:51
 
 ---
 
@@ -14,15 +14,15 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 34
-- **Completion**: 88.2%
+- **Total Stories**: 58
+- **Completion**: 53.4%
 
 ### By Status
 
 - blocked: 2
-- completed: 30
-- in_progress: 1
-- unassigned: 1
+- completed: 31
+- in_progress: 2
+- unassigned: 23
 
 ### By Type
 
@@ -31,10 +31,98 @@
 - implementation: 8
 - remediation: 6
 - testing: 7
+- validation: 6
+- validation_discovery: 6
+- validation_implementation: 6
+- validation_testing: 6
 
 ---
 
 ## Stories (Execution Order)
+
+  ### Story -1.d: Validate Discovery: Dedicated Venv Creation
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -1
+  - Blocks: Story -1.i
+
+  ### Story -1.i: Validate Implementation: Dedicated Venv Creation
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -1, Story -1.d
+  - Blocks: Story -1.t
+
+  ### Story -1.t: Validate Testing: Dedicated Venv Creation
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -1, Story -1.i
+
+  ### Story -2.d: Validate Discovery: Package Installation to Dedicated Venv
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -2
+  - Blocks: Story -2.i
+
+  ### Story -2.i: Validate Implementation: Package Installation to Dedicated Venv
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -2, Story -2.d
+  - Blocks: Story -2.t
+
+  ### Story -2.t: Validate Testing: Package Installation to Dedicated Venv
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -2, Story -2.i
+
+  ### Story -3.d: Validate Discovery: CLI Wrapper Script Generation
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -3
+  - Blocks: Story -3.i
+
+  ### Story -3.i: Validate Implementation: CLI Wrapper Script Generation
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -3, Story -3.d
+  - Blocks: Story -3.t
+
+  ### Story -3.t: Validate Testing: CLI Wrapper Script Generation
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -3, Story -3.i
+
+  ### Story -4.d: Validate Discovery: PATH Integration
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -4
+  - Blocks: Story -4.i
+
+  ### Story -4.i: Validate Implementation: PATH Integration
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -4, Story -4.d
+  - Blocks: Story -4.t
+
+  ### Story -4.t: Validate Testing: PATH Integration
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -4, Story -4.i
+
+  ### Story -5.d: Validate Discovery: Bootstrap Service Update
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -5
+  - Blocks: Story -5.i
+
+  ### Story -5.i: Validate Implementation: Bootstrap Service Update
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -5, Story -5.d
+  - Blocks: Story -5.t
+
+  ### Story -5.t: Validate Testing: Bootstrap Service Update
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -5, Story -5.i
+
+  ### Story -6.d: Validate Discovery: Documentation and Testing
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -6
+  - Blocks: Story -6.i
+
+  ### Story -6.i: Validate Implementation: Documentation and Testing
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -6, Story -6.d
+  - Blocks: Story -6.t
+
+  ### Story -6.t: Validate Testing: Documentation and Testing
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Dedicated Venv Creation
   **Status**: completed | **Type**: discovery
