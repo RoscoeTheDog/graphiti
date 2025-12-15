@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Dedicated Venv Creation",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "1.d",
@@ -183,7 +183,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Dedicated Venv Creation",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
