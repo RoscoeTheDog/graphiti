@@ -110,7 +110,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Bootstrap Service Update",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "5.d",
@@ -124,7 +124,16 @@
       },
       "blocks": [],
       "file": "stories/5-bootstrap-service-update.md",
-      "advisories": [],
+      "advisories": [
+        {
+          "id": "ADV-5-1",
+          "severity": "critical",
+          "category": "test_failure",
+          "message": "Test pass rate 64% below 90% threshold (6 failed)",
+          "status": "ACTIVE",
+          "created": "2025-12-14T18:45:00Z"
+        }
+      ],
       "_migrated_from": "implementation",
       "_migration_version": "v4.0.0"
     },
@@ -386,7 +395,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Bootstrap Service Update",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,

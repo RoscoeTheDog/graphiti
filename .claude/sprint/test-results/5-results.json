@@ -1,0 +1,136 @@
+{
+  "story_id": "5",
+  "phase": "testing",
+  "executed_by": "testing:5.t",
+  "timestamp": "2025-12-14T18:45:00Z",
+
+  "summary": {
+    "total_tests": 17,
+    "passed": 11,
+    "failed": 6,
+    "skipped": 0,
+    "pass_rate": 64,
+    "duration_ms": 960
+  },
+
+  "categories": {
+    "unit": {
+      "total": 14,
+      "passed": 8,
+      "failed": 3,
+      "coverage": null
+    },
+    "integration": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "coverage": null
+    },
+    "security": {
+      "total": 2,
+      "passed": 1,
+      "failed": 1,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [
+    {
+      "test": "test_windows_service_handles_venv_missing_gracefully",
+      "category": "unit",
+      "error": "Failed: DID NOT RAISE <class 'VenvCreationError'>",
+      "file": "tests/daemon/test_service_venv_integration.py:69",
+      "severity": "medium"
+    },
+    {
+      "test": "test_launchd_service_handles_venv_missing_gracefully",
+      "category": "unit",
+      "error": "Failed: DID NOT RAISE <class 'VenvCreationError'>",
+      "file": "tests/daemon/test_service_venv_integration.py:121",
+      "severity": "medium"
+    },
+    {
+      "test": "test_systemd_service_handles_venv_missing_gracefully",
+      "category": "unit",
+      "error": "Failed: DID NOT RAISE <class 'VenvCreationError'>",
+      "file": "tests/daemon/test_service_venv_integration.py:173",
+      "severity": "medium"
+    },
+    {
+      "test": "test_windows_service_template_uses_venv_python",
+      "category": "unit",
+      "error": "AttributeError: WindowsServiceManager does not have attribute '_create_service_xml'",
+      "file": "tests/daemon/test_service_venv_integration.py:243",
+      "severity": "high"
+    },
+    {
+      "test": "test_daemon_manager_passes_venv_manager_to_service_manager",
+      "category": "integration",
+      "error": "assert False is True - DaemonManager.install() failed due to wrapper generation error",
+      "file": "tests/daemon/test_service_venv_integration.py:314",
+      "severity": "high"
+    },
+    {
+      "test": "test_service_files_dont_contain_hardcoded_credentials",
+      "category": "security",
+      "error": "AttributeError: WindowsServiceManager does not have attribute '_create_service_xml'",
+      "file": "tests/daemon/test_service_venv_integration.py:344",
+      "severity": "high"
+    }
+  ],
+
+  "acceptance_criteria_coverage": {
+    "AC-5.1": {
+      "covered": true,
+      "tests": ["test_windows_service_uses_venv_python_path", "test_windows_service_uses_scripts_python_exe"],
+      "reason": null
+    },
+    "AC-5.2": {
+      "covered": true,
+      "tests": ["test_launchd_service_uses_venv_python_path", "test_unix_services_use_bin_python"],
+      "reason": null
+    },
+    "AC-5.3": {
+      "covered": true,
+      "tests": ["test_systemd_service_uses_venv_python_path", "test_unix_services_use_bin_python"],
+      "reason": null
+    },
+    "AC-5.4": {
+      "covered": false,
+      "tests": [],
+      "reason": "Template generation tests failed - method names don't match implementation"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "fix_required",
+      "description": "Update error handling tests to match actual service manager behavior",
+      "action": "Service managers should either raise VenvCreationError or tests should check for silent failure behavior"
+    },
+    {
+      "type": "fix_required",
+      "description": "Fix template generation test method names",
+      "action": "Investigate actual method names in WindowsServiceManager and update tests accordingly"
+    },
+    {
+      "type": "fix_required",
+      "description": "Fix DaemonManager.install() wrapper generation error",
+      "action": "Mock wrapper generation in integration test or fix actual wrapper generation bug"
+    },
+    {
+      "type": "improve",
+      "description": "Increase test coverage for platform-specific paths",
+      "action": "Add more integration tests for actual service installation scenarios"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "below_threshold",
+    "action": "block_and_recommend_remediation"
+  },
+
+  "outcome": "blocked",
+  "blocking": true
+}
