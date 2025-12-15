@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 17:03:00
+**Generated**: 2025-12-14 17:38:54
 
 ---
 
@@ -14,21 +14,23 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 24
-- **Completion**: 4.2%
+- **Total Stories**: 25
+- **Completion**: 20.0%
 
 ### By Status
 
-- completed: 1
+- blocked: 1
+- completed: 5
 - in_progress: 1
-- pending: 16
-- unassigned: 6
+- pending: 13
+- unassigned: 5
 
 ### By Type
 
 - discovery: 6
 - feature: 6
 - implementation: 6
+- remediation: 1
 - testing: 6
 
 ---
@@ -40,19 +42,23 @@
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Dedicated Venv Creation
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 1
 
+    ### Story 1.t.r1: Test Interface Fixes
+    **Status**: completed | **Type**: remediation
+    - Dependencies: Story 1.t
+
   ### Story 1.t: Testing: Dedicated Venv Creation
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Package Installation to Dedicated Venv
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Package Installation to Dedicated Venv
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Package Installation to Dedicated Venv
