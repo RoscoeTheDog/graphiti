@@ -28,6 +28,7 @@ from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
 from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
 from .wrapper_generator import WrapperGenerator, WrapperGenerationError
+from .path_integration import PathIntegration, PathIntegrationError
 
 
 class UnsupportedPlatformError(Exception):
@@ -45,6 +46,7 @@ class DaemonManager:
         self.config_path = self._get_config_path()
         self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
         self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
+        self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
         """Get platform-specific service manager."""
@@ -149,6 +151,16 @@ class DaemonManager:
         except Exception as e:
             print(f"[FAILED] Unexpected error during wrapper generation: {e}")
             return False
+
+        # Step 2.7: Display PATH configuration instructions
+        try:
+            self.path_integration.display_instructions()
+        except PathIntegrationError as e:
+            print(f"[WARNING] PATH integration error: {e}")
+            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+        except Exception as e:
+            print(f"[WARNING] Unexpected error during PATH integration: {e}")
+            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
 
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
