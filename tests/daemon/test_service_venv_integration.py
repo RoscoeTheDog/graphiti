@@ -231,23 +231,30 @@ class TestServiceTemplateGeneration:
     """Test service templates use venv Python path."""
 
     def test_windows_service_template_uses_venv_python(self):
-        """Windows service XML template uses venv Python path"""
+        """Windows service uses venv Python path in NSSM install command"""
         with patch('platform.system', return_value='Windows'):
             mock_venv = Mock(spec=VenvManager)
             venv_python = str(Path.home() / '.graphiti' / '.venv' / 'Scripts' / 'python.exe')
             mock_venv.get_python_executable.return_value = venv_python
 
-            service_manager = WindowsServiceManager(venv_manager=mock_venv)
+            # Mock _find_nssm to return a valid path
+            with patch.object(WindowsServiceManager, '_find_nssm', return_value=Path('C:/nssm/nssm.exe')):
+                service_manager = WindowsServiceManager(venv_manager=mock_venv)
 
-            # Mock _create_service_xml method
-            with patch.object(service_manager, '_create_service_xml') as mock_create_xml:
-                mock_create_xml.return_value = f'<python>{venv_python}</python>'
+                # Mock NSSM execution to verify venv Python is used
+                with patch.object(service_manager, '_run_nssm') as mock_nssm:
+                    with patch.object(service_manager, 'is_installed', return_value=False):
+                        with patch('builtins.print'):  # Suppress print statements
+                            mock_nssm.return_value = (True, "Service installed")
 
-                xml_content = service_manager._create_service_xml()
+                            # Call install() - should pass venv_python to NSSM
+                            service_manager.install()
 
-                # Verify template includes venv Python path
-                assert venv_python in xml_content
-                assert sys.executable not in xml_content
+                            # Verify NSSM install command used venv Python (not sys.executable)
+                            install_call = mock_nssm.call_args_list[0]  # First call is 'install'
+                            assert install_call[0][0] == 'install'  # First arg is 'install'
+                            assert install_call[0][2] == venv_python  # Third arg is python path
+                            assert install_call[0][2] != sys.executable  # Not system Python
 
     def test_launchd_plist_uses_venv_python(self):
         """macOS launchd plist uses venv Python path"""
@@ -258,15 +265,12 @@ class TestServiceTemplateGeneration:
 
             service_manager = LaunchdServiceManager(venv_manager=mock_venv)
 
-            # Mock _create_plist method
-            with patch.object(service_manager, '_create_plist') as mock_create_plist:
-                mock_create_plist.return_value = f'<string>{venv_python}</string>'
+            # Call actual _create_plist method (no mocking)
+            plist_content = service_manager._create_plist()
 
-                plist_content = service_manager._create_plist()
-
-                # Verify plist includes venv Python path
-                assert venv_python in plist_content
-                assert sys.executable not in plist_content
+            # Verify plist includes venv Python path (in ProgramArguments)
+            assert venv_python in plist_content['ProgramArguments']
+            assert sys.executable not in plist_content['ProgramArguments']
 
     def test_systemd_unit_uses_venv_python(self):
         """Linux systemd unit file uses venv Python path"""
@@ -277,15 +281,12 @@ class TestServiceTemplateGeneration:
 
             service_manager = SystemdServiceManager(venv_manager=mock_venv)
 
-            # Mock _create_service_unit method
-            with patch.object(service_manager, '_create_service_unit') as mock_create_unit:
-                mock_create_unit.return_value = f'ExecStart={venv_python} -m mcp_server'
+            # Call actual _create_service_unit method (no mocking)
+            unit_content = service_manager._create_service_unit()
 
-                unit_content = service_manager._create_service_unit()
-
-                # Verify unit file includes venv Python path
-                assert venv_python in unit_content
-                assert sys.executable not in unit_content
+            # Verify unit file includes venv Python path (in ExecStart)
+            assert venv_python in unit_content
+            assert sys.executable not in unit_content
 
 
 class TestDaemonManagerServiceIntegration:
@@ -296,22 +297,30 @@ class TestDaemonManagerServiceIntegration:
         with patch('platform.system', return_value='Linux'):
             from mcp_server.daemon.manager import DaemonManager
 
-            with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_service_class:
-                manager = DaemonManager()
+            # Mock WrapperGenerator BEFORE creating DaemonManager
+            with patch('mcp_server.daemon.manager.WrapperGenerator') as mock_wrapper_class:
+                mock_wrapper = mock_wrapper_class.return_value
+                mock_wrapper.generate_wrappers.return_value = (True, "Wrappers generated")
 
-                # Mock VenvManager
-                with patch.object(manager, 'venv_manager') as mock_venv:
-                    mock_venv.validate_python_version.return_value = True
-                    mock_venv.create_venv.return_value = (True, "Venv created")
-                    mock_venv.install_package.return_value = (True, "Package installed")
+                with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_service_class:
+                    manager = DaemonManager()
 
-                    # Install daemon
-                    with patch.object(manager.service_manager, 'install', return_value=True):
-                        result = manager.install()
+                    # Mock VenvManager
+                    with patch.object(manager, 'venv_manager') as mock_venv:
+                        mock_venv.validate_python_version.return_value = True
+                        mock_venv.create_venv.return_value = (True, "Venv created")
+                        mock_venv.install_package.return_value = (True, "Package installed")
 
-                        # Verify service manager was instantiated with venv_manager
-                        # (This test verifies integration point from plan)
-                        assert result is True
+                        # Install daemon
+                        with patch.object(manager.service_manager, 'install', return_value=True):
+                            result = manager.install()
+
+                            # Verify service manager was instantiated with venv_manager
+                            # (This test verifies integration point from plan)
+                            assert result is True
+
+                            # Verify wrapper generation was called (integration check)
+                            mock_wrapper.generate_wrappers.assert_called_once()
 
 
 class TestSecurityServiceFiles:
@@ -319,14 +328,14 @@ class TestSecurityServiceFiles:
 
     def test_service_files_dont_contain_hardcoded_credentials(self):
         """Service files don't contain hardcoded credentials"""
-        # Test all service managers
+        # Test service managers that generate template files
+        # Note: Windows uses NSSM commands (no template file), so skip Windows
         service_managers = [
-            (WindowsServiceManager, 'Windows'),
-            (LaunchdServiceManager, 'Darwin'),
-            (SystemdServiceManager, 'Linux')
+            (LaunchdServiceManager, 'Darwin', '_create_plist'),
+            (SystemdServiceManager, 'Linux', '_create_service_unit')
         ]
 
-        for manager_class, platform in service_managers:
+        for manager_class, platform, template_method in service_managers:
             with patch('platform.system', return_value=platform):
                 mock_venv = Mock(spec=VenvManager)
                 venv_python = str(Path.home() / '.graphiti' / '.venv' / 'bin' / 'python')
@@ -334,23 +343,17 @@ class TestSecurityServiceFiles:
 
                 service_manager = manager_class(venv_manager=mock_venv)
 
-                # Mock template generation
-                template_method = (
-                    '_create_service_xml' if platform == 'Windows'
-                    else '_create_plist' if platform == 'Darwin'
-                    else '_create_service_unit'
-                )
+                # Call actual template generation method
+                template_content = getattr(service_manager, template_method)()
 
-                with patch.object(service_manager, template_method) as mock_template:
-                    mock_template.return_value = f'service_config_{platform}'
+                # Convert to string for verification
+                template_str = str(template_content).lower()
 
-                    template_content = getattr(service_manager, template_method)()
-
-                    # Verify no credential patterns
-                    assert 'password=' not in template_content.lower()
-                    assert 'api_key=' not in template_content.lower()
-                    assert 'secret=' not in template_content.lower()
-                    assert 'token=' not in template_content.lower()
+                # Verify no credential patterns
+                assert 'password=' not in template_str
+                assert 'api_key=' not in template_str
+                assert 'secret=' not in template_str
+                assert 'token=' not in template_str
 
     def test_venv_path_resolution_prevents_path_traversal(self):
         """Venv path resolution doesn't allow path traversal"""
