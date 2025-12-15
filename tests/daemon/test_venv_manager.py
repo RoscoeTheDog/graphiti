@@ -361,14 +361,20 @@ class TestDetectRepoLocation:
         mock_venv_path = mock_repo_root / '.graphiti' / '.venv'
 
         with patch.object(manager, 'venv_path', mock_venv_path):
-            # Mock pyproject.toml exists at repo root
-            with patch.object(Path, 'exists') as mock_exists:
-                def exists_side_effect(self):
-                    # Check if this is the mcp_server/pyproject.toml path
-                    return self == mock_repo_root / 'mcp_server' / 'pyproject.toml'
+            # Mock pyproject.toml exists check
+            # The detect_repo_location searches upward checking (current / "mcp_server" / "pyproject.toml").exists()
+            # We need it to return True only when checking mock_repo_root / "mcp_server" / "pyproject.toml"
+            expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
 
-                mock_exists.side_effect = exists_side_effect
+            original_exists = Path.exists
+            def exists_side_effect(self):
+                # Return True only for the target pyproject.toml
+                if self == expected_pyproject:
+                    return True
+                # Use original exists for other paths
+                return original_exists(self)
 
+            with patch.object(Path, 'exists', exists_side_effect):
                 result = manager.detect_repo_location()
                 assert result == mock_repo_root
 
@@ -389,13 +395,17 @@ class TestDetectRepoLocation:
         mock_repo_root = Path('/opt/projects/graphiti')
 
         with patch.object(manager, 'venv_path', mock_venv_path):
-            with patch.object(Path, 'exists') as mock_exists:
-                # Only return True for the correct mcp_server/pyproject.toml
-                def exists_side_effect(self):
-                    return self == mock_repo_root / 'mcp_server' / 'pyproject.toml'
+            expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
 
-                mock_exists.side_effect = exists_side_effect
+            original_exists = Path.exists
+            def exists_side_effect(self):
+                # Return True only for the target pyproject.toml
+                if self == expected_pyproject:
+                    return True
+                # Use original exists for other paths
+                return original_exists(self)
 
+            with patch.object(Path, 'exists', exists_side_effect):
                 result = manager.detect_repo_location()
                 assert result == mock_repo_root
 
@@ -408,35 +418,43 @@ class TestValidateInstallation:
         manager = VenvManager()
 
         # Mock subprocess run to simulate successful import
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'get_python_executable', return_value=Path('/venv/bin/python')):
+                with patch('subprocess.run') as mock_run:
+                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-            result = manager.validate_installation('mcp_server')
-            assert result is True
+                    result = manager.validate_installation('mcp_server')
+                    assert result is True
 
     def test_validate_installation_returns_false_when_package_not_installed(self):
         """VenvManager.validate_installation() returns False when package is not installed"""
         manager = VenvManager()
 
         # Mock subprocess run to simulate import error
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = Mock(returncode=1, stdout='', stderr='ModuleNotFoundError')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'get_python_executable', return_value=Path('/venv/bin/python')):
+                with patch('subprocess.run') as mock_run:
+                    mock_run.return_value = Mock(returncode=1, stdout='', stderr='ModuleNotFoundError')
 
-            result = manager.validate_installation('mcp_server')
-            assert result is False
+                    result = manager.validate_installation('mcp_server')
+                    assert result is False
 
     def test_validate_installation_uses_venv_python(self):
         """VenvManager.validate_installation() uses venv Python interpreter"""
         manager = VenvManager()
 
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-            with patch('platform.system', return_value='Linux'):
-                manager.validate_installation('mcp_server')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'get_python_executable', return_value=Path('/venv/bin/python')) as mock_get_python:
+                with patch('subprocess.run') as mock_run:
+                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                    with patch('platform.system', return_value='Linux'):
+                        manager.validate_installation('mcp_server')
 
-                # Verify subprocess was called with venv Python
-                call_args = mock_run.call_args[0][0]
-                assert str(manager.venv_path / 'bin' / 'python') in str(call_args[0])
+                        # Verify get_python_executable was called
+                        mock_get_python.assert_called_once()
+                        # Verify subprocess was called with venv Python
+                        call_args = mock_run.call_args[0][0]
+                        assert str(Path('/venv/bin/python')) in str(call_args[0])
 
 
 class TestInstallPackage:
@@ -448,20 +466,22 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/home/user/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=Path('/venv/bin/uv')):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=Path('/venv/bin/uv')):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                        success, message = manager.install_package()
+                                success, message = manager.install_package()
 
-                        # Verify uv pip was used
-                        call_args = mock_run.call_args[0][0]
-                        assert 'uv' in str(call_args[0])
-                        assert 'pip' in call_args
-                        assert 'install' in call_args
-                        assert success is True
+                                # Verify uv pip was used
+                                call_args = mock_run.call_args[0][0]
+                                assert 'uv' in str(call_args[0])
+                                assert 'pip' in call_args
+                                assert 'install' in call_args
+                                assert success is True
 
     def test_install_package_falls_back_to_pip_when_uv_not_available(self):
         """VenvManager.install_package() falls back to pip when uv not available"""
@@ -469,19 +489,22 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/home/user/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-                        with patch('platform.system', return_value='Linux'):
-                            success, message = manager.install_package()
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                                    with patch('platform.system', return_value='Linux'):
+                                        success, message = manager.install_package()
 
-                            # Verify standard pip was used
-                            call_args = mock_run.call_args[0][0]
-                            assert 'pip' in str(call_args[0])
-                            assert 'install' in call_args
-                            assert success is True
+                                        # Verify standard pip was used
+                                        call_args = mock_run.call_args[0][0]
+                                        assert 'pip' in str(call_args[0])
+                                        assert 'install' in call_args
+                                        assert success is True
 
     def test_install_package_uses_non_editable_install(self):
         """VenvManager.install_package() uses non-editable install (no -e flag)"""
@@ -489,17 +512,20 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/home/user/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                        manager.install_package()
+                                    manager.install_package()
 
-                        # Verify -e flag is NOT in command
-                        call_args = mock_run.call_args[0][0]
-                        assert '-e' not in call_args
+                                    # Verify -e flag is NOT in command
+                                    call_args = mock_run.call_args[0][0]
+                                    assert '-e' not in call_args
 
     def test_install_package_constructs_correct_path(self):
         """VenvManager.install_package() constructs correct install command with dynamic path"""
@@ -507,17 +533,20 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/opt/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                        manager.install_package()
+                                    manager.install_package()
 
-                        # Verify package path is included
-                        call_args = mock_run.call_args[0][0]
-                        assert str(mock_repo_root / 'mcp_server') in str(call_args)
+                                    # Verify package path is included
+                                    call_args = mock_run.call_args[0][0]
+                                    assert str(mock_repo_root / 'mcp_server') in str(call_args)
 
     def test_install_package_raises_error_on_failure(self):
         """VenvManager.install_package() raises error on installation failure"""
@@ -525,14 +554,17 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/home/user/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch('subprocess.run') as mock_run:
-                    mock_run.return_value = Mock(returncode=1, stdout='', stderr='Installation failed')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=1, stdout='', stderr='Installation failed')
 
-                    success, message = manager.install_package()
-                    assert success is False
-                    assert 'failed' in message.lower()
+                                success, message = manager.install_package()
+                                assert success is False
+                                assert 'failed' in message.lower()
 
     def test_install_package_validates_installation_after_install(self):
         """VenvManager.install_package() validates installation after install"""
@@ -540,23 +572,26 @@ class TestInstallPackage:
 
         mock_repo_root = Path('/home/user/graphiti')
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation') as mock_validate:
-                    mock_validate.return_value = True
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
+                with patch.object(Path, 'exists', return_value=True):
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'validate_installation') as mock_validate:
+                            mock_validate.return_value = True
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                        manager.install_package()
+                                manager.install_package()
 
-                        # Verify validation was called
-                        mock_validate.assert_called_once_with('mcp_server')
+                                # Verify validation was called
+                                mock_validate.assert_called_once_with('mcp_server')
 
     def test_install_package_handles_repo_not_found(self):
         """VenvManager.install_package() handles case when repo location cannot be detected"""
         manager = VenvManager()
 
-        with patch.object(manager, 'detect_repo_location', return_value=None):
-            success, message = manager.install_package()
-            assert success is False
-            assert 'cannot find' in message.lower() or 'not found' in message.lower()
+        with patch.object(manager, 'detect_venv', return_value=True):
+            with patch.object(manager, 'detect_repo_location', return_value=None):
+                success, message = manager.install_package()
+                assert success is False
+                assert 'cannot find' in message.lower() or 'not found' in message.lower()
