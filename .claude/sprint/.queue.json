@@ -432,7 +432,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Documentation and Testing",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "implementation",
       "phase_order": 2,
@@ -448,7 +448,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Documentation and Testing",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "6",
       "phase": "testing",
       "phase_order": 3,
@@ -459,7 +459,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/6-plan.yaml"
+      }
     },
     "1.t.r1": {
       "type": "remediation",

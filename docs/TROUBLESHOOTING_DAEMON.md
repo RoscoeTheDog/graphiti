@@ -6,20 +6,24 @@ This guide covers common issues with the Graphiti daemon architecture and their 
 
 ## Prerequisites
 
-Before using daemon commands, ensure the MCP server package is installed:
+The Graphiti daemon uses an isolated virtual environment for dependency management. Run the automated installer:
 
 ```bash
 # From the cloned repository root
 cd graphiti
-pip install -e ./mcp_server
-# OR with uv:
-uv pip install -e ./mcp_server
+python mcp_server/daemon/installer.py
 
-# Verify CLI is available
+# This creates:
+# - Isolated venv at ~/.graphiti/.venv/
+# - CLI wrapper scripts at ~/.graphiti/bin/
+# - Installs mcp_server package in the venv
+
+# Add to PATH (see README.md for platform-specific instructions)
+# Then verify CLI is available:
 graphiti-mcp --help
 ```
 
-> **Note:** This is different from upstream Graphiti. Our fork requires package installation to register CLI commands for daemon management.
+> **Note:** The installer automatically handles venv creation, package installation, and CLI wrapper generation. Manual `pip install` is no longer required.
 
 ---
 
@@ -51,24 +55,148 @@ cat ~/.graphiti/graphiti.config.json | grep -A5 '"daemon"'
 - Running `graphiti-mcp daemon install` returns "command not found"
 - CLI commands are not recognized
 
-**Cause:**
-The MCP server package has not been installed to register CLI commands.
+**Causes:**
+1. Installer has not been run
+2. PATH not configured correctly
+3. Shell not reloaded after PATH update
 
 **Solution:**
 ```bash
-# Navigate to cloned repository
+# 1. Run the installer if you haven't already
 cd /path/to/graphiti
+python mcp_server/daemon/installer.py
 
-# Install the package (registers CLI commands)
-pip install -e ./mcp_server
-# OR with uv:
-uv pip install -e ./mcp_server
+# 2. Add ~/.graphiti/bin to PATH (platform-specific)
 
-# Verify installation
+# Windows (PowerShell):
+$env:Path += ";$env:USERPROFILE\.graphiti\bin"
+[Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
+
+# macOS/Linux (bash):
+echo 'export PATH="$HOME/.graphiti/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# macOS/Linux (zsh):
+echo 'export PATH="$HOME/.graphiti/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# 3. Restart your shell/terminal
+
+# 4. Verify CLI is available
 graphiti-mcp --help
 ```
 
-> **Note:** Unlike upstream Graphiti which runs from the cloned directory, our fork requires package installation for daemon functionality.
+> **Note:** The CLI commands are wrapper scripts that invoke the venv Python without requiring activation. Make sure `~/.graphiti/bin/` is in your PATH.
+
+---
+
+### 0.1. Venv Creation Failed
+
+**Symptoms:**
+- Installer reports "VenvCreationError" or "IncompatiblePythonVersionError"
+- `~/.graphiti/.venv/` directory is missing or incomplete
+
+**Causes:**
+1. Python version < 3.10
+2. Insufficient disk space
+3. Permission errors in `~/.graphiti/` directory
+4. `uv` or `python -m venv` subprocess failure
+
+**Solutions:**
+
+**Python Version Too Old:**
+```bash
+# Check Python version
+python --version
+
+# If < 3.10, upgrade Python:
+# Windows: Download from python.org
+# macOS: brew install python@3.10
+# Linux: sudo apt install python3.10
+```
+
+**Permission Errors:**
+```bash
+# Check permissions
+ls -ld ~/.graphiti/
+
+# Fix permissions (Unix)
+chmod 755 ~/.graphiti/
+
+# Windows: Check folder permissions in Properties
+```
+
+**Disk Space:**
+```bash
+# Check available space (need ~100MB for venv)
+df -h ~/.graphiti/  # Unix
+Get-PSDrive C | Select-Object Used,Free  # Windows
+```
+
+**Manual Venv Creation (Diagnostic):**
+```bash
+# Try creating venv manually to see detailed errors
+python -m venv ~/.graphiti/.venv
+
+# Or with uv (faster)
+uv venv ~/.graphiti/.venv
+```
+
+---
+
+### 0.2. CLI Commands Don't Work After Installation
+
+**Symptoms:**
+- `graphiti-mcp --help` works but commands fail
+- Errors like "ModuleNotFoundError: No module named 'mcp_server'"
+
+**Cause:**
+Package installation into venv failed. The venv exists but the `mcp_server` package is missing.
+
+**Solution:**
+```bash
+# Check if package is installed
+~/.graphiti/.venv/Scripts/python.exe -m pip list | grep mcp-server  # Windows
+~/.graphiti/.venv/bin/python -m pip list | grep mcp-server  # Unix
+
+# If missing, reinstall:
+cd /path/to/graphiti
+~/.graphiti/.venv/Scripts/python.exe -m pip install ./mcp_server  # Windows
+~/.graphiti/.venv/bin/python -m pip install ./mcp_server  # Unix
+
+# Or re-run installer with force flag (if supported)
+python mcp_server/daemon/installer.py --force
+```
+
+---
+
+### 0.3. Service Fails to Start - Python Path Issues
+
+**Symptoms:**
+- `graphiti-mcp daemon status` shows "stopped" or "crashed"
+- Daemon logs show "Python executable not found in venv"
+- Service configuration references wrong Python path
+
+**Cause:**
+Service configuration was generated before venv was created, or venv was recreated at a different location.
+
+**Solution:**
+```bash
+# 1. Check venv Python exists
+ls ~/.graphiti/.venv/Scripts/python.exe  # Windows
+ls ~/.graphiti/.venv/bin/python  # Unix
+
+# 2. If missing, recreate venv
+rm -rf ~/.graphiti/.venv/
+python mcp_server/daemon/installer.py
+
+# 3. Reinstall daemon service (regenerates service config with correct paths)
+graphiti-mcp daemon uninstall
+graphiti-mcp daemon install
+
+# 4. Check service status
+graphiti-mcp daemon status
+```
 
 ---
 
