@@ -27,6 +27,7 @@ from .windows_service import WindowsServiceManager
 from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
 from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
+from .wrapper_generator import WrapperGenerator, WrapperGenerationError
 
 
 class UnsupportedPlatformError(Exception):
@@ -43,6 +44,7 @@ class DaemonManager:
         self.service_manager = self._get_service_manager()
         self.config_path = self._get_config_path()
         self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
+        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
 
     def _get_service_manager(self):
         """Get platform-specific service manager."""
@@ -127,6 +129,27 @@ class DaemonManager:
             print(f"[FAILED] Unexpected error during package installation: {e}")
             return False
 
+        # Step 2.6: Generate CLI wrapper scripts
+        print()
+        print("Generating CLI wrapper scripts...")
+        try:
+            success, msg = self.wrapper_generator.generate_wrappers()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] {msg}")
+                print()
+                print("Troubleshooting:")
+                print("  - Ensure write permissions to ~/.graphiti/bin/")
+                print("  - Check available disk space")
+                return False
+        except WrapperGenerationError as e:
+            print(f"[FAILED] Wrapper generation failed: {e}")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during wrapper generation: {e}")
+            return False
+
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -166,6 +189,18 @@ class DaemonManager:
         success = self.service_manager.uninstall()
 
         if success:
+            # Clean up wrapper scripts
+            print()
+            print("Cleaning up wrapper scripts...")
+            try:
+                cleanup_success, cleanup_msg = self.wrapper_generator.cleanup_wrappers()
+                if cleanup_success:
+                    print(f"[OK] {cleanup_msg}")
+                else:
+                    print(f"[WARNING] {cleanup_msg}")
+            except Exception as e:
+                print(f"[WARNING] Wrapper cleanup failed: {e}")
+
             print()
             print("[SUCCESS] Bootstrap service uninstalled successfully")
             print()
@@ -186,12 +221,16 @@ class DaemonManager:
             Dict with status information:
             {
                 'venv': {'exists': bool, 'path': str},
+                'wrappers': {'all_exist': bool, 'bin_path': str, 'message': str},
                 'service': {'installed': bool, 'running': bool, 'platform': str, 'manager': str},
                 'config': {'enabled': bool, 'host': str, 'port': int, 'path': str}
             }
         """
         # Check venv status
         venv_exists = self.venv_manager.detect_venv()
+
+        # Check wrapper scripts status
+        wrappers_exist, wrapper_msg = self.wrapper_generator.validate_wrappers()
 
         # Check if service is installed
         is_installed = self.service_manager.is_installed()
@@ -204,6 +243,11 @@ class DaemonManager:
             'venv': {
                 'exists': venv_exists,
                 'path': str(self.venv_manager.venv_path)
+            },
+            'wrappers': {
+                'all_exist': wrappers_exist,
+                'bin_path': str(self.wrapper_generator.bin_path),
+                'message': wrapper_msg
             },
             'service': {
                 'installed': is_installed,
@@ -253,6 +297,13 @@ class DaemonManager:
         # Print venv status
         print(f"Venv Path:       {status['venv']['path']}")
         print(f"Venv Status:     {'[EXISTS]' if status['venv']['exists'] else '[MISSING]'}")
+        print()
+
+        # Print wrapper scripts status
+        print(f"Wrappers Path:   {status['wrappers']['bin_path']}")
+        print(f"Wrappers Status: {'[OK]' if status['wrappers']['all_exist'] else '[MISSING]'}")
+        if not status['wrappers']['all_exist']:
+            print(f"  {status['wrappers']['message']}")
         print()
 
         # Print service status
