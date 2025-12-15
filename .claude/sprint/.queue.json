@@ -110,7 +110,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Bootstrap Service Update",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "5.d",
@@ -357,7 +357,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Bootstrap Service Update",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "discovery",
       "phase_order": 1,
@@ -370,14 +370,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Bootstrap Service Update",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/5-plan.yaml"
+      "requires_artifact": "plans/5-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/5-plan.yaml"
+      }
     },
     "5.t": {
       "type": "testing",
