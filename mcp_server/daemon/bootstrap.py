@@ -25,6 +25,8 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from .venv_manager import VenvManager
+
 logger = logging.getLogger("graphiti.bootstrap")
 
 
@@ -33,6 +35,7 @@ class BootstrapService:
 
     def __init__(self):
         self.config_path = self._get_config_path()
+        self.venv_manager = VenvManager()  # Dedicated venv manager
         self.mcp_process: Optional[subprocess.Popen] = None
         self.last_config_mtime: float = 0
         self.last_enabled_state: Optional[bool] = None
@@ -44,6 +47,9 @@ class BootstrapService:
         # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGTERM, self._handle_signal)
         signal.signal(signal.SIGINT, self._handle_signal)
+
+        # Validate venv exists on startup (defensive check)
+        self._validate_venv_on_startup()
 
     def _get_config_path(self) -> Path:
         """Get config path (platform-aware)."""
@@ -60,6 +66,17 @@ class BootstrapService:
             if xdg_config:
                 return Path(xdg_config) / "graphiti" / "graphiti.config.json"
             return Path.home() / ".graphiti" / "graphiti.config.json"
+
+    def _validate_venv_on_startup(self):
+        """Validate venv exists before starting MCP server (defensive check)."""
+        if not self.venv_manager.detect_venv():
+            logger.warning(
+                f"Venv not found at {self.venv_manager.venv_path}. "
+                "MCP server may fail to start. Run: graphiti-mcp daemon install"
+            )
+            # Note: We log warning but don't fail startup. The bootstrap
+            # service should stay running even if venv is missing, to allow
+            # recovery via daemon install without service restart.
 
     def _handle_signal(self, signum, frame):
         """Handle shutdown signals gracefully."""

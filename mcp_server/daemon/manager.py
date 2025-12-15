@@ -26,6 +26,7 @@ from typing import Optional
 from .windows_service import WindowsServiceManager
 from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
+from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
 
 
 class UnsupportedPlatformError(Exception):
@@ -41,6 +42,7 @@ class DaemonManager:
         self.platform = platform.system()
         self.service_manager = self._get_service_manager()
         self.config_path = self._get_config_path()
+        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
 
     def _get_service_manager(self):
         """Get platform-specific service manager."""
@@ -73,15 +75,47 @@ class DaemonManager:
         print(f"Installing Graphiti bootstrap service on {self.platform}...")
         print()
 
-        # Ensure config directory exists
+        # Step 1: Validate Python version
+        try:
+            self.venv_manager.validate_python_version()
+            print("[OK] Python version check passed")
+        except IncompatiblePythonVersionError as e:
+            print(f"[FAILED] {e}")
+            print()
+            print("Please upgrade to Python 3.10 or higher:")
+            print("  https://www.python.org/downloads/")
+            return False
+
+        # Step 2: Create dedicated venv
+        print()
+        print("Creating dedicated virtual environment...")
+        try:
+            success, msg = self.venv_manager.create_venv()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] {msg}")
+                return False
+        except VenvCreationError as e:
+            print(f"[FAILED] Venv creation failed: {e}")
+            print()
+            print("Troubleshooting:")
+            print("  - Ensure you have write permissions to ~/.graphiti/")
+            print("  - Check available disk space")
+            print("  - Try: python -m venv --help (verify venv module available)")
+            return False
+
+        # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Initialize config if needed
+        # Step 4: Initialize config if needed
         if not self.config_path.exists():
+            print()
             print(f"Creating default config: {self.config_path}")
             self._create_default_config()
 
-        # Install service
+        # Step 5: Install service
+        print()
         success = self.service_manager.install()
 
         if success:
@@ -126,6 +160,12 @@ class DaemonManager:
         """Show daemon status (installed, enabled, running)."""
         print("Graphiti Daemon Status")
         print("=" * 60)
+        print()
+
+        # Check venv status
+        venv_exists = self.venv_manager.detect_venv()
+        print(f"Venv Path:       {self.venv_manager.venv_path}")
+        print(f"Venv Status:     {'[EXISTS]' if venv_exists else '[MISSING]'}")
         print()
 
         # Check if service is installed
