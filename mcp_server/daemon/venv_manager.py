@@ -265,3 +265,199 @@ class VenvManager:
             )
 
         return pip_exe
+
+    def get_uv_executable(self) -> Optional[Path]:
+        """
+        Get path to uv executable in the venv (if uv was used to create it).
+
+        Returns:
+            Path to uv executable if found, None otherwise
+        """
+        if not self.detect_venv():
+            return None
+
+        if sys.platform == "win32":
+            uv_exe = self.venv_path / "Scripts" / "uv.exe"
+        else:
+            uv_exe = self.venv_path / "bin" / "uv"
+
+        if uv_exe.exists():
+            logger.debug(f"uv found in venv: {uv_exe}")
+            return uv_exe
+
+        logger.debug("uv not found in venv")
+        return None
+
+    def detect_repo_location(self) -> Optional[Path]:
+        """
+        Dynamically detect the repository location by searching upward from venv path.
+
+        Searches for a directory containing mcp_server/pyproject.toml.
+
+        Returns:
+            Path to repository root if found, None otherwise
+        """
+        # Start from venv path and search upward
+        current = self.venv_path.resolve()
+
+        # Search up to 5 levels (prevents infinite loop)
+        for _ in range(5):
+            # Check if this directory contains mcp_server/pyproject.toml
+            mcp_server_dir = current / "mcp_server"
+            pyproject_toml = mcp_server_dir / "pyproject.toml"
+
+            if pyproject_toml.exists():
+                logger.debug(f"Repository found at: {current}")
+                return current
+
+            # Move up one level
+            parent = current.parent
+            if parent == current:  # Reached root
+                break
+            current = parent
+
+        logger.warning(f"Repository not found searching upward from {self.venv_path}")
+        return None
+
+    def validate_installation(self, package_name: str = "mcp_server") -> bool:
+        """
+        Validate that a package was installed successfully by attempting to import it.
+
+        Args:
+            package_name: Name of package to validate (default: mcp_server)
+
+        Returns:
+            True if package is importable, False otherwise
+        """
+        if not self.detect_venv():
+            logger.error("Cannot validate installation: venv does not exist")
+            return False
+
+        python_exe = self.get_python_executable()
+
+        # Try to import the package using venv's Python
+        try:
+            result = subprocess.run(
+                [str(python_exe), "-c", f"import {package_name}"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
+            )
+
+            if result.returncode == 0:
+                logger.debug(f"Package '{package_name}' is importable")
+                return True
+            else:
+                logger.warning(
+                    f"Package '{package_name}' not importable: {result.stderr.strip()}"
+                )
+                return False
+
+        except subprocess.TimeoutExpired:
+            logger.warning(f"Import validation timed out for '{package_name}'")
+            return False
+        except Exception as e:
+            logger.error(f"Error validating installation: {e}")
+            return False
+
+    def install_package(self) -> Tuple[bool, str]:
+        """
+        Install mcp_server package into the venv (non-editable install).
+
+        Detects repository location dynamically and installs the package.
+        Uses uv pip if available in venv, falls back to standard pip.
+
+        Returns:
+            Tuple of (success: bool, message: str)
+
+        Raises:
+            VenvCreationError: If venv does not exist
+        """
+        if not self.detect_venv():
+            raise VenvCreationError(
+                f"Venv does not exist at {self.venv_path}. "
+                "Call create_venv() first."
+            )
+
+        # Detect repository location
+        repo_path = self.detect_repo_location()
+        if repo_path is None:
+            error_msg = (
+                "Cannot find mcp_server package in repository. "
+                "Expected to find mcp_server/pyproject.toml searching upward from venv."
+            )
+            logger.error(error_msg)
+            return False, error_msg
+
+        # Validate repo path (security: prevent path traversal)
+        try:
+            repo_path = repo_path.resolve()
+            mcp_server_path = repo_path / "mcp_server"
+            if not mcp_server_path.exists():
+                error_msg = f"mcp_server directory not found at {mcp_server_path}"
+                logger.error(error_msg)
+                return False, error_msg
+        except Exception as e:
+            error_msg = f"Error validating repository path: {e}"
+            logger.error(error_msg)
+            return False, error_msg
+
+        # Determine which pip to use (prefer uv pip if available in venv)
+        uv_exe = self.get_uv_executable()
+        if uv_exe:
+            pip_command = [str(uv_exe), "pip", "install"]
+            tool_name = "uv pip"
+        else:
+            pip_exe = self.get_pip_executable()
+            pip_command = [str(pip_exe), "install"]
+            tool_name = "pip"
+
+        # Build install command (non-editable, use relative path ./mcp_server)
+        install_target = str(mcp_server_path.relative_to(repo_path))
+        install_command = pip_command + [install_target, "--quiet"]
+
+        logger.info(f"Installing mcp_server package using {tool_name}")
+        logger.debug(f"Install command: {' '.join(install_command)}")
+        logger.debug(f"Working directory: {repo_path}")
+
+        try:
+            result = subprocess.run(
+                install_command,
+                cwd=str(repo_path),  # Run from repo root
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=300,  # 5 minute timeout for package installation
+            )
+
+            if result.returncode != 0:
+                error_output = result.stderr.strip() or result.stdout.strip()
+                error_msg = (
+                    f"Package installation failed with exit code {result.returncode}\n"
+                    f"Error: {error_output}"
+                )
+                logger.error(error_msg)
+                return False, error_msg
+
+            # Validate installation succeeded
+            if not self.validate_installation("mcp_server"):
+                error_msg = (
+                    "Package installation reported success but validation failed. "
+                    "Package is not importable."
+                )
+                logger.error(error_msg)
+                return False, error_msg
+
+            msg = f"Successfully installed mcp_server package using {tool_name}"
+            logger.info(msg)
+            return True, msg
+
+        except subprocess.TimeoutExpired:
+            error_msg = "Package installation timed out (exceeded 5 minutes)"
+            logger.error(error_msg)
+            return False, error_msg
+        except Exception as e:
+            error_msg = f"Unexpected error during package installation: {e}"
+            logger.error(error_msg)
+            return False, error_msg

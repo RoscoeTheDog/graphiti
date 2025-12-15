@@ -105,6 +105,28 @@ class DaemonManager:
             print("  - Try: python -m venv --help (verify venv module available)")
             return False
 
+        # Step 2.5: Install mcp_server package into venv
+        print()
+        print("Installing mcp_server package...")
+        try:
+            success, msg = self.venv_manager.install_package()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] Package installation failed: {msg}")
+                print()
+                print("Troubleshooting:")
+                print("  - Ensure you're running from the Graphiti repository directory")
+                print("  - Check internet connection (needed for package dependencies)")
+                print("  - Verify mcp_server/pyproject.toml exists in repository")
+                return False
+        except VenvCreationError as e:
+            print(f"[FAILED] Package installation failed: {e}")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during package installation: {e}")
+            return False
+
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
