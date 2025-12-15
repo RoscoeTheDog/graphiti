@@ -1056,7 +1056,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Documentation and Testing",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.i",
       "phase": "validation_implementation",
