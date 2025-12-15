@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Package Installation to Dedicated Venv",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "2.d",
@@ -234,7 +234,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Package Installation to Dedicated Venv",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,

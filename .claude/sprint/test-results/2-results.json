@@ -1,0 +1,239 @@
+{
+  "story_id": "2",
+  "phase": "testing",
+  "executed_by": "testing:2.t",
+  "timestamp": "2025-12-14T23:00:00Z",
+
+  "summary": {
+    "total_tests": 28,
+    "passed": 4,
+    "failed": 24,
+    "skipped": 0,
+    "pass_rate": 14,
+    "duration_ms": 770
+  },
+
+  "categories": {
+    "unit": {
+      "total": 18,
+      "passed": 3,
+      "failed": 15,
+      "coverage": null
+    },
+    "integration": {
+      "total": 7,
+      "passed": 1,
+      "failed": 6,
+      "coverage": null
+    },
+    "security": {
+      "total": 3,
+      "passed": 0,
+      "failed": 3,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [
+    {
+      "test": "test_get_uv_executable_finds_uv_in_venv_unix",
+      "category": "unit",
+      "error": "Platform mocking issue - needs platform.system patched before VenvManager creation",
+      "file": "tests/daemon/test_venv_manager.py:332",
+      "severity": "medium"
+    },
+    {
+      "test": "test_detect_repo_location_finds_mcp_server_from_venv_path",
+      "category": "unit",
+      "error": "Mock side_effect function signature incorrect - TypeError on exists() call",
+      "file": "tests/daemon/test_venv_manager.py:355",
+      "severity": "medium"
+    },
+    {
+      "test": "test_detect_repo_location_searches_upward_from_venv",
+      "category": "unit",
+      "error": "Mock side_effect function signature incorrect - TypeError on exists() call",
+      "file": "tests/daemon/test_venv_manager.py:385",
+      "severity": "medium"
+    },
+    {
+      "test": "test_validate_installation_returns_true_when_package_importable",
+      "category": "unit",
+      "error": "Venv existence check fails - needs detect_venv mocked or venv.exists() mocked",
+      "file": "tests/daemon/test_venv_manager.py:407",
+      "severity": "medium"
+    },
+    {
+      "test": "test_validate_installation_uses_venv_python",
+      "category": "unit",
+      "error": "Venv existence check fails - subprocess.run not called due to early error",
+      "file": "tests/daemon/test_venv_manager.py:429",
+      "severity": "medium"
+    },
+    {
+      "test": "test_install_package_uses_uv_pip_when_available",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:446",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_falls_back_to_pip_when_uv_not_available",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:467",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_uses_non_editable_install",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:487",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_constructs_correct_path",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:505",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_raises_error_on_failure",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:523",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_validates_installation_after_install",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:538",
+      "severity": "high"
+    },
+    {
+      "test": "test_install_package_handles_repo_not_found",
+      "category": "unit",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked to return True",
+      "file": "tests/daemon/test_venv_manager.py:556",
+      "severity": "high"
+    },
+    {
+      "test": "test_daemon_install_uses_uv_pip_when_available",
+      "category": "integration",
+      "error": "VenvCreationError - Venv does not exist at real path, needs venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:322",
+      "severity": "high"
+    },
+    {
+      "test": "test_daemon_install_falls_back_to_pip_when_uv_not_available",
+      "category": "integration",
+      "error": "VenvCreationError - Venv does not exist at real path, needs venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:342",
+      "severity": "high"
+    },
+    {
+      "test": "test_daemon_install_validates_package_installation",
+      "category": "integration",
+      "error": "VenvCreationError - Venv does not exist at real path, needs venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:361",
+      "severity": "high"
+    },
+    {
+      "test": "test_installed_package_is_importable_from_venv_python",
+      "category": "integration",
+      "error": "TypeError - mock_run.call_args is None (validate_installation errored before subprocess)",
+      "file": "tests/daemon/test_venv_integration.py:397",
+      "severity": "medium"
+    },
+    {
+      "test": "test_non_editable_install_means_package_changes_dont_affect_venv",
+      "category": "integration",
+      "error": "VenvCreationError - Venv does not exist at real path, needs venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:414",
+      "severity": "high"
+    },
+    {
+      "test": "test_repo_path_validated_before_installation",
+      "category": "security",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:438",
+      "severity": "high"
+    },
+    {
+      "test": "test_subprocess_commands_properly_escaped_for_install",
+      "category": "security",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:450",
+      "severity": "high"
+    },
+    {
+      "test": "test_package_installation_does_not_require_elevated_privileges",
+      "category": "security",
+      "error": "VenvCreationError - Venv does not exist, needs detect_venv mocked",
+      "file": "tests/daemon/test_venv_integration.py:468",
+      "severity": "high"
+    }
+  ],
+
+  "acceptance_criteria_coverage": {
+    "AC-2.1": {
+      "covered": false,
+      "tests": [],
+      "reason": "Tests written but failing due to missing venv mock - install_package requires venv to exist"
+    },
+    "AC-2.2": {
+      "covered": false,
+      "tests": ["test_install_package_uses_non_editable_install"],
+      "reason": "Test exists but fails - venv existence check not mocked"
+    },
+    "AC-2.3": {
+      "covered": false,
+      "tests": ["test_detect_repo_location_finds_mcp_server_from_venv_path", "test_detect_repo_location_handles_repo_moved", "test_install_package_constructs_correct_path"],
+      "reason": "Tests exist but 2/3 fail - mock side_effect signature incorrect"
+    },
+    "AC-2.4": {
+      "covered": false,
+      "tests": ["test_validate_installation_returns_true_when_package_importable", "test_validate_installation_returns_false_when_package_not_installed", "test_daemon_install_validates_package_installation", "test_installed_package_is_importable_from_venv_python"],
+      "reason": "Tests exist but 3/4 fail - venv existence check not mocked"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "fix_required",
+      "description": "Add detect_venv mock to all install_package tests",
+      "action": "Wrap all TestInstallPackage tests with: with patch.object(manager, 'detect_venv', return_value=True)"
+    },
+    {
+      "type": "fix_required",
+      "description": "Fix Path.exists mock side_effect signature",
+      "action": "Change exists_side_effect(self) to exists_side_effect() - remove self parameter"
+    },
+    {
+      "type": "fix_required",
+      "description": "Add venv existence mock to validate_installation tests",
+      "action": "Mock detect_venv or venv_path.exists() to return True before calling validate_installation"
+    },
+    {
+      "type": "fix_required",
+      "description": "Fix platform.system patching for Unix tests",
+      "action": "Apply platform.system mock BEFORE creating VenvManager instance"
+    },
+    {
+      "type": "fix_required",
+      "description": "Add venv existence mock to security tests",
+      "action": "Mock detect_venv to return True for all TestPackageInstallationSecurity tests"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "below_threshold",
+    "action": "block_and_recommend_remediation"
+  },
+
+  "outcome": "blocked",
+  "blocking": true
+}
