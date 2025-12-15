@@ -234,7 +234,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Package Installation to Dedicated Venv",
-      "status": "completed",
+      "status": "blocked",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
