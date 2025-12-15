@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 18:38:58
+**Generated**: 2025-12-14 18:46:38
 
 ---
 
@@ -15,15 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 27
-- **Completion**: 40.7%
+- **Completion**: 48.1%
 
 ### By Status
 
 - blocked: 2
-- completed: 11
-- in_progress: 1
+- completed: 13
 - pending: 9
-- unassigned: 4
+- unassigned: 3
 
 ### By Type
 
@@ -82,7 +81,7 @@
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: CLI Wrapper Script Generation
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: PATH Integration
