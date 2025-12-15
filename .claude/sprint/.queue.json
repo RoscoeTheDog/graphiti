@@ -234,7 +234,7 @@
       "phase_order": 1,
       "children": [],
       "blocks": [],
-      "file": null,
+      "file": "stories/2-package-installation-to-venv.md",
       "artifact": "plans/2-plan.yaml"
     },
     "2.i": {
@@ -704,7 +704,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Package Installation to Dedicated Venv",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "2",
       "children": [
         "-2.d",
@@ -724,7 +724,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Package Installation to Dedicated Venv",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.d",
       "phase": "validation_discovery",

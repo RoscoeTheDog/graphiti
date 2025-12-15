@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 20:53:06
+**Generated**: 2025-12-14 20:57:35
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 58
-- **Completion**: 58.6%
+- **Completion**: 60.3%
 
 ### By Status
 
 - blocked: 2
-- completed: 34
-- in_progress: 1
-- unassigned: 21
+- completed: 35
+- in_progress: 2
+- unassigned: 19
 
 ### By Type
 
@@ -55,7 +55,7 @@
   - Dependencies: Story -1, Story -1.i
 
   ### Story -2.d: Validate Discovery: Package Installation to Dedicated Venv
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -2
   - Blocks: Story -2.i
 
@@ -140,7 +140,7 @@
   **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
-  ### Story 2.d: Discovery: Package Installation to Dedicated Venv
+  ### Story 2.d: 2 Package Installation To Venv
   **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
