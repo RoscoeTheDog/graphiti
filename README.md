@@ -535,9 +535,29 @@ The MCP server supports a **persistent daemon architecture** for improved perfor
 - Auto-starts on system boot (if installed as service)
 - Lower resource usage (single Neo4j connection)
 
+**Prerequisites:**
+
+> [!IMPORTANT]
+> The daemon architecture requires installing the MCP server package to register CLI commands.
+> This is different from upstream Graphiti which runs from the cloned directory.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/RoscoeTheDog/graphiti.git
+cd graphiti
+
+# 2. Install the MCP server package (registers CLI commands system-wide)
+pip install -e ./mcp_server
+# OR with uv:
+uv pip install -e ./mcp_server
+
+# 3. Verify CLI is available
+graphiti-mcp --help
+```
+
 **Quick Setup:**
 ```bash
-# Install daemon service (one-time)
+# Install daemon service (one-time, requires step 2 above)
 graphiti-mcp daemon install
 
 # Enable in config

@@ -4,6 +4,25 @@ This guide covers common issues with the Graphiti daemon architecture and their 
 
 ---
 
+## Prerequisites
+
+Before using daemon commands, ensure the MCP server package is installed:
+
+```bash
+# From the cloned repository root
+cd graphiti
+pip install -e ./mcp_server
+# OR with uv:
+uv pip install -e ./mcp_server
+
+# Verify CLI is available
+graphiti-mcp --help
+```
+
+> **Note:** This is different from upstream Graphiti. Our fork requires package installation to register CLI commands for daemon management.
+
+---
+
 ## Quick Diagnostics
 
 Run these commands to quickly diagnose daemon issues:
@@ -25,6 +44,33 @@ cat ~/.graphiti/graphiti.config.json | grep -A5 '"daemon"'
 ---
 
 ## Common Issues
+
+### 0. "graphiti-mcp: command not found"
+
+**Symptoms:**
+- Running `graphiti-mcp daemon install` returns "command not found"
+- CLI commands are not recognized
+
+**Cause:**
+The MCP server package has not been installed to register CLI commands.
+
+**Solution:**
+```bash
+# Navigate to cloned repository
+cd /path/to/graphiti
+
+# Install the package (registers CLI commands)
+pip install -e ./mcp_server
+# OR with uv:
+uv pip install -e ./mcp_server
+
+# Verify installation
+graphiti-mcp --help
+```
+
+> **Note:** Unlike upstream Graphiti which runs from the cloned directory, our fork requires package installation for daemon functionality.
+
+---
 
 ### 1. "Connection refused" Error in Claude Code
 
