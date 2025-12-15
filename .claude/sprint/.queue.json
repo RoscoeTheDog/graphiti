@@ -339,7 +339,9 @@
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
-      "children": [],
+      "children": [
+        "4.r1"
+      ],
       "blocks": [],
       "file": null,
       "test_categories": [
@@ -474,6 +476,77 @@
       "file": "stories/2.t.r2-fix-platform-specific-test-moc.md",
       "priority": "P0",
       "blocking": false
+    },
+    "4.r1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Test Failures in PATH Integration",
+      "status": "in_progress",
+      "parent": "4.t",
+      "children": [
+        "4.r1.d",
+        "4.r1.i",
+        "4.r1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4.r1-test-fixes.md",
+      "priority": "P0",
+      "blocking": false
+    },
+    "4.r1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix Test Failures in PATH Integration",
+      "status": "completed",
+      "parent": "4.r1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "4.r1.i"
+      ],
+      "file": null,
+      "artifact": "plans/4.r1-plan.yaml"
+    },
+    "4.r1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix Test Failures in PATH Integration",
+      "status": "unassigned",
+      "parent": "4.r1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "4.r1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/4.r1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4.r1-plan.yaml"
+      }
+    },
+    "4.r1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix Test Failures in PATH Integration",
+      "status": "unassigned",
+      "parent": "4.r1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -497,6 +570,9 @@
     "5.t",
     "6.d",
     "6.i",
-    "6.t"
+    "6.t",
+    "4.r1.d",
+    "4.r1.i",
+    "4.r1.t"
   ]
 }
