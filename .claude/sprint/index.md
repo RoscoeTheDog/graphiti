@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 21:52:38
+**Generated**: 2025-12-14 21:58:06
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 58
-- **Completion**: 86.2%
+- **Completion**: 87.9%
 
 ### By Status
 
 - blocked: 2
-- completed: 50
-- in_progress: 1
-- unassigned: 5
+- completed: 51
+- in_progress: 2
+- unassigned: 3
 
 ### By Type
 
@@ -111,7 +111,7 @@
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Documentation and Testing
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -6
   - Blocks: Story -6.i
 
