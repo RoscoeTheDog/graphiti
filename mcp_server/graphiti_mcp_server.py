@@ -14,7 +14,7 @@ import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Optional, cast
 from typing_extensions import TypedDict
 
 try:
@@ -2799,6 +2799,8 @@ async def initialize_server() -> MCPConfig:
 
 async def run_mcp_server():
     """Run the MCP server in the current event loop."""
+    global session_manager, resilient_indexer
+
     # Initialize the server
     mcp_config = await initialize_server()
 
@@ -2883,8 +2885,6 @@ async def run_mcp_server():
             logger.info('Metrics logging task cancelled successfully')
 
         # Clean up session manager on shutdown
-        global session_manager, resilient_indexer
-
         # Stop session manager
         if session_manager is not None:
             try:
