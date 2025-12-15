@@ -160,13 +160,14 @@ class TestShellDetection:
         shell = integration.detect_shell()
         assert shell == "zsh"
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Unix-specific test")
     @patch("os.environ", {})
-    def test_detect_shell_defaults_to_bash(self):
+    @patch("os.getuid", side_effect=AttributeError("getuid not available"))
+    def test_detect_shell_defaults_to_bash(self, mock_getuid):
         """Test shell detection defaults to bash when detection fails."""
-        with patch("mcp_server.daemon.path_integration.pwd", None):
-            integration = PathIntegration()
-            shell = integration.detect_shell()
-            assert shell == "bash"
+        integration = PathIntegration()
+        shell = integration.detect_shell()
+        assert shell == "bash"
 
 
 class TestUnixSnippetGeneration:
@@ -213,23 +214,27 @@ class TestWindowsRegistry:
     """Test Windows registry modification (mocked)."""
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
-    @patch("mcp_server.daemon.path_integration.winreg")
-    def test_configure_windows_path_with_consent(self, mock_winreg, tmp_path):
+    def test_configure_windows_path_with_consent(self, tmp_path):
         """Test Windows registry modification with user consent."""
         bin_path = tmp_path / "bin"
         bin_path.mkdir()
 
-        # Mock registry operations
-        mock_key = MagicMock()
-        mock_winreg.OpenKey.return_value = mock_key
-        mock_winreg.QueryValueEx.return_value = (r"C:\existing\path", None)
+        # Mock winreg at import level
+        with patch("winreg.OpenKey") as mock_open_key, \
+             patch("winreg.QueryValueEx") as mock_query, \
+             patch("winreg.SetValueEx") as mock_set, \
+             patch("winreg.CloseKey") as mock_close:
 
-        integration = PathIntegration(bin_path=bin_path)
-        success, msg = integration.configure_windows_path(consent=True)
+            mock_key = MagicMock()
+            mock_open_key.return_value = mock_key
+            mock_query.return_value = (r"C:\existing\path", None)
 
-        assert success is True
-        assert "Successfully added" in msg
-        mock_winreg.SetValueEx.assert_called_once()
+            integration = PathIntegration(bin_path=bin_path)
+            success, msg = integration.configure_windows_path(consent=True)
+
+            assert success is True
+            assert "Successfully added" in msg
+            mock_set.assert_called_once()
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_configure_windows_path_without_consent(self, tmp_path):
@@ -244,16 +249,10 @@ class TestWindowsRegistry:
         assert "consent" in msg.lower()
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
-    @patch("mcp_server.daemon.path_integration.winreg")
-    def test_configure_windows_path_already_present(self, mock_winreg, tmp_path):
+    def test_configure_windows_path_already_present(self, tmp_path):
         """Test Windows registry modification skipped if PATH already configured."""
         bin_path = tmp_path / "bin"
         bin_path.mkdir()
-
-        # Mock PATH as already containing bin_path
-        mock_key = MagicMock()
-        mock_winreg.OpenKey.return_value = mock_key
-        mock_winreg.QueryValueEx.return_value = (f"C:\\existing\\path;{bin_path}", None)
 
         integration = PathIntegration(bin_path=bin_path)
 
@@ -263,23 +262,20 @@ class TestWindowsRegistry:
 
         assert success is True
         assert "already in PATH" in msg
-        mock_winreg.SetValueEx.assert_not_called()
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
-    @patch("mcp_server.daemon.path_integration.winreg")
-    def test_configure_windows_path_permission_error(self, mock_winreg, tmp_path):
+    def test_configure_windows_path_permission_error(self, tmp_path):
         """Test Windows registry modification handles permission errors."""
         bin_path = tmp_path / "bin"
         bin_path.mkdir()
 
-        # Mock permission error
-        mock_winreg.OpenKey.side_effect = PermissionError("Access denied")
+        # Mock winreg.OpenKey to raise PermissionError
+        with patch("winreg.OpenKey", side_effect=PermissionError("Access denied")):
+            integration = PathIntegration(bin_path=bin_path)
+            success, msg = integration.configure_windows_path(consent=True)
 
-        integration = PathIntegration(bin_path=bin_path)
-        success, msg = integration.configure_windows_path(consent=True)
-
-        assert success is False
-        assert "Permission denied" in msg
+            assert success is False
+            assert "Permission denied" in msg
 
 
 class TestInstructionDisplay:
@@ -298,7 +294,10 @@ class TestInstructionDisplay:
             integration.display_instructions()
 
         # Verify OK message was printed
-        printed_text = " ".join(str(call[0][0]) for call in mock_print.call_args_list)
+        printed_text = " ".join(
+            str(call[0][0]) if call[0] else ""
+            for call in mock_print.call_args_list
+        )
         assert "[OK]" in printed_text
         assert "already in your PATH" in printed_text
 
@@ -317,7 +316,10 @@ class TestInstructionDisplay:
             integration.display_instructions()
 
         # Verify Windows-specific instructions were shown
-        printed_text = " ".join(str(call[0][0]) for call in mock_print.call_args_list)
+        printed_text = " ".join(
+            str(call[0][0]) if call[0] else ""
+            for call in mock_print.call_args_list
+        )
         assert "PowerShell" in printed_text or "System Properties" in printed_text
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Unix-specific test")

@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 19:11:05
+**Generated**: 2025-12-14 19:15:50
 
 ---
 
@@ -15,15 +15,15 @@
 ## Sprint Statistics
 
 - **Total Stories**: 31
-- **Completion**: 51.6%
+- **Completion**: 54.8%
 
 ### By Status
 
 - blocked: 4
-- completed: 16
+- completed: 17
 - in_progress: 1
 - pending: 6
-- unassigned: 4
+- unassigned: 3
 
 ### By Type
 
@@ -127,7 +127,7 @@
       - Blocks: Story 4.r1.i
 
       ### Story 4.r1.i: Implementation: Fix Test Failures in PATH Integration
-      **Status**: unassigned | **Type**: implementation
+      **Status**: completed | **Type**: implementation
       - Dependencies: Story 4.r1, Story 4.r1.d
       - Blocks: Story 4.r1.t
 
