@@ -183,11 +183,13 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Dedicated Venv Creation",
-      "status": "blocked",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
-      "children": [],
+      "children": [
+        "1.t.r1"
+      ],
       "blocks": [],
       "file": null,
       "test_categories": [
@@ -413,11 +415,25 @@
         "integration",
         "security"
       ]
+    },
+    "1.t.r1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Test Interface Fixes for Dedicated Venv Creation",
+      "status": "completed",
+      "parent": "1.t",
+      "children": [],
+      "blocks": [],
+      "file": "stories/1.t.r1-test-interface-fixes.md",
+      "priority": "P0",
+      "fixes": "1.t",
+      "remediation_type": "bug_fix"
     }
   },
   "execution_queue": [
     "1.d",
     "1.i",
+    "1.t.r1",
     "1.t",
     "2.d",
     "2.i",

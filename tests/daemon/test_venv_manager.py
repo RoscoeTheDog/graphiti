@@ -16,7 +16,11 @@ from unittest.mock import Mock, patch, MagicMock, call
 
 import pytest
 
-from mcp_server.daemon.venv_manager import VenvManager
+from mcp_server.daemon.venv_manager import (
+    VenvManager,
+    IncompatiblePythonVersionError,
+    VenvCreationError,
+)
 
 
 class TestCheckUvAvailable:
@@ -61,19 +65,25 @@ class TestValidatePythonVersion:
         """VenvManager.validate_python_version() rejects Python 3.9 and below"""
         manager = VenvManager()
         with patch.object(sys, 'version_info', (3, 9, 18)):
-            assert manager.validate_python_version() is False
+            with pytest.raises(IncompatiblePythonVersionError) as exc_info:
+                manager.validate_python_version()
+            assert "3.10+ required" in str(exc_info.value)
 
     def test_validate_python_version_rejects_3_8(self):
         """VenvManager.validate_python_version() rejects Python 3.8"""
         manager = VenvManager()
         with patch.object(sys, 'version_info', (3, 8, 10)):
-            assert manager.validate_python_version() is False
+            with pytest.raises(IncompatiblePythonVersionError) as exc_info:
+                manager.validate_python_version()
+            assert "3.10+ required" in str(exc_info.value)
 
     def test_validate_python_version_rejects_2_7(self):
         """VenvManager.validate_python_version() rejects Python 2.7"""
         manager = VenvManager()
         with patch.object(sys, 'version_info', (2, 7, 18)):
-            assert manager.validate_python_version() is False
+            with pytest.raises(IncompatiblePythonVersionError) as exc_info:
+                manager.validate_python_version()
+            assert "3.10+ required" in str(exc_info.value)
 
 
 class TestDetectVenv:
@@ -116,10 +126,29 @@ class TestDetectVenv:
         mock_venv_path.exists.return_value = True
         mock_venv_path.is_dir.return_value = True
 
+        # Mock pyvenv.cfg exists (so we get past that check)
+        mock_pyvenv_cfg = MagicMock(spec=Path)
+        mock_pyvenv_cfg.exists.return_value = True
+
+        # Mock intermediate paths (Scripts/bin)
+        mock_scripts = MagicMock(spec=Path)
+
         # Mock activate script does NOT exist
         mock_activate = MagicMock(spec=Path)
         mock_activate.exists.return_value = False
-        mock_venv_path.__truediv__ = lambda self, other: mock_activate if 'activate' in str(other) else MagicMock()
+
+        def mock_truediv(self, other):
+            if 'pyvenv.cfg' in str(other):
+                return mock_pyvenv_cfg
+            elif 'Scripts' in str(other) or 'bin' in str(other):
+                return mock_scripts
+            elif 'activate' in str(other):
+                return mock_activate
+            else:
+                return MagicMock()
+
+        mock_venv_path.__truediv__ = mock_truediv
+        mock_scripts.__truediv__ = lambda self, other: mock_activate if 'activate' in str(other) else MagicMock()
 
         with patch.object(manager, 'venv_path', mock_venv_path):
             assert manager.detect_venv() is False
@@ -134,18 +163,19 @@ class TestCreateVenv:
 
         # Mock uv available
         with patch.object(manager, 'check_uv_available', return_value=True):
-            # Mock venv does not exist
-            with patch.object(manager, 'detect_venv', return_value=False):
+            # Mock venv does not exist initially, then exists after creation
+            with patch.object(manager, 'detect_venv', side_effect=[False, True]):
                 # Mock successful subprocess call
                 with patch('subprocess.run') as mock_run:
                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                     # Mock directory creation
                     with patch.object(Path, 'mkdir'):
-                        result = manager.create_venv()
+                        success, msg = manager.create_venv()
 
                         # Verify uv venv was called
-                        assert result is True
+                        assert success is True
+                        assert isinstance(msg, str)
                         mock_run.assert_called_once()
                         args = mock_run.call_args[0][0]
                         assert 'uv' in args
@@ -157,18 +187,19 @@ class TestCreateVenv:
 
         # Mock uv NOT available
         with patch.object(manager, 'check_uv_available', return_value=False):
-            # Mock venv does not exist
-            with patch.object(manager, 'detect_venv', return_value=False):
+            # Mock venv does not exist initially, then exists after creation
+            with patch.object(manager, 'detect_venv', side_effect=[False, True]):
                 # Mock successful subprocess call
                 with patch('subprocess.run') as mock_run:
                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                     # Mock directory creation
                     with patch.object(Path, 'mkdir'):
-                        result = manager.create_venv()
+                        success, msg = manager.create_venv()
 
                         # Verify python -m venv was called
-                        assert result is True
+                        assert success is True
+                        assert isinstance(msg, str)
                         mock_run.assert_called_once()
                         args = mock_run.call_args[0][0]
                         assert sys.executable in args or 'python' in args
@@ -183,10 +214,11 @@ class TestCreateVenv:
         with patch.object(manager, 'detect_venv', return_value=True):
             # Mock subprocess should NOT be called
             with patch('subprocess.run') as mock_run:
-                result = manager.create_venv()
+                success, msg = manager.create_venv()
 
                 # Verify venv creation was skipped
-                assert result is True
+                assert success is True
+                assert isinstance(msg, str)
                 mock_run.assert_not_called()
 
 
@@ -258,10 +290,8 @@ class TestEdgeCases:
                     mock_run.return_value = Mock(returncode=1, stdout='', stderr='Error creating venv')
 
                     with patch.object(Path, 'mkdir'):
-                        result = manager.create_venv()
-
-                        # Verify failure is detected
-                        assert result is False
+                        with pytest.raises(VenvCreationError):
+                            manager.create_venv()
 
     def test_create_venv_handles_permission_error(self):
         """VenvManager.create_venv() handles permission errors"""

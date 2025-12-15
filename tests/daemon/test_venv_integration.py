@@ -33,8 +33,7 @@ class TestDaemonInstallVenvCreation:
 
                 # Mock VenvManager
                 with patch.object(manager, 'venv_manager') as mock_venv:
-                    mock_venv.detect_venv.return_value = False
-                    mock_venv.create_venv.return_value = True
+                    mock_venv.create_venv.return_value = (True, "Venv created successfully")
                     mock_venv.validate_python_version.return_value = True
 
                     # Mock service manager install
@@ -43,7 +42,6 @@ class TestDaemonInstallVenvCreation:
 
                         # Verify venv creation was attempted
                         mock_venv.validate_python_version.assert_called_once()
-                        mock_venv.detect_venv.assert_called()
                         mock_venv.create_venv.assert_called_once()
                         assert result is True
 
@@ -55,10 +53,9 @@ class TestDaemonInstallVenvCreation:
 
                 # Mock VenvManager - venv already exists
                 with patch.object(manager, 'venv_manager') as mock_venv:
-                    mock_venv.detect_venv.return_value = True
                     mock_venv.validate_python_version.return_value = True
                     # create_venv should not be called for existing venv
-                    mock_venv.create_venv.return_value = True
+                    mock_venv.create_venv.return_value = (True, "Venv already exists, skipping creation")
 
                     # Mock service manager install
                     with patch.object(manager.service_manager, 'install', return_value=True):
@@ -66,8 +63,8 @@ class TestDaemonInstallVenvCreation:
 
                         # Verify venv creation was called (idempotency check is internal)
                         mock_venv.validate_python_version.assert_called_once()
-                        mock_venv.detect_venv.assert_called()
                         # create_venv is called, but internally returns early if exists
+                        mock_venv.create_venv.assert_called_once()
                         assert result is True
 
     def test_daemon_install_fails_with_old_python(self):
@@ -78,7 +75,10 @@ class TestDaemonInstallVenvCreation:
 
                 # Mock VenvManager - Python version too old
                 with patch.object(manager, 'venv_manager') as mock_venv:
-                    mock_venv.validate_python_version.return_value = False
+                    from mcp_server.daemon.venv_manager import IncompatiblePythonVersionError
+                    mock_venv.validate_python_version.side_effect = IncompatiblePythonVersionError(
+                        "Python 3.10+ required, but running Python 3.9"
+                    )
 
                     result = manager.install()
 
@@ -101,16 +101,13 @@ class TestDaemonInstallWithUv:
                 # Mock VenvManager with uv available
                 with patch.object(manager, 'venv_manager') as mock_venv:
                     mock_venv.validate_python_version.return_value = True
-                    mock_venv.detect_venv.return_value = False
-                    mock_venv.check_uv_available.return_value = True
-                    mock_venv.create_venv.return_value = True
+                    mock_venv.create_venv.return_value = (True, "Venv created successfully using uv")
 
                     # Mock service manager install
                     with patch.object(manager.service_manager, 'install', return_value=True):
                         result = manager.install()
 
-                        # Verify uv was detected
-                        mock_venv.check_uv_available.assert_called()
+                        # Verify venv creation was called
                         mock_venv.create_venv.assert_called_once()
                         assert result is True
 
@@ -123,16 +120,13 @@ class TestDaemonInstallWithUv:
                 # Mock VenvManager with uv NOT available
                 with patch.object(manager, 'venv_manager') as mock_venv:
                     mock_venv.validate_python_version.return_value = True
-                    mock_venv.detect_venv.return_value = False
-                    mock_venv.check_uv_available.return_value = False
-                    mock_venv.create_venv.return_value = True
+                    mock_venv.create_venv.return_value = (True, "Venv created successfully using python -m venv")
 
                     # Mock service manager install
                     with patch.object(manager.service_manager, 'install', return_value=True):
                         result = manager.install()
 
-                        # Verify fallback was used
-                        mock_venv.check_uv_available.assert_called()
+                        # Verify venv creation was called
                         mock_venv.create_venv.assert_called_once()
                         assert result is True
 
@@ -197,19 +191,16 @@ class TestDaemonStatusVenv:
                     # Directory exists but activate script missing
                     mock_venv.detect_venv.return_value = False
                     mock_venv.venv_path = Path.home() / '.graphiti' / '.venv'
-                    mock_venv.venv_path.exists = Mock(return_value=True)
 
-                    # Mock service manager status
-                    with patch.object(manager.service_manager, 'status', return_value={
-                        'service_name': 'graphiti-mcp',
-                        'status': 'stopped'
-                    }):
-                        status = manager.status()
+                    # Mock service manager (note: status() no longer expects a dict return)
+                    with patch.object(manager.service_manager, 'is_installed', return_value=True):
+                        with patch.object(manager.service_manager, 'is_running', return_value=False):
+                            status = manager.status()
 
-                        # Verify venv status shows invalid
-                        assert 'venv' in status
-                        # detect_venv returns False for corrupted venv
-                        assert status['venv']['exists'] is False
+                            # Verify venv status shows invalid
+                            assert 'venv' in status
+                            # detect_venv returns False for corrupted venv
+                            assert status['venv']['exists'] is False
 
 
 class TestBootstrapVenvValidation:
@@ -278,7 +269,7 @@ class TestSecurityAndPermissions:
         """Subprocess commands are properly escaped (no shell injection)"""
         manager = VenvManager()
 
-        with patch.object(manager, 'detect_venv', return_value=False):
+        with patch.object(manager, 'detect_venv', side_effect=[False, True]):
             with patch.object(manager, 'check_uv_available', return_value=True):
                 with patch('subprocess.run') as mock_run:
                     mock_run.return_value = Mock(returncode=0)

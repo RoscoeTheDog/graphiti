@@ -156,72 +156,122 @@ class DaemonManager:
             print("  See error messages above for details")
             return False
 
-    def status(self) -> None:
-        """Show daemon status (installed, enabled, running)."""
-        print("Graphiti Daemon Status")
-        print("=" * 60)
-        print()
+    def status(self) -> dict:
+        """
+        Get daemon status (installed, enabled, running).
 
+        Returns:
+            Dict with status information:
+            {
+                'venv': {'exists': bool, 'path': str},
+                'service': {'installed': bool, 'running': bool, 'platform': str, 'manager': str},
+                'config': {'enabled': bool, 'host': str, 'port': int, 'path': str}
+            }
+        """
         # Check venv status
         venv_exists = self.venv_manager.detect_venv()
-        print(f"Venv Path:       {self.venv_manager.venv_path}")
-        print(f"Venv Status:     {'[EXISTS]' if venv_exists else '[MISSING]'}")
-        print()
 
         # Check if service is installed
         is_installed = self.service_manager.is_installed()
-        print(f"Platform:        {self.platform}")
-        print(f"Service Manager: {self.service_manager.name}")
-        print(f"Installed:       {'[YES]' if is_installed else '[NO]'}")
-        print()
-
-        if not is_installed:
-            print("Service not installed. Run: graphiti-mcp daemon install")
-            return
 
         # Check if service is running
-        is_running = self.service_manager.is_running()
-        print(f"Bootstrap:       {'[RUNNING]' if is_running else '[STOPPED]'}")
-        print()
+        is_running = self.service_manager.is_running() if is_installed else False
 
-        if not is_running:
-            print("Bootstrap service not running.")
-            print("  Check logs: graphiti-mcp daemon logs")
-            print(f"  Or start via: {self.service_manager.start_hint}")
-            return
+        # Build status dict
+        status_dict = {
+            'venv': {
+                'exists': venv_exists,
+                'path': str(self.venv_manager.venv_path)
+            },
+            'service': {
+                'installed': is_installed,
+                'running': is_running,
+                'platform': self.platform,
+                'manager': self.service_manager.name
+            }
+        }
 
         # Check config state
         if self.config_path.exists():
             try:
                 config = json.loads(self.config_path.read_text())
                 daemon_config = config.get("daemon", {})
-                enabled = daemon_config.get("enabled", False)
-                host = daemon_config.get("host", "127.0.0.1")
-                port = daemon_config.get("port", 8321)
-
-                print(f"Config:          {self.config_path}")
-                print(f"Daemon Enabled:  {'[YES]' if enabled else '[NO]'}")
-                print(f"MCP Server:      http://{host}:{port}")
-                print()
-
-                if not enabled:
-                    print("MCP server is disabled in config.")
-                    print(f"  To enable, edit: {self.config_path}")
-                    print('  Set: "daemon": { "enabled": true }')
-                else:
-                    # Try to check if MCP server is responding
-                    print("MCP server should be running on:")
-                    print(f"  http://{host}:{port}/health")
-                    print()
-                    print("Test with: curl http://127.0.0.1:8321/health")
-
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'enabled': daemon_config.get("enabled", False),
+                    'host': daemon_config.get("host", "127.0.0.1"),
+                    'port': daemon_config.get("port", 8321)
+                }
             except json.JSONDecodeError:
-                print(f"Config:          {self.config_path} (INVALID JSON)")
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'error': 'Invalid JSON'
+                }
             except Exception as e:
-                print(f"Config Error:    {e}")
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'error': str(e)
+                }
         else:
-            print(f"Config:          NOT FOUND ({self.config_path})")
+            status_dict['config'] = {
+                'path': str(self.config_path),
+                'exists': False
+            }
+
+        return status_dict
+
+    def print_status(self) -> None:
+        """Print daemon status to stdout (CLI-friendly version)."""
+        status = self.status()
+
+        print("Graphiti Daemon Status")
+        print("=" * 60)
+        print()
+
+        # Print venv status
+        print(f"Venv Path:       {status['venv']['path']}")
+        print(f"Venv Status:     {'[EXISTS]' if status['venv']['exists'] else '[MISSING]'}")
+        print()
+
+        # Print service status
+        print(f"Platform:        {status['service']['platform']}")
+        print(f"Service Manager: {status['service']['manager']}")
+        print(f"Installed:       {'[YES]' if status['service']['installed'] else '[NO]'}")
+        print()
+
+        if not status['service']['installed']:
+            print("Service not installed. Run: graphiti-mcp daemon install")
+            return
+
+        print(f"Bootstrap:       {'[RUNNING]' if status['service']['running'] else '[STOPPED]'}")
+        print()
+
+        if not status['service']['running']:
+            print("Bootstrap service not running.")
+            print("  Check logs: graphiti-mcp daemon logs")
+            return
+
+        # Print config status
+        if 'error' in status['config']:
+            print(f"Config:          {status['config']['path']} ({status['config']['error']})")
+        elif not status['config'].get('exists', True):
+            print(f"Config:          NOT FOUND ({status['config']['path']})")
             print("  Run: graphiti-mcp daemon install (to create default config)")
+        else:
+            print(f"Config:          {status['config']['path']}")
+            print(f"Daemon Enabled:  {'[YES]' if status['config']['enabled'] else '[NO]'}")
+            print(f"MCP Server:      http://{status['config']['host']}:{status['config']['port']}")
+            print()
+
+            if not status['config']['enabled']:
+                print("MCP server is disabled in config.")
+                print(f"  To enable, edit: {status['config']['path']}")
+                print('  Set: "daemon": { "enabled": true }')
+            else:
+                print("MCP server should be running on:")
+                print(f"  http://{status['config']['host']}:{status['config']['port']}/health")
+                print()
+                print("Test with: curl http://127.0.0.1:8321/health")
 
     def logs(self, follow: bool = False, lines: int = 50) -> None:
         """Tail daemon logs."""

@@ -25,9 +25,50 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from .venv_manager import VenvManager
+from .venv_manager import (
+    VenvManager,
+    VenvCreationError,
+    IncompatiblePythonVersionError,
+)
 
 logger = logging.getLogger("graphiti.bootstrap")
+
+
+def validate_environment() -> bool:
+    """
+    Validate that the daemon environment is properly set up.
+
+    Checks:
+    - Venv exists at ~/.graphiti/.venv/
+    - Python version compatibility
+
+    Returns:
+        True if environment is valid
+
+    Raises:
+        VenvCreationError: If venv is missing or invalid
+        IncompatiblePythonVersionError: If Python version incompatible
+    """
+    # Check venv exists
+    venv_manager = VenvManager()
+
+    # Validate Python version
+    try:
+        venv_manager.validate_python_version()
+    except IncompatiblePythonVersionError as e:
+        logger.error(f"Python version check failed: {e}")
+        raise
+
+    # Check venv exists
+    if not venv_manager.detect_venv():
+        logger.error(f"Venv not found at {venv_manager.venv_path}")
+        raise VenvCreationError(
+            f"Dedicated venv not found at {venv_manager.venv_path}. "
+            "Run 'graphiti-mcp daemon install' first."
+        )
+
+    logger.info(f"Environment validation passed (venv: {venv_manager.venv_path})")
+    return True
 
 
 class BootstrapService:
