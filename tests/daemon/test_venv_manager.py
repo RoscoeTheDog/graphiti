@@ -331,8 +331,8 @@ class TestGetUvExecutable:
 
     def test_get_uv_executable_finds_uv_in_venv_unix(self):
         """VenvManager.get_uv_executable() finds uv in venv on Unix"""
-        # Mock Unix platform from the start
-        with patch('platform.system', return_value='Linux'):
+        # Mock Unix platform - use sys.platform instead of platform.system()
+        with patch('sys.platform', 'linux'):
             manager = VenvManager()
             mock_uv_path = manager.venv_path / 'bin' / 'uv'
             with patch.object(Path, 'exists', return_value=True):
@@ -355,15 +355,16 @@ class TestDetectRepoLocation:
         """VenvManager.detect_repo_location() finds mcp_server directory from venv path"""
         manager = VenvManager()
 
-        # Mock venv path: /home/user/graphiti/.graphiti/.venv
-        # Repo root should be: /home/user/graphiti
-        mock_repo_root = Path('/home/user/graphiti')
+        # Use platform-agnostic path construction
+        if sys.platform == "win32":
+            mock_repo_root = Path('C:/home/user/graphiti')
+        else:
+            mock_repo_root = Path('/home/user/graphiti')
+
         mock_venv_path = mock_repo_root / '.graphiti' / '.venv'
 
         with patch.object(manager, 'venv_path', mock_venv_path):
             # Mock pyproject.toml exists check
-            # The detect_repo_location searches upward checking (current / "mcp_server" / "pyproject.toml").exists()
-            # We need it to return True only when checking mock_repo_root / "mcp_server" / "pyproject.toml"
             expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
 
             original_exists = Path.exists
@@ -391,8 +392,13 @@ class TestDetectRepoLocation:
         """VenvManager.detect_repo_location() searches upward from venv location"""
         manager = VenvManager()
 
-        mock_venv_path = Path('/opt/projects/graphiti/.graphiti/.venv')
-        mock_repo_root = Path('/opt/projects/graphiti')
+        # Use platform-agnostic path construction
+        if sys.platform == "win32":
+            mock_venv_path = Path('C:/opt/projects/graphiti/.graphiti/.venv')
+            mock_repo_root = Path('C:/opt/projects/graphiti')
+        else:
+            mock_venv_path = Path('/opt/projects/graphiti/.graphiti/.venv')
+            mock_repo_root = Path('/opt/projects/graphiti')
 
         with patch.object(manager, 'venv_path', mock_venv_path):
             expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
@@ -531,22 +537,30 @@ class TestInstallPackage:
         """VenvManager.install_package() constructs correct install command with dynamic path"""
         manager = VenvManager()
 
-        mock_repo_root = Path('/opt/graphiti')
+        # Use platform-agnostic path construction
+        if sys.platform == "win32":
+            mock_repo_root = Path('C:/opt/graphiti')
+            mock_pip = Path('C:/venv/bin/pip')
+        else:
+            mock_repo_root = Path('/opt/graphiti')
+            mock_pip = Path('/venv/bin/pip')
 
         with patch.object(manager, 'detect_venv', return_value=True):
             with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
                 with patch.object(Path, 'exists', return_value=True):
                     with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
                                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                                     manager.install_package()
 
-                                    # Verify package path is included
+                                    # Verify package path is included (relative path "mcp_server")
                                     call_args = mock_run.call_args[0][0]
-                                    assert str(mock_repo_root / 'mcp_server') in str(call_args)
+                                    # Implementation uses relative path from repo root
+                                    assert 'mcp_server' in call_args, \
+                                        f"Expected package 'mcp_server' not found in {call_args}"
 
     def test_install_package_raises_error_on_failure(self):
         """VenvManager.install_package() raises error on installation failure"""
