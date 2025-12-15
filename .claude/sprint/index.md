@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 19:54:39
+**Generated**: 2025-12-14 20:15:26
 
 ---
 
@@ -15,15 +15,15 @@
 ## Sprint Statistics
 
 - **Total Stories**: 34
-- **Completion**: 64.7%
+- **Completion**: 79.4%
 
 ### By Status
 
-- blocked: 4
-- completed: 22
-- in_progress: 1
-- pending: 3
-- unassigned: 4
+- blocked: 2
+- completed: 27
+- in_progress: 2
+- pending: 1
+- unassigned: 2
 
 ### By Type
 
@@ -106,15 +106,15 @@
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Bootstrap Service Update
-  **Status**: blocked | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Documentation and Testing
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Documentation and Testing
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 6
 
   ### Story 6.t: Testing: Documentation and Testing
@@ -140,11 +140,11 @@
   - Dependencies: Story 5
 
   ### Story 5.r2: Fix Template Generation Tests
-  **Status**: unassigned | **Type**: remediation
+  **Status**: completed | **Type**: remediation
   - Dependencies: Story 5
 
   ### Story 5.r3: Fix Integration Test Mocking
-  **Status**: unassigned | **Type**: remediation
+  **Status**: completed | **Type**: remediation
   - Dependencies: Story 5
 
 ---
