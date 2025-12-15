@@ -115,7 +115,10 @@
       "children": [
         "5.d",
         "5.i",
-        "5.t"
+        "5.t",
+        "5.r1",
+        "5.r2",
+        "5.r3"
       ],
       "phase_status": {
         "discovery": "pending",
@@ -562,6 +565,45 @@
         "integration",
         "security"
       ]
+    },
+    "5.r1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Error Handling - Venv Validation",
+      "status": "completed",
+      "parent": "5",
+      "children": [],
+      "blocks": [],
+      "file": "stories/5.r1-error-handling-venv-validation.md",
+      "priority": "P0",
+      "fixes": "5.t",
+      "remediation_type": "bug_fix"
+    },
+    "5.r2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Template Generation Tests",
+      "status": "unassigned",
+      "parent": "5",
+      "children": [],
+      "blocks": [],
+      "file": "stories/5.r2-fix-template-generation-tests.md",
+      "priority": "P0",
+      "fixes": "5.t",
+      "remediation_type": "bug_fix"
+    },
+    "5.r3": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Integration Test - Wrapper Generation Mocking",
+      "status": "unassigned",
+      "parent": "5",
+      "children": [],
+      "blocks": [],
+      "file": "stories/5.r3-fix-integration-test-mocking.md",
+      "priority": "P0",
+      "fixes": "5.t",
+      "remediation_type": "bug_fix"
     }
   },
   "execution_queue": [
@@ -588,6 +630,9 @@
     "6.t",
     "4.r1.d",
     "4.r1.i",
-    "4.r1.t"
+    "4.r1.t",
+    "5.r1",
+    "5.r2",
+    "5.r3"
   ]
 }

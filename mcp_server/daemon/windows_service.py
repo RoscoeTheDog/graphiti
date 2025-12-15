@@ -33,15 +33,15 @@ class WindowsServiceManager:
 
         Args:
             venv_manager: Optional VenvManager instance. If None, creates default instance.
+
+        Raises:
+            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
         """
         self.nssm_path = self._find_nssm()
         self.venv_manager = venv_manager or VenvManager()
-        try:
-            self.python_exe = self.venv_manager.get_python_executable()
-        except VenvCreationError:
-            # Fallback to sys.executable if venv not available
-            # (will be created by DaemonManager.install() before service installation)
-            self.python_exe = Path(sys.executable)
+        # Get venv Python executable - raise VenvCreationError if venv doesn't exist
+        # (DaemonManager.install() ensures venv exists before instantiating service managers)
+        self.python_exe = self.venv_manager.get_python_executable()
         self.bootstrap_script = self._get_bootstrap_path()
 
     def _find_nssm(self) -> Optional[Path]:
