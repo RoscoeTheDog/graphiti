@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-14 21:02:53
+**Generated**: 2025-12-14 21:07:35
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 58
-- **Completion**: 62.1%
+- **Completion**: 65.5%
 
 ### By Status
 
 - blocked: 2
-- completed: 36
-- in_progress: 2
-- unassigned: 18
+- completed: 38
+- in_progress: 1
+- unassigned: 17
 
 ### By Type
 
@@ -65,7 +65,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Package Installation to Dedicated Venv
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: CLI Wrapper Script Generation

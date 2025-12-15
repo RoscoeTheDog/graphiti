@@ -704,7 +704,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Package Installation to Dedicated Venv",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "2",
       "children": [
         "-2.d",
@@ -762,7 +762,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Package Installation to Dedicated Venv",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.t",
       "phase": "validation_testing",
