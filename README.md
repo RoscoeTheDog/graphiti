@@ -538,26 +538,60 @@ The MCP server supports a **persistent daemon architecture** for improved perfor
 **Prerequisites:**
 
 > [!IMPORTANT]
-> The daemon architecture requires installing the MCP server package to register CLI commands.
-> This is different from upstream Graphiti which runs from the cloned directory.
+> The daemon architecture uses a dedicated isolated virtual environment at `~/.graphiti/.venv/`.
+> This ensures dependency isolation and prevents conflicts with your Python environment.
+
+**Optional (Recommended):**
+- `uv` - For faster virtual environment creation (install via `pip install uv`)
+
+**Installation Steps:**
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/RoscoeTheDog/graphiti.git
 cd graphiti
 
-# 2. Install the MCP server package (registers CLI commands system-wide)
-pip install -e ./mcp_server
-# OR with uv:
-uv pip install -e ./mcp_server
+# 2. Run the automated installer (creates venv, installs package, generates CLI wrappers)
+python mcp_server/daemon/installer.py
 
-# 3. Verify CLI is available
-graphiti-mcp --help
+# The installer will:
+# - Create isolated venv at ~/.graphiti/.venv/ (using uv if available, python -m venv fallback)
+# - Install mcp_server package into the venv
+# - Generate CLI wrapper scripts at ~/.graphiti/bin/
+# - Display PATH configuration instructions
 ```
 
-**Quick Setup:**
+**Configure PATH (Platform-Specific):**
+
+After installation completes, add the bin directory to your PATH:
+
+**Windows (PowerShell):**
+```powershell
+# Add to PATH permanently (requires admin)
+$env:Path += ";$env:USERPROFILE\.graphiti\bin"
+[Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
+
+# Or add to current session only
+$env:Path += ";$env:USERPROFILE\.graphiti\bin"
+```
+
+**macOS/Linux (bash/zsh):**
 ```bash
-# Install daemon service (one-time, requires step 2 above)
+# Add to ~/.bashrc or ~/.zshrc
+echo 'export PATH="$HOME/.graphiti/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# For zsh users
+echo 'export PATH="$HOME/.graphiti/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Verify Installation:**
+```bash
+# Check CLI is available (restart shell if needed)
+graphiti-mcp --help
+
+# Install and enable daemon service
 graphiti-mcp daemon install
 
 # Enable in config

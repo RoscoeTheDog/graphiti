@@ -841,6 +841,7 @@ Session tracking monitors Claude Code conversation files (`~/.claude/projects/{h
 | `store_in_graph` | bool | `true` | Store session summaries in the Graphiti knowledge graph |
 | `filter` | object | See below | Filtering configuration for session content (controls token reduction) |
 | `keep_length_days` | int\|null | 1 | **Days** to retain sessions in rolling window (default: 1 day). If null, discovers all sessions (use with caution - may cause bulk LLM costs). **New in v1.1.0** |
+| `excluded_paths` | list[str] | `[]` | List of paths to exclude from session tracking. Supports absolute paths, paths relative to `watch_path`, and glob patterns (e.g., `**/temporal-*-server/**`). Platform-agnostic path matching. |
 
 ### Filtering Configuration
 
@@ -923,6 +924,40 @@ Control how different message types are filtered during session tracking. Enable
 - Maximum config: ~60% reduction (omit all tool results)
 - Aggressive config: ~70% reduction (summarize everything with LLM)
 - Conservative config: 0% reduction (no filtering)
+
+### Path Exclusion
+
+Exclude specific paths from session tracking using the `excluded_paths` field. This is useful for orchestration systems that need direct control over session storage without auto-tracking interference.
+
+**Example: Temporal Orchestrator Exclusion**
+
+```json
+{
+  "session_tracking": {
+    "enabled": true,
+    "watch_path": "~/.claude/projects",
+    "excluded_paths": [
+      "**/temporal-*-server/**",
+      "/absolute/path/to/orchestrator"
+    ]
+  }
+}
+```
+
+**Path Formats:**
+- **Absolute paths**: `/absolute/path/to/exclude` - Exact path matching
+- **Relative paths**: `relative/path` - Relative to `watch_path`
+- **Glob patterns**: `**/temporal-*/**` - Pattern matching (supports `*` and `**`)
+
+**Platform Compatibility:**
+- Paths are normalized for platform-agnostic matching
+- Windows backslashes (`C:\path\to\file`) and Unix slashes (`/path/to/file`) are handled automatically
+- Patterns are matched against normalized UNIX-style paths internally
+
+**Use Cases:**
+- **Dual-track architecture**: Orchestrators use manual `add_episode()`, agents use auto-tracking
+- **Privacy control**: Exclude sensitive project paths
+- **Performance**: Skip large project directories that don't need auto-indexing
 
 **Note on Template-Based Summarization:**
 - **Template paths** (e.g., `"default-tool-content.md"`) trigger LLM-based summarization

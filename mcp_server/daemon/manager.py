@@ -26,6 +26,9 @@ from typing import Optional
 from .windows_service import WindowsServiceManager
 from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
+from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
+from .wrapper_generator import WrapperGenerator, WrapperGenerationError
+from .path_integration import PathIntegration, PathIntegrationError
 
 
 class UnsupportedPlatformError(Exception):
@@ -39,17 +42,20 @@ class DaemonManager:
     def __init__(self):
         """Initialize manager with platform-specific implementation."""
         self.platform = platform.system()
+        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
         self.service_manager = self._get_service_manager()
         self.config_path = self._get_config_path()
+        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
+        self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
         """Get platform-specific service manager."""
         if self.platform == "Windows":
-            return WindowsServiceManager()
+            return WindowsServiceManager(venv_manager=self.venv_manager)
         elif self.platform == "Darwin":
-            return LaunchdServiceManager()
+            return LaunchdServiceManager(venv_manager=self.venv_manager)
         elif self.platform == "Linux":
-            return SystemdServiceManager()
+            return SystemdServiceManager(venv_manager=self.venv_manager)
         else:
             raise UnsupportedPlatformError(
                 f"Platform '{self.platform}' is not supported. "
@@ -73,15 +79,100 @@ class DaemonManager:
         print(f"Installing Graphiti bootstrap service on {self.platform}...")
         print()
 
-        # Ensure config directory exists
+        # Step 1: Validate Python version
+        try:
+            self.venv_manager.validate_python_version()
+            print("[OK] Python version check passed")
+        except IncompatiblePythonVersionError as e:
+            print(f"[FAILED] {e}")
+            print()
+            print("Please upgrade to Python 3.10 or higher:")
+            print("  https://www.python.org/downloads/")
+            return False
+
+        # Step 2: Create dedicated venv
+        print()
+        print("Creating dedicated virtual environment...")
+        try:
+            success, msg = self.venv_manager.create_venv()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] {msg}")
+                return False
+        except VenvCreationError as e:
+            print(f"[FAILED] Venv creation failed: {e}")
+            print()
+            print("Troubleshooting:")
+            print("  - Ensure you have write permissions to ~/.graphiti/")
+            print("  - Check available disk space")
+            print("  - Try: python -m venv --help (verify venv module available)")
+            return False
+
+        # Step 2.5: Install mcp_server package into venv
+        print()
+        print("Installing mcp_server package...")
+        try:
+            success, msg = self.venv_manager.install_package()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] Package installation failed: {msg}")
+                print()
+                print("Troubleshooting:")
+                print("  - Ensure you're running from the Graphiti repository directory")
+                print("  - Check internet connection (needed for package dependencies)")
+                print("  - Verify mcp_server/pyproject.toml exists in repository")
+                return False
+        except VenvCreationError as e:
+            print(f"[FAILED] Package installation failed: {e}")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during package installation: {e}")
+            return False
+
+        # Step 2.6: Generate CLI wrapper scripts
+        print()
+        print("Generating CLI wrapper scripts...")
+        try:
+            success, msg = self.wrapper_generator.generate_wrappers()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] {msg}")
+                print()
+                print("Troubleshooting:")
+                print("  - Ensure write permissions to ~/.graphiti/bin/")
+                print("  - Check available disk space")
+                return False
+        except WrapperGenerationError as e:
+            print(f"[FAILED] Wrapper generation failed: {e}")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during wrapper generation: {e}")
+            return False
+
+        # Step 2.7: Display PATH configuration instructions
+        try:
+            self.path_integration.display_instructions()
+        except PathIntegrationError as e:
+            print(f"[WARNING] PATH integration error: {e}")
+            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+        except Exception as e:
+            print(f"[WARNING] Unexpected error during PATH integration: {e}")
+            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+
+        # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Initialize config if needed
+        # Step 4: Initialize config if needed
         if not self.config_path.exists():
+            print()
             print(f"Creating default config: {self.config_path}")
             self._create_default_config()
 
-        # Install service
+        # Step 5: Install service
+        print()
         success = self.service_manager.install()
 
         if success:
@@ -110,6 +201,18 @@ class DaemonManager:
         success = self.service_manager.uninstall()
 
         if success:
+            # Clean up wrapper scripts
+            print()
+            print("Cleaning up wrapper scripts...")
+            try:
+                cleanup_success, cleanup_msg = self.wrapper_generator.cleanup_wrappers()
+                if cleanup_success:
+                    print(f"[OK] {cleanup_msg}")
+                else:
+                    print(f"[WARNING] {cleanup_msg}")
+            except Exception as e:
+                print(f"[WARNING] Wrapper cleanup failed: {e}")
+
             print()
             print("[SUCCESS] Bootstrap service uninstalled successfully")
             print()
@@ -122,66 +225,138 @@ class DaemonManager:
             print("  See error messages above for details")
             return False
 
-    def status(self) -> None:
-        """Show daemon status (installed, enabled, running)."""
-        print("Graphiti Daemon Status")
-        print("=" * 60)
-        print()
+    def status(self) -> dict:
+        """
+        Get daemon status (installed, enabled, running).
+
+        Returns:
+            Dict with status information:
+            {
+                'venv': {'exists': bool, 'path': str},
+                'wrappers': {'all_exist': bool, 'bin_path': str, 'message': str},
+                'service': {'installed': bool, 'running': bool, 'platform': str, 'manager': str},
+                'config': {'enabled': bool, 'host': str, 'port': int, 'path': str}
+            }
+        """
+        # Check venv status
+        venv_exists = self.venv_manager.detect_venv()
+
+        # Check wrapper scripts status
+        wrappers_exist, wrapper_msg = self.wrapper_generator.validate_wrappers()
 
         # Check if service is installed
         is_installed = self.service_manager.is_installed()
-        print(f"Platform:        {self.platform}")
-        print(f"Service Manager: {self.service_manager.name}")
-        print(f"Installed:       {'[YES]' if is_installed else '[NO]'}")
-        print()
-
-        if not is_installed:
-            print("Service not installed. Run: graphiti-mcp daemon install")
-            return
 
         # Check if service is running
-        is_running = self.service_manager.is_running()
-        print(f"Bootstrap:       {'[RUNNING]' if is_running else '[STOPPED]'}")
-        print()
+        is_running = self.service_manager.is_running() if is_installed else False
 
-        if not is_running:
-            print("Bootstrap service not running.")
-            print("  Check logs: graphiti-mcp daemon logs")
-            print(f"  Or start via: {self.service_manager.start_hint}")
-            return
+        # Build status dict
+        status_dict = {
+            'venv': {
+                'exists': venv_exists,
+                'path': str(self.venv_manager.venv_path)
+            },
+            'wrappers': {
+                'all_exist': wrappers_exist,
+                'bin_path': str(self.wrapper_generator.bin_path),
+                'message': wrapper_msg
+            },
+            'service': {
+                'installed': is_installed,
+                'running': is_running,
+                'platform': self.platform,
+                'manager': self.service_manager.name
+            }
+        }
 
         # Check config state
         if self.config_path.exists():
             try:
                 config = json.loads(self.config_path.read_text())
                 daemon_config = config.get("daemon", {})
-                enabled = daemon_config.get("enabled", False)
-                host = daemon_config.get("host", "127.0.0.1")
-                port = daemon_config.get("port", 8321)
-
-                print(f"Config:          {self.config_path}")
-                print(f"Daemon Enabled:  {'[YES]' if enabled else '[NO]'}")
-                print(f"MCP Server:      http://{host}:{port}")
-                print()
-
-                if not enabled:
-                    print("MCP server is disabled in config.")
-                    print(f"  To enable, edit: {self.config_path}")
-                    print('  Set: "daemon": { "enabled": true }')
-                else:
-                    # Try to check if MCP server is responding
-                    print("MCP server should be running on:")
-                    print(f"  http://{host}:{port}/health")
-                    print()
-                    print("Test with: curl http://127.0.0.1:8321/health")
-
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'enabled': daemon_config.get("enabled", False),
+                    'host': daemon_config.get("host", "127.0.0.1"),
+                    'port': daemon_config.get("port", 8321)
+                }
             except json.JSONDecodeError:
-                print(f"Config:          {self.config_path} (INVALID JSON)")
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'error': 'Invalid JSON'
+                }
             except Exception as e:
-                print(f"Config Error:    {e}")
+                status_dict['config'] = {
+                    'path': str(self.config_path),
+                    'error': str(e)
+                }
         else:
-            print(f"Config:          NOT FOUND ({self.config_path})")
+            status_dict['config'] = {
+                'path': str(self.config_path),
+                'exists': False
+            }
+
+        return status_dict
+
+    def print_status(self) -> None:
+        """Print daemon status to stdout (CLI-friendly version)."""
+        status = self.status()
+
+        print("Graphiti Daemon Status")
+        print("=" * 60)
+        print()
+
+        # Print venv status
+        print(f"Venv Path:       {status['venv']['path']}")
+        print(f"Venv Status:     {'[EXISTS]' if status['venv']['exists'] else '[MISSING]'}")
+        print()
+
+        # Print wrapper scripts status
+        print(f"Wrappers Path:   {status['wrappers']['bin_path']}")
+        print(f"Wrappers Status: {'[OK]' if status['wrappers']['all_exist'] else '[MISSING]'}")
+        if not status['wrappers']['all_exist']:
+            print(f"  {status['wrappers']['message']}")
+        print()
+
+        # Print service status
+        print(f"Platform:        {status['service']['platform']}")
+        print(f"Service Manager: {status['service']['manager']}")
+        print(f"Installed:       {'[YES]' if status['service']['installed'] else '[NO]'}")
+        print()
+
+        if not status['service']['installed']:
+            print("Service not installed. Run: graphiti-mcp daemon install")
+            return
+
+        print(f"Bootstrap:       {'[RUNNING]' if status['service']['running'] else '[STOPPED]'}")
+        print()
+
+        if not status['service']['running']:
+            print("Bootstrap service not running.")
+            print("  Check logs: graphiti-mcp daemon logs")
+            return
+
+        # Print config status
+        if 'error' in status['config']:
+            print(f"Config:          {status['config']['path']} ({status['config']['error']})")
+        elif not status['config'].get('exists', True):
+            print(f"Config:          NOT FOUND ({status['config']['path']})")
             print("  Run: graphiti-mcp daemon install (to create default config)")
+        else:
+            print(f"Config:          {status['config']['path']}")
+            print(f"Daemon Enabled:  {'[YES]' if status['config']['enabled'] else '[NO]'}")
+            print(f"MCP Server:      http://{status['config']['host']}:{status['config']['port']}")
+            print()
+
+            if not status['config']['enabled']:
+                print("MCP server is disabled in config.")
+                print(f"  To enable, edit: {status['config']['path']}")
+                print('  Set: "daemon": { "enabled": true }')
+            else:
+                print("MCP server should be running on:")
+                print(f"  http://{status['config']['host']}:{status['config']['port']}/health")
+                print()
+                print("Test with: curl http://127.0.0.1:8321/health")
 
     def logs(self, follow: bool = False, lines: int = 50) -> None:
         """Tail daemon logs."""

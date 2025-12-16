@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from .venv_manager import VenvManager, VenvCreationError
+
 
 class SystemdServiceManager:
     """Manages Graphiti bootstrap service on Linux via systemd."""
@@ -20,9 +22,19 @@ class SystemdServiceManager:
     name = "systemd (Linux Service Manager)"
     service_name = "graphiti-bootstrap"
 
-    def __init__(self):
-        """Initialize systemd service manager."""
-        self.python_exe = sys.executable
+    def __init__(self, venv_manager: Optional[VenvManager] = None):
+        """Initialize systemd service manager.
+
+        Args:
+            venv_manager: Optional VenvManager instance. If None, creates default instance.
+
+        Raises:
+            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+        """
+        self.venv_manager = venv_manager or VenvManager()
+        # Get venv Python executable - raise VenvCreationError if venv doesn't exist
+        # (DaemonManager.install() ensures venv exists before instantiating service managers)
+        self.python_exe = self.venv_manager.get_python_executable()
         self.bootstrap_script = self._get_bootstrap_path()
 
         # User service directory

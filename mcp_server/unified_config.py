@@ -796,6 +796,14 @@ class SessionTrackingConfig(BaseModel):
             "Set to False to redact paths for privacy (only namespace hash is stored)."
         )
     )
+    excluded_paths: list[str] = Field(
+        default_factory=list,
+        description=(
+            "List of paths to exclude from session tracking. "
+            "Supports absolute paths, paths relative to watch_path, and glob patterns. "
+            "Examples: '**/temporal-*-server/**', '/absolute/path/to/exclude', 'relative/path'"
+        )
+    )
 
     @field_validator('keep_length_days')
     def validate_keep_length_days(cls, v):

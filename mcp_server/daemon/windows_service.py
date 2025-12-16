@@ -18,6 +18,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from .venv_manager import VenvManager, VenvCreationError
+
 
 class WindowsServiceManager:
     """Manages Graphiti bootstrap service on Windows via NSSM."""
@@ -26,10 +28,20 @@ class WindowsServiceManager:
     service_name = "GraphitiBootstrap"
     display_name = "Graphiti MCP Bootstrap Service"
 
-    def __init__(self):
-        """Initialize Windows service manager."""
+    def __init__(self, venv_manager: Optional[VenvManager] = None):
+        """Initialize Windows service manager.
+
+        Args:
+            venv_manager: Optional VenvManager instance. If None, creates default instance.
+
+        Raises:
+            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+        """
         self.nssm_path = self._find_nssm()
-        self.python_exe = sys.executable
+        self.venv_manager = venv_manager or VenvManager()
+        # Get venv Python executable - raise VenvCreationError if venv doesn't exist
+        # (DaemonManager.install() ensures venv exists before instantiating service managers)
+        self.python_exe = self.venv_manager.get_python_executable()
         self.bootstrap_script = self._get_bootstrap_path()
 
     def _find_nssm(self) -> Optional[Path]:
