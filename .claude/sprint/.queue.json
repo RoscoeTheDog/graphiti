@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Session Tracking Excluded Paths",
-      "status": "blocked",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -72,7 +72,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Session Tracking Excluded Paths",
-      "status": "blocked",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
