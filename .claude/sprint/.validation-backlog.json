@@ -1,21 +1,8 @@
 {
   "created": "2025-12-15T04:36:06Z",
-  "last_updated": "2025-12-16T06:52:12Z",
+  "last_updated": "2025-12-16T07:05:00Z",
   "version": "1.0",
   "stories": {
-    "1.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
     "2.d": {
       "issues": [
         {
@@ -252,8 +239,8 @@
     }
   },
   "summary": {
-    "total_stories_with_issues": 19,
+    "total_stories_with_issues": 18,
     "auto_fixable_count": 0,
-    "needs_llm_count": 19
+    "needs_llm_count": 18
   }
 }
