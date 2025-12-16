@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "sessions": [
+    {
+      "session_id": "20251216-064337",
+      "command": "/sprint:NEXT",
+      "story_id": "1.d",
+      "timestamp": "2025-12-16T06:43:37Z",
+      "attempts": [
+        {
+          "method": "agent_inference",
+          "confidence": 0.8,
+          "result": "success",
+          "selected_path": "stories/1-session-tracking-excluded-paths.md"
+        }
+      ],
+      "outcome": "fixed",
+      "fixes_applied": {
+        "1.d": {
+          "file": "stories/1-session-tracking-excluded-paths.md"
+        }
+      }
+    }
+  ]
+}

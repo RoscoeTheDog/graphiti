@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-15 22:01:15
+**Generated**: 2025-12-15 22:49:10
 
 ---
 
@@ -15,11 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 4
-- **Completion**: 0.0%
+- **Completion**: 25.0%
 
 ### By Status
 
-- unassigned: 4
+- completed: 1
+- in_progress: 1
+- unassigned: 2
 
 ### By Type
 
@@ -32,8 +34,8 @@
 
 ## Stories (Execution Order)
 
-  ### Story 1.d: Discovery: Session Tracking Excluded Paths
-  **Status**: unassigned | **Type**: discovery
+  ### Story 1.d: 1 Session Tracking Excluded Paths
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 1
   - Blocks: Story 1.i
 

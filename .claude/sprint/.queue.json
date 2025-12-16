@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Session Tracking Excluded Paths",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "1.d",
@@ -34,7 +34,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Session Tracking Excluded Paths",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "discovery",
       "phase_order": 1,
@@ -42,8 +42,11 @@
       "blocks": [
         "1.i"
       ],
-      "file": null,
-      "artifact": "plans/1-plan.yaml"
+      "file": "stories/1-session-tracking-excluded-paths.md",
+      "artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "file": "stories/1-session-tracking-excluded-paths.md"
+      }
     },
     "1.i": {
       "type": "implementation",
@@ -58,7 +61,10 @@
         "1.t"
       ],
       "file": null,
-      "requires_artifact": "plans/1-plan.yaml"
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
     },
     "1.t": {
       "type": "testing",
