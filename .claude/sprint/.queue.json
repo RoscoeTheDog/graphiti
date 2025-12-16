@@ -52,7 +52,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Session Tracking Excluded Paths",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
@@ -63,7 +63,8 @@
       "file": null,
       "requires_artifact": "plans/1-plan.yaml",
       "metadata": {
-        "requires_artifact": "plans/1-plan.yaml"
+        "requires_artifact": "plans/1-plan.yaml",
+        "file": "stories/1-session-tracking-excluded-paths.md"
       }
     },
     "1.t": {
@@ -81,7 +82,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1-plan.yaml"
+      }
     }
   },
   "execution_queue": [

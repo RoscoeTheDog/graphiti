@@ -56,15 +56,21 @@ class SessionManager:
         self,
         path_resolver: ClaudePathResolver,
         on_session_closed: Optional[Callable[[str, Path, ConversationContext], None]] = None,
+        excluded_paths: Optional[list[str]] = None,
+        watch_path: Optional[Path] = None,
     ):
         """Initialize session manager.
 
         Args:
             path_resolver: Path resolver for Claude directories
             on_session_closed: Callback when session closes (session_id, file_path, context)
+            excluded_paths: List of paths to exclude from tracking (supports glob patterns)
+            watch_path: Watch path for relative path resolution
         """
         self.path_resolver = path_resolver
         self.on_session_closed = on_session_closed
+        self.excluded_paths = excluded_paths or []
+        self.watch_path = watch_path
 
         # Active session registry
         self.active_sessions: Dict[str, ActiveSession] = {}
@@ -85,6 +91,10 @@ class SessionManager:
             return
 
         logger.info("Starting session manager...")
+
+        # Log excluded paths configuration
+        if self.excluded_paths:
+            logger.info(f"Session tracking excluded paths: {self.excluded_paths}")
 
         self._is_running = True
         logger.info("Session manager started successfully")
@@ -126,6 +136,64 @@ class SessionManager:
         """
         return session_id in self.active_sessions
 
+    def _is_path_excluded(self, session_path: Path) -> bool:
+        """Check if session path matches any exclusion pattern.
+
+        Uses platform-agnostic path matching with support for:
+        - Absolute paths (exact match)
+        - Relative paths (relative to watch_path)
+        - Glob patterns (e.g., **/temporal-*/**)
+
+        Args:
+            session_path: Path to session file to check
+
+        Returns:
+            True if path matches any exclusion pattern
+        """
+        if not self.excluded_paths:
+            return False
+
+        # Normalize session path for comparison (convert to Path if string)
+        session_path = Path(session_path)
+
+        # Normalize paths to UNIX format for consistent comparison
+        normalized_session = self.path_resolver._normalize_path_for_hash(str(session_path))
+
+        for pattern in self.excluded_paths:
+            # Check if pattern is absolute
+            pattern_path = Path(pattern)
+            is_absolute = pattern_path.is_absolute()
+
+            if is_absolute:
+                # Absolute path: normalize and match directly
+                normalized_pattern = self.path_resolver._normalize_path_for_hash(pattern)
+                # Check if session path starts with or matches pattern
+                if normalized_session.startswith(normalized_pattern):
+                    return True
+            else:
+                # Relative path or glob: resolve relative to watch_path
+                if self.watch_path:
+                    # Calculate session path relative to watch_path
+                    try:
+                        watch_normalized = self.path_resolver._normalize_path_for_hash(str(self.watch_path))
+                        if normalized_session.startswith(watch_normalized):
+                            # Get relative part
+                            relative_session = normalized_session[len(watch_normalized):].lstrip('/')
+                            # Use PurePath for glob matching (platform-agnostic)
+                            from pathlib import PurePosixPath
+                            if PurePosixPath(relative_session).match(pattern):
+                                return True
+                    except (ValueError, OSError):
+                        # If relative path calculation fails, skip this pattern
+                        pass
+
+                # Also try glob matching against full normalized path
+                from pathlib import PurePosixPath
+                if PurePosixPath(normalized_session).match(pattern):
+                    return True
+
+        return False
+
     def _start_tracking_session(self, file_path: Path, project_hash: str) -> None:
         """Start tracking a new session.
 
@@ -133,6 +201,11 @@ class SessionManager:
             file_path: Path to session file
             project_hash: Project hash
         """
+        # Check if path is excluded before processing
+        if self._is_path_excluded(file_path):
+            logger.debug(f"Skipping excluded path: {file_path}")
+            return
+
         session_id = self.path_resolver.extract_session_id_from_path(file_path)
         if not session_id:
             return

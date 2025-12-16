@@ -94,6 +94,104 @@
       "title": "CircuitBreakerConfig",
       "type": "object"
     },
+    "DaemonConfig": {
+      "description": "Daemon service configuration (Two-Layer Architecture).\n\nThe daemon architecture consists of:\n1. Bootstrap service (always running) - watches config, manages MCP server lifecycle\n2. MCP server (conditional) - only runs when daemon.enabled is true\n\nSee: .claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Master switch for daemon mode. false (default) = MCP server stopped, true = MCP server running. Bootstrap service watches this flag and starts/stops the MCP server accordingly.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "host": {
+          "default": "127.0.0.1",
+          "description": "Bind address for HTTP API. Use 127.0.0.1 (localhost-only, secure). WARNING: Binding to 0.0.0.0 exposes server to network.",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 8321,
+          "description": "HTTP port for MCP API. 8321 is default (mnemonic: 8=graphiti, 321=countdown/launch). Change if port conflict occurs.",
+          "maximum": 65535,
+          "minimum": 1024,
+          "title": "Port",
+          "type": "integer"
+        },
+        "config_poll_seconds": {
+          "default": 5,
+          "description": "How often bootstrap service checks config file for changes (seconds). Changes take effect within this interval (default: 5s).",
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Config Poll Seconds",
+          "type": "integer"
+        },
+        "pid_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to PID file for daemon process. null = ~/.graphiti/graphiti-mcp.pid",
+          "title": "Pid File"
+        },
+        "log_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to daemon log file. null = ~/.graphiti/logs/graphiti-mcp.log",
+          "title": "Log File"
+        },
+        "log_level": {
+          "default": "INFO",
+          "description": "Log level for daemon (DEBUG | INFO | WARNING | ERROR | CRITICAL)",
+          "title": "Log Level",
+          "type": "string"
+        },
+        "log_rotation": {
+          "$ref": "#/$defs/DaemonLogRotationConfig",
+          "description": "Log rotation settings"
+        },
+        "health_check_interval": {
+          "default": 30,
+          "description": "Seconds between MCP server health checks by bootstrap service. If server crashes, bootstrap will restart it within this interval.",
+          "maximum": 300,
+          "minimum": 5,
+          "title": "Health Check Interval",
+          "type": "integer"
+        }
+      },
+      "title": "DaemonConfig",
+      "type": "object"
+    },
+    "DaemonLogRotationConfig": {
+      "description": "Log rotation configuration for daemon.",
+      "properties": {
+        "max_bytes": {
+          "default": 10485760,
+          "description": "Maximum log file size before rotation",
+          "title": "Max Bytes",
+          "type": "integer"
+        },
+        "backup_count": {
+          "default": 5,
+          "description": "Number of rotated log files to keep",
+          "title": "Backup Count",
+          "type": "integer"
+        }
+      },
+      "title": "DaemonLogRotationConfig",
+      "type": "object"
+    },
     "DatabaseConfig": {
       "description": "Database backend configuration",
       "properties": {
@@ -946,7 +1044,7 @@
               "type": "null"
             }
           ],
-          "default": 7,
+          "default": 1,
           "description": "Rolling window filter for session discovery in days. Only sessions modified within the last N days will be indexed. Set to null to index all sessions (not recommended, may cause bulk LLM costs).",
           "title": "Keep Length Days"
         },
@@ -1002,6 +1100,14 @@
           "description": "Include human-readable project path in episode metadata. When True, the full project directory path is embedded in indexed sessions. Set to False to redact paths for privacy (only namespace hash is stored).",
           "title": "Include Project Path",
           "type": "boolean"
+        },
+        "excluded_paths": {
+          "description": "List of paths to exclude from session tracking. Supports absolute paths, paths relative to watch_path, and glob patterns. Examples: '**/temporal-*-server/**', '/absolute/path/to/exclude', 'relative/path'",
+          "items": {
+            "type": "string"
+          },
+          "title": "Excluded Paths",
+          "type": "array"
         }
       },
       "title": "SessionTrackingConfig",
@@ -1127,6 +1233,9 @@
     },
     "mcp_server": {
       "$ref": "#/$defs/MCPServerConfig"
+    },
+    "daemon": {
+      "$ref": "#/$defs/DaemonConfig"
     },
     "resilience": {
       "$ref": "#/$defs/ResilienceConfig"
