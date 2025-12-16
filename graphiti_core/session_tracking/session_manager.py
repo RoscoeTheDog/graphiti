@@ -8,6 +8,7 @@ Platform Handling:
 - Session IDs are platform-agnostic (UUID strings)
 """
 
+import fnmatch
 import logging
 import time
 from dataclasses import dataclass, field
@@ -136,13 +137,56 @@ class SessionManager:
         """
         return session_id in self.active_sessions
 
+    def _glob_match_recursive(self, path_parts: list[str], pattern_parts: list[str]) -> bool:
+        """Match path parts against glob pattern parts with ** support.
+
+        This helper implements proper recursive glob matching for ** patterns,
+        which match zero or more directories.
+
+        Args:
+            path_parts: Path split into directory components (e.g., ['projects', 'temporal-server', 'logs'])
+            pattern_parts: Pattern split into components (e.g., ['**', 'temporal-*', '**'])
+
+        Returns:
+            True if path matches pattern with proper ** semantics, False otherwise
+
+        Examples:
+            ['temporal-server', 'logs'] matches ['**', 'temporal-*', '**']
+            ['projects', 'temporal-server', 'logs'] matches ['**', 'temporal-*', '**']
+            ['temporal-server'] does NOT match ['**', 'temporal-*', '**'] (needs directory after)
+        """
+        # Base cases
+        if not pattern_parts:
+            return not path_parts  # Both empty = match
+        if not path_parts:
+            # Path empty but pattern remains - only matches if pattern is all **
+            return all(p == '**' for p in pattern_parts)
+
+        pattern_head = pattern_parts[0]
+        pattern_tail = pattern_parts[1:]
+
+        if pattern_head == '**':
+            # ** matches zero or more directories
+            # Try matching with zero directories (skip ** and continue)
+            if self._glob_match_recursive(path_parts, pattern_tail):
+                return True
+            # Try matching with one or more directories (consume one path part and keep **)
+            if path_parts:
+                return self._glob_match_recursive(path_parts[1:], pattern_parts)
+            return False
+        else:
+            # Non-** pattern: must match current path part
+            if path_parts and fnmatch.fnmatch(path_parts[0], pattern_head):
+                return self._glob_match_recursive(path_parts[1:], pattern_tail)
+            return False
+
     def _is_path_excluded(self, session_path: Path) -> bool:
         """Check if session path matches any exclusion pattern.
 
         Uses platform-agnostic path matching with support for:
-        - Absolute paths (exact match)
+        - Absolute paths (exact match with directory boundary checking)
         - Relative paths (relative to watch_path)
-        - Glob patterns (e.g., **/temporal-*/**)
+        - Glob patterns with ** support (e.g., **/temporal-*/**)
 
         Args:
             session_path: Path to session file to check
@@ -160,37 +204,51 @@ class SessionManager:
         normalized_session = self.path_resolver._normalize_path_for_hash(str(session_path))
 
         for pattern in self.excluded_paths:
-            # Check if pattern is absolute
-            pattern_path = Path(pattern)
-            is_absolute = pattern_path.is_absolute()
+            # Check if pattern is absolute by looking at original pattern string
+            # (before normalization which might add drive letters on Windows)
+            is_absolute = pattern.startswith('/') or (len(pattern) > 1 and pattern[1] == ':')
 
             if is_absolute:
-                # Absolute path: normalize and match directly
+                # Normalize pattern for consistent comparison
                 normalized_pattern = self.path_resolver._normalize_path_for_hash(pattern)
-                # Check if session path starts with or matches pattern
-                if normalized_session.startswith(normalized_pattern):
+                # Absolute path: match with directory boundary checking
+                # This prevents /projects/temporal-server from matching /projects/temporal-server-2
+                pattern_with_boundary = normalized_pattern.rstrip('/') + '/'
+                session_with_boundary = normalized_session.rstrip('/') + '/'
+
+                # Check exact match or prefix match with directory boundary
+                if normalized_session == normalized_pattern or session_with_boundary.startswith(pattern_with_boundary):
                     return True
             else:
                 # Relative path or glob: resolve relative to watch_path
                 if self.watch_path:
-                    # Calculate session path relative to watch_path
                     try:
                         watch_normalized = self.path_resolver._normalize_path_for_hash(str(self.watch_path))
                         if normalized_session.startswith(watch_normalized):
                             # Get relative part
                             relative_session = normalized_session[len(watch_normalized):].lstrip('/')
-                            # Use PurePath for glob matching (platform-agnostic)
-                            from pathlib import PurePosixPath
-                            if PurePosixPath(relative_session).match(pattern):
-                                return True
+
+                            # Check if pattern contains ** (recursive wildcard)
+                            if '**' in pattern:
+                                # Use custom recursive matching for ** patterns
+                                path_parts = relative_session.split('/')
+                                pattern_parts = pattern.split('/')
+                                if self._glob_match_recursive(path_parts, pattern_parts):
+                                    return True
+                            elif '*' in pattern or '?' in pattern:
+                                # Glob pattern with wildcards - use fnmatch
+                                if fnmatch.fnmatch(relative_session, pattern):
+                                    return True
+                            else:
+                                # Simple directory name - check if it's a prefix
+                                # "temporal-server" should match "temporal-server/session.jsonl"
+                                pattern_with_boundary = pattern.rstrip('/') + '/'
+                                relative_with_boundary = relative_session.rstrip('/') + '/'
+                                if relative_session == pattern or relative_with_boundary.startswith(pattern_with_boundary):
+                                    return True
                     except (ValueError, OSError):
                         # If relative path calculation fails, skip this pattern
                         pass
-
-                # Also try glob matching against full normalized path
-                from pathlib import PurePosixPath
-                if PurePosixPath(normalized_session).match(pattern):
-                    return True
 
         return False
 
