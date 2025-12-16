@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-15 23:03:17
+**Generated**: 2025-12-15 23:30:36
 
 ---
 
@@ -14,21 +14,23 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 4
-- **Completion**: 50.0%
+- **Total Stories**: 8
+- **Completion**: 37.5%
 
 ### By Status
 
-- completed: 2
+- blocked: 2
+- completed: 3
 - in_progress: 1
-- unassigned: 1
+- unassigned: 2
 
 ### By Type
 
-- discovery: 1
+- discovery: 2
 - feature: 1
-- implementation: 1
-- testing: 1
+- implementation: 2
+- remediation: 1
+- testing: 2
 
 ---
 
@@ -44,9 +46,23 @@
   - Dependencies: Story 1, Story 1.d
   - Blocks: Story 1.t
 
-  ### Story 1.t: Testing: Session Tracking Excluded Paths
-  **Status**: unassigned | **Type**: testing
+  ### Story 1.t: 1 Session Tracking Excluded Paths
+  **Status**: blocked | **Type**: testing
   - Dependencies: Story 1, Story 1.i
+
+    ### Story 1.r1.d: 1.R1 Fix Path Exclusion Logic Implementation
+    **Status**: completed | **Type**: discovery
+    - Dependencies: Story 1.r1
+    - Blocks: Story 1.r1.i
+
+    ### Story 1.r1.i: Implementation: Fix Path Exclusion Logic Implementation
+    **Status**: unassigned | **Type**: implementation
+    - Dependencies: Story 1.r1, Story 1.r1.d
+    - Blocks: Story 1.r1.t
+
+    ### Story 1.r1.t: Testing: Fix Path Exclusion Logic Implementation
+    **Status**: unassigned | **Type**: testing
+    - Dependencies: Story 1.r1, Story 1.r1.i
 
 ---
 

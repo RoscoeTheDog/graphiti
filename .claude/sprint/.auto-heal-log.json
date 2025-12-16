@@ -20,6 +20,25 @@
           "file": "stories/1-session-tracking-excluded-paths.md"
         }
       }
+    },
+    {
+      "session_id": "20251216-072616",
+      "command": "/sprint:NEXT",
+      "story_id": "1.r1.d",
+      "timestamp": "2025-12-16T07:26:16Z",
+      "attempts": [
+        {
+          "method": "agent_inference",
+          "confidence": 1.0,
+          "result": "success"
+        }
+      ],
+      "outcome": "fixed",
+      "fixes_applied": {
+        "1.r1.d": {
+          "file": "stories/1.r1-fix-path-exclusion-logic-implementation.md"
+        }
+      }
     }
   ]
 }

@@ -20,7 +20,8 @@
       "children": [
         "1.d",
         "1.i",
-        "1.t"
+        "1.t",
+        "1.r1"
       ],
       "phase_status": {
         "discovery": "pending",
@@ -87,11 +88,85 @@
         "test_requirements_from": "plans/1-plan.yaml",
         "file": "stories/1-session-tracking-excluded-paths.md"
       }
+    },
+    "1.r1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Path Exclusion Logic Implementation",
+      "status": "in_progress",
+      "parent": "1",
+      "children": [
+        "1.r1.d",
+        "1.r1.i",
+        "1.r1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/1.r1-fix-path-exclusion-logic-imple.md",
+      "priority": "P0",
+      "blocking": false
+    },
+    "1.r1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix Path Exclusion Logic Implementation",
+      "status": "completed",
+      "parent": "1.r1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "1.r1.i"
+      ],
+      "file": "stories/1.r1-fix-path-exclusion-logic-implementation.md",
+      "artifact": "plans/1.r1-plan.yaml"
+    },
+    "1.r1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix Path Exclusion Logic Implementation",
+      "status": "unassigned",
+      "parent": "1.r1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "1.r1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/1.r1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1.r1-plan.yaml"
+      }
+    },
+    "1.r1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix Path Exclusion Logic Implementation",
+      "status": "unassigned",
+      "parent": "1.r1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
     "1.d",
     "1.i",
-    "1.t"
+    "1.t",
+    "1.r1.d",
+    "1.r1.i",
+    "1.r1.t"
   ]
 }
