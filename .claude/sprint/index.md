@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-15 23:39:50
+**Generated**: 2025-12-15 23:45:08
 
 ---
 
@@ -15,14 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 8
-- **Completion**: 50.0%
+- **Completion**: 75.0%
 
 ### By Status
 
 - blocked: 2
-- completed: 4
-- in_progress: 1
-- unassigned: 1
+- completed: 6
 
 ### By Type
 
@@ -60,8 +58,8 @@
     - Dependencies: Story 1.r1, Story 1.r1.d
     - Blocks: Story 1.r1.t
 
-    ### Story 1.r1.t: Testing: Fix Path Exclusion Logic Implementation
-    **Status**: unassigned | **Type**: testing
+    ### Story 1.r1.t: 1.R1 Fix Path Exclusion Logic Implementation
+    **Status**: completed | **Type**: testing
     - Dependencies: Story 1.r1, Story 1.r1.i
 
 ---

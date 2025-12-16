@@ -1,0 +1,97 @@
+{
+  "story_id": "1.r1",
+  "phase": "testing",
+  "executed_by": "testing:1.r1.t",
+  "timestamp": "2025-12-15T07:30:00Z",
+
+  "summary": {
+    "total_tests": 16,
+    "passed": 15,
+    "failed": 0,
+    "skipped": 1,
+    "pass_rate": 100,
+    "duration_ms": 260
+  },
+
+  "categories": {
+    "unit": {
+      "total": 13,
+      "passed": 12,
+      "failed": 0,
+      "coverage": null
+    },
+    "integration": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "coverage": null
+    },
+    "security": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-1.r1.1": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestPathExclusionLogic::test_absolute_path_exclusion_exact_match"],
+      "reason": null
+    },
+    "AC-1.r1.2": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestPathExclusionLogic::test_relative_path_exclusion"],
+      "reason": null
+    },
+    "AC-1.r1.3": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestPathExclusionLogic::test_glob_pattern_simple_wildcard"],
+      "reason": null
+    },
+    "AC-1.r1.4": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestPathExclusionLogic::test_platform_specific_path_normalization_windows"],
+      "reason": null
+    },
+    "AC-1.r1.5": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestPathExclusionLogic::test_multiple_exclusion_patterns"],
+      "reason": null
+    },
+    "AC-1.r1.6": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestSessionManagerIntegration::test_start_tracking_session_skips_excluded"],
+      "reason": null
+    },
+    "AC-1.r1.7": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py::TestSessionManagerIntegration::test_excluded_session_logs_debug_message"],
+      "reason": null
+    },
+    "AC-1.r1.8": {
+      "covered": true,
+      "tests": ["tests/session_tracking/test_excluded_paths.py (15/15 passed)"],
+      "reason": null
+    },
+    "AC-1.r1.9": {
+      "covered": true,
+      "tests": ["No regression - existing tests still pass"],
+      "reason": null
+    }
+  },
+
+  "recommendations": [],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false
+}
