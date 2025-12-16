@@ -1,0 +1,69 @@
+{
+  "version": "1.4",
+  "started_at": "2025-12-15T10:30:00Z",
+  "status": "completed",
+  "current_phase": "execution",
+  "current_section": 2,
+  "completed_sections": [
+    "feature-1-discovery",
+    "feature-1-implementation"
+  ],
+  "completed_stories": [
+    "1.d",
+    "1.i",
+    "1.t",
+    "1.r1.d",
+    "1.r1.i",
+    "1.r1.t",
+    "-1.d",
+    "-1.i",
+    "-1.t"
+  ],
+  "failed_stories": [],
+  "args": {
+    "validation_only": false,
+    "skip_validation": false,
+    "parallel_limit": 3,
+    "story_filter": null,
+    "from_story": null,
+    "validate_story_filter": null,
+    "from_validation": null
+  },
+  "execution_plan": {
+    "sections": [
+      {
+        "id": "feature-1-discovery",
+        "type": "sequential",
+        "stories": [
+          "1.d"
+        ],
+        "reason": "Discovery phase for Feature 1"
+      },
+      {
+        "id": "feature-1-implementation",
+        "type": "sequential",
+        "stories": [
+          "1.i"
+        ],
+        "reason": "Blocked by 1.d"
+      },
+      {
+        "id": "feature-1-testing",
+        "type": "sequential",
+        "stories": [
+          "1.t"
+        ],
+        "reason": "Blocked by 1.i"
+      }
+    ],
+    "total_stories": 3,
+    "parallel_groups": 0
+  },
+  "completed_at": "2025-12-16T08:17:21Z",
+  "summary": {
+    "stories_completed": 9,
+    "stories_failed": 0,
+    "validations_passed": 3,
+    "remediations_executed": 3
+  }
+}

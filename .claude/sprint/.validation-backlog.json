@@ -1,22 +1,40 @@
 {
-  "created": "2025-12-15T04:36:06Z",
-  "last_updated": "2025-12-16T07:25:58Z",
+  "created": "2025-12-15T12:00:00Z",
+  "last_updated": "2025-12-15T12:00:00Z",
   "version": "1.0",
   "stories": {
-    "2.d": {
+    "1": {
       "issues": [
         {
-          "type": "missing_file_field",
+          "type": "missing_file_reference",
           "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
+          "auto_fixable": true,
+          "file_referenced": "stories/1-session-tracking-excluded-path.md",
+          "candidates": [
+            {
+              "path": "stories/1-dedicated-venv-creation.md",
+              "exists": true,
+              "file_size": 784,
+              "modified": 1765759892.1563659,
+              "confidence": 1.0,
+              "reason": "Confidence 1.00: file exists, large file (784B), short canonical name, recently modified (1d ago)"
+            },
+            {
+              "path": "stories/1-session-tracking-excluded-paths.md",
+              "exists": true,
+              "file_size": 4664,
+              "modified": 1765864910.4930723,
+              "confidence": 0.9,
+              "reason": "Confidence 0.90: file exists, large file (4664B), medium-length name, recently modified (0d ago)"
+            }
+          ],
+          "reasoning": "Referenced file 'stories/1-session-tracking-excluded-path.md' not found, found candidates"
         }
       ],
-      "detected_at": "2025-12-15T04:36:06Z",
+      "detected_at": "2025-12-15T12:00:00Z",
       "auto_heal_attempts": 0
     },
-    "2.i": {
+    "1.i": {
       "issues": [
         {
           "type": "missing_file_field",
@@ -26,23 +44,24 @@
           "reasoning": "Story missing 'file' field, found candidates on disk"
         }
       ],
-      "detected_at": "2025-12-15T04:36:06Z",
+      "detected_at": "2025-12-15T12:00:00Z",
       "auto_heal_attempts": 0
     },
-    "2.t": {
+    "1.r1": {
       "issues": [
         {
-          "type": "missing_file_field",
+          "type": "missing_file_reference",
           "severity": "minor",
           "auto_fixable": false,
+          "file_referenced": "stories/1.r1-fix-path-exclusion-logic-imple.md",
           "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
+          "reasoning": "Referenced file 'stories/1.r1-fix-path-exclusion-logic-imple.md' not found, found candidates"
         }
       ],
-      "detected_at": "2025-12-15T04:36:06Z",
+      "detected_at": "2025-12-15T12:00:00Z",
       "auto_heal_attempts": 0
     },
-    "3.d": {
+    "1.r1.i": {
       "issues": [
         {
           "type": "missing_file_field",
@@ -52,195 +71,13 @@
           "reasoning": "Story missing 'file' field, found candidates on disk"
         }
       ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "3.i": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "3.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.d": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.i": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "5.d": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "5.i": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "5.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "6.d": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "6.i": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "6.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.r1.d": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.r1.i": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
-      "auto_heal_attempts": 0
-    },
-    "4.r1.t": {
-      "issues": [
-        {
-          "type": "missing_file_field",
-          "severity": "minor",
-          "auto_fixable": false,
-          "candidates": [],
-          "reasoning": "Story missing 'file' field, found candidates on disk"
-        }
-      ],
-      "detected_at": "2025-12-15T04:36:06Z",
+      "detected_at": "2025-12-15T12:00:00Z",
       "auto_heal_attempts": 0
     }
   },
   "summary": {
-    "total_stories_with_issues": 18,
-    "auto_fixable_count": 0,
-    "needs_llm_count": 18
+    "total_stories_with_issues": 4,
+    "auto_fixable_count": 1,
+    "needs_llm_count": 3
   }
 }
