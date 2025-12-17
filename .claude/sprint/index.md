@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 15:40:01
+**Generated**: 2025-12-17 15:55:30
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 16
-- **Completion**: 6.2%
+- **Completion**: 25.0%
 
 ### By Status
 
-- completed: 1
-- in_progress: 1
-- pending: 10
-- unassigned: 4
+- completed: 4
+- pending: 9
+- unassigned: 3
 
 ### By Type
 
@@ -40,11 +39,11 @@
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Auto-Enable Daemon on Install
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Auto-Enable Daemon on Install
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Clear Error Feedback for Connection Failures
