@@ -19,3 +19,4 @@
 | s016 | research-and-specify-preprocessing | ACTIVE | 2025-12-12 00:27 | Research and specify preprocessing prompt injection |
 | s017 | execute-turn-based-preprocessing | ACTIVE | 2025-12-12 07:34 | Execute Turn-Based Preprocessing Injection sprint |
 | s018 | complete-sprint-execution-with | ACTIVE | 2025-12-13 15:41 | Complete sprint execution with all stories, validations, remediations |
+| s020 | mcp-daemon-fallback-architecture | ACTIVE | 2025-12-17 15:17 | MCP daemon fallback architecture analysis and hybrid trans |
