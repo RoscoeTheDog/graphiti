@@ -30,6 +30,7 @@ graphiti-mcp = "mcp_server.graphiti_mcp_server:main"
 graphiti-bootstrap = "mcp_server.daemon.bootstrap:main"
 graphiti-mcp-daemon = "mcp_server.daemon.manager:main"
 graphiti-mcp-session-tracking = "mcp_server.session_tracking_cli:main"
+graphiti-mcp-config = "mcp_server.config_cli:main"
 
 [tool.pyright]
 include = ["src", "tests"]
