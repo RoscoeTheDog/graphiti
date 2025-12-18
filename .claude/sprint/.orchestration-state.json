@@ -1,11 +1,11 @@
 {
   "version": "1.4",
-  "started_at": "2025-12-18T17:25:00Z",
+  "started_at": "2025-12-18T09:30:00Z",
   "status": "in_progress",
   "current_phase": "execution",
   "current_section": 0,
   "completed_sections": [],
-  "completed_stories": [],
+  "completed_stories": ["1.d", "1.i", "1.t", "2.d", "2.i", "2.t", "3.d", "4.d", "5.d"],
   "failed_stories": [],
   "args": {
     "validation_only": false,
@@ -19,44 +19,41 @@
   "execution_plan": {
     "sections": [
       {
-        "id": "story-1-phases",
-        "type": "sequential",
-        "stories": ["1.d", "1.i", "1.t"],
-        "reason": "Story 1 phases must be sequential (d→i→t)"
-      },
-      {
-        "id": "story-2-phases",
-        "type": "sequential",
-        "stories": ["2.d", "2.i", "2.t"],
-        "reason": "Story 2 depends on Story 1, phases sequential"
-      },
-      {
-        "id": "parallel-stories-3-4-5-discovery",
-        "type": "parallel",
-        "stories": ["3.d", "4.d", "5.d"],
-        "reason": "Stories 3, 4, 5 all depend only on Story 2 - discovery phases can run in parallel"
-      },
-      {
-        "id": "parallel-stories-3-4-5-implementation",
+        "id": "impl-parallel-1",
         "type": "parallel",
         "stories": ["3.i", "4.i", "5.i"],
-        "reason": "Implementation phases can run in parallel after discoveries complete"
+        "reason": "Independent implementations (all discoveries complete)"
       },
       {
-        "id": "parallel-stories-3-4-5-testing",
-        "type": "parallel",
-        "stories": ["3.t", "4.t", "5.t"],
-        "reason": "Testing phases can run in parallel"
-      },
-      {
-        "id": "story-6-phases",
+        "id": "discovery-6",
         "type": "sequential",
-        "stories": ["6.d", "6.i", "6.t"],
-        "reason": "Story 6 depends on Stories 1-5, phases sequential"
+        "stories": ["6.d"],
+        "reason": "Discovery for feature 6"
+      },
+      {
+        "id": "testing-sequential-1",
+        "type": "sequential",
+        "stories": ["3.t", "4.t", "5.t"],
+        "reason": "Testing phases run sequentially for stability"
+      },
+      {
+        "id": "feature-6-complete",
+        "type": "sequential",
+        "stories": ["6.i", "6.t"],
+        "reason": "Blocked by 6.d, then sequential within feature"
       }
     ],
-    "total_stories": 18,
-    "parallel_groups": 3,
-    "estimated_parallelization": "50%"
+    "total_stories": 9,
+    "parallel_groups": 1,
+    "estimated_parallelization": "33%"
+  },
+  "phase_helpers": {
+    "recovery": "resources/commands/sprint/helpers/orchestrate-recovery.md",
+    "story_dispatch": "resources/commands/sprint/helpers/story-execution-dispatch.md",
+    "discovery": "resources/commands/sprint/helpers/execute-discovery.md",
+    "implementation": "resources/commands/sprint/helpers/execute-implementation.md",
+    "testing": "resources/commands/sprint/helpers/execute-testing.md",
+    "validation": "resources/commands/sprint/helpers/orchestrate-validation-phase.md",
+    "validation_story": "resources/commands/sprint/execute-validation-story.md"
   }
 }

@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:53:49
+**Generated**: 2025-12-18 11:54:17
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 62.5%
+- **Completion**: 66.7%
 
 ### By Status
 
-- completed: 30
-- in_progress: 8
+- completed: 32
+- in_progress: 6
 - unassigned: 10
 
 ### By Type
@@ -72,7 +72,7 @@
   - Blocks: Story -3.i
 
   ### Story -3.i: Validate Implementation: CLI Command - config effective
-  **Status**: in_progress | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -3, Story -3.d
   - Blocks: Story -3.t
 
@@ -114,7 +114,7 @@
   - Blocks: Story -6.i
 
   ### Story -6.i: Validate Implementation: Config Validation and Documentation
-  **Status**: in_progress | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -6, Story -6.d
   - Blocks: Story -6.t
 
