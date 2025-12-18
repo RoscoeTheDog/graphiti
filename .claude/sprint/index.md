@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 17:47:16
+**Generated**: 2025-12-17 18:04:14
 
 ---
 
@@ -14,20 +14,23 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 28
-- **Completion**: 92.9%
+- **Total Stories**: 32
+- **Completion**: 84.4%
 
 ### By Status
 
 - blocked: 2
-- completed: 26
+- completed: 27
+- in_progress: 1
+- unassigned: 2
 
 ### By Type
 
-- discovery: 4
+- discovery: 5
 - feature: 4
-- implementation: 4
-- testing: 4
+- implementation: 5
+- remediation: 1
+- testing: 5
 - validation: 3
 - validation_discovery: 3
 - validation_implementation: 3
@@ -126,6 +129,20 @@
   ### Story 4.t: Testing: Validation - End-to-End UX Test
   **Status**: blocked | **Type**: testing
   - Dependencies: Story 4
+
+    ### Story 4.1.d: Discovery: Fix E2E Test Fixtures VenvCreationError
+    **Status**: completed | **Type**: discovery
+    - Dependencies: Story 4.1
+    - Blocks: Story 4.1.i
+
+    ### Story 4.1.i: Implementation: Fix E2E Test Fixtures VenvCreationError
+    **Status**: unassigned | **Type**: implementation
+    - Dependencies: Story 4.1, Story 4.1.d
+    - Blocks: Story 4.1.t
+
+    ### Story 4.1.t: Testing: Fix E2E Test Fixtures VenvCreationError
+    **Status**: unassigned | **Type**: testing
+    - Dependencies: Story 4.1, Story 4.1.i
 
 ---
 

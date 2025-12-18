@@ -96,7 +96,8 @@
       "children": [
         "4.d",
         "4.i",
-        "4.t"
+        "4.t",
+        "4.1"
       ],
       "phase_status": {
         "discovery": "pending",
@@ -541,6 +542,77 @@
       "children": [],
       "blocks": [],
       "file": null
+    },
+    "4.1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix E2E Test Fixtures VenvCreationError",
+      "status": "in_progress",
+      "parent": "4",
+      "children": [
+        "4.1.d",
+        "4.1.i",
+        "4.1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4.1-fix-e2e-test-fixtures-venvcrea.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "4.1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix E2E Test Fixtures VenvCreationError",
+      "status": "completed",
+      "parent": "4.1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "4.1.i"
+      ],
+      "file": null,
+      "artifact": "plans/4.1-plan.yaml"
+    },
+    "4.1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix E2E Test Fixtures VenvCreationError",
+      "status": "unassigned",
+      "parent": "4.1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "4.1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/4.1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4.1-plan.yaml"
+      }
+    },
+    "4.1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix E2E Test Fixtures VenvCreationError",
+      "status": "unassigned",
+      "parent": "4.1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -564,6 +636,9 @@
     "3.t",
     "4.d",
     "4.i",
-    "4.t"
+    "4.t",
+    "4.1.d",
+    "4.1.i",
+    "4.1.t"
   ]
 }
