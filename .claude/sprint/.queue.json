@@ -273,7 +273,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Validation - End-to-End UX Test",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
@@ -289,7 +289,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Validation - End-to-End UX Test",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
@@ -300,7 +300,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/4-plan.yaml"
+      }
     }
   },
   "execution_queue": [
