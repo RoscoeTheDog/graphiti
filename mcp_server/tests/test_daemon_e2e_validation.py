@@ -21,6 +21,45 @@ import pytest
 pytestmark = pytest.mark.e2e
 
 
+def _check_service_manager_available() -> tuple[bool, str]:
+    """
+    Check if the platform's service manager is available.
+
+    Returns:
+        Tuple of (available: bool, reason: str)
+    """
+    system = platform.system()
+    if system == 'Windows':
+        # Check for NSSM
+        nssm_path = shutil.which('nssm')
+        if nssm_path:
+            return True, f"NSSM found at {nssm_path}"
+        return False, "NSSM not installed (required for Windows service management)"
+    elif system == 'Darwin':
+        # macOS uses launchctl (built-in)
+        return True, "launchctl available (macOS built-in)"
+    elif system == 'Linux':
+        # Check for systemctl
+        systemctl_path = shutil.which('systemctl')
+        if systemctl_path:
+            return True, f"systemctl found at {systemctl_path}"
+        return False, "systemctl not found (required for Linux service management)"
+    else:
+        return False, f"Unsupported platform: {system}"
+
+
+@pytest.fixture(scope='session')
+def service_manager_available():
+    """
+    Session-scoped fixture that checks if the platform's service manager is available.
+    Tests that require service installation should depend on this fixture.
+    """
+    available, reason = _check_service_manager_available()
+    if not available:
+        pytest.skip(f"Service manager not available: {reason}")
+    return reason
+
+
 @pytest.fixture(scope='session')
 def ensure_venv_exists():
     """
@@ -163,7 +202,7 @@ class TestFreshInstallFlow:
     """
 
     @pytest.mark.asyncio
-    async def test_fresh_install_flow(self, clean_daemon_state, daemon_manager, mock_config_path):
+    async def test_fresh_install_flow(self, clean_daemon_state, daemon_manager, mock_config_path, service_manager_available):
         """
         Test complete fresh install flow from zero to working MCP server.
         """
@@ -292,7 +331,7 @@ class TestReinstallIdempotent:
     """
 
     @pytest.mark.asyncio
-    async def test_reinstall_idempotent(self, daemon_manager, mock_config_path):
+    async def test_reinstall_idempotent(self, daemon_manager, mock_config_path, service_manager_available):
         """
         Test that reinstalling when daemon is already running is safe and idempotent.
         """
@@ -390,7 +429,7 @@ class TestHealthCheckTiming:
     """
 
     @pytest.mark.asyncio
-    async def test_health_check_timing(self, daemon_manager):
+    async def test_health_check_timing(self, daemon_manager, service_manager_available):
         """
         Test that health check responds within 5 seconds after install.
         """
@@ -435,19 +474,36 @@ class TestDaemonStatusCommand:
     Additional validation: Daemon status command works
     """
 
-    def test_daemon_status_command(self, daemon_manager):
+    def test_daemon_status_command(self, daemon_manager, ensure_venv_exists):
         """
-        Test that 'graphiti-mcp daemon status' returns accurate state.
+        Test that daemon status CLI returns accurate state.
+
+        Uses the venv's Python to run the daemon manager module directly,
+        rather than relying on a globally installed CLI command.
         """
         # Get status via Python API
         api_status = daemon_manager.status()
 
-        # Get status via CLI
+        # Get venv Python executable
+        venv_python = ensure_venv_exists.venv_path / 'bin' / 'python'
+        if platform.system() == 'Windows':
+            venv_python = ensure_venv_exists.venv_path / 'Scripts' / 'python.exe'
+
+        # Get status via CLI (using venv Python to run the module)
+        # This avoids dependency on global installation
         result = subprocess.run(
-            ['graphiti-mcp', 'daemon', 'status'], capture_output=True, text=True, timeout=5
+            [str(venv_python), '-m', 'mcp_server.daemon.manager', 'status'],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=str(Path(__file__).parent.parent.parent),  # Run from repo root
         )
 
-        assert result.returncode == 0, 'Status command should succeed'
+        # Check if command executed (may fail if package not fully installed)
+        if result.returncode != 0 and 'ModuleNotFoundError' in result.stderr:
+            pytest.skip('mcp_server package not installed in venv - CLI test skipped')
+
+        assert result.returncode == 0, f'Status command should succeed: {result.stderr}'
 
         # Parse output
         output = result.stdout.lower()
@@ -455,4 +511,7 @@ class TestDaemonStatusCommand:
         if api_status.get('running'):
             assert 'running' in output, 'CLI should show running state'
         else:
-            assert 'stopped' in output or 'not running' in output, 'CLI should show stopped state'
+            # Check for various "not running" indicators
+            not_running_indicators = ['stopped', 'not running', 'not installed', '[no]']
+            assert any(ind in output for ind in not_running_indicators), \
+                f'CLI should show stopped/not installed state. Got: {output[:200]}'

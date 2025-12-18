@@ -528,7 +528,7 @@ def main():
             sys.exit(0 if success else 1)
 
         elif args.command == "status":
-            manager.status()
+            manager.print_status()
             sys.exit(0)
 
         elif args.command == "logs":
