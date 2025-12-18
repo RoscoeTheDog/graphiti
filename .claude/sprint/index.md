@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 09:33:33
+**Generated**: 2025-12-18 09:42:26
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 24
-- **Completion**: 4.2%
+- **Completion**: 8.3%
 
 ### By Status
 
-- completed: 1
+- completed: 2
 - in_progress: 1
-- pending: 16
+- pending: 15
 - unassigned: 6
 
 ### By Type
@@ -40,11 +40,11 @@
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Implement get_effective_config() Method
