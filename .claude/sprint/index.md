@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 08:53:38
+**Generated**: 2025-12-18 09:01:22
 
 ---
 
@@ -19,10 +19,8 @@
 
 ### By Status
 
-- blocked: 4
+- blocked: 6
 - completed: 30
-- in_progress: 1
-- unassigned: 1
 
 ### By Type
 
@@ -155,7 +153,7 @@
     - Blocks: Story 4.2.t
 
     ### Story 4.2.t: Testing: Fix E2E Test API Assertions
-    **Status**: unassigned | **Type**: testing
+    **Status**: blocked | **Type**: testing
     - Dependencies: Story 4.2, Story 4.2.i
 
 ---

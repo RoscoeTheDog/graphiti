@@ -625,7 +625,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Fix E2E Test API Assertions",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": "4",
       "children": [
         "4.2.d",
@@ -679,7 +679,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Fix E2E Test API Assertions",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "4.2",
       "phase": "testing",
       "phase_order": 3,

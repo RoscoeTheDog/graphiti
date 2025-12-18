@@ -1,0 +1,158 @@
+{
+  "story_id": "4.2",
+  "phase": "testing",
+  "executed_by": "testing:4.2.t",
+  "timestamp": "2025-12-18T17:00:15Z",
+
+  "summary": {
+    "total_tests": 7,
+    "passed": 3,
+    "failed": 3,
+    "skipped": 1,
+    "pass_rate": 42.9,
+    "duration_ms": 64210
+  },
+
+  "categories": {
+    "integration": {
+      "total": 7,
+      "passed": 3,
+      "failed": 3,
+      "skipped": 1,
+      "coverage": null
+    }
+  },
+
+  "failures": [
+    {
+      "test": "TestFreshInstallFlow::test_fresh_install_flow",
+      "category": "integration",
+      "error": "AssertionError: Install failed - VenvManager cannot find mcp_server package (venv outside repository)",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py:176",
+      "severity": "high",
+      "root_cause": "Venv location at ~/.graphiti/.venv is outside repository, VenvManager searches upward and cannot find mcp_server/pyproject.toml"
+    },
+    {
+      "test": "TestReinstallIdempotent::test_reinstall_idempotent",
+      "category": "integration",
+      "error": "AssertionError: First install should succeed - Same venv location issue",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py:301",
+      "severity": "high",
+      "root_cause": "Same as test_fresh_install_flow"
+    },
+    {
+      "test": "TestDaemonStatusCommand::test_daemon_status_command",
+      "category": "integration",
+      "error": "ModuleNotFoundError: No module named 'mcp_server' in global graphiti-mcp command",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py:450",
+      "severity": "medium",
+      "root_cause": "Global graphiti-mcp script cannot import mcp_server (package not installed globally)"
+    }
+  ],
+
+  "passed_tests": [
+    {
+      "test": "TestErrorFeedbackWithoutDaemon::test_error_messages_without_daemon",
+      "category": "integration",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py"
+    },
+    {
+      "test": "TestCrossPlatformValidation::test_platform_detection",
+      "category": "integration",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py"
+    },
+    {
+      "test": "TestCrossPlatformValidation::test_cross_platform_validation",
+      "category": "integration",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py"
+    }
+  ],
+
+  "skipped_tests": [
+    {
+      "test": "TestHealthCheckTiming::test_health_check_timing",
+      "reason": "Daemon install failed",
+      "file": "mcp_server/tests/test_daemon_e2e_validation.py"
+    }
+  ],
+
+  "acceptance_criteria_coverage": {
+    "AC-4.2.1": {
+      "covered": false,
+      "tests": ["test_fresh_install_flow", "test_reinstall_idempotent", "test_daemon_status_command"],
+      "reason": "Tests failing due to venv location issue (outside scope of this story)"
+    },
+    "AC-4.2.2": {
+      "covered": false,
+      "tests": ["All integration tests"],
+      "reason": "Pass rate 42.9% < 90% threshold"
+    },
+    "AC-4.2.3": {
+      "covered": true,
+      "tests": ["All tests that reached assertion points"],
+      "reason": "No TypeError exceptions for install() return type - API fixes successful"
+    },
+    "AC-4.2.4": {
+      "covered": true,
+      "tests": ["ensure_venv_exists fixture"],
+      "reason": "Package installation fixture works when pip is available - fixture modifications successful"
+    },
+    "AC-4.2.5": {
+      "covered": false,
+      "tests": ["Pass rate check"],
+      "reason": "Pass rate < 90%, stories remain blocked"
+    }
+  },
+
+  "story_4_2_api_fixes": {
+    "status": "SUCCESSFUL",
+    "fixed_issues": [
+      "Line 159: Changed assert install_result['success'] to assert install_result (bool)",
+      "Line 284: Changed assert first_install['success'] to assert first_install (bool)",
+      "Line 294: Changed assert second_install['success'] to assert second_install (bool)",
+      "Fixture: Added pip ensurepip and package installation logic"
+    ],
+    "verification": "No TypeError exceptions occurred for API contract issues - all assertion fixes work correctly"
+  },
+
+  "newly_discovered_issues": {
+    "issue_1": {
+      "type": "environmental",
+      "severity": "high",
+      "description": "Venv created at ~/.graphiti/.venv (outside repository) cannot find mcp_server package",
+      "impact": "3 tests fail during daemon.install() when VenvManager searches upward for pyproject.toml",
+      "recommendation": "Create separate remediation story to fix venv location (use tmp_path in tests or reconfigure VenvManager)"
+    },
+    "issue_2": {
+      "type": "environmental",
+      "severity": "medium",
+      "description": "Global graphiti-mcp command missing mcp_server module",
+      "impact": "test_daemon_status_command fails when calling CLI",
+      "recommendation": "Install package in development mode globally or mock CLI in tests"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "fix_required",
+      "description": "Venv location issue blocking 3 tests",
+      "action": "Create remediation story 4.3 to fix VenvManager repository detection or use test-scoped venv"
+    },
+    {
+      "type": "improve",
+      "description": "Global CLI import issue blocking 1 test",
+      "action": "Mock graphiti-mcp CLI in tests or ensure package installed globally for test environment"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "below_threshold",
+    "action": "block_and_recommend_remediation",
+    "analysis": "Story 4.2 implementation successfully fixed API assertion issues (no TypeErrors). Failures are due to newly discovered environmental issues outside this story's scope."
+  },
+
+  "outcome": "blocked",
+  "blocking": true,
+  "notes": "Story 4.2.i successfully fixed the API assertion issues it was designed to fix. The remaining test failures are due to environmental issues (venv location, global package availability) that were not part of the original story scope. These require separate remediation."
+}
