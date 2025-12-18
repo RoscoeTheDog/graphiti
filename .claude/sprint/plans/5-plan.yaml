@@ -1,0 +1,285 @@
+story: "5"
+title: "Session Tracking Integration"
+status: "discovery_complete"
+priority: "P0"
+
+discovery_findings:
+  overview: |
+    Session tracking processes JSONL files in on_session_closed callback (mcp_server/graphiti_mcp_server.py:2632).
+    Currently uses global config (unified_config) for all projects. Need to inject project-specific config
+    into the callback based on the session file's project path.
+
+  key_files:
+    - path: "mcp_server/graphiti_mcp_server.py"
+      role: "Main integration point - on_session_closed callback and session manager initialization"
+      lines: "2632-2708"
+
+    - path: "graphiti_core/session_tracking/path_resolver.py"
+      role: "Extracts project hash from JSONL path, provides project path resolution"
+      key_methods:
+        - "resolve_project_from_session_file(file_path) -> project_hash"
+        - "get_project_path_from_hash(hash) -> project_path (requires cache)"
+
+    - path: "graphiti_core/session_tracking/session_manager.py"
+      role: "Manages session lifecycle, calls on_session_closed callback"
+      note: "Does NOT need modification - callback receives file_path"
+
+    - path: "graphiti_core/session_tracking/filter.py"
+      role: "Filters messages based on FilterConfig"
+      current_usage: "Initialized once with global config in initialize_session_tracking()"
+
+    - path: "graphiti_core/session_tracking/resilient_indexer.py"
+      role: "Indexes sessions to Graphiti with resilience"
+      current_usage: "Initialized once with global config"
+
+    - path: "mcp_server/unified_config.py"
+      role: "Provides get_effective_config(project_path) method"
+      key_method: "GraphitiConfig.get_effective_config(project_path) -> GraphitiConfig"
+      normalization: "normalize_project_path(path) -> UNIX-style normalized path"
+
+  current_config_usage:
+    initialization:
+      location: "mcp_server/graphiti_mcp_server.py:2570-2708"
+      components:
+        - "SessionFilter initialized with unified_config.session_tracking.filter"
+        - "ResilientIndexer initialized with unified_config.session_tracking.resilience"
+        - "SessionManager initialized with unified_config.session_tracking.keep_length_days"
+      note: "All components use global config, no per-project differentiation"
+
+    processing:
+      location: "on_session_closed callback (line 2632)"
+      current_flow: |
+        1. session_filter.filter_conversation(context.messages) - uses global FilterConfig
+        2. Extract project_namespace from file_path (project hash)
+        3. Resolve project_path from hash (if include_project_path enabled)
+        4. Compute group_id (global, not project-specific)
+        5. resilient_indexer.index_session() - uses global resilience config
+
+      config_access_points:
+        - line_2641: "session_filter.filter_conversation()" - FilterConfig
+        - line_2653: "unified_config.session_tracking.include_project_path"
+        - line_2658: "unified_config.session_tracking.group_id"
+        - line_2672: "resilient_indexer.index_session()" - ResilienceConfig
+        - line_2681: "unified_config.session_tracking.include_project_path"
+
+  project_path_resolution:
+    strategy: |
+      JSONL file path structure: ~/.claude/projects/{hash}/sessions/{session-id}.jsonl
+
+      Path Resolution Chain:
+      1. on_session_closed receives file_path (Path object)
+      2. path_resolver.resolve_project_from_session_file(file_path) -> project_hash
+      3. path_resolver.get_project_path_from_hash(project_hash) -> project_path
+         - Currently requires project to be in reverse hash cache
+         - Cache populated by register_project_path() or forward lookups
+
+      Challenge: Need project path BEFORE we can call get_effective_config()
+
+      Solution Options:
+      A. Use path_resolver.get_project_path_from_hash() (requires cache)
+      B. Infer from JSONL parent directories (unreliable)
+      C. Store project_path in episode metadata during indexing (requires DB lookup)
+      D. Enhance PathResolver to discover project paths by scanning workspace
+
+      Recommended: Option A + fallback to global config if project_path unknown
+
+implementation_approach:
+  phase_1_minimal_integration:
+    goal: "Get effective config working for cached project paths"
+    changes:
+      - modify: "on_session_closed callback"
+        action: |
+          1. Extract project_hash from file_path
+          2. Get project_path from path_resolver cache
+          3. If project_path found:
+             - effective_config = unified_config.get_effective_config(project_path)
+             - Use effective_config for this session
+          4. If not found:
+             - Use global unified_config (graceful degradation)
+             - Log warning for debugging
+
+      - create_helper: "get_session_config()"
+        signature: "def get_session_config(file_path: Path) -> GraphitiConfig"
+        purpose: "Encapsulate project path resolution + effective config logic"
+
+  phase_2_dynamic_components:
+    problem: "SessionFilter and ResilientIndexer initialized once with global config"
+    solution: "Create components per-session OR make them config-agnostic"
+
+    option_a_per_session_creation:
+      pros: "Clean separation, each session gets correct config"
+      cons: "Performance overhead if created for every session"
+      implementation: |
+        Create SessionFilter and ResilientIndexer inside on_session_closed:
+        - session_filter = SessionFilter(effective_config.session_tracking.filter)
+        - BUT ResilientIndexer is async and needs start() - complex lifecycle
+
+    option_b_config_as_parameter:
+      pros: "Reuse components, pass config per call"
+      cons: "Requires API changes to filter/index methods"
+      implementation: |
+        - SessionFilter.filter_conversation(messages, config=None)
+        - ResilientIndexer.index_session(..., config=None)
+        - If config is None, use instance config (backward compatible)
+
+    recommended: "Option B - add optional config parameter to methods"
+
+  phase_3_settings_mapping:
+    session_tracking_enabled:
+      location: "effective_config.session_tracking.enabled"
+      usage: "Check before processing session (skip if disabled for project)"
+      implementation: |
+        if not effective_config.session_tracking.enabled:
+            logger.debug(f"Session tracking disabled for project {project_path}")
+            return  # Don't index this session
+
+    filter_config:
+      location: "effective_config.session_tracking.filter"
+      usage: "Pass to SessionFilter.filter_conversation()"
+      affects: "Message filtering (tool_calls, tool_content, user_messages, agent_messages)"
+
+    extraction_config:
+      location: "effective_config.extraction"
+      usage: "Pass to Graphiti.add_episode() via indexer"
+      affects: "Entity extraction prompts and behavior"
+      note: "May require changes to SessionIndexer API"
+
+    llm_config:
+      location: "effective_config.llm"
+      usage: "Used by Graphiti instance (already global)"
+      challenge: "Graphiti instance is global, can't be per-project without major refactor"
+      workaround: "Document limitation - LLM config is global, only session_tracking overridable"
+
+testing_strategy:
+  unit_tests:
+    - test: "test_get_session_config_with_cached_path"
+      verify: "Returns effective config when project_path in cache"
+
+    - test: "test_get_session_config_without_cached_path"
+      verify: "Returns global config when project_path not in cache"
+
+    - test: "test_on_session_closed_respects_project_enabled"
+      verify: "Skips processing if effective_config.session_tracking.enabled=False"
+
+    - test: "test_filter_uses_project_config"
+      verify: "SessionFilter applies project-specific filter settings"
+
+  integration_tests:
+    - test: "test_two_projects_different_configs"
+      setup: |
+        - Project A: session_tracking.enabled=True, filter.tool_content="summary"
+        - Project B: session_tracking.enabled=False
+      verify: |
+        - Project A sessions are indexed with summary filtering
+        - Project B sessions are skipped (not indexed)
+
+    - test: "test_unknown_project_uses_global_config"
+      setup: "Session from uncached project path"
+      verify: "Falls back to global config, logs warning"
+
+  manual_testing:
+    - scenario: "Create project override, verify sessions use it"
+      steps: |
+        1. Add project override in graphiti.config.json
+        2. Trigger session close for that project
+        3. Check logs for "Using effective config for project X"
+        4. Verify filtering behavior matches override
+
+logging_requirements:
+  - level: "DEBUG"
+    message: "Using effective config for project {project_path}"
+    location: "on_session_closed"
+
+  - level: "DEBUG"
+    message: "Project path not found in cache, using global config"
+    location: "get_session_config helper"
+
+  - level: "INFO"
+    message: "Session tracking disabled for project {project_path}, skipping"
+    location: "on_session_closed"
+
+  - level: "DEBUG"
+    message: "Applying project-specific filter config: {filter_summary}"
+    location: "on_session_closed"
+
+dependencies:
+  completed:
+    - story: "2"
+      provides: "get_effective_config() method"
+
+  required:
+    - story: "1"
+      status: "completed"
+      provides: "Deep merge logic and ProjectOverride schema"
+
+risks_and_mitigations:
+  risk_1:
+    issue: "Project path not in cache -> can't get effective config"
+    impact: "Sessions processed with global config instead of project override"
+    mitigation: |
+      - Accept limitation for Phase 1
+      - Document: "Project paths must be registered via register_project_path()"
+      - Future: Add background scanner to populate cache from ~/.claude/projects/
+
+  risk_2:
+    issue: "SessionFilter/ResilientIndexer created once with global config"
+    impact: "Can't switch configs per session without refactor"
+    mitigation: |
+      - Phase 2: Add optional config parameter to methods
+      - Maintain backward compatibility (config=None uses instance config)
+
+  risk_3:
+    issue: "Graphiti instance is global, can't override LLM config per project"
+    impact: "Only session_tracking settings are project-specific, not LLM"
+    mitigation: |
+      - Document limitation in spec
+      - Mark llm override as P2 (future enhancement requiring Graphiti refactor)
+
+  risk_4:
+    issue: "Performance overhead of get_effective_config() per session"
+    impact: "Minimal - config is cached, only dict lookup + deep merge"
+    mitigation: "Accept - performance impact negligible (<1ms per session)"
+
+acceptance_criteria_implementation:
+  p0_session_tracker_resolves_project_path:
+    implementation: |
+      In on_session_closed:
+      1. project_hash = path_resolver.resolve_project_from_session_file(file_path)
+      2. project_path = path_resolver.get_project_path_from_hash(project_hash)
+      3. if project_path: effective_config = unified_config.get_effective_config(project_path)
+
+  p0_get_effective_config_called:
+    implementation: |
+      Add in on_session_closed before any config usage:
+      effective_config = get_session_config(file_path)
+
+  p0_project_enabled_respected:
+    implementation: |
+      if not effective_config.session_tracking.enabled:
+          logger.info(f"Session tracking disabled for {project_path}")
+          return
+
+  p1_preprocessing_prompt_applied:
+    implementation: |
+      Pass effective_config.extraction to SessionIndexer
+      Note: May require API changes to index_session()
+
+  p1_project_llm_settings_used:
+    status: "Deferred to Story 6 or future"
+    reason: "Requires Graphiti instance per project (major refactor)"
+
+  p2_logging_shows_config_applied:
+    implementation: |
+      logger.debug(f"Using effective config for project {project_path}")
+      logger.debug(f"Filter config: {effective_config.session_tracking.filter}")
+
+next_steps:
+  1. Create helper function get_session_config(file_path)
+  2. Modify on_session_closed to use effective config
+  3. Add config parameter to SessionFilter.filter_conversation()
+  4. Add tests for project config resolution
+  5. Update logging to show which config is applied
+  6. Document limitation: project_path must be in cache
+
+estimated_effort: "4-6 hours"
+complexity: "Medium"

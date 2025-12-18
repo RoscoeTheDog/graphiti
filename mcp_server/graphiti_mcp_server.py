@@ -2628,17 +2628,76 @@ async def initialize_session_tracking() -> None:
             filter_config=filter_config
         ) if filter_config else SessionFilter()
 
+        # Helper function to resolve effective config for a session
+        def get_session_config(file_path: Path):
+            """Get effective configuration for a session based on its project path.
+
+            Args:
+                file_path: Path to the session JSONL file
+
+            Returns:
+                GraphitiConfig: Effective config (project-specific or global fallback)
+            """
+            try:
+                # Extract project hash from session file path
+                project_hash = path_resolver.resolve_project_from_session_file(file_path)
+
+                if not project_hash:
+                    logger.debug("Could not resolve project hash from session file, using global config")
+                    return unified_config
+
+                # Get project path from hash (requires cache)
+                project_path = path_resolver.get_project_path_from_hash(project_hash)
+
+                if not project_path:
+                    logger.debug(
+                        f"Project path not found in cache for hash {project_hash[:8]}, "
+                        f"using global config"
+                    )
+                    return unified_config
+
+                # Get effective config for project
+                effective_config = unified_config.get_effective_config(project_path)
+                logger.debug(f"Using effective config for project {project_path}")
+                return effective_config
+
+            except Exception as e:
+                logger.warning(f"Error resolving project config: {e}, falling back to global config")
+                return unified_config
+
         # Define session closed callback with resilience
         def on_session_closed(session_id: str, file_path: Path, context) -> None:
             """Callback when session closes - filter and index to Graphiti with resilience."""
             try:
                 import socket
 
+                # Get effective configuration for this session (Story 5)
+                effective_config = get_session_config(file_path)
+
+                # Check if session tracking is enabled for this project (Story 5 AC-5.2)
+                if not effective_config.session_tracking.enabled:
+                    logger.info(
+                        f"Session tracking disabled for this project, skipping session {session_id}"
+                    )
+                    return
+
                 # Session tracking is now controlled by config only (no runtime overrides)
                 logger.info(f"Session closed: {session_id}, indexing to Graphiti...")
 
-                # Filter conversation
-                filtered_messages = session_filter.filter_conversation(context.messages)
+                # Create project-specific filter if needed (Story 5 AC-5.3)
+                project_filter_config = effective_config.session_tracking.filter
+                if project_filter_config != filter_config:
+                    logger.debug(
+                        f"Applying project-specific filter config: "
+                        f"tool_content={project_filter_config.tool_content}, "
+                        f"user_messages={project_filter_config.user_messages}, "
+                        f"agent_messages={project_filter_config.agent_messages}"
+                    )
+                    project_filter = SessionFilter(config=project_filter_config)
+                    filtered_messages = project_filter.filter_conversation(context.messages)
+                else:
+                    # Use global filter
+                    filtered_messages = session_filter.filter_conversation(context.messages)
 
                 # Format filtered content
                 filtered_content = "\n\n".join([
@@ -2649,14 +2708,16 @@ async def initialize_session_tracking() -> None:
                 project_namespace = path_resolver.resolve_project_from_session_file(file_path)
 
                 # Get human-readable project path (if config allows) (Story 6)
+                # Use effective_config for project-specific settings (Story 5)
                 project_path = None
-                if unified_config.session_tracking.include_project_path and project_namespace:
+                if effective_config.session_tracking.include_project_path and project_namespace:
                     project_path = path_resolver.get_project_path_from_hash(project_namespace)
 
-                # Compute global group_id (Story 6 - was project-specific before)
+                # Compute group_id (Story 6 - global unless overridden)
+                # Use effective_config for project-specific settings (Story 5)
                 hostname = socket.gethostname()
-                if unified_config.session_tracking.group_id:
-                    group_id = unified_config.session_tracking.group_id
+                if effective_config.session_tracking.group_id:
+                    group_id = effective_config.session_tracking.group_id
                 else:
                     group_id = path_resolver.get_global_group_id(hostname)
 
@@ -2678,7 +2739,8 @@ async def initialize_session_tracking() -> None:
                     project_namespace=project_namespace,
                     project_path=project_path,
                     hostname=hostname,
-                    include_project_path=unified_config.session_tracking.include_project_path,
+                    # Use effective_config for project-specific settings (Story 5)
+                    include_project_path=effective_config.session_tracking.include_project_path,
                 ))
 
                 logger.info(f"Session {session_id} indexing initiated ({len(filtered_messages)} messages)")

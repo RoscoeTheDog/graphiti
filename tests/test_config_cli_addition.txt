@@ -1,0 +1,13 @@
+
+# (continued from existing file)
+
+def test_cmd_list_projects_single_project(tmp_path, monkeypatch, minimal_config_dict, capsys):
+    config = minimal_config_dict.copy()
+    config["project_overrides"] = {"/c/Users/Admin/project1": {"llm": {"provider": "anthropic"}}}
+    config_file = tmp_path / "graphiti.config.json"
+    config_file.write_text(__import__("json").dumps(config, indent=2))
+    monkeypatch.chdir(tmp_path)
+    args = __import__("argparse").Namespace()
+    cmd_list_projects(args)
+    captured = capsys.readouterr()
+    assert "Project: /c/Users/Admin/project1" in captured.out

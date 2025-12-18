@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Add ProjectOverride Schema and Deep Merge Logic",
-      "status": "blocked",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -23,9 +23,9 @@
         "1.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "2"
@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Implement get_effective_config() Method",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -47,9 +47,9 @@
         "2.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "3",
@@ -182,7 +182,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Add ProjectOverride Schema and Deep Merge Logic",
-      "status": "blocked",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
@@ -202,7 +202,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Implement get_effective_config() Method",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -215,7 +215,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Implement get_effective_config() Method",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
@@ -228,7 +228,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Implement get_effective_config() Method",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
@@ -245,7 +245,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: CLI Command - config effective",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "discovery",
       "phase_order": 1,
@@ -288,7 +288,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: CLI Commands - list-projects, set-override, remove-override",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,
@@ -331,7 +331,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Session Tracking Integration",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "discovery",
       "phase_order": 1,
