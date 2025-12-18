@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:54:17
+**Generated**: 2025-12-18 12:00:26
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 66.7%
+- **Completion**: 72.9%
 
 ### By Status
 
-- completed: 32
+- completed: 35
 - in_progress: 6
-- unassigned: 10
+- unassigned: 7
 
 ### By Type
 
@@ -86,7 +86,7 @@
   - Blocks: Story -4.i
 
   ### Story -4.i: Validate Implementation: CLI Commands - list-projects, set-override, remove-override
-  **Status**: in_progress | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 
@@ -95,12 +95,12 @@
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Session Tracking Integration
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -5
   - Blocks: Story -5.i
 
   ### Story -5.i: Validate Implementation: Session Tracking Integration
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -5, Story -5.d
   - Blocks: Story -5.t
 
