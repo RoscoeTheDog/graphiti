@@ -468,7 +468,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Update Installation Documentation",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "3",
       "children": [
         "-3.d",
@@ -488,7 +488,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Update Installation Documentation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.d",
       "phase": "validation_discovery",
