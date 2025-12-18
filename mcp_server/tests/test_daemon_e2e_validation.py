@@ -21,6 +21,37 @@ import pytest
 pytestmark = pytest.mark.e2e
 
 
+@pytest.fixture(scope='session')
+def ensure_venv_exists():
+    """
+    Session-scoped fixture to ensure venv exists before any daemon operations.
+
+    This fixes the chicken-and-egg problem where DaemonManager.__init__() creates
+    VenvManager instance, but venv doesn't exist until tests create it.
+
+    Creates venv once per test session if missing, skips tests gracefully if creation fails.
+    """
+    from mcp_server.daemon.venv_manager import VenvManager
+
+    venv_manager = VenvManager()
+
+    # Check if venv already exists
+    if venv_manager.detect_venv():
+        yield venv_manager
+        return
+
+    # Create venv if missing
+    try:
+        success, message = venv_manager.create_venv()
+        if not success:
+            pytest.skip(f"Venv creation failed: {message}")
+    except Exception as e:
+        pytest.skip(f"Venv creation error: {str(e)}")
+
+    yield venv_manager
+    # No cleanup - venv persists across tests
+
+
 @pytest.fixture
 def test_config_dir(tmp_path):
     """
@@ -36,21 +67,27 @@ def test_config_dir(tmp_path):
 
 
 @pytest.fixture
-def daemon_manager():
+def daemon_manager(ensure_venv_exists):
     """
     Fixture for managing daemon state during tests.
     Ensures cleanup even if tests fail.
+    Depends on ensure_venv_exists to prevent VenvCreationError.
     """
     from mcp_server.daemon.manager import DaemonManager
 
     manager = DaemonManager()
-    initial_status = manager.get_status()
+
+    # Get initial status (may fail if daemon not installed)
+    try:
+        initial_status = manager.status()
+    except Exception:
+        initial_status = {'running': False}
 
     yield manager
 
-    # Cleanup: restore initial state
+    # Cleanup: restore initial state (best effort)
     try:
-        current_status = manager.get_status()
+        current_status = manager.status()
         if current_status.get('running') and not initial_status.get('running'):
             manager.uninstall()
     except Exception:
@@ -58,10 +95,11 @@ def daemon_manager():
 
 
 @pytest.fixture
-def clean_daemon_state(daemon_manager):
+def clean_daemon_state(daemon_manager, ensure_venv_exists):
     """
     Ensure daemon is uninstalled before test.
     Critical for fresh install tests.
+    Depends on ensure_venv_exists to prevent VenvCreationError.
     """
     try:
         daemon_manager.uninstall()
@@ -72,7 +110,7 @@ def clean_daemon_state(daemon_manager):
 
     yield
 
-    # Cleanup after test
+    # Cleanup after test (best effort)
     try:
         daemon_manager.uninstall()
     except Exception:
@@ -113,7 +151,7 @@ class TestFreshInstallFlow:
         Test complete fresh install flow from zero to working MCP server.
         """
         # Step 1: Verify daemon is not installed
-        status_before = daemon_manager.get_status()
+        status_before = daemon_manager.status()
         assert not status_before.get('running'), 'Daemon should not be running initially'
 
         # Step 2: Install daemon
@@ -256,7 +294,7 @@ class TestReinstallIdempotent:
         assert second_install['success'], 'Reinstall should succeed without errors'
 
         # Step 3: Verify daemon continues running
-        status = daemon_manager.get_status()
+        status = daemon_manager.status()
         assert status.get('running'), 'Daemon should still be running after reinstall'
 
         # Step 4: Verify config preserved
@@ -380,7 +418,7 @@ class TestDaemonStatusCommand:
         Test that 'graphiti-mcp daemon status' returns accurate state.
         """
         # Get status via Python API
-        api_status = daemon_manager.get_status()
+        api_status = daemon_manager.status()
 
         # Get status via CLI
         result = subprocess.run(

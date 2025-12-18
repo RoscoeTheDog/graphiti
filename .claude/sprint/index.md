@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 18:04:14
+**Generated**: 2025-12-17 18:09:46
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 32
-- **Completion**: 84.4%
+- **Completion**: 87.5%
 
 ### By Status
 
 - blocked: 2
-- completed: 27
+- completed: 28
 - in_progress: 1
-- unassigned: 2
+- unassigned: 1
 
 ### By Type
 
@@ -136,7 +136,7 @@
     - Blocks: Story 4.1.i
 
     ### Story 4.1.i: Implementation: Fix E2E Test Fixtures VenvCreationError
-    **Status**: unassigned | **Type**: implementation
+    **Status**: completed | **Type**: implementation
     - Dependencies: Story 4.1, Story 4.1.d
     - Blocks: Story 4.1.t
 
