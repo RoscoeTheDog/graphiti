@@ -1,0 +1,181 @@
+{
+  "story_id": "1",
+  "phase": "testing",
+  "executed_by": "testing:1.t",
+  "timestamp": "2025-12-18T18:15:00Z",
+
+  "summary": {
+    "total_tests": 27,
+    "passed": 16,
+    "failed": 11,
+    "skipped": 0,
+    "pass_rate": 59.26,
+    "duration_ms": null
+  },
+
+  "categories": {
+    "unit": {
+      "total": 27,
+      "passed": 16,
+      "failed": 11,
+      "coverage": null
+    },
+    "integration": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null
+    },
+    "security": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [
+    {
+      "test": "test_normalize_path_unix",
+      "category": "unit",
+      "error": "AssertionError: assert 'C:/home/user/project' == '/home/user/project' - Unix paths on Windows getting C:/ prefix",
+      "file": "tests/test_project_overrides.py:53",
+      "severity": "high"
+    },
+    {
+      "test": "test_normalize_path_msys",
+      "category": "unit",
+      "error": "AssertionError: assert '/c/c/Users/Admin/project' == '/c/Users/Admin/project' - MSYS paths getting double /c/c/ prefix",
+      "file": "tests/test_project_overrides.py:59",
+      "severity": "high"
+    },
+    {
+      "test": "test_normalize_path_expanduser",
+      "category": "unit",
+      "error": "AssertionError: Tilde expansion on Windows not starting with /",
+      "file": "tests/test_project_overrides.py:70",
+      "severity": "medium"
+    },
+    {
+      "test": "test_normalize_path_trailing_slash_removed",
+      "category": "unit",
+      "error": "AssertionError: assert 'C:/home/user/project' == '/home/user/project' - Unix path with trailing slash",
+      "file": "tests/test_project_overrides.py:77",
+      "severity": "high"
+    },
+    {
+      "test": "test_normalize_path_relative_becomes_absolute",
+      "category": "unit",
+      "error": "AssertionError: Relative path resolution not starting with /",
+      "file": "tests/test_project_overrides.py:84",
+      "severity": "high"
+    },
+    {
+      "test": "test_projectoverride_valid_llm",
+      "category": "unit",
+      "error": "AttributeError: 'LLMConfig' object has no attribute 'model' - Tests use .model but LLMConfig uses .default_model",
+      "file": "tests/test_project_overrides.py:175",
+      "severity": "high"
+    },
+    {
+      "test": "test_projectoverride_valid_extraction",
+      "category": "unit",
+      "error": "AttributeError: 'ExtractionConfig' object has no attribute 'max_workers' - ExtractionConfig doesn't have max_workers field",
+      "file": "tests/test_project_overrides.py:191",
+      "severity": "high"
+    },
+    {
+      "test": "test_projectoverride_all_fields_valid",
+      "category": "unit",
+      "error": "AttributeError: 'LLMConfig' object has no attribute 'model'",
+      "file": "tests/test_project_overrides.py:209",
+      "severity": "high"
+    },
+    {
+      "test": "test_graphiticonfig_project_overrides_valid",
+      "category": "unit",
+      "error": "AttributeError: 'LLMConfig' object has no attribute 'model'",
+      "file": "tests/test_project_overrides.py:251",
+      "severity": "high"
+    },
+    {
+      "test": "test_project_overrides_end_to_end",
+      "category": "unit",
+      "error": "AttributeError: 'LLMConfig' object has no attribute 'model'",
+      "file": "tests/test_project_overrides.py:299",
+      "severity": "high"
+    },
+    {
+      "test": "test_project_overrides_from_file_simulation",
+      "category": "unit",
+      "error": "AttributeError: 'LLMConfig' object has no attribute 'model'",
+      "file": "tests/test_project_overrides.py:326",
+      "severity": "high"
+    }
+  ],
+
+  "acceptance_criteria_coverage": {
+    "AC-1": {
+      "covered": false,
+      "tests": [],
+      "reason": "ProjectOverride schema tests failing - LLMConfig.model attribute mismatch"
+    },
+    "AC-2": {
+      "covered": false,
+      "tests": [],
+      "reason": "project_overrides integration tests failing due to schema issues"
+    },
+    "AC-3": {
+      "covered": false,
+      "tests": [],
+      "reason": "Path normalization tests failing on non-Windows platforms (monkeypatch not working correctly)"
+    },
+    "AC-4": {
+      "covered": true,
+      "tests": ["test_requirements.unit[4-7]"],
+      "reason": "Deep merge tests all passing (9/9)"
+    },
+    "AC-5": {
+      "covered": false,
+      "tests": [],
+      "reason": "Platform-specific path tests failing (5/7 failed)"
+    },
+    "AC-6": {
+      "covered": true,
+      "tests": ["test_requirements.unit[4-7]"],
+      "reason": "Deep merge edge case tests all passing"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "fix_required",
+      "description": "Path normalization function must respect platform.system() monkeypatch in tests",
+      "action": "Update normalize_project_path() to check platform.system() before Path.resolve() operations"
+    },
+    {
+      "type": "fix_required",
+      "description": "Tests incorrectly use LLMConfig(model=...) but schema uses default_model field",
+      "action": "Update all test assertions to use .default_model instead of .model"
+    },
+    {
+      "type": "fix_required",
+      "description": "Tests assume ExtractionConfig has max_workers field which doesn't exist",
+      "action": "Remove max_workers tests or add field to ExtractionConfig schema"
+    },
+    {
+      "type": "improve",
+      "description": "MSYS path normalization has double /c/c/ prefix bug",
+      "action": "Fix normalize_project_path() to detect already-normalized MSYS paths"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "below_threshold",
+    "action": "block_and_recommend_remediation"
+  },
+
+  "outcome": "blocked",
+  "blocking": true
+}

@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 09:42:26
+**Generated**: 2025-12-18 09:48:02
 
 ---
 
@@ -19,10 +19,10 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 2
-- in_progress: 1
 - pending: 15
-- unassigned: 6
+- unassigned: 5
 
 ### By Type
 
@@ -44,7 +44,7 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: unassigned | **Type**: testing
+  **Status**: blocked | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Implement get_effective_config() Method
