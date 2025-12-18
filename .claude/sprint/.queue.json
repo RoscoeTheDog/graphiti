@@ -390,7 +390,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Clear Error Feedback for Connection Failures",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "2",
       "children": [
         "-2.d",
@@ -410,7 +410,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Clear Error Feedback for Connection Failures",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.d",
       "phase": "validation_discovery",
