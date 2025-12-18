@@ -661,7 +661,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Fix E2E Test API Assertions",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "4.2",
       "phase": "implementation",
       "phase_order": 2,
@@ -690,7 +690,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/4.2-plan.yaml"
+      }
     }
   },
   "execution_queue": [

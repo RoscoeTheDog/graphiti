@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 08:49:08
+**Generated**: 2025-12-18 08:53:38
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 36
-- **Completion**: 80.6%
+- **Completion**: 83.3%
 
 ### By Status
 
 - blocked: 4
-- completed: 29
+- completed: 30
 - in_progress: 1
-- unassigned: 2
+- unassigned: 1
 
 ### By Type
 
@@ -150,7 +150,7 @@
     - Blocks: Story 4.2.i
 
     ### Story 4.2.i: Implementation: Fix E2E Test API Assertions
-    **Status**: unassigned | **Type**: implementation
+    **Status**: completed | **Type**: implementation
     - Dependencies: Story 4.2, Story 4.2.d
     - Blocks: Story 4.2.t
 
