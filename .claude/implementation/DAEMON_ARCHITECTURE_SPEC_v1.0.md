@@ -201,8 +201,8 @@ The daemon architecture consists of two layers:
 {
   "daemon": {
     "_comment": "Daemon service configuration",
-    "enabled": false,
-    "_enabled_help": "Set to true to start MCP server. Bootstrap service watches this.",
+    "enabled": true,
+    "_enabled_help": "Auto-enabled after install. Set to false to stop MCP server.",
     "host": "127.0.0.1",
     "port": 8321,
     "config_poll_seconds": 5,
@@ -216,9 +216,10 @@ The daemon architecture consists of two layers:
 ```
 
 **Key Points:**
-- `enabled: false` by default (opt-in model)
+- `enabled: true` by default **after install** (auto-enable UX improvement - Story 1)
+- **Breaking Change**: Previous behavior required manual `enabled: true` edit
 - Bootstrap service always runs (watches config)
-- MCP server only runs when `enabled: true`
+- MCP server starts automatically within 5 seconds of install
 
 ### Port Selection: 8321
 
@@ -756,17 +757,26 @@ graphiti-mcp daemon logs       # Tail daemon logs
 - Config-driven: automation tools can manage state via config files
 - Consistent: bootstrap watches config, user edits config
 
-**User workflow:**
+**User workflow (Auto-Enable UX - Story 1):**
 ```bash
-# 1. One-time install
+# 1. One-time install (daemon auto-enabled)
 graphiti-mcp daemon install
+# MCP server starts automatically within 5 seconds!
 
-# 2. Enable/disable via config (not CLI)
-# Edit ~/.graphiti/graphiti.config.json:
-#   "daemon": { "enabled": true }
-
-# 3. Check status anytime
+# 2. Verify daemon is running (should be active immediately)
 graphiti-mcp daemon status
+
+# 3. Optional: Disable via config if needed
+# Edit ~/.graphiti/graphiti.config.json:
+#   "daemon": { "enabled": false }
+```
+
+**Previous workflow (manual enable required):**
+```bash
+# OLD (before Story 1):
+# 1. graphiti-mcp daemon install
+# 2. Edit config: set daemon.enabled: true ← Manual step removed!
+# 3. Wait 5 seconds for server to start
 ```
 
 Implementation uses platform detection:

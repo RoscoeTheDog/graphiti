@@ -224,7 +224,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Update Installation Documentation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -240,7 +240,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Update Installation Documentation",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
@@ -251,7 +251,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
     },
     "4.d": {
       "type": "discovery",

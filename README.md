@@ -591,20 +591,11 @@ source ~/.zshrc
 # Check CLI is available (restart shell if needed)
 graphiti-mcp --help
 
-# Install and enable daemon service
+# Install daemon service (auto-enabled - no config editing needed!)
 graphiti-mcp daemon install
+# MCP server starts automatically within 5 seconds
 
-# Enable in config
-# Edit ~/.graphiti/graphiti.config.json:
-{
-  "daemon": {
-    "enabled": true,
-    "host": "127.0.0.1",
-    "port": 8321
-  }
-}
-
-# Check status
+# Verify daemon is running (should be active immediately)
 graphiti-mcp daemon status
 ```
 
