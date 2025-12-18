@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:39:05
+**Generated**: 2025-12-18 11:46:58
 
 ---
 
@@ -14,14 +14,14 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 24
-- **Completion**: 91.7%
+- **Total Stories**: 48
+- **Completion**: 54.2%
 
 ### By Status
 
-- completed: 22
-- in_progress: 1
-- unassigned: 1
+- completed: 26
+- in_progress: 4
+- unassigned: 18
 
 ### By Type
 
@@ -29,10 +29,98 @@
 - feature: 6
 - implementation: 6
 - testing: 6
+- validation: 6
+- validation_discovery: 6
+- validation_implementation: 6
+- validation_testing: 6
 
 ---
 
 ## Stories (Execution Order)
+
+  ### Story -1.d: Validate Discovery: Add ProjectOverride Schema and Deep Merge Logic
+  **Status**: in_progress | **Type**: validation_discovery
+  - Dependencies: Story -1
+  - Blocks: Story -1.i
+
+  ### Story -1.i: Validate Implementation: Add ProjectOverride Schema and Deep Merge Logic
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -1, Story -1.d
+  - Blocks: Story -1.t
+
+  ### Story -1.t: Validate Testing: Add ProjectOverride Schema and Deep Merge Logic
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -1, Story -1.i
+
+  ### Story -2.d: Validate Discovery: Implement get_effective_config() Method
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -2
+  - Blocks: Story -2.i
+
+  ### Story -2.i: Validate Implementation: Implement get_effective_config() Method
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -2, Story -2.d
+  - Blocks: Story -2.t
+
+  ### Story -2.t: Validate Testing: Implement get_effective_config() Method
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -2, Story -2.i
+
+  ### Story -3.d: Validate Discovery: CLI Command - config effective
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -3
+  - Blocks: Story -3.i
+
+  ### Story -3.i: Validate Implementation: CLI Command - config effective
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -3, Story -3.d
+  - Blocks: Story -3.t
+
+  ### Story -3.t: Validate Testing: CLI Command - config effective
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -3, Story -3.i
+
+  ### Story -4.d: Validate Discovery: CLI Commands - list-projects, set-override, remove-override
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -4
+  - Blocks: Story -4.i
+
+  ### Story -4.i: Validate Implementation: CLI Commands - list-projects, set-override, remove-override
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -4, Story -4.d
+  - Blocks: Story -4.t
+
+  ### Story -4.t: Validate Testing: CLI Commands - list-projects, set-override, remove-override
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -4, Story -4.i
+
+  ### Story -5.d: Validate Discovery: Session Tracking Integration
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -5
+  - Blocks: Story -5.i
+
+  ### Story -5.i: Validate Implementation: Session Tracking Integration
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -5, Story -5.d
+  - Blocks: Story -5.t
+
+  ### Story -5.t: Validate Testing: Session Tracking Integration
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -5, Story -5.i
+
+  ### Story -6.d: Validate Discovery: Config Validation and Documentation
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -6
+  - Blocks: Story -6.i
+
+  ### Story -6.i: Validate Implementation: Config Validation and Documentation
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -6, Story -6.d
+  - Blocks: Story -6.t
+
+  ### Story -6.t: Validate Testing: Config Validation and Documentation
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Add ProjectOverride Schema and Deep Merge Logic
   **Status**: completed | **Type**: discovery
@@ -91,7 +179,7 @@
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Session Tracking Integration
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Config Validation and Documentation
