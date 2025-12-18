@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 12:06:04
+**Generated**: 2025-12-18 12:06:59
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 77.1%
+- **Completion**: 83.3%
 
 ### By Status
 
 - blocked: 2
-- completed: 37
-- in_progress: 8
+- completed: 40
+- in_progress: 5
 - unassigned: 1
 
 ### By Type
@@ -92,7 +92,7 @@
   - Blocks: Story -4.t
 
   ### Story -4.t: Validate Testing: CLI Commands - list-projects, set-override, remove-override
-  **Status**: in_progress | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Session Tracking Integration
@@ -120,7 +120,7 @@
   - Blocks: Story -6.t
 
   ### Story -6.t: Validate Testing: Config Validation and Documentation
-  **Status**: in_progress | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Add ProjectOverride Schema and Deep Merge Logic
