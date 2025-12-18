@@ -67,7 +67,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Update Installation Documentation",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "3.d",
@@ -240,7 +240,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Update Installation Documentation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
