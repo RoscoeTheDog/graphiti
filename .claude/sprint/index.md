@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:47:53
+**Generated**: 2025-12-18 11:53:49
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 56.2%
+- **Completion**: 62.5%
 
 ### By Status
 
-- completed: 27
-- in_progress: 3
-- unassigned: 18
+- completed: 30
+- in_progress: 8
+- unassigned: 10
 
 ### By Type
 
@@ -44,7 +44,7 @@
   - Blocks: Story -1.i
 
   ### Story -1.i: Validate Implementation: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -1, Story -1.d
   - Blocks: Story -1.t
 
@@ -58,7 +58,7 @@
   - Blocks: Story -2.i
 
   ### Story -2.i: Validate Implementation: Implement get_effective_config() Method
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -2, Story -2.d
   - Blocks: Story -2.t
 
@@ -72,7 +72,7 @@
   - Blocks: Story -3.i
 
   ### Story -3.i: Validate Implementation: CLI Command - config effective
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: in_progress | **Type**: validation_implementation
   - Dependencies: Story -3, Story -3.d
   - Blocks: Story -3.t
 
@@ -86,7 +86,7 @@
   - Blocks: Story -4.i
 
   ### Story -4.i: Validate Implementation: CLI Commands - list-projects, set-override, remove-override
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: in_progress | **Type**: validation_implementation
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 
@@ -109,12 +109,12 @@
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Config Validation and Documentation
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -6
   - Blocks: Story -6.i
 
   ### Story -6.i: Validate Implementation: Config Validation and Documentation
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: in_progress | **Type**: validation_implementation
   - Dependencies: Story -6, Story -6.d
   - Blocks: Story -6.t
 
