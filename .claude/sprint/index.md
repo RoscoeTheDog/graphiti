@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 09:48:02
+**Generated**: 2025-12-18 10:54:06
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 24
-- **Completion**: 8.3%
+- **Completion**: 54.2%
 
 ### By Status
 
-- blocked: 2
-- completed: 2
-- pending: 15
-- unassigned: 5
+- completed: 13
+- in_progress: 1
+- pending: 6
+- unassigned: 4
 
 ### By Type
 
@@ -44,27 +44,27 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: blocked | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Implement get_effective_config() Method
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Implement get_effective_config() Method
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Implement get_effective_config() Method
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: CLI Command - config effective
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: CLI Command - config effective
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: CLI Command - config effective
@@ -72,7 +72,7 @@
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: CLI Commands - list-projects, set-override, remove-override
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: CLI Commands - list-projects, set-override, remove-override
@@ -84,15 +84,15 @@
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: Session Tracking Integration
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: Session Tracking Integration
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Session Tracking Integration
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Config Validation and Documentation

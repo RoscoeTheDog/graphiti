@@ -73,8 +73,8 @@
         "3.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
+        "discovery": "completed",
+        "implementation": "completed",
         "testing": "pending"
       },
       "blocks": [],
@@ -109,7 +109,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Session Tracking Integration",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "5.d",
@@ -258,7 +258,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: CLI Command - config effective",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -344,7 +344,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Session Tracking Integration",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
@@ -357,7 +357,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Session Tracking Integration",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
@@ -368,7 +368,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/5-plan.yaml"
+      }
     },
     "6.d": {
       "type": "discovery",
