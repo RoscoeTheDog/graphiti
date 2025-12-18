@@ -91,7 +91,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Validation - End-to-End UX Test",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "4.d",
@@ -107,7 +107,10 @@
       "file": "stories/4-validation-e2e-test.md",
       "advisories": [],
       "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
+      "_migration_version": "v4.0.0",
+      "metadata": {
+        "advisory": "{\"severity\": \"critical\", \"category\": \"test_failure\", \"message\": \"Test pass rate 14.3% below 90% threshold - test fixture setup errors (6 setup failures)\"}"
+      }
     },
     "1.d": {
       "type": "discovery",
@@ -289,7 +292,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Validation - End-to-End UX Test",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,

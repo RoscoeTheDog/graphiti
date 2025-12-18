@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 16:48:11
+**Generated**: 2025-12-17 16:55:04
 
 ---
 
@@ -19,9 +19,8 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 14
-- in_progress: 1
-- unassigned: 1
 
 ### By Type
 
@@ -79,7 +78,7 @@
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Validation - End-to-End UX Test
-  **Status**: unassigned | **Type**: testing
+  **Status**: blocked | **Type**: testing
   - Dependencies: Story 4
 
 ---
