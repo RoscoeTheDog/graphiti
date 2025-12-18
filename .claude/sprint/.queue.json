@@ -447,7 +447,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Add ProjectOverride Schema and Deep Merge Logic",
-      "status": "in_progress",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.d",
       "phase": "validation_discovery",

@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:46:58
+**Generated**: 2025-12-18 11:47:53
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 54.2%
+- **Completion**: 56.2%
 
 ### By Status
 
-- completed: 26
-- in_progress: 4
+- completed: 27
+- in_progress: 3
 - unassigned: 18
 
 ### By Type
@@ -39,7 +39,7 @@
 ## Stories (Execution Order)
 
   ### Story -1.d: Validate Discovery: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: in_progress | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -1
   - Blocks: Story -1.i
 
