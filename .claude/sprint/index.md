@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 12:00:26
+**Generated**: 2025-12-18 12:05:20
 
 ---
 
@@ -19,9 +19,10 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 35
-- in_progress: 6
-- unassigned: 7
+- in_progress: 10
+- unassigned: 1
 
 ### By Type
 
@@ -49,7 +50,7 @@
   - Blocks: Story -1.t
 
   ### Story -1.t: Validate Testing: Add ProjectOverride Schema and Deep Merge Logic
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: blocked | **Type**: validation_testing
   - Dependencies: Story -1, Story -1.i
 
   ### Story -2.d: Validate Discovery: Implement get_effective_config() Method
@@ -63,7 +64,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Implement get_effective_config() Method
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: CLI Command - config effective
@@ -77,7 +78,7 @@
   - Blocks: Story -3.t
 
   ### Story -3.t: Validate Testing: CLI Command - config effective
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: CLI Commands - list-projects, set-override, remove-override
@@ -91,7 +92,7 @@
   - Blocks: Story -4.t
 
   ### Story -4.t: Validate Testing: CLI Commands - list-projects, set-override, remove-override
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Session Tracking Integration
@@ -105,7 +106,7 @@
   - Blocks: Story -5.t
 
   ### Story -5.t: Validate Testing: Session Tracking Integration
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Config Validation and Documentation
@@ -119,7 +120,7 @@
   - Blocks: Story -6.t
 
   ### Story -6.t: Validate Testing: Config Validation and Documentation
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: in_progress | **Type**: validation_testing
   - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Add ProjectOverride Schema and Deep Merge Logic
