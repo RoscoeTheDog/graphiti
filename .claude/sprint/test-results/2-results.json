@@ -1,0 +1,54 @@
+{
+  "story_id": "2",
+  "timestamp": "2025-12-18T18:45:00Z",
+  "test_run": {
+    "command": "pytest tests/test_project_overrides.py::TestGetEffectiveConfig -v",
+    "duration_seconds": 0.26,
+    "exit_code": 0
+  },
+  "test_counts": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0
+  },
+  "pass_rate": 100.0,
+  "priority_breakdown": {
+    "P0": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "pass_rate": 100.0,
+      "tests": [
+        "test_get_effective_config_no_override",
+        "test_get_effective_config_with_override",
+        "test_get_effective_config_merge_llm",
+        "test_get_effective_config_merge_nested",
+        "test_get_effective_config_none_inherits",
+        "test_get_effective_config_normalizes_path",
+        "test_get_config_with_project_path",
+        "test_get_config_without_project_path",
+        "test_validate_override_warns_database"
+      ]
+    },
+    "P1": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "pass_rate": 100.0,
+      "tests": [
+        "test_validate_override_warns_daemon",
+        "test_validate_override_warns_multiple"
+      ]
+    }
+  },
+  "validation": {
+    "check_D": {
+      "name": "Test Pass Rates",
+      "status": "pass",
+      "blocking": false,
+      "details": "P0 pass rate: 100.0% (threshold: 100%), P1 pass rate: 100.0% (threshold: 90%)"
+    }
+  }
+}
