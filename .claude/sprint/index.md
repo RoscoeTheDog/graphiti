@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 17:24:38
+**Generated**: 2025-12-17 17:31:08
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 71.4%
+- **Completion**: 78.6%
 
 ### By Status
 
 - blocked: 2
-- completed: 20
-- in_progress: 1
-- unassigned: 5
+- completed: 22
+- unassigned: 4
 
 ### By Type
 
@@ -64,7 +63,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Clear Error Feedback for Connection Failures
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Update Installation Documentation
