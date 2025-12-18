@@ -18,8 +18,10 @@ Config search order:
 
 import json
 import os
+import platform
+import sys
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 from graphiti_core.extraction_config import ExtractionConfig
@@ -829,6 +831,27 @@ class SessionTrackingConfig(BaseModel):
 
 
 # ============================================================================
+# Project Override Configuration
+# ============================================================================
+
+
+class ProjectOverride(BaseModel):
+    """Project-specific configuration overrides.
+
+    Allows overriding LLM, embedder, extraction, and session tracking settings
+    on a per-project basis. Non-overridable sections: database, daemon, resilience.
+    """
+
+    llm: Optional[LLMConfig] = None
+    embedder: Optional[EmbedderConfig] = None
+    extraction: Optional[ExtractionConfig] = None
+    session_tracking: Optional[SessionTrackingConfig] = None
+
+    class Config:
+        extra = "forbid"  # Reject unknown fields to prevent typos
+
+
+# ============================================================================
 # Root Configuration
 # ============================================================================
 
@@ -851,6 +874,10 @@ class GraphitiConfig(BaseModel):
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
     llm_resilience: LLMResilienceConfig = Field(default_factory=LLMResilienceConfig)
     mcp_tools: MCPToolsBehaviorConfig = Field(default_factory=MCPToolsBehaviorConfig)
+    project_overrides: Dict[str, ProjectOverride] = Field(
+        default_factory=dict,
+        description="Project-specific configuration overrides, keyed by normalized project path"
+    )
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":
@@ -1067,6 +1094,106 @@ class GraphitiConfig(BaseModel):
         logger.info(f"Embedder: {self.embedder.provider} ({self.embedder.model})")
 
         logger.info("=" * 60)
+
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+
+def normalize_project_path(path: str) -> str:
+    """Normalize project path to UNIX format for consistent hashing.
+
+    This function ensures consistent path representation across platforms:
+    - Windows: C:\\Users\\Admin\\project → /c/Users/Admin/project
+    - Unix: /home/user/project → /home/user/project
+    - MSYS: /c/Users/Admin/project → /c/Users/Admin/project
+
+    Adapted from PathResolver._normalize_path_for_hash() in
+    graphiti_core/session_tracking/path_resolver.py
+
+    Args:
+        path: Path to normalize (any format)
+
+    Returns:
+        UNIX-style normalized path string
+    """
+    if not path:
+        return path
+
+    # Convert to Path object and resolve to absolute
+    p = Path(path)
+    try:
+        p = p.resolve()
+    except (OSError, RuntimeError):
+        # If resolve fails, just make it absolute
+        p = p.absolute()
+
+    # Convert to POSIX format (forward slashes)
+    path_str = p.as_posix()
+
+    # Handle Windows paths - convert drive letters to MSYS format
+    # C:/Users/... -> /c/Users/... (Git Bash style)
+    if platform.system() == "Windows" and ":" in path_str:
+        drive, rest = path_str.split(":", 1)
+        path_str = f"/{drive.lower()}{rest}"
+
+    # Remove trailing slashes (but keep root slash)
+    path_str = path_str.rstrip('/')
+    if not path_str:
+        path_str = '/'
+
+    return path_str
+
+
+def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively merge two dictionaries with None inheritance.
+
+    Merge rules:
+    - Scalars: override replaces base
+    - Dicts: merge recursively
+    - Lists: override replaces base
+    - None: inherit from base (do not replace)
+
+    Args:
+        base: Base dictionary
+        override: Override dictionary
+
+    Returns:
+        Merged dictionary
+
+    Examples:
+        >>> deep_merge({"a": 1}, {"b": 2})
+        {"a": 1, "b": 2}
+
+        >>> deep_merge({"a": {"b": 1}}, {"a": {"c": 2}})
+        {"a": {"b": 1, "c": 2}}
+
+        >>> deep_merge({"a": 1}, {"a": None})
+        {"a": 1}  # None inherits from base
+    """
+    result = base.copy()
+
+    for key, override_value in override.items():
+        # None means "inherit from base" - skip
+        if override_value is None:
+            continue
+
+        # Key not in base - add it
+        if key not in result:
+            result[key] = override_value
+            continue
+
+        base_value = result[key]
+
+        # Both are dicts - merge recursively
+        if isinstance(base_value, dict) and isinstance(override_value, dict):
+            result[key] = deep_merge(base_value, override_value)
+        else:
+            # Scalar or list - replace
+            result[key] = override_value
+
+    return result
 
 
 # ============================================================================
