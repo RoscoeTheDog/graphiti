@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 16:55:04
+**Generated**: 2025-12-17 17:02:12
 
 ---
 
@@ -14,13 +14,15 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 16
-- **Completion**: 87.5%
+- **Total Stories**: 28
+- **Completion**: 53.6%
 
 ### By Status
 
 - blocked: 2
-- completed: 14
+- completed: 15
+- in_progress: 1
+- unassigned: 10
 
 ### By Type
 
@@ -28,10 +30,56 @@
 - feature: 4
 - implementation: 4
 - testing: 4
+- validation: 3
+- validation_discovery: 3
+- validation_implementation: 3
+- validation_testing: 3
 
 ---
 
 ## Stories (Execution Order)
+
+  ### Story -1.d: Validate Discovery: Auto-Enable Daemon on Install
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -1
+  - Blocks: Story -1.i
+
+  ### Story -1.i: Validate Implementation: Auto-Enable Daemon on Install
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -1, Story -1.d
+  - Blocks: Story -1.t
+
+  ### Story -1.t: Validate Testing: Auto-Enable Daemon on Install
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -1, Story -1.i
+
+  ### Story -2.d: Validate Discovery: Clear Error Feedback for Connection Failures
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -2
+  - Blocks: Story -2.i
+
+  ### Story -2.i: Validate Implementation: Clear Error Feedback for Connection Failures
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -2, Story -2.d
+  - Blocks: Story -2.t
+
+  ### Story -2.t: Validate Testing: Clear Error Feedback for Connection Failures
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -2, Story -2.i
+
+  ### Story -3.d: Validate Discovery: Update Installation Documentation
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -3
+  - Blocks: Story -3.i
+
+  ### Story -3.i: Validate Implementation: Update Installation Documentation
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -3, Story -3.d
+  - Blocks: Story -3.t
+
+  ### Story -3.t: Validate Testing: Update Installation Documentation
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -3, Story -3.i
 
   ### Story 1.d: Discovery: Auto-Enable Daemon on Install
   **Status**: completed | **Type**: discovery
