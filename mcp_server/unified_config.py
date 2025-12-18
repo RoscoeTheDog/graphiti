@@ -857,9 +857,9 @@ class ProjectOverride(BaseModel):
 
 
 class GraphitiConfig(BaseModel):
-    """Root Graphiti configuration"""
+    """Root Graphiti configuration (v1.1.0 with project overrides)"""
 
-    version: str = "1.0.0"
+    version: str = "1.1.0"
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
@@ -878,6 +878,33 @@ class GraphitiConfig(BaseModel):
         default_factory=dict,
         description="Project-specific configuration overrides, keyed by normalized project path"
     )
+
+    @field_validator('version')
+    def validate_version(cls, v):
+        """Validate config version is within acceptable range (1.0.0 to 1.1.0)."""
+        from packaging import version as pkg_version
+
+        try:
+            v_parsed = pkg_version.parse(v)
+            min_version = pkg_version.parse("1.0.0")
+            max_version = pkg_version.parse("1.1.0")
+
+            if v_parsed < min_version:
+                raise ValueError(
+                    f"Config version {v} is too old (minimum: 1.0.0). "
+                    "Please upgrade your config file."
+                )
+            if v_parsed > max_version:
+                raise ValueError(
+                    f"Config version {v} is too new (maximum: 1.1.0). "
+                    "Please upgrade your Graphiti installation."
+                )
+        except Exception as e:
+            if "too old" in str(e) or "too new" in str(e):
+                raise
+            raise ValueError(f"Invalid version format: {v}. Expected semver format (e.g., 1.0.0)")
+
+        return v
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":

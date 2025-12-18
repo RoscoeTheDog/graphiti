@@ -1,0 +1,61 @@
+{
+  "version": "1.1.0",
+  "database": {
+    "backend": "neo4j",
+    "neo4j": {
+      "uri": "bolt://localhost:7687",
+      "user": "neo4j",
+      "password_env": "NEO4J_PASSWORD",
+      "database": "neo4j"
+    }
+  },
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1-mini",
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": null,
+      "organization": null
+    }
+  },
+  "embedder": {
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "dimensions": 1024,
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY"
+    }
+  },
+  "session_tracking": {
+    "enabled": false,
+    "watch_path": null
+  },
+  "project_overrides": {
+    "/home/user/dev-project": {
+      "llm": {
+        "provider": "openai",
+        "default_model": "gpt-4.1-mini",
+        "openai": {
+          "api_key_env": "OPENAI_API_KEY"
+        }
+      },
+      "session_tracking": {
+        "enabled": true,
+        "watch_path": "/home/user/dev-project"
+      }
+    },
+    "/home/user/prod-project": {
+      "llm": {
+        "provider": "openai",
+        "default_model": "gpt-4.1",
+        "openai": {
+          "api_key_env": "OPENAI_API_KEY"
+        }
+      },
+      "session_tracking": {
+        "enabled": false,
+        "watch_path": null
+      }
+    }
+  }
+}
