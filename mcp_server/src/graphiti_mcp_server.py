@@ -755,8 +755,24 @@ async def get_status() -> StatusResponse:
 
 @mcp.custom_route('/health', methods=['GET'])
 async def health_check(request) -> JSONResponse:
-    """Health check endpoint for Docker and load balancers."""
-    return JSONResponse({'status': 'healthy', 'service': 'graphiti-mcp'})
+    """Health check endpoint for Docker and load balancers.
+
+    Returns health status and daemon configuration state.
+    """
+    response_data = {
+        'status': 'healthy',
+        'service': 'graphiti-mcp'
+    }
+
+    # Add daemon state information if config is available
+    if config:
+        daemon_config = config.daemon if hasattr(config, 'daemon') else {}
+        response_data['daemon'] = {
+            'enabled': getattr(daemon_config, 'enabled', False) if hasattr(daemon_config, 'enabled') else False,
+            'config_path': str(config.config_path) if hasattr(config, 'config_path') else None
+        }
+
+    return JSONResponse(response_data)
 
 
 async def initialize_server() -> ServerConfig:
@@ -923,6 +939,20 @@ async def run_mcp_server():
     elif mcp_config.transport == 'http':
         # Use localhost for display if binding to 0.0.0.0
         display_host = 'localhost' if mcp.settings.host == '0.0.0.0' else mcp.settings.host
+
+        # Print startup banner to stderr (visible in Claude Code logs)
+        import sys
+        print("=" * 60, file=sys.stderr)
+        print("Graphiti MCP Server Starting", file=sys.stderr)
+        print("=" * 60, file=sys.stderr)
+        print(f"  Connection URL: http://{display_host}:{mcp.settings.port}/", file=sys.stderr)
+        print(f"  Health Check:   http://{display_host}:{mcp.settings.port}/health", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("  For daemon installation:", file=sys.stderr)
+        print("    graphiti-mcp daemon install", file=sys.stderr)
+        print("=" * 60, file=sys.stderr)
+        sys.stderr.flush()
+
         logger.info(
             f'Running MCP server with streamable HTTP transport on {mcp.settings.host}:{mcp.settings.port}'
         )

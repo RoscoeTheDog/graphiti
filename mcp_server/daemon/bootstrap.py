@@ -259,10 +259,18 @@ class BootstrapService:
                     # State change detected
                     if enabled != self.last_enabled_state:
                         if enabled:
-                            logger.info("daemon.enabled changed to true, starting MCP server")
+                            logger.info("=" * 60)
+                            logger.info("Daemon state changed: ENABLED")
+                            logger.info("=" * 60)
+                            logger.info(f"Starting MCP server from config: {self.config_path}")
+                            logger.info("The server will be available within 5 seconds")
                             self._start_mcp_server(config)
                         else:
-                            logger.info("daemon.enabled changed to false, stopping MCP server")
+                            logger.info("=" * 60)
+                            logger.info("Daemon state changed: DISABLED")
+                            logger.info("=" * 60)
+                            logger.info(f"Stopping MCP server (config: {self.config_path})")
+                            logger.info("To re-enable: Set daemon.enabled: true in config")
                             self._stop_mcp_server()
 
                         self.last_enabled_state = enabled

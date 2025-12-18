@@ -172,7 +172,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Clear Error Feedback for Connection Failures",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
@@ -188,7 +188,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Clear Error Feedback for Connection Failures",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
@@ -199,7 +199,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
     },
     "3.d": {
       "type": "discovery",
