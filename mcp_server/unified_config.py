@@ -1048,6 +1048,75 @@ class GraphitiConfig(BaseModel):
 
         logger.info(f"Saved config to: {config_path}")
 
+    def _validate_override(self, override_dict: Dict[str, Any], project_path: str) -> None:
+        """Validate that override only contains overridable sections.
+
+        Non-overridable sections: database, daemon, resilience, mcp_server, logging,
+        version, project, search, performance.
+
+        Overridable sections (from ProjectOverride): llm, embedder, extraction, session_tracking.
+
+        Args:
+            override_dict: Override dictionary to validate
+            project_path: Project path (for logging)
+        """
+        non_overridable = {
+            "database", "daemon", "resilience", "mcp_server", "logging",
+            "version", "project", "search", "performance"
+        }
+
+        for section in non_overridable:
+            if section in override_dict and override_dict[section] is not None:
+                logger.warning(
+                    f"Project override for {project_path} contains non-overridable "
+                    f"section '{section}', ignoring"
+                )
+
+    def get_effective_config(self, project_path: str) -> "GraphitiConfig":
+        """Get effective configuration for a project (global config + project override).
+
+        This method performs a deep merge of the global configuration with any
+        project-specific overrides defined in project_overrides dict.
+
+        Args:
+            project_path: Path to the project (any format, will be normalized)
+
+        Returns:
+            GraphitiConfig instance with merged configuration:
+            - If project_path not in project_overrides: returns self unchanged
+            - If found: returns new GraphitiConfig with deep-merged configuration
+
+        Example:
+            >>> config = GraphitiConfig.from_file()
+            >>> effective = config.get_effective_config("/home/user/myproject")
+            >>> # effective.llm may have project-specific provider while
+            >>> # effective.embedder inherits from global config
+        """
+        # Normalize project path for consistent lookup
+        normalized_path = normalize_project_path(project_path)
+
+        # Look up override in project_overrides dict
+        if normalized_path not in self.project_overrides:
+            # No override found - return global config unchanged
+            return self
+
+        override = self.project_overrides[normalized_path]
+
+        # Convert override to dict (exclude None values to allow inheritance)
+        override_dict = override.model_dump(exclude_none=True)
+
+        # Validate override (log warnings for non-overridable sections)
+        self._validate_override(override_dict, normalized_path)
+
+        # Convert self to dict
+        base_dict = self.model_dump()
+
+        # Deep merge: override values take precedence, None inherits from base
+        merged_dict = deep_merge(base_dict, override_dict)
+
+        # Reconstruct GraphitiConfig from merged dict
+        return GraphitiConfig.model_validate(merged_dict)
+
     def log_effective_config(self) -> None:
         """Log the effective configuration on startup.
 
@@ -1204,15 +1273,18 @@ def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]
 _config_instance: Optional[GraphitiConfig] = None
 
 
-def get_config(reload: bool = False, force_reload: bool = False) -> GraphitiConfig:
+def get_config(reload: bool = False, force_reload: bool = False, project_path: str | None = None) -> GraphitiConfig:
     """Get the global configuration instance.
 
     Args:
         reload: Force reload from file (deprecated, use force_reload)
         force_reload: Force reload from file
+        project_path: Optional project path for project-specific overrides.
+                     If provided, returns effective config (global + project override).
+                     If None, returns global config (backward compatible).
 
     Returns:
-        GraphitiConfig instance
+        GraphitiConfig instance (global or effective config based on project_path)
     """
     global _config_instance
 
@@ -1223,6 +1295,11 @@ def get_config(reload: bool = False, force_reload: bool = False) -> GraphitiConf
         _config_instance = GraphitiConfig.from_file()
         _config_instance.apply_env_overrides()
 
+    # If project_path provided, return effective config (global + override)
+    if project_path is not None:
+        return _config_instance.get_effective_config(project_path)
+
+    # Otherwise, return global config (backward compatible)
     return _config_instance
 
 
