@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 12:05:20
+**Generated**: 2025-12-18 12:06:04
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 72.9%
+- **Completion**: 77.1%
 
 ### By Status
 
 - blocked: 2
-- completed: 35
-- in_progress: 10
+- completed: 37
+- in_progress: 8
 - unassigned: 1
 
 ### By Type
@@ -106,7 +106,7 @@
   - Blocks: Story -5.t
 
   ### Story -5.t: Validate Testing: Session Tracking Integration
-  **Status**: in_progress | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -5, Story -5.i
 
   ### Story -6.d: Validate Discovery: Config Validation and Documentation
