@@ -1,0 +1,82 @@
+{
+  "story_id": "3",
+  "phase": "testing",
+  "executed_by": "testing:3.t",
+  "timestamp": "2025-12-18T18:30:00Z",
+
+  "summary": {
+    "total_tests": 64,
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100,
+    "duration_ms": 430
+  },
+
+  "categories": {
+    "unit": {
+      "total": 52,
+      "passed": 52,
+      "failed": 0,
+      "coverage": null
+    },
+    "integration": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "coverage": null
+    },
+    "security": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-1": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_cmd_effective_uses_cwd_by_default", "tests/test_config_cli.py::test_end_to_end_no_override"],
+      "reason": null
+    },
+    "AC-2": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_cmd_effective_with_project_flag", "tests/test_config_cli.py::test_end_to_end_with_override"],
+      "reason": null
+    },
+    "AC-3": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_cmd_effective_diff_flag", "tests/test_config_cli.py::test_end_to_end_diff_mode"],
+      "reason": null
+    },
+    "AC-4": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_cmd_effective_json_flag", "tests/test_config_cli.py::test_end_to_end_json_mode"],
+      "reason": null
+    },
+    "AC-5": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_format_config_human_with_overrides", "tests/test_config_cli.py::test_format_section_with_overrides"],
+      "reason": null
+    },
+    "AC-6": {
+      "covered": true,
+      "tests": ["tests/test_config_cli.py::test_colored_output_in_tty", "tests/test_config_cli.py::test_no_color_in_non_tty"],
+      "reason": null
+    }
+  },
+
+  "recommendations": [],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false
+}

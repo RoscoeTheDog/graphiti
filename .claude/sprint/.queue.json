@@ -65,7 +65,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "CLI Command - config effective",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "3.d",
@@ -271,7 +271,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: CLI Command - config effective",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
