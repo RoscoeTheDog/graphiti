@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 17:02:12
+**Generated**: 2025-12-17 17:08:10
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 53.6%
+- **Completion**: 57.1%
 
 ### By Status
 
 - blocked: 2
-- completed: 15
+- completed: 16
 - in_progress: 1
-- unassigned: 10
+- unassigned: 9
 
 ### By Type
 
@@ -45,7 +45,7 @@
   - Blocks: Story -1.i
 
   ### Story -1.i: Validate Implementation: Auto-Enable Daemon on Install
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -1, Story -1.d
   - Blocks: Story -1.t
 
