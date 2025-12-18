@@ -91,7 +91,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Validation - End-to-End UX Test",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "4.d",
@@ -260,7 +260,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Validation - End-to-End UX Test",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,
@@ -273,14 +273,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Validation - End-to-End UX Test",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/4-plan.yaml"
+      "requires_artifact": "plans/4-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4-plan.yaml"
+      }
     },
     "4.t": {
       "type": "testing",
