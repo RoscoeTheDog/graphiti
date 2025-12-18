@@ -547,7 +547,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Fix E2E Test Fixtures VenvCreationError",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": "4",
       "children": [
         "4.1.d",
@@ -562,7 +562,10 @@
       "blocks": [],
       "file": "stories/4.1-fix-e2e-test-fixtures-venvcrea.md",
       "priority": "P2",
-      "blocking": false
+      "blocking": false,
+      "metadata": {
+        "advisory": "{\"severity\": \"critical\", \"category\": \"test_failure\", \"message\": \"Test pass rate 42.9% below 90% threshold - install API mismatch and package installation issues (4 failures)\"}"
+      }
     },
     "4.1.d": {
       "type": "discovery",
@@ -601,7 +604,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Fix E2E Test Fixtures VenvCreationError",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "4.1",
       "phase": "testing",
       "phase_order": 3,

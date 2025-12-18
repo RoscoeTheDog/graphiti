@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-17 18:09:46
+**Generated**: 2025-12-17 18:14:48
 
 ---
 
@@ -19,10 +19,8 @@
 
 ### By Status
 
-- blocked: 2
+- blocked: 4
 - completed: 28
-- in_progress: 1
-- unassigned: 1
 
 ### By Type
 
@@ -141,7 +139,7 @@
     - Blocks: Story 4.1.t
 
     ### Story 4.1.t: Testing: Fix E2E Test Fixtures VenvCreationError
-    **Status**: unassigned | **Type**: testing
+    **Status**: blocked | **Type**: testing
     - Dependencies: Story 4.1, Story 4.1.i
 
 ---

@@ -1,0 +1,130 @@
+{
+  "story_id": "4.1",
+  "phase": "testing",
+  "executed_by": "testing:4.1.t",
+  "timestamp": "2025-12-17T19:45:00Z",
+
+  "summary": {
+    "total_tests": 7,
+    "passed": 3,
+    "failed": 4,
+    "skipped": 0,
+    "pass_rate": 42.9,
+    "duration_ms": 11200
+  },
+
+  "categories": {
+    "unit": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null
+    },
+    "integration": {
+      "total": 7,
+      "passed": 3,
+      "failed": 4,
+      "coverage": null
+    },
+    "security": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [
+    {
+      "test": "test_fresh_install_flow",
+      "category": "integration",
+      "error": "TypeError: 'bool' object is not subscriptable - install_result is bool instead of dict",
+      "file": "test_daemon_e2e_validation.py:159",
+      "severity": "high"
+    },
+    {
+      "test": "test_reinstall_idempotent",
+      "category": "integration",
+      "error": "TypeError: 'bool' object is not subscriptable - first_install is bool instead of dict",
+      "file": "test_daemon_e2e_validation.py:284",
+      "severity": "high"
+    },
+    {
+      "test": "test_health_check_timing",
+      "category": "integration",
+      "error": "AssertionError: Health check should succeed - Package installation failed: Cannot find mcp_server package",
+      "file": "test_daemon_e2e_validation.py:390",
+      "severity": "high"
+    },
+    {
+      "test": "test_daemon_status_command",
+      "category": "integration",
+      "error": "AssertionError: Status command should succeed - ModuleNotFoundError: No module named 'mcp_server'",
+      "file": "test_daemon_e2e_validation.py:428",
+      "severity": "high"
+    }
+  ],
+
+  "acceptance_criteria_coverage": {
+    "AC-4.1.1": {
+      "covered": true,
+      "tests": ["ensure_venv_exists fixture"],
+      "reason": "Session-scoped venv fixture working (no VenvCreationError)"
+    },
+    "AC-4.1.2": {
+      "covered": true,
+      "tests": ["daemon_manager fixture"],
+      "reason": "daemon_manager fixture initializes without VenvCreationError"
+    },
+    "AC-4.1.3": {
+      "covered": false,
+      "tests": [],
+      "reason": "Only 3/7 tests passing (42.9%), goal was all 6 previously failing tests passing"
+    },
+    "AC-4.1.4": {
+      "covered": true,
+      "tests": ["All E2E tests"],
+      "reason": "No AttributeError for get_status() - API method names corrected"
+    },
+    "AC-4.1.5": {
+      "covered": false,
+      "tests": [],
+      "reason": "Test pass rate 42.9% is below 90% threshold"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "fix_required",
+      "description": "Fix install() API return type - should return dict, not bool",
+      "action": "Update DaemonManager.install() to return {'success': bool, 'error': str} instead of bool"
+    },
+    {
+      "type": "fix_required",
+      "description": "Fix package installation in venv - cannot find mcp_server package",
+      "action": "Update VenvManager.install_package() to correctly locate mcp_server/pyproject.toml relative to repository root"
+    },
+    {
+      "type": "improve",
+      "description": "Better error handling for missing NSSM on Windows",
+      "action": "Consider graceful degradation or clearer error messages for Windows service manager"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "below_threshold",
+    "action": "block_and_recommend_remediation"
+  },
+
+  "outcome": "blocked",
+  "blocking": true,
+
+  "notes": [
+    "VenvCreationError successfully eliminated - primary goal achieved",
+    "API method name fixes (get_status -> status) working correctly",
+    "Session-scoped venv fixture working as designed",
+    "New failures discovered: install() API contract mismatch and package installation issues",
+    "Pass rate improved from 14.3% (1/7) to 42.9% (3/7) but still below 90% threshold"
+  ]
+}
