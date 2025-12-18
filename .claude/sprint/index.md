@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 12:07:06
+**Generated**: 2025-12-18 12:07:31
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 83.3%
+- **Completion**: 91.7%
 
 ### By Status
 
 - blocked: 2
-- completed: 40
-- in_progress: 5
+- completed: 44
+- in_progress: 1
 - unassigned: 1
 
 ### By Type
@@ -64,7 +64,7 @@
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Implement get_effective_config() Method
-  **Status**: in_progress | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: CLI Command - config effective
@@ -78,7 +78,7 @@
   - Blocks: Story -3.t
 
   ### Story -3.t: Validate Testing: CLI Command - config effective
-  **Status**: in_progress | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: CLI Commands - list-projects, set-override, remove-override
