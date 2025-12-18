@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 11:10:40
+**Generated**: 2025-12-18 11:17:36
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 24
-- **Completion**: 66.7%
+- **Completion**: 79.2%
 
 ### By Status
 
-- completed: 16
+- completed: 19
 - in_progress: 2
-- pending: 3
-- unassigned: 3
+- pending: 1
+- unassigned: 2
 
 ### By Type
 
@@ -76,11 +76,11 @@
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: CLI Commands - list-projects, set-override, remove-override
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: CLI Commands - list-projects, set-override, remove-override
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: Session Tracking Integration
