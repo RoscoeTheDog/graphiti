@@ -92,7 +92,31 @@ class TestConfigPathDetection:
 class TestInstallCommand:
     """Test daemon install command behavior."""
 
-    def test_install_creates_config_directory(self, tmp_path, capsys):
+    @pytest.fixture
+    def mock_install_dependencies(self):
+        """Mock all install dependencies (venv, wrapper, path)."""
+        with patch('mcp_server.daemon.manager.VenvManager') as mock_venv:
+            with patch('mcp_server.daemon.manager.WrapperGenerator') as mock_wrapper:
+                with patch('mcp_server.daemon.manager.PathIntegration') as mock_path:
+                    mock_venv_instance = Mock()
+                    mock_venv_instance.create_venv.return_value = (True, "Venv created")
+                    mock_venv_instance.install_package.return_value = (True, "Package installed")
+                    mock_venv.return_value = mock_venv_instance
+
+                    mock_wrapper_instance = Mock()
+                    mock_wrapper_instance.generate_wrappers.return_value = (True, "Wrappers generated")
+                    mock_wrapper.return_value = mock_wrapper_instance
+
+                    mock_path_instance = Mock()
+                    mock_path.return_value = mock_path_instance
+
+                    yield {
+                        'venv': mock_venv,
+                        'wrapper': mock_wrapper,
+                        'path': mock_path
+                    }
+
+    def test_install_creates_config_directory(self, tmp_path, capsys, mock_install_dependencies):
         """Install creates config directory if missing"""
         with patch('platform.system', return_value='Linux'):
             with patch('pathlib.Path.home', return_value=tmp_path):
@@ -108,7 +132,7 @@ class TestInstallCommand:
                     assert manager.config_path.parent.exists()
                     mock_systemd_instance.install.assert_called_once()
 
-    def test_install_creates_default_config(self, tmp_path, capsys):
+    def test_install_creates_default_config(self, tmp_path, capsys, mock_install_dependencies):
         """Install creates default config if file missing"""
         with patch('platform.system', return_value='Linux'):
             with patch('pathlib.Path.home', return_value=tmp_path):
@@ -126,10 +150,10 @@ class TestInstallCommand:
                     # Verify default config structure
                     config = json.loads(manager.config_path.read_text())
                     assert 'daemon' in config
-                    assert config['daemon']['enabled'] is False
+                    assert config['daemon']['enabled'] is True
 
-    def test_install_preserves_existing_config(self, tmp_path):
-        """Install does not overwrite existing config"""
+    def test_install_preserves_existing_config_when_enabled(self, tmp_path, mock_install_dependencies):
+        """Install does not modify config when daemon.enabled is already true"""
         with patch('platform.system', return_value='Linux'):
             with patch('pathlib.Path.home', return_value=tmp_path):
                 with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
@@ -139,7 +163,7 @@ class TestInstallCommand:
 
                     manager = DaemonManager()
 
-                    # Create existing config with custom values
+                    # Create existing config with enabled=true and custom values
                     manager.config_path.parent.mkdir(parents=True, exist_ok=True)
                     existing_config = {
                         "daemon": {"enabled": True, "port": 9999},
@@ -153,7 +177,61 @@ class TestInstallCommand:
                     config = json.loads(manager.config_path.read_text())
                     assert config == existing_config
 
-    def test_install_success_message(self, tmp_path, capsys):
+    def test_install_prompts_when_config_disabled(self, tmp_path, monkeypatch, mock_install_dependencies):
+        """Install prompts user when existing config has enabled=false"""
+        with patch('platform.system', return_value='Linux'):
+            with patch('pathlib.Path.home', return_value=tmp_path):
+                with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
+                    mock_systemd_instance = Mock()
+                    mock_systemd_instance.install.return_value = True
+                    mock_systemd.return_value = mock_systemd_instance
+
+                    manager = DaemonManager()
+
+                    # Create existing config with enabled=false
+                    manager.config_path.parent.mkdir(parents=True, exist_ok=True)
+                    existing_config = {
+                        "daemon": {"enabled": False, "port": 8321}
+                    }
+                    manager.config_path.write_text(json.dumps(existing_config))
+
+                    # User says yes
+                    monkeypatch.setattr('builtins.input', lambda _: 'y')
+                    success = manager.install()
+
+                    assert success
+                    config = json.loads(manager.config_path.read_text())
+                    assert config['daemon']['enabled'] is True
+                    assert config['daemon']['port'] == 8321
+
+    def test_install_skips_update_when_user_declines(self, tmp_path, monkeypatch, mock_install_dependencies):
+        """Install preserves disabled state when user declines update"""
+        with patch('platform.system', return_value='Linux'):
+            with patch('pathlib.Path.home', return_value=tmp_path):
+                with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
+                    mock_systemd_instance = Mock()
+                    mock_systemd_instance.install.return_value = True
+                    mock_systemd.return_value = mock_systemd_instance
+
+                    manager = DaemonManager()
+
+                    # Create existing config with enabled=false
+                    manager.config_path.parent.mkdir(parents=True, exist_ok=True)
+                    existing_config = {
+                        "daemon": {"enabled": False, "port": 8321}
+                    }
+                    manager.config_path.write_text(json.dumps(existing_config))
+
+                    # User says no
+                    monkeypatch.setattr('builtins.input', lambda _: 'n')
+                    success = manager.install()
+
+                    assert success
+                    config = json.loads(manager.config_path.read_text())
+                    assert config['daemon']['enabled'] is False
+                    assert config['daemon']['port'] == 8321
+
+    def test_install_success_message(self, tmp_path, capsys, mock_install_dependencies):
         """Install displays success message with next steps"""
         with patch('platform.system', return_value='Linux'):
             with patch('pathlib.Path.home', return_value=tmp_path):
@@ -167,7 +245,7 @@ class TestInstallCommand:
 
                     captured = capsys.readouterr()
                     assert 'SUCCESS' in captured.out
-                    assert 'daemon": { "enabled": true }' in captured.out
+                    assert 'auto-start enabled' in captured.out
                     assert 'graphiti-mcp daemon status' in captured.out
 
     def test_install_failure_message(self, tmp_path, capsys):

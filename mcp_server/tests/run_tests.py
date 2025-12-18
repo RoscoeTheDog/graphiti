@@ -120,6 +120,8 @@ class TestRunner:
             pytest_args.append('test_async_operations.py')
         elif suite == 'stress':
             pytest_args.extend(['-m', 'slow', 'test_stress_load.py'])
+        elif suite == 'e2e':
+            pytest_args.extend(['-m', 'e2e', 'test_daemon_e2e_validation.py'])
         elif suite == 'smoke':
             # Quick smoke test - just basic operations
             pytest_args.extend(
@@ -236,12 +238,14 @@ Test Suites:
   comprehensive - Run comprehensive integration test suite
   async         - Run async operation tests
   stress        - Run stress and load tests
+  e2e           - Run end-to-end daemon UX validation tests
   smoke         - Run quick smoke tests
   all           - Run all tests
 
 Examples:
   python run_tests.py smoke                    # Quick smoke test
   python run_tests.py integration --parallel 4 # Run integration tests in parallel
+  python run_tests.py e2e                      # Run daemon E2E validation tests
   python run_tests.py stress --database neo4j  # Run stress tests with Neo4j
   python run_tests.py all --coverage          # Run all tests with coverage
         """,
@@ -249,7 +253,7 @@ Examples:
 
     parser.add_argument(
         'suite',
-        choices=['unit', 'integration', 'comprehensive', 'async', 'stress', 'smoke', 'all'],
+        choices=['unit', 'integration', 'comprehensive', 'async', 'stress', 'e2e', 'smoke', 'all'],
         help='Test suite to run',
     )
 

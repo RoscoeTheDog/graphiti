@@ -165,11 +165,14 @@ class DaemonManager:
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Step 4: Initialize config if needed
+        # Step 4: Initialize or update config
         if not self.config_path.exists():
             print()
             print(f"Creating default config: {self.config_path}")
             self._create_default_config()
+        else:
+            # Config exists, update if needed
+            self._update_existing_config()
 
         # Step 5: Install service
         print()
@@ -179,13 +182,16 @@ class DaemonManager:
             print()
             print("[SUCCESS] Bootstrap service installed successfully")
             print()
+            print("Daemon is now running with auto-start enabled!")
+            print()
+            print("What's happening:")
+            print("  - The MCP server will start automatically within 5 seconds")
+            print("  - Config file created/updated with daemon.enabled = true")
+            print()
             print("Next steps:")
-            print(f"  1. Edit config: {self.config_path}")
-            print('     Set: "daemon": { "enabled": true }')
-            print()
-            print("  2. The MCP server will start automatically within 5 seconds")
-            print()
-            print("  3. Check status: graphiti-mcp daemon status")
+            print("  1. Check status: graphiti-mcp daemon status")
+            print(f"  2. View logs: graphiti-mcp daemon logs")
+            print(f"  3. Edit config (optional): {self.config_path}")
             return True
         else:
             print()
@@ -371,8 +377,8 @@ class DaemonManager:
             "daemon": {
                 "_comment": "Daemon service configuration (Two-Layer Architecture)",
                 "_docs": "See .claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md",
-                "enabled": False,
-                "_enabled_help": "Master switch: false (default) = MCP server stopped, true = MCP server running",
+                "enabled": True,
+                "_enabled_help": "Master switch: false = MCP server stopped, true (default) = MCP server running",
                 "host": "127.0.0.1",
                 "_host_help": "Bind address for HTTP API. Use 127.0.0.1 (localhost-only, secure)",
                 "port": 8321,
@@ -397,6 +403,61 @@ class DaemonManager:
         }
 
         self.config_path.write_text(json.dumps(default_config, indent=2))
+
+    def _update_existing_config(self) -> None:
+        """Update existing config to enable daemon if needed.
+
+        If config exists with daemon.enabled: false, prompts user before updating.
+        If user confirms, updates config to set enabled: true.
+        If daemon.enabled is already true, skips update.
+        """
+        try:
+            # Read existing config
+            config_text = self.config_path.read_text()
+            config = json.loads(config_text)
+
+            # Check if daemon.enabled is already true
+            daemon_config = config.get("daemon", {})
+            if daemon_config.get("enabled", False):
+                # Already enabled, no update needed
+                return
+
+            # Daemon is disabled, prompt user for update
+            print()
+            print(f"Found existing config: {self.config_path}")
+            print("  Current setting: daemon.enabled = false (MCP server will not auto-start)")
+            print()
+            print("The installer can update this to enabled = true for auto-start.")
+            print()
+
+            try:
+                response = input("  Update config to enable daemon? (y/n): ").strip().lower()
+                if response == 'y':
+                    # Update config to enable daemon
+                    daemon_config["enabled"] = True
+                    config["daemon"] = daemon_config
+                    self.config_path.write_text(json.dumps(config, indent=2))
+                    print()
+                    print("  [OK] Config updated: daemon.enabled = true")
+                else:
+                    print()
+                    print("  [SKIPPED] Config not updated, daemon remains disabled")
+                    print("  You can manually enable later by editing:")
+                    print(f"    {self.config_path}")
+            except (KeyboardInterrupt, EOFError):
+                print()
+                print("  [SKIPPED] Config update cancelled")
+
+        except json.JSONDecodeError:
+            print(f"[WARNING] Existing config has invalid JSON: {self.config_path}")
+            print("  Creating backup and generating new config...")
+            backup_path = self.config_path.with_suffix('.json.backup')
+            self.config_path.rename(backup_path)
+            print(f"  Backup saved to: {backup_path}")
+            self._create_default_config()
+        except Exception as e:
+            print(f"[WARNING] Error reading existing config: {e}")
+            print("  Proceeding with existing config unchanged")
 
 
 def main():
@@ -467,7 +528,7 @@ def main():
             sys.exit(0 if success else 1)
 
         elif args.command == "status":
-            manager.status()
+            manager.print_status()
             sys.exit(0)
 
         elif args.command == "logs":

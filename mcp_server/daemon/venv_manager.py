@@ -246,7 +246,7 @@ class VenvManager:
             Path to pip executable
 
         Raises:
-            VenvCreationError: If venv does not exist
+            VenvCreationError: If venv does not exist or pip not found
         """
         if not self.detect_venv():
             raise VenvCreationError(
@@ -255,16 +255,25 @@ class VenvManager:
             )
 
         if sys.platform == "win32":
-            pip_exe = self.venv_path / "Scripts" / "pip.exe"
-        else:
-            pip_exe = self.venv_path / "bin" / "pip"
-
-        if not pip_exe.exists():
+            # Try multiple pip executable names (pip.exe, pip3.exe)
+            scripts_dir = self.venv_path / "Scripts"
+            for pip_name in ["pip.exe", "pip3.exe"]:
+                pip_exe = scripts_dir / pip_name
+                if pip_exe.exists():
+                    return pip_exe
             raise VenvCreationError(
-                f"Pip executable not found in venv: {pip_exe}"
+                f"Pip executable not found in venv Scripts: {scripts_dir}"
             )
-
-        return pip_exe
+        else:
+            # Unix: try pip, pip3
+            bin_dir = self.venv_path / "bin"
+            for pip_name in ["pip", "pip3"]:
+                pip_exe = bin_dir / pip_name
+                if pip_exe.exists():
+                    return pip_exe
+            raise VenvCreationError(
+                f"Pip executable not found in venv bin: {bin_dir}"
+            )
 
     def get_uv_executable(self) -> Optional[Path]:
         """
@@ -290,33 +299,72 @@ class VenvManager:
 
     def detect_repo_location(self) -> Optional[Path]:
         """
-        Dynamically detect the repository location by searching upward from venv path.
+        Dynamically detect the repository location.
 
         Searches for a directory containing mcp_server/pyproject.toml.
+
+        Detection order:
+        1. GRAPHITI_REPO_PATH environment variable (explicit override)
+        2. Current working directory (covers most dev/test scenarios)
+        3. __file__ location search (for installed package scenarios)
+        4. Upward from venv path (legacy fallback)
 
         Returns:
             Path to repository root if found, None otherwise
         """
-        # Start from venv path and search upward
+        import os
+
+        def _check_path(path: Path, source: str) -> Optional[Path]:
+            """Check if path contains mcp_server/pyproject.toml."""
+            try:
+                resolved = path.resolve()
+                pyproject = resolved / "mcp_server" / "pyproject.toml"
+                if pyproject.exists():
+                    logger.debug(f"Repository found at: {resolved} (via {source})")
+                    return resolved
+            except Exception:
+                pass
+            return None
+
+        # 1. Check environment variable override
+        env_path = os.environ.get("GRAPHITI_REPO_PATH")
+        if env_path:
+            result = _check_path(Path(env_path), "GRAPHITI_REPO_PATH env")
+            if result:
+                return result
+            logger.warning(f"GRAPHITI_REPO_PATH set but invalid: {env_path}")
+
+        # 2. Check current working directory (most common for tests and dev)
+        result = _check_path(Path.cwd(), "current directory")
+        if result:
+            return result
+
+        # 3. Check __file__ location (for when running as installed package)
+        try:
+            # Go up from venv_manager.py: daemon/ -> mcp_server/ -> repo_root/
+            file_path = Path(__file__).resolve()
+            repo_candidate = file_path.parent.parent.parent
+            result = _check_path(repo_candidate, "__file__ location")
+            if result:
+                return result
+        except Exception:
+            pass
+
+        # 4. Legacy: Search upward from venv path
         current = self.venv_path.resolve()
-
-        # Search up to 5 levels (prevents infinite loop)
         for _ in range(5):
-            # Check if this directory contains mcp_server/pyproject.toml
-            mcp_server_dir = current / "mcp_server"
-            pyproject_toml = mcp_server_dir / "pyproject.toml"
-
-            if pyproject_toml.exists():
-                logger.debug(f"Repository found at: {current}")
-                return current
-
-            # Move up one level
+            result = _check_path(current, "venv upward search")
+            if result:
+                return result
             parent = current.parent
             if parent == current:  # Reached root
                 break
             current = parent
 
-        logger.warning(f"Repository not found searching upward from {self.venv_path}")
+        logger.warning(
+            f"Repository not found. Checked: CWD ({Path.cwd()}), "
+            f"venv upward ({self.venv_path})"
+        )
         return None
 
     def validate_installation(self, package_name: str = "mcp_server") -> bool:

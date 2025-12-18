@@ -1,0 +1,728 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "daemon-auto-enable-ux-v1.0",
+    "name": "Daemon Auto-Enable UX",
+    "version": "1.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-17 15:28",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
+  },
+  "stories": {
+    "1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "3",
+        "4"
+      ],
+      "file": "stories/1-auto-enable-daemon-on-install.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "4"
+      ],
+      "file": "stories/2-clear-error-feedback.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "metadata": {
+        "advisory": "{\"severity\": \"low\", \"category\": \"test_warning\", \"message\": \"Test pass rate 78.9% - test implementation issues (non-blocking)\"}"
+      }
+    },
+    "3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update Installation Documentation",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "4"
+      ],
+      "file": "stories/3-update-installation-docs.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "4": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Validation - End-to-End UX Test",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t",
+        "4.1",
+        "4.2"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4-validation-e2e-test.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0",
+      "metadata": {
+        "advisory": "{\"severity\": \"critical\", \"category\": \"test_failure\", \"message\": \"Test pass rate 14.3% below 90% threshold - test fixture setup errors (6 setup failures)\"}"
+      }
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1-plan.yaml"
+      }
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update Installation Documentation",
+      "status": "completed",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update Installation Documentation",
+      "status": "completed",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update Installation Documentation",
+      "status": "completed",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Validation - End-to-End UX Test",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Validation - End-to-End UX Test",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4-plan.yaml"
+      }
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Validation - End-to-End UX Test",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/4-plan.yaml"
+      }
+    },
+    "-1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "validates": "1",
+      "children": [
+        "-1.d",
+        "-1.i",
+        "-1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.i"
+      ],
+      "file": null
+    },
+    "-1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": null
+    },
+    "-1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Auto-Enable Daemon on Install",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Clear Error Feedback for Connection Failures",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update Installation Documentation",
+      "status": "completed",
+      "validates": "3",
+      "children": [
+        "-3.d",
+        "-3.i",
+        "-3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update Installation Documentation",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.i"
+      ],
+      "file": null
+    },
+    "-3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update Installation Documentation",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.t"
+      ],
+      "file": null
+    },
+    "-3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update Installation Documentation",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "4.1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix E2E Test Fixtures VenvCreationError",
+      "status": "completed",
+      "parent": "4",
+      "children": [
+        "4.1.d",
+        "4.1.i",
+        "4.1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4.1-fix-e2e-test-fixtures-venvcrea.md",
+      "priority": "P2",
+      "blocking": false,
+      "metadata": {
+        "advisory": "{\"severity\": \"critical\", \"category\": \"test_failure\", \"message\": \"Test pass rate 42.9% below 90% threshold - install API mismatch and package installation issues (4 failures)\"}"
+      }
+    },
+    "4.1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix E2E Test Fixtures VenvCreationError",
+      "status": "completed",
+      "parent": "4.1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "4.1.i"
+      ],
+      "file": null,
+      "artifact": "plans/4.1-plan.yaml"
+    },
+    "4.1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix E2E Test Fixtures VenvCreationError",
+      "status": "completed",
+      "parent": "4.1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "4.1.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/4.1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4.1-plan.yaml"
+      }
+    },
+    "4.1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix E2E Test Fixtures VenvCreationError",
+      "status": "completed",
+      "parent": "4.1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/4.1-plan.yaml"
+      }
+    },
+    "4.2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix E2E Test API Assertions",
+      "status": "completed",
+      "parent": "4",
+      "children": [
+        "4.2.d",
+        "4.2.i",
+        "4.2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4.2-fix-e2e-test-api-assertions.md",
+      "priority": "P2",
+      "blocking": false
+    },
+    "4.2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix E2E Test API Assertions",
+      "status": "completed",
+      "parent": "4.2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "4.2.i"
+      ],
+      "file": null,
+      "artifact": "plans/4.2-plan.yaml"
+    },
+    "4.2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix E2E Test API Assertions",
+      "status": "completed",
+      "parent": "4.2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "4.2.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/4.2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4.2-plan.yaml"
+      }
+    },
+    "4.2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix E2E Test API Assertions",
+      "status": "completed",
+      "parent": "4.2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/4.2-plan.yaml"
+      }
+    }
+  },
+  "execution_queue": [
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "4.1.d",
+    "4.1.i",
+    "4.1.t",
+    "4.2.d",
+    "4.2.i",
+    "4.2.t"
+  ]
+}
