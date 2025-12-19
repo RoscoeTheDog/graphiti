@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 19:26:04
+**Generated**: 2025-12-18 19:31:40
 
 ---
 
@@ -15,14 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 52
-- **Completion**: 92.3%
+- **Completion**: 96.2%
 
 ### By Status
 
 - blocked: 2
-- completed: 48
-- in_progress: 1
-- unassigned: 1
+- completed: 50
 
 ### By Type
 
@@ -97,7 +95,7 @@
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: CLI Commands - list-projects, set-override, remove-override
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -4
   - Blocks: Story -4.i
 
