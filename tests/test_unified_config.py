@@ -110,7 +110,7 @@ def test_config_loads_from_file(temp_config_file, monkeypatch, clean_env):
     """Test loading config from graphiti.config.json file."""
     monkeypatch.chdir(temp_config_file.parent)
 
-    config = get_config()
+    config = get_config(reload=True)
 
     assert config.database.backend == "neo4j"
     assert config.database.neo4j.uri == "bolt://localhost:7687"

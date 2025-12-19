@@ -932,7 +932,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Fix Test Isolation - Global Config Singleton Pollution",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1.r",
       "phase": "implementation",
       "phase_order": 2,
@@ -961,7 +961,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1.r-plan.yaml"
+      }
     }
   },
   "execution_queue": [
