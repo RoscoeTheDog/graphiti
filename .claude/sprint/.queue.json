@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Add ProjectOverride Schema and Deep Merge Logic",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -896,7 +896,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Fix Test Isolation - Global Config Singleton Pollution",
-      "status": "in_progress",
+      "status": "completed",
       "parent": "1",
       "children": [
         "1.r.d",
@@ -950,7 +950,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Fix Test Isolation - Global Config Singleton Pollution",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1.r",
       "phase": "testing",
       "phase_order": 3,

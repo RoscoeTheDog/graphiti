@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 19:11:05
+**Generated**: 2025-12-18 19:19:27
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 52
-- **Completion**: 84.6%
+- **Completion**: 92.3%
 
 ### By Status
 
 - blocked: 2
-- completed: 44
-- in_progress: 3
-- unassigned: 3
+- completed: 48
+- in_progress: 1
+- unassigned: 1
 
 ### By Type
 
@@ -46,12 +46,12 @@
     - Blocks: Story 1.r.i
 
     ### Story 1.r.i: Implementation: Fix Test Isolation - Global Config Singleton Pollution
-    **Status**: unassigned | **Type**: implementation
+    **Status**: completed | **Type**: implementation
     - Dependencies: Story 1.r, Story 1.r.d
     - Blocks: Story 1.r.t
 
     ### Story 1.r.t: Testing: Fix Test Isolation - Global Config Singleton Pollution
-    **Status**: unassigned | **Type**: testing
+    **Status**: completed | **Type**: testing
     - Dependencies: Story 1.r, Story 1.r.i
 
   ### Story -1.d: Validate Discovery: Add ProjectOverride Schema and Deep Merge Logic
