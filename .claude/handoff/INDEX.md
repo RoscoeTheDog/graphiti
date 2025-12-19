@@ -21,3 +21,4 @@
 | s018 | complete-sprint-execution-with | ACTIVE | 2025-12-13 15:41 | Complete sprint execution with all stories, validations, remediations |
 | s020 | mcp-daemon-fallback-architecture | ACTIVE | 2025-12-17 15:17 | MCP daemon fallback architecture analysis and hybrid trans |
 | s021 | complete-daemon-auto-enable-ux-sprint | ACTIVE | 2025-12-17 17:54 | Complete Daemon Auto-Enable UX sprint orchestration |
+| s022 | sprint-orchestrate-v110-per-project | ACTIVE | 2025-12-18 18:44 | Execute full sprint orchestration for Per-Project Config |
