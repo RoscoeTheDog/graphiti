@@ -17,6 +17,12 @@ Complete documentation for Graphiti's temporal knowledge graph and session track
 
 ### Core Documentation
 
+- **[Daemon Architecture](DAEMON_ARCHITECTURE.md)** - Daemon system design
+  - Virtual environment organization (why two venvs)
+  - Bootstrap service architecture
+  - Multi-session support
+  - Platform-specific details
+
 - **[API Reference](API_REFERENCE.md)** - Complete Python API documentation
   - Session tracking API (parser, filter, indexer)
   - Filtering API (ContentMode, FilterConfig)
@@ -216,6 +222,7 @@ Complete documentation for Graphiti's temporal knowledge graph and session track
 
 | Document | Purpose | Audience | Length |
 |----------|---------|----------|--------|
+| Daemon Architecture | Daemon & venv design | Developers, Admins | 400+ lines |
 | API Reference | Complete API docs | Developers | 600+ lines |
 | CLI Reference | Command-line guide | Users, Admins | 500+ lines |
 | Architecture | System design | Developers | 700+ lines |
