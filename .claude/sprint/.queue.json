@@ -15,12 +15,13 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Add ProjectOverride Schema and Deep Merge Logic",
-      "status": "completed",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "1.d",
         "1.i",
-        "1.t"
+        "1.t",
+        "1.r"
       ],
       "phase_status": {
         "discovery": "completed",
@@ -890,9 +891,83 @@
       "children": [],
       "blocks": [],
       "file": null
+    },
+    "1.r": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Test Isolation - Global Config Singleton Pollution",
+      "status": "in_progress",
+      "parent": "1",
+      "children": [
+        "1.r.d",
+        "1.r.i",
+        "1.r.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/1.r-fix-test-isolation-global-config.md",
+      "priority": "P1",
+      "blocking": false
+    },
+    "1.r.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix Test Isolation - Global Config Singleton Pollution",
+      "status": "completed",
+      "parent": "1.r",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "1.r.i"
+      ],
+      "file": null,
+      "artifact": "plans/1.r-plan.yaml"
+    },
+    "1.r.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix Test Isolation - Global Config Singleton Pollution",
+      "status": "unassigned",
+      "parent": "1.r",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "1.r.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/1.r-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1.r-plan.yaml"
+      }
+    },
+    "1.r.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix Test Isolation - Global Config Singleton Pollution",
+      "status": "unassigned",
+      "parent": "1.r",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
+    "1.r.d",
+    "1.r.i",
+    "1.r.t",
     "-1.d",
     "-1.i",
     "-1.t",

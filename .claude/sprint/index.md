@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-18 12:07:31
+**Generated**: 2025-12-18 19:11:05
 
 ---
 
@@ -14,22 +14,23 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 48
-- **Completion**: 91.7%
+- **Total Stories**: 52
+- **Completion**: 84.6%
 
 ### By Status
 
 - blocked: 2
 - completed: 44
-- in_progress: 1
-- unassigned: 1
+- in_progress: 3
+- unassigned: 3
 
 ### By Type
 
-- discovery: 6
+- discovery: 7
 - feature: 6
-- implementation: 6
-- testing: 6
+- implementation: 7
+- remediation: 1
+- testing: 7
 - validation: 6
 - validation_discovery: 6
 - validation_implementation: 6
@@ -38,6 +39,20 @@
 ---
 
 ## Stories (Execution Order)
+
+    ### Story 1.r.d: Discovery: Fix Test Isolation - Global Config Singleton Pollution
+    **Status**: completed | **Type**: discovery
+    - Dependencies: Story 1.r
+    - Blocks: Story 1.r.i
+
+    ### Story 1.r.i: Implementation: Fix Test Isolation - Global Config Singleton Pollution
+    **Status**: unassigned | **Type**: implementation
+    - Dependencies: Story 1.r, Story 1.r.d
+    - Blocks: Story 1.r.t
+
+    ### Story 1.r.t: Testing: Fix Test Isolation - Global Config Singleton Pollution
+    **Status**: unassigned | **Type**: testing
+    - Dependencies: Story 1.r, Story 1.r.i
 
   ### Story -1.d: Validate Discovery: Add ProjectOverride Schema and Deep Merge Logic
   **Status**: completed | **Type**: validation_discovery
