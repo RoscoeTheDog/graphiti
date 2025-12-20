@@ -40,7 +40,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Test Identity Capture in REMEDIATE",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "2.d",
@@ -253,7 +253,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Test Identity Capture in REMEDIATE",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -266,14 +266,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Test Identity Capture in REMEDIATE",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/2-plan.yaml"
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
     },
     "2.t": {
       "type": "testing",
@@ -296,7 +299,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Overlap Calculation Algorithm",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "discovery",
       "phase_order": 1,

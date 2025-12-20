@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-20 14:13:01
+**Generated**: 2025-12-20 14:22:16
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 32
-- **Completion**: 6.2%
+- **Completion**: 18.8%
 
 ### By Status
 
-- blocked: 2
-- completed: 2
-- pending: 21
+- completed: 6
+- in_progress: 1
+- pending: 18
 - unassigned: 7
 
 ### By Type
@@ -44,15 +44,15 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Metadata Schema Extension
-  **Status**: blocked | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Test Identity Capture in REMEDIATE
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Test Identity Capture in REMEDIATE
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Test Identity Capture in REMEDIATE
@@ -60,7 +60,7 @@
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Overlap Calculation Algorithm
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: Overlap Calculation Algorithm
