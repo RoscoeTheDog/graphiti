@@ -145,7 +145,7 @@
       ],
       "phase_status": {
         "discovery": "pending",
-        "implementation": "pending",
+        "implementation": "completed",
         "testing": "pending"
       },
       "blocks": [
@@ -480,14 +480,15 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Remediation Testing Trigger",
-      "status": "pending",
+      "status": "completed",
       "parent": "6",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/6-plan.yaml"
+      "requires_artifact": "plans/6-plan.yaml",
+      "completed_at": "2025-12-20T23:24:28.112419Z"
     },
     "6.t": {
       "type": "testing",
@@ -627,5 +628,6 @@
     "8.d",
     "8.i",
     "8.t"
-  ]
+  ],
+  "last_updated": "2025-12-20T23:24:28.112455Z"
 }
