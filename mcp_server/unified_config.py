@@ -18,8 +18,10 @@ Config search order:
 
 import json
 import os
+import platform
+import sys
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 from graphiti_core.extraction_config import ExtractionConfig
@@ -829,14 +831,35 @@ class SessionTrackingConfig(BaseModel):
 
 
 # ============================================================================
+# Project Override Configuration
+# ============================================================================
+
+
+class ProjectOverride(BaseModel):
+    """Project-specific configuration overrides.
+
+    Allows overriding LLM, embedder, extraction, and session tracking settings
+    on a per-project basis. Non-overridable sections: database, daemon, resilience.
+    """
+
+    llm: Optional[LLMConfig] = None
+    embedder: Optional[EmbedderConfig] = None
+    extraction: Optional[ExtractionConfig] = None
+    session_tracking: Optional[SessionTrackingConfig] = None
+
+    class Config:
+        extra = "forbid"  # Reject unknown fields to prevent typos
+
+
+# ============================================================================
 # Root Configuration
 # ============================================================================
 
 
 class GraphitiConfig(BaseModel):
-    """Root Graphiti configuration"""
+    """Root Graphiti configuration (v1.1.0 with project overrides)"""
 
-    version: str = "1.0.0"
+    version: str = "1.1.0"
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     embedder: EmbedderConfig = Field(default_factory=EmbedderConfig)
@@ -851,6 +874,37 @@ class GraphitiConfig(BaseModel):
     extraction: ExtractionConfig = Field(default_factory=ExtractionConfig)
     llm_resilience: LLMResilienceConfig = Field(default_factory=LLMResilienceConfig)
     mcp_tools: MCPToolsBehaviorConfig = Field(default_factory=MCPToolsBehaviorConfig)
+    project_overrides: Dict[str, ProjectOverride] = Field(
+        default_factory=dict,
+        description="Project-specific configuration overrides, keyed by normalized project path"
+    )
+
+    @field_validator('version')
+    def validate_version(cls, v):
+        """Validate config version is within acceptable range (1.0.0 to 1.1.0)."""
+        from packaging import version as pkg_version
+
+        try:
+            v_parsed = pkg_version.parse(v)
+            min_version = pkg_version.parse("1.0.0")
+            max_version = pkg_version.parse("1.1.0")
+
+            if v_parsed < min_version:
+                raise ValueError(
+                    f"Config version {v} is too old (minimum: 1.0.0). "
+                    "Please upgrade your config file."
+                )
+            if v_parsed > max_version:
+                raise ValueError(
+                    f"Config version {v} is too new (maximum: 1.1.0). "
+                    "Please upgrade your Graphiti installation."
+                )
+        except Exception as e:
+            if "too old" in str(e) or "too new" in str(e):
+                raise
+            raise ValueError(f"Invalid version format: {v}. Expected semver format (e.g., 1.0.0)")
+
+        return v
 
     @classmethod
     def from_file(cls, config_path: str | Path | None = None) -> "GraphitiConfig":
@@ -1021,6 +1075,75 @@ class GraphitiConfig(BaseModel):
 
         logger.info(f"Saved config to: {config_path}")
 
+    def _validate_override(self, override_dict: Dict[str, Any], project_path: str) -> None:
+        """Validate that override only contains overridable sections.
+
+        Non-overridable sections: database, daemon, resilience, mcp_server, logging,
+        version, project, search, performance.
+
+        Overridable sections (from ProjectOverride): llm, embedder, extraction, session_tracking.
+
+        Args:
+            override_dict: Override dictionary to validate
+            project_path: Project path (for logging)
+        """
+        non_overridable = {
+            "database", "daemon", "resilience", "mcp_server", "logging",
+            "version", "project", "search", "performance"
+        }
+
+        for section in non_overridable:
+            if section in override_dict and override_dict[section] is not None:
+                logger.warning(
+                    f"Project override for {project_path} contains non-overridable "
+                    f"section '{section}', ignoring"
+                )
+
+    def get_effective_config(self, project_path: str) -> "GraphitiConfig":
+        """Get effective configuration for a project (global config + project override).
+
+        This method performs a deep merge of the global configuration with any
+        project-specific overrides defined in project_overrides dict.
+
+        Args:
+            project_path: Path to the project (any format, will be normalized)
+
+        Returns:
+            GraphitiConfig instance with merged configuration:
+            - If project_path not in project_overrides: returns self unchanged
+            - If found: returns new GraphitiConfig with deep-merged configuration
+
+        Example:
+            >>> config = GraphitiConfig.from_file()
+            >>> effective = config.get_effective_config("/home/user/myproject")
+            >>> # effective.llm may have project-specific provider while
+            >>> # effective.embedder inherits from global config
+        """
+        # Normalize project path for consistent lookup
+        normalized_path = normalize_project_path(project_path)
+
+        # Look up override in project_overrides dict
+        if normalized_path not in self.project_overrides:
+            # No override found - return global config unchanged
+            return self
+
+        override = self.project_overrides[normalized_path]
+
+        # Convert override to dict (exclude None values to allow inheritance)
+        override_dict = override.model_dump(exclude_none=True)
+
+        # Validate override (log warnings for non-overridable sections)
+        self._validate_override(override_dict, normalized_path)
+
+        # Convert self to dict
+        base_dict = self.model_dump()
+
+        # Deep merge: override values take precedence, None inherits from base
+        merged_dict = deep_merge(base_dict, override_dict)
+
+        # Reconstruct GraphitiConfig from merged dict
+        return GraphitiConfig.model_validate(merged_dict)
+
     def log_effective_config(self) -> None:
         """Log the effective configuration on startup.
 
@@ -1070,6 +1193,106 @@ class GraphitiConfig(BaseModel):
 
 
 # ============================================================================
+# Helper Functions
+# ============================================================================
+
+
+def normalize_project_path(path: str) -> str:
+    """Normalize project path to UNIX format for consistent hashing.
+
+    This function ensures consistent path representation across platforms:
+    - Windows: C:\\Users\\Admin\\project → /c/Users/Admin/project
+    - Unix: /home/user/project → /home/user/project
+    - MSYS: /c/Users/Admin/project → /c/Users/Admin/project
+
+    Adapted from PathResolver._normalize_path_for_hash() in
+    graphiti_core/session_tracking/path_resolver.py
+
+    Args:
+        path: Path to normalize (any format)
+
+    Returns:
+        UNIX-style normalized path string
+    """
+    if not path:
+        return path
+
+    # Convert to Path object and resolve to absolute
+    p = Path(path)
+    try:
+        p = p.resolve()
+    except (OSError, RuntimeError):
+        # If resolve fails, just make it absolute
+        p = p.absolute()
+
+    # Convert to POSIX format (forward slashes)
+    path_str = p.as_posix()
+
+    # Handle Windows paths - convert drive letters to MSYS format
+    # C:/Users/... -> /c/Users/... (Git Bash style)
+    if platform.system() == "Windows" and ":" in path_str:
+        drive, rest = path_str.split(":", 1)
+        path_str = f"/{drive.lower()}{rest}"
+
+    # Remove trailing slashes (but keep root slash)
+    path_str = path_str.rstrip('/')
+    if not path_str:
+        path_str = '/'
+
+    return path_str
+
+
+def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively merge two dictionaries with None inheritance.
+
+    Merge rules:
+    - Scalars: override replaces base
+    - Dicts: merge recursively
+    - Lists: override replaces base
+    - None: inherit from base (do not replace)
+
+    Args:
+        base: Base dictionary
+        override: Override dictionary
+
+    Returns:
+        Merged dictionary
+
+    Examples:
+        >>> deep_merge({"a": 1}, {"b": 2})
+        {"a": 1, "b": 2}
+
+        >>> deep_merge({"a": {"b": 1}}, {"a": {"c": 2}})
+        {"a": {"b": 1, "c": 2}}
+
+        >>> deep_merge({"a": 1}, {"a": None})
+        {"a": 1}  # None inherits from base
+    """
+    result = base.copy()
+
+    for key, override_value in override.items():
+        # None means "inherit from base" - skip
+        if override_value is None:
+            continue
+
+        # Key not in base - add it
+        if key not in result:
+            result[key] = override_value
+            continue
+
+        base_value = result[key]
+
+        # Both are dicts - merge recursively
+        if isinstance(base_value, dict) and isinstance(override_value, dict):
+            result[key] = deep_merge(base_value, override_value)
+        else:
+            # Scalar or list - replace
+            result[key] = override_value
+
+    return result
+
+
+# ============================================================================
 # Global Config Instance
 # ============================================================================
 
@@ -1077,15 +1300,18 @@ class GraphitiConfig(BaseModel):
 _config_instance: Optional[GraphitiConfig] = None
 
 
-def get_config(reload: bool = False, force_reload: bool = False) -> GraphitiConfig:
+def get_config(reload: bool = False, force_reload: bool = False, project_path: str | None = None) -> GraphitiConfig:
     """Get the global configuration instance.
 
     Args:
         reload: Force reload from file (deprecated, use force_reload)
         force_reload: Force reload from file
+        project_path: Optional project path for project-specific overrides.
+                     If provided, returns effective config (global + project override).
+                     If None, returns global config (backward compatible).
 
     Returns:
-        GraphitiConfig instance
+        GraphitiConfig instance (global or effective config based on project_path)
     """
     global _config_instance
 
@@ -1096,6 +1322,11 @@ def get_config(reload: bool = False, force_reload: bool = False) -> GraphitiConf
         _config_instance = GraphitiConfig.from_file()
         _config_instance.apply_env_overrides()
 
+    # If project_path provided, return effective config (global + override)
+    if project_path is not None:
+        return _config_instance.get_effective_config(project_path)
+
+    # Otherwise, return global config (backward compatible)
     return _config_instance
 
 

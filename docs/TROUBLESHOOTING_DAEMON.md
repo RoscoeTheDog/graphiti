@@ -2,11 +2,17 @@
 
 This guide covers common issues with the Graphiti daemon architecture and their solutions.
 
+> **Understanding the Architecture**: Before troubleshooting, it helps to understand how the daemon system works.
+> See [DAEMON_ARCHITECTURE.md](DAEMON_ARCHITECTURE.md) for a complete overview of the virtual environment
+> organization, bootstrap service, and multi-session support.
+
 ---
 
 ## Prerequisites
 
-The Graphiti daemon uses an isolated virtual environment for dependency management. Run the automated installer:
+The Graphiti daemon uses an isolated virtual environment at `~/.graphiti/.venv/` (separate from any project venv). This design allows the daemon to run independently of where you clone the graphiti repository.
+
+Run the automated installer:
 
 ```bash
 # From the cloned repository root
@@ -884,7 +890,7 @@ If none of these solutions work:
 
 ## Related Documentation
 
+- [DAEMON_ARCHITECTURE.md](DAEMON_ARCHITECTURE.md) - Complete daemon architecture (venv organization, bootstrap service)
 - [CONFIGURATION.md - Daemon Configuration](../CONFIGURATION.md#daemon-configuration)
 - [README.md - Daemon Setup](../README.md#daemon-architecture-recommended)
 - [MCP_TOOLS.md - Transport Options](MCP_TOOLS.md#transport-options)
-- [Architecture Spec](./.claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md)

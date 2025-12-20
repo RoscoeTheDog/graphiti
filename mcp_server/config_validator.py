@@ -256,6 +256,10 @@ class ConfigValidator:
         if config.extraction.preprocessing_prompt:
             self._validate_extraction_template(config, result, check_paths)
 
+        # Validate project_overrides structure
+        if config.project_overrides:
+            self._validate_project_overrides(config, result, check_paths)
+
         return result
 
     def validate_cross_fields(self, config: GraphitiConfig) -> ValidationResult:
@@ -483,6 +487,65 @@ class ConfigValidator:
             return False, f"Environment variable {env_var_name} is empty"
         return True, ""
 
+    def _validate_project_overrides(
+        self,
+        config: GraphitiConfig,
+        result: ValidationResult,
+        check_paths: bool,
+    ) -> None:
+        """Validate project_overrides structure.
+
+        Checks for:
+        - Non-overridable sections in overrides (database, daemon, resilience, etc.)
+        - Project paths are valid directory paths
+        - Semantic validation of override contents
+
+        Args:
+            config: Graphiti configuration
+            result: ValidationResult to add warnings/errors to
+            check_paths: Whether to check project paths exist
+        """
+        # Non-overridable sections (must match unified_config.py:_validate_override)
+        non_overridable = {
+            "database", "daemon", "resilience", "mcp_server", "logging",
+            "version", "project", "search", "performance"
+        }
+
+        for project_path, override in config.project_overrides.items():
+            # Convert override to dict to check for non-overridable sections
+            override_dict = override.model_dump(exclude_none=True)
+
+            # Check for non-overridable sections
+            for section in non_overridable:
+                if section in override_dict and override_dict[section] is not None:
+                    result.add_warning(
+                        path=f"project_overrides.{project_path}.{section}",
+                        message=f"Non-overridable section '{section}' in project override (will be ignored)",
+                        suggestion=f"Remove '{section}' section from override. "
+                        f"Overridable sections: llm, embedder, extraction, session_tracking"
+                    )
+
+            # Validate project path format (basic path validation)
+            if check_paths:
+                from pathlib import Path
+                try:
+                    # Attempt to create Path object (validates format)
+                    path_obj = Path(project_path).expanduser()
+
+                    # Check if path exists (warning only, not error)
+                    if not path_obj.exists():
+                        result.add_warning(
+                            path=f"project_overrides.{project_path}",
+                            message=f"Project path does not exist: {project_path}",
+                            suggestion="Ensure this is a valid project directory path"
+                        )
+                except Exception as e:
+                    result.add_error(
+                        path=f"project_overrides.{project_path}",
+                        message=f"Invalid project path format: {str(e)}",
+                        suggestion="Use absolute or ~/ path format"
+                    )
+
 
 def format_result(result: ValidationResult, config_path: Path) -> str:
     """Format validation result as human-readable string.
@@ -500,7 +563,7 @@ def format_result(result: ValidationResult, config_path: Path) -> str:
         lines.append(f"[OK] Configuration valid: {config_path}\n")
 
         if result.config:
-            lines.append("Schema: graphiti-config v1.0.0")
+            lines.append(f"Schema: graphiti-config v{result.config.version}")
             lines.append(
                 f"Database: {result.config.database.backend} "
                 f"({result.config.database.neo4j.uri if result.config.database.neo4j else 'N/A'})"

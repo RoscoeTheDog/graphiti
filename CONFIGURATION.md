@@ -18,10 +18,11 @@ Complete documentation for `graphiti.config.json` - the unified configuration sy
 12. [LLM Resilience Configuration](#llm-resilience-configuration) ⭐ New in v1.0.0
 13. [MCP Tools Configuration](#mcp-tools-configuration) ⭐ New in v1.0.0
 14. [Session Tracking Configuration](#session-tracking-configuration)
-15. [Daemon Configuration](#daemon-configuration) ⭐ New in v1.1.0
-16. [Environment Variable Overrides](#environment-variable-overrides)
-17. [Complete Examples](#complete-examples)
-18. [Troubleshooting](#troubleshooting)
+15. [Project Overrides](#project-overrides) ⭐ New in v1.1.0
+16. [Daemon Configuration](#daemon-configuration) ⭐ New in v1.1.0
+17. [Environment Variable Overrides](#environment-variable-overrides)
+18. [Complete Examples](#complete-examples)
+19. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -1407,6 +1408,272 @@ For detailed session tracking documentation:
 
 ---
 
+## Project Overrides
+
+**New in v1.1.0** - Per-project configuration overrides for multi-project workflows.
+
+Project overrides allow you to customize Graphiti behavior for specific projects while maintaining a global baseline configuration. This is useful when different projects require different LLM models, session tracking settings, or extraction parameters.
+
+### Overview
+
+**How It Works:**
+1. Define a global configuration in `graphiti.config.json`
+2. Add project-specific overrides under `project_overrides` keyed by project path
+3. When `get_effective_config(project_path)` is called, the global config is deep-merged with the matching override
+4. Non-overridable sections (database, daemon, resilience) are ignored in overrides with a warning
+
+**Overridable Sections:**
+- `llm` - LLM provider and model settings
+- `embedder` - Embedding model configuration
+- `extraction` - Entity extraction parameters
+- `session_tracking` - Session monitoring settings
+
+**Non-Overridable Sections (Always Global):**
+- `version` - Config schema version
+- `database` - Database connection (shared across projects)
+- `daemon` - Daemon architecture settings
+- `resilience` - Connection resilience settings
+- `mcp_server` - MCP server settings
+- `logging` - Logging configuration
+- `project` - Project metadata
+- `search` - Search parameters
+- `performance` - Performance tuning
+
+### Configuration
+
+```json
+{
+  "version": "1.1.0",
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1-mini"
+  },
+  "project_overrides": {
+    "/home/user/dev-project": {
+      "llm": {
+        "provider": "openai",
+        "default_model": "gpt-4.1-mini"
+      },
+      "session_tracking": {
+        "enabled": true,
+        "watch_path": "/home/user/dev-project"
+      }
+    },
+    "/home/user/prod-project": {
+      "llm": {
+        "provider": "openai",
+        "default_model": "gpt-4.1"
+      },
+      "session_tracking": {
+        "enabled": false,
+        "watch_path": null
+      }
+    }
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `project_overrides` | dict | Dictionary mapping project paths to `ProjectOverride` objects |
+
+**`ProjectOverride` Fields:**
+- All fields are optional (inherit from global if not specified)
+- Supports: `llm`, `embedder`, `extraction`, `session_tracking`
+- Nested partial overrides supported (e.g., override only `llm.default_model`, inherit rest)
+
+### Path Normalization
+
+Project paths are automatically normalized for consistent lookup across platforms:
+
+**Normalization Rules:**
+- Expands `~` to home directory
+- Converts to absolute path
+- Normalizes separators (\ → / on Windows)
+- Lowercases drive letters (Windows)
+- Removes trailing slashes
+
+**Examples:**
+```
+Input                        → Normalized (Unix)
+~/dev/myproject             → /home/user/dev/myproject
+/home/user/dev/myproject/   → /home/user/dev/myproject
+
+Input                        → Normalized (Windows)
+C:\Users\Admin\project      → /c/users/admin/project
+~\Documents\GitHub\proj     → /c/users/admin/documents/github/proj
+```
+
+**Recommendation:** Use absolute paths (`/home/user/project`) or tilde paths (`~/project`) in config for portability.
+
+### Deep Merge Behavior
+
+Overrides are deep-merged with the global config:
+
+**Partial Overrides (Nested):**
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1-mini",
+    "temperature": 0.7,
+    "max_tokens": 8192
+  },
+  "project_overrides": {
+    "/home/user/myproject": {
+      "llm": {
+        "default_model": "gpt-4.1"  // Only override model, inherit temperature/max_tokens
+      }
+    }
+  }
+}
+```
+
+**Result for `/home/user/myproject`:**
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1",      // Overridden
+    "temperature": 0.7,              // Inherited from global
+    "max_tokens": 8192               // Inherited from global
+  }
+}
+```
+
+### Validation
+
+The config validator (`mcp_server/config_validator.py`) automatically checks:
+
+**✅ Valid:**
+- Project paths exist (warning if not)
+- Override contains only overridable sections
+- Project path format is valid
+
+**⚠️ Warnings:**
+- Non-overridable sections in override (ignored with warning)
+- Project path does not exist (may not be created yet)
+
+**❌ Errors:**
+- Invalid project path format (malformed path)
+- Schema validation errors in override content
+
+**Example Validation Output:**
+```
+[OK] Configuration valid: graphiti.config.json
+
+Schema: graphiti-config v1.1.0
+Database: neo4j (bolt://localhost:7687)
+LLM: openai (gpt-4.1-mini)
+Session Tracking: disabled
+
+Warnings: 1
+
+[WARNING] project_overrides./home/user/test.database: Non-overridable section 'database' in project override (will be ignored)
+  → Remove 'database' section from override. Overridable sections: llm, embedder, extraction, session_tracking
+```
+
+### Use Cases
+
+**Development vs Production Models:**
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "default_model": "gpt-4.1-mini"  // Cheap model for most projects
+  },
+  "project_overrides": {
+    "/home/user/critical-prod-project": {
+      "llm": {
+        "default_model": "gpt-4.1"  // Premium model for production
+      }
+    }
+  }
+}
+```
+
+**Per-Project Session Tracking:**
+```json
+{
+  "session_tracking": {
+    "enabled": false  // Disabled globally
+  },
+  "project_overrides": {
+    "/home/user/active-dev-project": {
+      "session_tracking": {
+        "enabled": true,
+        "watch_path": "/home/user/active-dev-project"
+      }
+    }
+  }
+}
+```
+
+**Custom Extraction Thresholds:**
+```json
+{
+  "extraction": {
+    "extraction_threshold": 0.6  // Standard threshold
+  },
+  "project_overrides": {
+    "/home/user/high-precision-project": {
+      "extraction": {
+        "extraction_threshold": 0.8  // Stricter for high-precision needs
+      }
+    }
+  }
+}
+```
+
+### Troubleshooting
+
+**Issue:** Override not applying
+
+**Causes:**
+1. Project path normalization mismatch
+2. Calling code not using `get_effective_config()`
+3. Non-overridable section (check validator warnings)
+
+**Solutions:**
+1. Use absolute or tilde paths in config
+2. Ensure code calls `config.get_effective_config(project_path)` not just `config`
+3. Check validator output: `python -m mcp_server.config_validator --json`
+
+**Issue:** Validator warns about non-overridable section
+
+**Cause:** Override contains `database`, `daemon`, `resilience`, etc.
+
+**Solution:** Remove non-overridable sections from override. These must be global for consistency.
+
+**Issue:** Project path doesn't match at runtime
+
+**Cause:** Path format differs (relative vs absolute, trailing slashes, etc.)
+
+**Solution:**
+1. Use absolute paths in config: `/home/user/project`
+2. Or use tilde paths: `~/project`
+3. Check normalized path: `python -c "from mcp_server.unified_config import normalize_project_path; print(normalize_project_path('/your/path'))"`
+
+### CLI Support
+
+**Validate project overrides:**
+```bash
+python -m mcp_server.config_validator graphiti.config.json --level full
+```
+
+**Test effective config for a project:**
+```python
+from mcp_server.unified_config import GraphitiConfig
+
+config = GraphitiConfig.from_file()
+effective = config.get_effective_config("/home/user/myproject")
+print(f"LLM Model: {effective.llm.default_model}")
+```
+
+---
+
 ## Daemon Configuration
 
 **New in v1.1.0** - Persistent daemon architecture for improved performance and multi-client support.
@@ -2034,7 +2301,7 @@ The validator performs four levels of validation:
 ```
 [OK] Configuration valid: graphiti.config.json
 
-Schema: graphiti-config v1.0.0
+Schema: graphiti-config v1.1.0
 Database: neo4j (bolt://localhost:7687)
 LLM: openai (gpt-4.1-mini)
 Session Tracking: disabled

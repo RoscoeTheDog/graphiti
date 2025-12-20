@@ -1,0 +1,82 @@
+{
+  "story_id": "4",
+  "phase": "testing",
+  "executed_by": "testing:4.t",
+  "timestamp": "2025-12-18T19:30:00Z",
+
+  "summary": {
+    "total_tests": 64,
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100,
+    "duration_ms": 430
+  },
+
+  "categories": {
+    "unit": {
+      "total": 64,
+      "passed": 64,
+      "failed": 0,
+      "coverage": null
+    },
+    "integration": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null
+    },
+    "security": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "vulnerabilities": []
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-1": {
+      "covered": true,
+      "tests": ["test_cmd_list_projects_no_config", "test_cmd_list_projects_empty_overrides"],
+      "reason": null
+    },
+    "AC-2": {
+      "covered": true,
+      "tests": ["test_set_nested_value_simple", "test_set_nested_value_deep", "test_parse_value_bool", "test_parse_value_int", "test_parse_value_float", "test_parse_value_string"],
+      "reason": null
+    },
+    "AC-3": {
+      "covered": true,
+      "tests": ["test_delete_nested_value_simple", "test_delete_nested_value_deep", "test_delete_nested_value_not_found"],
+      "reason": null
+    },
+    "AC-4": {
+      "covered": true,
+      "tests": ["test_delete_nested_value_simple"],
+      "reason": null
+    },
+    "AC-5": {
+      "covered": true,
+      "tests": ["test_validate_key_path_valid_llm", "test_validate_key_path_valid_embedder", "test_validate_key_path_valid_extraction", "test_validate_key_path_valid_session_tracking"],
+      "reason": null
+    },
+    "AC-6": {
+      "covered": true,
+      "tests": ["test_validate_key_path_invalid_database", "test_validate_key_path_invalid_daemon", "test_validate_key_path_invalid_resilience"],
+      "reason": null
+    }
+  },
+
+  "recommendations": [],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false
+}
