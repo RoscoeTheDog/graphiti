@@ -40,7 +40,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Test Identity Capture in REMEDIATE",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -48,9 +48,9 @@
         "2.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/2-test-identity-capture-in-remediate.md",
@@ -62,7 +62,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Overlap Calculation Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "3.d",
@@ -70,9 +70,9 @@
         "3.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "4"
@@ -86,7 +86,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Reconciliation Application Functions",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "4.d",
@@ -94,9 +94,9 @@
         "4.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "5",
@@ -112,7 +112,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Container Status Propagation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "5.d",
@@ -120,9 +120,9 @@
         "5.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "6"
@@ -136,7 +136,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Remediation Testing Trigger",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "6.d",
@@ -154,13 +154,16 @@
       "file": "stories/6-remediation-testing-trigger.md",
       "advisories": [],
       "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
+      "_migration_version": "v4.0.0",
+      "metadata": {
+        "phase_status.discovery": "completed"
+      }
     },
     "7": {
       "type": "feature",
       "story_type": "feature",
       "title": "queue_helpers.py Commands",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "7.d",
@@ -168,15 +171,16 @@
         "7.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/7-queue-helpers-commands.md",
       "advisories": [],
       "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
+      "_migration_version": "v4.0.0",
+      "completed_at": "2025-12-20T23:11:02.122894Z"
     },
     "8": {
       "type": "feature",
@@ -266,7 +270,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Test Identity Capture in REMEDIATE",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
@@ -282,7 +286,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Test Identity Capture in REMEDIATE",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
@@ -293,7 +297,11 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml",
+        "test_results": "test-results/2-results.json"
+      }
     },
     "3.d": {
       "type": "discovery",
@@ -312,7 +320,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Overlap Calculation Algorithm",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -325,7 +333,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Overlap Calculation Algorithm",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
@@ -336,13 +344,20 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "test_file": "tests/sprint/test_overlap_calculation.py",
+      "test_count": 64,
+      "test_results": {
+        "passed": 64,
+        "failed": 0,
+        "skipped": 0
+      }
     },
     "4.d": {
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Reconciliation Application Functions",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,
@@ -355,7 +370,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Reconciliation Application Functions",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
@@ -368,7 +383,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Reconciliation Application Functions",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
@@ -379,13 +394,24 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_file": "tests/sprint/test_reconciliation_application.py",
+        "test_results": {
+          "total": 49,
+          "passed": 49,
+          "failed": 0,
+          "pass_rate": 100.0,
+          "duration_seconds": 0.8
+        },
+        "completed_at": "2025-12-20T00:00:00Z"
+      }
     },
     "5.d": {
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Container Status Propagation",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "discovery",
       "phase_order": 1,
@@ -398,7 +424,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Container Status Propagation",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
@@ -411,7 +437,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Container Status Propagation",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
@@ -422,13 +448,26 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_file": "tests/sprint/test_reconciliation_application.py::TestPropagateStatusToParent",
+        "test_results": {
+          "total": 13,
+          "passed": 13,
+          "failed": 0,
+          "pass_rate": 100.0,
+          "duration_seconds": 0.1
+        },
+        "test_results_artifact": "test-results/5-results.json",
+        "completed_at": "2025-12-20T00:00:00Z",
+        "verification_type": "existing_tests"
+      }
     },
     "6.d": {
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Remediation Testing Trigger",
-      "status": "pending",
+      "status": "completed",
       "parent": "6",
       "phase": "discovery",
       "phase_order": 1,
@@ -471,7 +510,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: queue_helpers.py Commands",
-      "status": "pending",
+      "status": "completed",
       "parent": "7",
       "phase": "discovery",
       "phase_order": 1,
@@ -484,20 +523,28 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: queue_helpers.py Commands",
-      "status": "pending",
+      "status": "completed",
       "parent": "7",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/7-plan.yaml"
+      "requires_artifact": "plans/7-plan.yaml",
+      "metadata": {
+        "completed_at": "2025-12-20T00:00:00Z",
+        "implementation_files": [
+          "resources/commands/sprint/queue_helpers/cli.py",
+          "resources/commands/sprint/queue_helpers/__main__.py",
+          "resources/commands/sprint/queue_helpers/__init__.py"
+        ]
+      }
     },
     "7.t": {
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: queue_helpers.py Commands",
-      "status": "pending",
+      "status": "completed",
       "parent": "7",
       "phase": "testing",
       "phase_order": 3,
@@ -508,7 +555,8 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "completed_at": "2025-12-20T23:11:02.122825Z"
     },
     "8.d": {
       "type": "discovery",

@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-20 14:22:16
+**Generated**: 2025-12-20 15:18:50
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 32
-- **Completion**: 18.8%
+- **Completion**: 78.1%
 
 ### By Status
 
-- completed: 6
+- completed: 25
 - in_progress: 1
-- pending: 18
-- unassigned: 7
+- pending: 5
+- unassigned: 1
 
 ### By Type
 
@@ -52,11 +52,11 @@
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Test Identity Capture in REMEDIATE
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Test Identity Capture in REMEDIATE
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Overlap Calculation Algorithm
@@ -64,39 +64,39 @@
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: Overlap Calculation Algorithm
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Overlap Calculation Algorithm
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Reconciliation Application Functions
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Reconciliation Application Functions
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Reconciliation Application Functions
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: Container Status Propagation
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: Container Status Propagation
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Container Status Propagation
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Remediation Testing Trigger
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Remediation Testing Trigger
@@ -108,15 +108,15 @@
   - Dependencies: Story 6
 
   ### Story 7.d: Discovery: queue_helpers.py Commands
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 7
 
   ### Story 7.i: Implementation: queue_helpers.py Commands
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 7
 
   ### Story 7.t: Testing: queue_helpers.py Commands
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 7
 
   ### Story 8.d: Discovery: Validation Engine Skip Logic
