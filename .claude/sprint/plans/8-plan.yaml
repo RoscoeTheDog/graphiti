@@ -1,0 +1,281 @@
+# Discovery Plan: Story 8 - Validation Engine Skip Logic
+
+## Story Summary
+**ID**: 8
+**Title**: Validation Engine Skip Logic
+**Type**: implementation
+**Phase**: Discovery (8.d)
+
+## Problem Statement
+When remediation testing completes successfully, reconciliation is applied to validation stories with metadata indicating whether tests passed (`reconciliation.status = "propagated"`) or were superseded (`reconciliation.status = "superseded"`). However, Check D (test pass rates) currently has no awareness of this reconciliation metadata and will redundantly re-run tests that already passed during remediation.
+
+## Discovery Findings
+
+### 1. Location of Check D
+**File**: `~/.claude/resources/commands/sprint/execute-validation-story.md`
+**Section**: "Execute Testing Validation (Checks D, E, F, G, H)" (line 286)
+**Invocation**:
+```bash
+python ~/.claude/resources/commands/sprint/validate_test_pass_rates.py \
+    --sprint-dir ".claude/sprint" \
+    --story-id "$TARGET_STORY" \
+    --json
+```
+
+**Status**: **Script does not exist yet** - needs to be created as part of implementation.
+
+### 2. Validation Workflow Structure
+**Container Model (v3.6.0)**:
+- Validation Container (-N): Orchestrates three phases
+- Validation Discovery (-N.d): Checks A, B, C (structure, metadata, traceability)
+- Validation Implementation (-N.i): Check I (code validation)
+- Validation Testing (-N.t): Checks D, E, F, G, H (tests, advisories, hierarchy)
+
+**Check D Execution Context**:
+- Runs in Testing Phase (-N.t)
+- Token Budget: ~2,000-2,500t per phase
+- Blocking behavior: Fails if P0 pass rate < 100% OR P1 pass rate < 90%
+- No auto-repair capability (manual fix required)
+
+### 3. Reconciliation Metadata Structure
+
+**Source**: `~/.claude/resources/commands/sprint/queue_helpers/test_reconciliation.py`
+
+#### Validation Story Metadata (metadata.reconciliation)
+```python
+class ReconciliationMetadata(TypedDict, total=False):
+    """Metadata for validation stories tracking test reconciliation."""
+    remediation_count: int       # Required - number of remediations created
+    resolved_count: int          # Optional - number resolved
+    pending_tests: list[str]     # Optional - test IDs still pending
+```
+
+**Note**: This schema does NOT include a `status` field. Need to check actual implementation in Story 4/6.
+
+#### Remediation Story Metadata (metadata.test_reconciliation)
+```python
+class TestReconciliationMetadata(TypedDict, total=False):
+    """Metadata for remediation stories from test failures."""
+    failed_test_id: str
+    test_file: str
+    failure_summary: str
+    original_story_id: str
+    reconciliation_status: str  # "pending" | "fixed" | "superseded" | "deferred"
+```
+
+### 4. Reconciliation Modes (from Story 4 context)
+
+Based on context from prior stories, reconciliation application results in:
+
+1. **Propagated Mode**: Tests passed during remediation
+   - `metadata.reconciliation.status = "propagated"`
+   - `metadata.reconciliation.needs_retest = false`
+   - **Check D should SKIP** (96% token savings)
+
+2. **Pending Retest Mode**: Tests need re-run
+   - `metadata.reconciliation.status = "pending_retest"`
+   - `metadata.reconciliation.needs_retest = true`
+   - **Check D should RUN** (verify tests pass)
+
+3. **Superseded Mode**: Validation superseded by later story
+   - `metadata.reconciliation.status = "superseded"`
+   - **Check D should SKIP** (entire validation skipped)
+
+**Action Required**: Verify exact metadata structure in Story 4 implementation.
+
+### 5. Skip Logic Implementation Plan
+
+#### File to Create
+**Path**: `~/.claude/resources/commands/sprint/validate_test_pass_rates.py`
+
+#### Skip Detection Logic
+```python
+def should_skip_check_d(validation_story: dict) -> tuple[bool, str]:
+    """
+    Determine if Check D should be skipped based on reconciliation metadata.
+
+    Returns:
+        (should_skip: bool, reason: str)
+    """
+    reconciliation = validation_story.get("metadata", {}).get("reconciliation", {})
+
+    # Check for reconciliation status
+    status = reconciliation.get("status")
+    needs_retest = reconciliation.get("needs_retest", False)
+
+    # Skip if propagated (tests already passed)
+    if status == "propagated" and not needs_retest:
+        return (True, "Tests passed during remediation reconciliation (propagated mode)")
+
+    # Skip if superseded
+    if status == "superseded":
+        return (True, "Validation superseded by later story")
+
+    # Run if needs retest
+    if needs_retest:
+        return (False, "Reconciliation requires retest (pending_retest mode)")
+
+    # Run if no reconciliation applied
+    if not status:
+        return (False, "No reconciliation metadata found - running Check D")
+
+    # Default: run tests
+    return (False, f"Unknown reconciliation status: {status}")
+```
+
+#### Integration Points
+
+1. **Check D Script Structure**:
+   - Load validation story from queue
+   - Call `should_skip_check_d(validation_story)`
+   - If skip: Return success with skip reason in audit trail
+   - If run: Execute test pass rate validation
+
+2. **Output Format**:
+```json
+{
+  "check": "D",
+  "name": "Test Pass Rates",
+  "status": "skipped",
+  "skip_reason": "Tests passed during remediation reconciliation (propagated mode)",
+  "reconciliation_mode": "propagated",
+  "token_savings": "~2000-2500 tokens",
+  "timestamp": "2025-12-20T..."
+}
+```
+
+3. **Audit Trail**:
+   - Log skip reason to validation results file
+   - Include reconciliation metadata snapshot
+   - Record token savings achieved
+
+### 6. Token Savings Calculation
+
+**Baseline Check D Cost**: ~2,000-2,500 tokens
+- Load test files
+- Parse test results
+- Calculate pass rates
+- Generate report
+
+**Skip Cost**: ~50-100 tokens
+- Load validation story metadata
+- Check reconciliation status
+- Log skip reason
+
+**Savings**: 96% reduction (2,000t → 80t)
+
+### 7. Test Requirements
+
+#### Unit Tests
+1. Test `should_skip_check_d()` with:
+   - `status = "propagated"` → should skip
+   - `status = "propagated", needs_retest = true` → should run
+   - `status = "superseded"` → should skip
+   - `status = "pending_retest"` → should run
+   - No reconciliation metadata → should run
+   - Invalid status value → should run (safe default)
+
+#### Integration Tests
+1. Full validation flow with reconciliation:
+   - Create remediation story
+   - Run remediation tests (pass)
+   - Apply reconciliation (propagated mode)
+   - Execute validation -N.t phase
+   - Verify Check D skipped
+   - Verify audit trail logged
+
+2. Retest flow:
+   - Apply reconciliation (pending_retest mode)
+   - Execute validation -N.t phase
+   - Verify Check D runs
+   - Verify tests validated
+
+### 8. Dependencies
+
+**Story 4**: Reconciliation Application Functions
+- **Status**: Check if `metadata.reconciliation.status` field exists
+- **Action**: Review Story 4 implementation for exact metadata structure
+
+**Story 6**: Remediation Testing Trigger
+- **Status**: Check if reconciliation is applied after remediation.t
+- **Action**: Verify reconciliation metadata is populated correctly
+
+### 9. Implementation Checklist
+
+- [ ] Verify `metadata.reconciliation.status` field in Story 4 implementation
+- [ ] Create `validate_test_pass_rates.py` script
+- [ ] Implement `should_skip_check_d()` function
+- [ ] Add skip logic to Check D execution
+- [ ] Implement audit trail logging
+- [ ] Add JSON output support (--json flag)
+- [ ] Create unit tests for skip logic
+- [ ] Create integration test for full flow
+- [ ] Update `execute-validation-story.md` if needed (script already referenced)
+- [ ] Document token savings in implementation notes
+
+### 10. Open Questions
+
+1. **Metadata Structure Verification**:
+   - Does Story 4 add `metadata.reconciliation.status` field?
+   - Or does it use a different field name?
+   - Is `needs_retest` a separate field or implied by status?
+
+2. **Testing Phase Behavior**:
+   - Should Check D skip halt the entire Testing Phase (-N.t)?
+   - Or should other checks (E, F, G, H) still run?
+   - **Answer**: Other checks should run - Check D skip is not blocking
+
+3. **Validation Container Completion**:
+   - If Testing Phase skips all checks, does container still complete?
+   - **Answer**: Yes - skipped checks count as success for completion
+
+### 11. Risk Assessment
+
+**Low Risk**:
+- Skip logic is read-only (no queue mutations)
+- Safe default behavior (run tests if uncertain)
+- Explicit audit trail for debugging
+
+**Medium Risk**:
+- Metadata structure assumptions (mitigated by verification step)
+- Integration with existing validation workflow (mitigated by unit tests)
+
+**Mitigation**:
+- Verify Story 4/6 implementations before starting
+- Add comprehensive unit tests
+- Include detailed logging for audit trail
+
+## Next Steps
+
+1. **Verification** (Story 8.d - Current):
+   - Review Story 4 implementation for metadata structure
+   - Review Story 6 implementation for reconciliation trigger
+   - Confirm exact field names and values
+
+2. **Implementation** (Story 8.i):
+   - Create `validate_test_pass_rates.py`
+   - Implement skip logic
+   - Add audit trail logging
+   - Create unit tests
+
+3. **Testing** (Story 8.t):
+   - Run unit tests
+   - Run integration test
+   - Verify token savings
+   - Verify audit trail
+
+## Success Criteria
+- [ ] Discovery plan documents Check D location and workflow
+- [ ] Reconciliation metadata structure verified
+- [ ] Skip logic design reviewed and approved
+- [ ] Test requirements defined
+- [ ] Dependencies identified and verified
+- [ ] Implementation checklist created
+- [ ] Open questions documented
+
+---
+
+**Created**: 2025-12-20
+**Phase**: Discovery
+**Status**: Complete
+**Next Phase**: Implementation (8.i)

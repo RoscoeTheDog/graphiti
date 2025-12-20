@@ -1,0 +1,105 @@
+{
+  "story_id": "6.t",
+  "test_file": "tests/sprint/test_remediation_testing_trigger.py",
+  "timestamp": "2025-12-20T15:30:00Z",
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0
+  },
+  "pass_rate": 100.0,
+  "test_count": 22,
+  "test_categories": {
+    "unit_tests": 13,
+    "integration_tests": 9
+  },
+  "test_breakdown": {
+    "remediation_story_detection": 2,
+    "blocked_validation_discovery": 3,
+    "overlap_calculation_integration": 3,
+    "reconciliation_mode_selection": 3,
+    "reconciliation_application": 2,
+    "end_to_end_workflow": 4,
+    "error_handling": 3,
+    "reporting": 2
+  },
+  "acceptance_criteria_coverage": {
+    "AC-6.1_propagate_end_to_end": "PASSED",
+    "AC-6.2_retest_end_to_end": "PASSED",
+    "AC-6.3_failed_tests_skip_reconciliation": "PASSED",
+    "AC-6.4_non_remediation_skip": "PASSED",
+    "P0_on_remediation_testing_complete_called": "VERIFIED",
+    "P0_reconciliation_result_reported": "VERIFIED"
+  },
+  "test_classes": [
+    {
+      "class": "TestRemediationStoryDetection",
+      "tests": 2,
+      "passed": 2,
+      "description": "Unit tests for remediation story type detection logic"
+    },
+    {
+      "class": "TestBlockedValidationDiscovery",
+      "tests": 3,
+      "passed": 3,
+      "description": "Unit tests for discovering blocked validation stories"
+    },
+    {
+      "class": "TestOverlapCalculationIntegration",
+      "tests": 3,
+      "passed": 3,
+      "description": "Unit tests for test overlap calculation integration"
+    },
+    {
+      "class": "TestReconciliationModeSelection",
+      "tests": 3,
+      "passed": 3,
+      "description": "Unit tests for reconciliation mode determination"
+    },
+    {
+      "class": "TestReconciliationApplication",
+      "tests": 2,
+      "passed": 2,
+      "description": "Unit tests for reconciliation application functions"
+    },
+    {
+      "class": "TestEndToEndReconciliationWorkflow",
+      "tests": 4,
+      "passed": 4,
+      "description": "Integration tests for complete remediation testing trigger workflow"
+    },
+    {
+      "class": "TestErrorHandling",
+      "tests": 3,
+      "passed": 3,
+      "description": "Integration tests for error handling in reconciliation workflow"
+    },
+    {
+      "class": "TestReconciliationReporting",
+      "tests": 2,
+      "passed": 2,
+      "description": "Integration tests for reconciliation result reporting"
+    }
+  ],
+  "key_tests": [
+    "test_propagate_mode_end_to_end - Verifies complete propagate workflow from remediation testing to validation completion",
+    "test_retest_mode_end_to_end - Verifies complete retest workflow from remediation testing to validation unblocking",
+    "test_failed_remediation_tests_skip_reconciliation - Ensures failed tests do not trigger reconciliation",
+    "test_non_remediation_story_skips_reconciliation - Ensures non-remediation stories don't trigger workflow",
+    "test_apply_propagate_marks_validation_completed - Validates propagate function marks validation as completed",
+    "test_apply_retest_unblocks_validation - Validates retest function unblocks validation"
+  ],
+  "coverage_notes": [
+    "All 22 tests passed successfully",
+    "100% pass rate achieved",
+    "Comprehensive coverage of unit and integration scenarios",
+    "All acceptance criteria verified",
+    "Error handling and edge cases tested",
+    "Reporting functionality validated"
+  ],
+  "execution_time_seconds": 0.18,
+  "warnings": 8,
+  "status": "PASSED"
+}

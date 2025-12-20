@@ -4,7 +4,7 @@
     "id": "remediation-test-reconciliation-v1.0.0",
     "name": "Remediation Test Reconciliation",
     "version": "1.0.0",
-    "status": "active",
+    "status": "completed",
     "branch": "dev",
     "created": "2025-12-19 19:58",
     "queue_version": "2.0.0",
@@ -136,7 +136,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Remediation Testing Trigger",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "6.d",
@@ -146,7 +146,7 @@
       "phase_status": {
         "discovery": "pending",
         "implementation": "completed",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [
         "8"
@@ -186,7 +186,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Validation Engine Skip Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "8.d",
@@ -194,15 +194,16 @@
         "8.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/8-validation-engine-skip-logic.md",
       "advisories": [],
       "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
+      "_migration_version": "v4.0.0",
+      "completed_at": "2025-12-20T23:46:22.416465Z"
     },
     "1.d": {
       "type": "discovery",
@@ -494,7 +495,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Remediation Testing Trigger",
-      "status": "pending",
+      "status": "completed",
       "parent": "6",
       "phase": "testing",
       "phase_order": 3,
@@ -505,7 +506,19 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_file": "tests/sprint/test_remediation_testing_trigger.py",
+        "test_results": {
+          "total": 22,
+          "passed": 22,
+          "failed": 0,
+          "pass_rate": 100.0,
+          "duration_seconds": 0.18
+        },
+        "test_results_artifact": "test-results/6-results.json",
+        "completed_at": "2025-12-20T23:32:49.286889Z"
+      }
     },
     "7.d": {
       "type": "discovery",
@@ -563,7 +576,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Validation Engine Skip Logic",
-      "status": "pending",
+      "status": "completed",
       "parent": "8",
       "phase": "discovery",
       "phase_order": 1,
@@ -576,20 +589,26 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Validation Engine Skip Logic",
-      "status": "pending",
+      "status": "completed",
       "parent": "8",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/8-plan.yaml"
+      "requires_artifact": "plans/8-plan.yaml",
+      "metadata": {
+        "completed_at": "2025-12-20T23:45:00.000000Z",
+        "implementation_files": [
+          "resources/commands/sprint/validate_test_pass_rates.py"
+        ]
+      }
     },
     "8.t": {
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Validation Engine Skip Logic",
-      "status": "pending",
+      "status": "completed",
       "parent": "8",
       "phase": "testing",
       "phase_order": 3,
@@ -600,7 +619,19 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_file": "tests/sprint/test_validation_skip_logic.py",
+        "test_results": {
+          "total": 17,
+          "passed": 17,
+          "failed": 0,
+          "pass_rate": 100.0,
+          "duration_seconds": 0.31
+        },
+        "test_results_artifact": "test-results/8-results.json",
+        "completed_at": "2025-12-20T23:46:22.416416Z"
+      }
     }
   },
   "execution_queue": [
@@ -629,5 +660,5 @@
     "8.i",
     "8.t"
   ],
-  "last_updated": "2025-12-20T23:24:28.112455Z"
+  "last_updated": "2025-12-20T23:46:22.416486Z"
 }
