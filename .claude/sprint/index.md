@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-20 14:04:59
+**Generated**: 2025-12-20 14:13:01
 
 ---
 
@@ -19,10 +19,10 @@
 
 ### By Status
 
+- blocked: 2
 - completed: 2
-- in_progress: 1
 - pending: 21
-- unassigned: 8
+- unassigned: 7
 
 ### By Type
 
@@ -44,7 +44,7 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Metadata Schema Extension
-  **Status**: unassigned | **Type**: testing
+  **Status**: blocked | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Test Identity Capture in REMEDIATE
