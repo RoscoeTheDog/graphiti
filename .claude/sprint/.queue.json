@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Metadata Schema Extension",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "1.d",
@@ -204,7 +204,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Metadata Schema Extension",
-      "status": "pending",
+      "status": "completed",
       "parent": "1",
       "phase": "discovery",
       "phase_order": 1,
@@ -217,14 +217,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Metadata Schema Extension",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/1-plan.yaml"
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
     },
     "1.t": {
       "type": "testing",
