@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Metadata Schema Extension",
-      "status": "in_progress",
+      "status": "blocked",
       "parent": null,
       "children": [
         "1.d",
@@ -233,7 +233,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Metadata Schema Extension",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
