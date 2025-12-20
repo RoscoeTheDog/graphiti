@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-20 13:58:01
+**Generated**: 2025-12-20 14:04:59
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 32
-- **Completion**: 3.1%
+- **Completion**: 6.2%
 
 ### By Status
 
-- completed: 1
+- completed: 2
 - in_progress: 1
-- pending: 22
+- pending: 21
 - unassigned: 8
 
 ### By Type
@@ -40,11 +40,11 @@
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Metadata Schema Extension
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Metadata Schema Extension
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Test Identity Capture in REMEDIATE
