@@ -995,7 +995,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Container Status Propagation",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "5",
       "children": [
         "-5.d",
@@ -1085,7 +1085,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Container Status Propagation",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.t",
       "phase": "validation_testing",
@@ -1099,7 +1099,22 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": null,
+      "metadata": {
+        "validation_result": "PASS",
+        "validation_date": "2025-12-21T03:30:00.000000Z",
+        "validation_report": "C:/Users/Admin/AppData/Local/Temp/validation_testing_results.json",
+        "checks_executed": [
+          "D",
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "checks_passed": "5",
+        "checks_failed": "0",
+        "test_pass_rate": "100%"
+      }
     },
     "-6": {
       "type": "validation",
