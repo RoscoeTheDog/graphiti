@@ -43,7 +43,7 @@
       "story": "5-create-changelog.md",
       "title": "Create CHANGELOG.md",
       "priority": "P2",
-      "status": "pending",
+      "status": "completed",
       "estimated_tokens": 5000
     }
   ],

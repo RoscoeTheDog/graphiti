@@ -69,8 +69,8 @@ All notable architectural changes to Graphiti.
 
 ## Acceptance Criteria
 
-- [ ] All major architectural changes documented
-- [ ] Breaking changes clearly marked
-- [ ] Deprecations noted with alternatives
-- [ ] Dates accurate
-- [ ] Links to relevant documentation
+- [x] All major architectural changes documented
+- [x] Breaking changes clearly marked
+- [x] Deprecations noted with alternatives
+- [x] Dates accurate
+- [x] Links to relevant documentation
