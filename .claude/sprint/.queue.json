@@ -1004,8 +1004,8 @@
       ],
       "phase_status": {
         "validation_discovery": "completed",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
+        "validation_implementation": "completed",
+        "validation_testing": "completed"
       },
       "target_has_phases": true,
       "blocks": [],
