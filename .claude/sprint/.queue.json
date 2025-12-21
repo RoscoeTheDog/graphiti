@@ -639,7 +639,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Metadata Schema Extension",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "1",
       "children": [
         "-1.d",
@@ -653,7 +653,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.658995Z"
     },
     "-1.d": {
       "type": "validation_discovery",
@@ -679,7 +680,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Metadata Schema Extension",
-      "status": "failed_validation",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.i",
       "phase": "validation_implementation",
@@ -734,7 +735,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Test Identity Capture in REMEDIATE",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "2",
       "children": [
         "-2.d",
@@ -748,7 +749,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659017Z"
     },
     "-2.d": {
       "type": "validation_discovery",
@@ -812,7 +814,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Overlap Calculation Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "3",
       "children": [
         "-3.d",
@@ -826,7 +828,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659020Z"
     },
     "-3.d": {
       "type": "validation_discovery",
@@ -910,7 +913,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Reconciliation Application Functions",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "4",
       "children": [
         "-4.d",
@@ -924,7 +927,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659023Z"
     },
     "-4.d": {
       "type": "validation_discovery",
@@ -973,7 +977,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Reconciliation Application Functions",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4.t",
       "phase": "validation_testing",
@@ -1009,7 +1013,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659025Z"
     },
     "-5.d": {
       "type": "validation_discovery",
@@ -1120,7 +1125,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Remediation Testing Trigger",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "6",
       "children": [
         "-6.d",
@@ -1134,7 +1139,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659027Z"
     },
     "-6.d": {
       "type": "validation_discovery",
@@ -1251,7 +1257,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659031Z"
     },
     "-7.d": {
       "type": "validation_discovery",
@@ -1362,7 +1369,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Validation Engine Skip Logic",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "8",
       "children": [
         "-8.d",
@@ -1376,7 +1383,8 @@
       },
       "target_has_phases": true,
       "blocks": [],
-      "file": null
+      "file": null,
+      "completed_at": "2025-12-21T05:26:52.659033Z"
     },
     "-8.d": {
       "type": "validation_discovery",
