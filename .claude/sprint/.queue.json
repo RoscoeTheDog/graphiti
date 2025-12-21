@@ -704,7 +704,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Metadata Schema Extension",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.t",
       "phase": "validation_testing",
@@ -718,7 +718,17 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": null,
+      "metadata": {
+        "validation_result": "requires_remediation",
+        "remediation_stories": [
+          "R-1.t.1",
+          "R-1.t.2"
+        ],
+        "pass_rate": "76%",
+        "unit_tests": "26/26 (100%)",
+        "integration_tests": "43/71 (61%)"
+      }
     },
     "-2": {
       "type": "validation",
