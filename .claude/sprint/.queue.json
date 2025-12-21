@@ -820,7 +820,7 @@
         "-3.t"
       ],
       "phase_status": {
-        "validation_discovery": "pending",
+        "validation_discovery": "completed",
         "validation_implementation": "pending",
         "validation_testing": "pending"
       },
@@ -832,7 +832,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Overlap Calculation Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.d",
       "phase": "validation_discovery",
@@ -846,7 +846,7 @@
       "blocks": [
         "-3.i"
       ],
-      "file": null
+      "file": "stories/-3.d-validation-discovery.md"
     },
     "-3.i": {
       "type": "validation_implementation",
