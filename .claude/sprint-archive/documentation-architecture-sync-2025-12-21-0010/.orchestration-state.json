@@ -1,0 +1,42 @@
+{
+  "version": "1.4",
+  "started_at": "2025-12-20T00:00:00Z",
+  "status": "completed",
+  "current_phase": "complete",
+  "completed_at": "2025-12-20T00:30:00Z",
+  "current_section": 0,
+  "completed_sections": [],
+  "completed_stories": ["1", "2", "3", "4", "5"],
+  "failed_stories": [],
+  "args": {
+    "validation_only": false,
+    "skip_validation": false,
+    "parallel_limit": 3,
+    "story_filter": null,
+    "from_story": null,
+    "validate_story_filter": null,
+    "from_validation": null
+  },
+  "execution_plan": {
+    "sections": [
+      {
+        "id": "docs-sequential",
+        "type": "sequential",
+        "stories": ["1", "2", "3", "4", "5"],
+        "reason": "Fresh session required per story (high token usage)"
+      }
+    ],
+    "total_stories": 5,
+    "parallel_groups": 0,
+    "estimated_parallelization": "0%"
+  },
+  "phase_helpers": {
+    "recovery": "resources/commands/sprint/helpers/orchestrate-recovery.md",
+    "story_dispatch": "resources/commands/sprint/helpers/story-execution-dispatch.md",
+    "discovery": "resources/commands/sprint/helpers/execute-discovery.md",
+    "implementation": "resources/commands/sprint/helpers/execute-implementation.md",
+    "testing": "resources/commands/sprint/helpers/execute-testing.md",
+    "validation": "resources/commands/sprint/helpers/orchestrate-validation-phase.md",
+    "validation_story": "resources/commands/sprint/execute-validation-story.md"
+  }
+}
