@@ -2,8 +2,8 @@
 
 Comprehensive architectural overview of Graphiti's session tracking and memory management system.
 
-**Version**: v1.0.0
-**Last Updated**: 2025-11-18
+**Version**: v2.0.0
+**Last Updated**: 2025-12-20
 
 ---
 
@@ -27,11 +27,12 @@ Graphiti's session tracking system automatically captures Claude Code sessions, 
 
 ### Key Features
 
-- **Automatic Session Detection**: Watches Claude Code session directory for new/updated files
+- **Turn-Based Indexing**: Automatically indexes conversation turns when role transitions occur (user→assistant)
 - **Smart Filtering**: Reduces token usage by 35-70% through intelligent content filtering
 - **Knowledge Graph Integration**: Indexes sessions as episodes in Neo4j for semantic search
+- **Global Session Tracking**: Single global knowledge graph with namespace tagging for cross-project learning
 - **Platform-Agnostic**: Handles Windows, Unix, and WSL path formats
-- **Runtime Control**: Enable/disable tracking via MCP tools or CLI
+- **Configuration-Driven Control**: Enable/disable tracking via graphiti.config.json
 - **Opt-Out Model**: Enabled by default for seamless out-of-box experience
 
 ### Architecture Principles
@@ -53,39 +54,41 @@ Graphiti's session tracking system automatically captures Claude Code sessions, 
 │  │              Session Tracking Subsystem                   │  │
 │  │                                                           │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │  │
-│  │  │   Watcher    │  │    Parser    │  │    Filter    │   │  │
+│  │  │Turn Detector │  │    Parser    │  │    Filter    │   │  │
 │  │  │              │  │              │  │              │   │  │
-│  │  │ Monitors:    │→ │ Parses:      │→ │ Reduces:     │   │  │
-│  │  │ .jsonl files │  │ JSONL to     │  │ Tokens by    │   │  │
-│  │  │              │  │ Messages     │  │ 35-70%       │   │  │
+│  │  │ Detects:     │→ │ Parses:      │→ │ Reduces:     │   │  │
+│  │  │ Role         │  │ JSONL to     │  │ Tokens by    │   │  │
+│  │  │ Transitions  │  │ Messages     │  │ 35-70%       │   │  │
 │  │  └──────────────┘  └──────────────┘  └──────────────┘   │  │
 │  │         │                  │                  │          │  │
 │  │         └──────────────────┴──────────────────┘          │  │
 │  │                            │                             │  │
 │  │                   ┌────────▼────────┐                    │  │
-│  │                   │ Session Manager │                    │  │
+│  │                   │ Preprocessor    │                    │  │
 │  │                   │                 │                    │  │
-│  │                   │ Lifecycle Mgmt  │                    │  │
-│  │                   │ Inactivity      │                    │  │
-│  │                   │ Detection       │                    │  │
+│  │                   │ Builds Context  │                    │  │
+│  │                   │ Single-Pass LLM │                    │  │
 │  │                   └────────┬────────┘                    │  │
 │  │                            │                             │  │
 │  │                   ┌────────▼────────┐                    │  │
 │  │                   │    Indexer      │                    │  │
 │  │                   │                 │                    │  │
-│  │                   │ Add Episode to  │                    │  │
-│  │                   │ Knowledge Graph │                    │  │
+│  │                   │ Graphiti        │                    │  │
+│  │                   │ add_episode()   │                    │  │
 │  │                   └────────┬────────┘                    │  │
 │  └────────────────────────────┼──────────────────────────────┘  │
 │                                │                                │
 │  ┌─────────────────────────────▼──────────────────────────┐    │
 │  │              Graphiti Core                             │    │
 │  │  ┌──────────────────────────────────────────────────┐  │    │
-│  │  │           Knowledge Graph (Neo4j)                │  │    │
+│  │  │    Global Knowledge Graph (Neo4j)                │  │    │
+│  │  │                                                  │  │    │
+│  │  │  group_id: hostname__global                     │  │    │
+│  │  │  metadata: project_namespace                    │  │    │
 │  │  │                                                  │  │    │
 │  │  │  Episodes → Entities → Relationships → Facts    │  │    │
 │  │  │                                                  │  │    │
-│  │  │  LLM-powered entity extraction & summarization  │  │    │
+│  │  │  LLM-powered entity extraction (single-pass)    │  │    │
 │  │  └──────────────────────────────────────────────────┘  │    │
 │  └────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
@@ -96,7 +99,7 @@ Graphiti's session tracking system automatically captures Claude Code sessions, 
                     │   MCP Tools       │
                     │                   │
                     │ session_tracking_ │
-                    │ start/stop/status │
+                    │ status/health     │
                     └───────────────────┘
 ```
 
@@ -104,25 +107,25 @@ Graphiti's session tracking system automatically captures Claude Code sessions, 
 
 ## Data Flow
 
-### 1. Session Detection Flow
+### 1. Turn Detection Flow
 
 ```
-User creates Claude Code session
+User sends message to Claude Code
         │
         ▼
 Claude Code writes to ~/.claude-code/sessions/{uuid}.jsonl
         │
         ▼
-SessionWatcher detects file change (watchdog library)
+Turn Detector monitors role transitions (user→assistant)
         │
         ▼
-SessionManager creates/updates Session object
+When assistant turn completes, trigger indexing
         │
         ▼
-Parser incrementally reads new lines (from last offset)
+Parser reads turn-pair from JSONL (user + assistant messages)
         │
         ▼
-ConversationContext updated with new messages
+ConversationContext built for this turn
 ```
 
 ### 2. Filtering Flow
@@ -145,49 +148,48 @@ Optional: MessageSummarizer for LLM-based summarization
 ConversationContext (filtered, 35-70% smaller)
 ```
 
-### 3. Indexing Flow
+### 3. Indexing Flow (Single-Pass)
 
 ```
 ConversationContext (filtered)
         │
         ▼
-SessionIndexer.index_session() [async]
+Preprocessor builds context with custom_prompt
         │
         ├─→ Format as episode text
-        ├─→ Add metadata (session_id, timestamp, files_modified)
-        └─→ Generate group_id (project-based)
+        ├─→ Add metadata (session_id, timestamp, files_modified, project_namespace)
+        ├─→ Inject preprocessing prompt into custom_prompt field
+        └─→ Generate global group_id (hostname__global)
         │
         ▼
-Graphiti.add_episode()
+Graphiti.add_episode() with custom_prompt
         │
-        ├─→ LLM extracts entities (User, Agent, MCP Tools, Files)
-        ├─→ LLM identifies relationships (used, modified, created)
-        └─→ Store in Neo4j knowledge graph
+        ├─→ Single LLM pass: preprocessing + entity extraction
+        ├─→ Extract entities (User, Agent, MCP Tools, Files)
+        ├─→ Identify relationships (used, modified, created)
+        └─→ Store in Neo4j global knowledge graph
         │
         ▼
-Episode indexed, searchable via search_memory_nodes/facts
+Episode indexed with namespace tag, searchable via search_memory_nodes/facts
 ```
 
-### 4. Inactivity Detection Flow
+### 4. Turn Completion Flow
 
 ```
-Session file: No changes for 5 minutes
+Assistant completes response
         │
         ▼
-SessionManager.check_inactivity()
+Turn-pair complete (user + assistant messages)
         │
         ▼
-Session marked as inactive
+Trigger indexing pipeline
+        │
+        ├─→ Filter turn content
+        ├─→ Build preprocessed context
+        └─→ Index to Graphiti (single-pass LLM)
         │
         ▼
-on_session_closed callback triggered
-        │
-        ├─→ Filter conversation
-        ├─→ Index to Graphiti
-        └─→ Remove from active sessions
-        │
-        ▼
-Session complete (available in knowledge graph)
+Turn indexed and available in global knowledge graph
 ```
 
 ---
@@ -233,11 +235,11 @@ Session complete (available in knowledge graph)
 - Graceful fallback to FULL mode on errors
 - Cache statistics tracking
 
-**watcher.py** - File system monitoring
-- `SessionWatcher`: Watches session directory for changes
-- Uses `watchdog` library for efficient file monitoring
-- Debounces rapid changes (5-second window)
-- Cross-platform (Windows, macOS, Linux)
+**watcher.py** - File system monitoring (DEPRECATED in v2.0)
+- `SessionWatcher`: Previously watched session directory for changes
+- **Note**: File watching replaced by turn-based detection in v2.0
+- Legacy code maintained for backward compatibility
+- New implementations should use turn detection instead
 
 **session_manager.py** - Session lifecycle management
 - `SessionManager`: Coordinates watcher, parser, filter, indexer
@@ -338,17 +340,24 @@ class SessionTrackingConfig:
 
 ### Neo4j Knowledge Graph
 
-**Episode Structure**:
+**Episode Structure** (Global Scope with Namespace Tagging):
 ```cypher
 (:Episode {
   uuid: "...",
   name: "Session 2025-11-18",
   content: "User: ...\nAgent: ...\nTools used: ...",
   source: "session_tracking",
-  group_id: "hostname__project_hash",
+  group_id: "hostname__global",
+  project_namespace: "/path/to/project",
   created_at: "2025-11-18T12:34:56Z"
 })
 ```
+
+**Key Design**:
+- **group_id**: Single global identifier per machine (`hostname__global`)
+- **project_namespace**: Metadata field for provenance and optional filtering
+- **Cross-project learning**: All episodes share global graph for knowledge sharing
+- **Filterable context**: Search can be scoped to specific namespaces if needed
 
 **Entity Extraction** (automatic via Graphiti LLM):
 - User actions
@@ -489,12 +498,16 @@ User's Machine
 ├── Claude Code (writes sessions)
 ├── Graphiti MCP Server (indexes sessions)
 └── Neo4j Database (local or cloud)
+    └── Global Knowledge Graph
+        ├── group_id: hostname__global
+        └── Episodes tagged with project_namespace
 ```
 
 **Characteristics**:
 - Session tracking enabled by default
-- Project-level group_id isolation
-- Single user, multiple projects
+- Global knowledge graph with namespace tagging
+- Cross-project learning enabled
+- Single user, multiple projects share knowledge
 
 ### Multi-User (Enterprise)
 
@@ -505,15 +518,109 @@ Shared Neo4j Database (Cloud)
    ┌────┴────┐
    │         │
 User A      User B
-├── Claude Code    ├── Claude Code
-├── Graphiti MCP   ├── Graphiti MCP
-└── group_id=A     └── group_id=B
+├── Claude Code           ├── Claude Code
+├── Graphiti MCP          ├── Graphiti MCP
+└── group_id=hostA__global └── group_id=hostB__global
+    ├── namespace=projectA1   ├── namespace=projectB1
+    └── namespace=projectA2   └── namespace=projectB2
 ```
 
 **Characteristics**:
 - Shared knowledge graph (all episodes)
-- group_id isolation per user/project
-- Search can span groups (optional)
+- Per-machine global group_id (hostA__global, hostB__global)
+- Project namespace tagging for provenance
+- Cross-project learning within each user's machine
+- Optional namespace filtering for focused search
+
+---
+
+## Daemon Architecture
+
+### Overview
+
+Graphiti MCP Server supports a **platform-agnostic daemon architecture** for persistent background operation with unified HTTP/JSON communication.
+
+### Architecture Models
+
+#### Current: Per-Session Architecture (stdio)
+
+```
+┌─────────────────┐     stdio      ┌──────────────────────┐
+│ Claude Code #1  │ ──────────────►│ graphiti_mcp (pid 1) │
+└─────────────────┘                └──────────────────────┘
+
+┌─────────────────┐     stdio      ┌──────────────────────┐
+│ Claude Code #2  │ ──────────────►│ graphiti_mcp (pid 2) │
+└─────────────────┘                └──────────────────────┘
+```
+
+**Characteristics**:
+- Each client spawns separate MCP server process
+- stdio-based communication
+- No shared state between sessions
+- Resource overhead (multiple Neo4j connections)
+
+#### Future: Daemon Architecture (HTTP)
+
+```
+┌─────────────────┐
+│ Claude Code #1  │─────┐
+└─────────────────┘     │
+                        │  HTTP/JSON
+┌─────────────────┐     │  :8321
+│ Claude Code #2  │─────┼─────────►┌──────────────────────┐
+└─────────────────┘     │          │                      │
+                        │          │  Graphiti MCP Server │
+┌─────────────────┐     │          │  (Daemon Service)    │
+│ CLI commands    │─────┤          │                      │
+└─────────────────┘     │          │  - Single Neo4j conn │
+                        │          │  - Shared state      │
+┌─────────────────┐     │          │  - Session tracking  │
+│ Other tools     │─────┘          │                      │
+└─────────────────┘                └──────────────────────┘
+```
+
+**Characteristics**:
+- Single persistent daemon process
+- HTTP/JSON communication (platform-agnostic)
+- Many-to-one client relationships
+- Shared state across all clients
+- Config-driven control (`daemon.enabled`)
+
+### Design Principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Platform-Agnostic** | Single protocol works on Windows, macOS, Linux |
+| **Config-Primary** | `daemon.enabled` in graphiti.config.json is THE runtime control |
+| **Auto-Monitoring** | Config changes detected automatically within 5 seconds |
+| **Single Daemon** | One daemon per machine to avoid state conflicts |
+| **No Fallback** | No per-process spawning; daemon-only when enabled |
+
+### Control Model
+
+**Installation** (one-time):
+```bash
+graphiti-mcp daemon install
+```
+
+**Runtime Control** (config-driven):
+```json
+{
+  "daemon": {
+    "enabled": true,
+    "port": 8321,
+    "host": "127.0.0.1"
+  }
+}
+```
+
+Changes take effect automatically within 5 seconds via file polling.
+
+### Reference
+
+For complete daemon architecture specification, see:
+- **[docs/DAEMON_ARCHITECTURE.md](DAEMON_ARCHITECTURE.md)** - Detailed design specification
 
 ---
 
