@@ -226,7 +226,9 @@
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
-      "children": [],
+      "children": [
+        "1.i.1"
+      ],
       "blocks": [],
       "file": null,
       "requires_artifact": "plans/1-plan.yaml",
@@ -1263,11 +1265,33 @@
       "children": [],
       "blocks": [],
       "file": null
+    },
+    "1.i.1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Implementation Location for Metadata Schema Extension",
+      "status": "completed",
+      "parent": "1.i",
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": "stories/1.i.1-fix-implementation-location.md",
+      "remediation_type": "validation_failure",
+      "validates_failure": "-1.i",
+      "priority": "P0",
+      "metadata": {
+        "created": "2025-12-20T01:50:00Z",
+        "source_validation": "-1.i",
+        "remediation_for": "1.i"
+      },
+      "completed_at": "2025-12-21T01:54:40.873036+00:00"
     }
   },
   "execution_queue": [
     "-1.d",
     "-1.i",
+    "1.i.1",
     "-1.t",
     "-2.d",
     "-2.i",
@@ -1315,5 +1339,5 @@
     "8.i",
     "8.t"
   ],
-  "last_updated": "2025-12-20T23:46:22.416486Z"
+  "last_updated": "2025-12-21T01:50:48.266516+00:00"
 }
