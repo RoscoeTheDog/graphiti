@@ -1438,7 +1438,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Validation Engine Skip Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-8",
       "validates": "8.t",
       "phase": "validation_testing",
@@ -1452,7 +1452,19 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "stories/validation/-8.t-validation-testing.md",
+      "metadata": {
+        "validation_result": "PASS",
+        "validation_date": "2025-12-21T03:58:35.800669+00:00",
+        "all_checks_passed": true,
+        "checks_status": {
+          "D": "PASS",
+          "E": "PASS",
+          "F": "PASS",
+          "G": "PASS",
+          "H": "PASS"
+        }
+      }
     },
     "1.i.1": {
       "type": "remediation",
