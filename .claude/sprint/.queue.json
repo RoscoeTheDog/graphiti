@@ -1382,7 +1382,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Validation Engine Skip Logic",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-8",
       "validates": "8.d",
       "phase": "validation_discovery",
@@ -1396,7 +1396,8 @@
       "blocks": [
         "-8.i"
       ],
-      "file": null
+      "file": "validation-results/-8.d-results.json",
+      "completed_at": "2025-12-21T03:47:44.237433+00:00"
     },
     "-8.i": {
       "type": "validation_implementation",
