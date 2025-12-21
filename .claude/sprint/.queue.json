@@ -1,1468 +1,1481 @@
 {
-  "version": "4.0.0",
-  "sprint": {
-    "id": "remediation-test-reconciliation-v1.0.0",
-    "name": "Remediation Test Reconciliation",
-    "version": "1.0.0",
-    "status": "completed",
-    "branch": "dev",
-    "created": "2025-12-19 19:58",
-    "queue_version": "2.0.0",
-    "queue_strategy": "interleaved"
-  },
-  "stories": {
-    "1": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Metadata Schema Extension",
-      "status": "completed",
-      "parent": null,
-      "children": [
+    "version": "4.0.0",
+    "sprint": {
+        "id": "remediation-test-reconciliation-v1.0.0",
+        "name": "Remediation Test Reconciliation",
+        "version": "1.0.0",
+        "status": "completed",
+        "branch": "dev",
+        "created": "2025-12-19 19:58",
+        "queue_version": "2.0.0",
+        "queue_strategy": "interleaved"
+    },
+    "stories": {
+        "1": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Metadata Schema Extension",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "1.d",
+                "1.i",
+                "1.t"
+            ],
+            "phase_status": {
+                "discovery": "pending",
+                "implementation": "pending",
+                "testing": "pending"
+            },
+            "blocks": [
+                "2",
+                "3"
+            ],
+            "file": "stories/1-metadata-schema-extension.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0"
+        },
+        "2": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "2.d",
+                "2.i",
+                "2.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [],
+            "file": "stories/2-test-identity-capture-in-remediate.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0"
+        },
+        "3": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "3.d",
+                "3.i",
+                "3.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [
+                "4"
+            ],
+            "file": "stories/3-overlap-calculation-algorithm.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0"
+        },
+        "4": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Reconciliation Application Functions",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "4.d",
+                "4.i",
+                "4.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [
+                "5",
+                "6",
+                "7"
+            ],
+            "file": "stories/4-reconciliation-application-functions.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0"
+        },
+        "5": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Container Status Propagation",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "5.d",
+                "5.i",
+                "5.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [
+                "6"
+            ],
+            "file": "stories/5-container-status-propagation.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0"
+        },
+        "6": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Remediation Testing Trigger",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "6.d",
+                "6.i",
+                "6.t"
+            ],
+            "phase_status": {
+                "discovery": "pending",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [
+                "8"
+            ],
+            "file": "stories/6-remediation-testing-trigger.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0",
+            "metadata": {
+                "phase_status.discovery": "completed"
+            }
+        },
+        "7": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "queue_helpers.py Commands",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "7.d",
+                "7.i",
+                "7.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [],
+            "file": "stories/7-queue-helpers-commands.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0",
+            "completed_at": "2025-12-20T23:11:02.122894Z"
+        },
+        "8": {
+            "type": "feature",
+            "story_type": "feature",
+            "title": "Validation Engine Skip Logic",
+            "status": "completed",
+            "parent": null,
+            "children": [
+                "8.d",
+                "8.i",
+                "8.t"
+            ],
+            "phase_status": {
+                "discovery": "completed",
+                "implementation": "completed",
+                "testing": "completed"
+            },
+            "blocks": [],
+            "file": "stories/8-validation-engine-skip-logic.md",
+            "advisories": [],
+            "_migrated_from": "implementation",
+            "_migration_version": "v4.0.0",
+            "completed_at": "2025-12-20T23:46:22.416465Z"
+        },
+        "1.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Metadata Schema Extension",
+            "status": "completed",
+            "parent": "1",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/1-plan.yaml"
+        },
+        "1.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Metadata Schema Extension",
+            "status": "completed",
+            "parent": "1",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [
+                "1.i.1"
+            ],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/1-plan.yaml",
+            "metadata": {
+                "requires_artifact": "plans/1-plan.yaml"
+            }
+        },
+        "1.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Metadata Schema Extension",
+            "status": "completed",
+            "parent": "1",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_requirements_from": "plans/1-plan.yaml"
+            }
+        },
+        "2.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "2",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/2-plan.yaml"
+        },
+        "2.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "2",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/2-plan.yaml",
+            "metadata": {
+                "requires_artifact": "plans/2-plan.yaml"
+            }
+        },
+        "2.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "2",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_requirements_from": "plans/2-plan.yaml",
+                "test_results": "test-results/2-results.json"
+            }
+        },
+        "3.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "3",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/3-plan.yaml"
+        },
+        "3.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "3",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/3-plan.yaml"
+        },
+        "3.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "3",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "test_file": "tests/sprint/test_overlap_calculation.py",
+            "test_count": 64,
+            "test_results": {
+                "passed": 64,
+                "failed": 0,
+                "skipped": 0
+            }
+        },
+        "4.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Reconciliation Application Functions",
+            "status": "completed",
+            "parent": "4",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/4-plan.yaml"
+        },
+        "4.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Reconciliation Application Functions",
+            "status": "completed",
+            "parent": "4",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/4-plan.yaml"
+        },
+        "4.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Reconciliation Application Functions",
+            "status": "completed",
+            "parent": "4",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_file": "tests/sprint/test_reconciliation_application.py",
+                "test_results": {
+                    "total": 49,
+                    "passed": 49,
+                    "failed": 0,
+                    "pass_rate": 100.0,
+                    "duration_seconds": 0.8
+                },
+                "completed_at": "2025-12-20T00:00:00Z"
+            }
+        },
+        "5.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Container Status Propagation",
+            "status": "completed",
+            "parent": "5",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/5-plan.yaml"
+        },
+        "5.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Container Status Propagation",
+            "status": "completed",
+            "parent": "5",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/5-plan.yaml"
+        },
+        "5.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Container Status Propagation",
+            "status": "completed",
+            "parent": "5",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_file": "tests/sprint/test_reconciliation_application.py::TestPropagateStatusToParent",
+                "test_results": {
+                    "total": 13,
+                    "passed": 13,
+                    "failed": 0,
+                    "pass_rate": 100.0,
+                    "duration_seconds": 0.1
+                },
+                "test_results_artifact": "test-results/5-results.json",
+                "completed_at": "2025-12-20T00:00:00Z",
+                "verification_type": "existing_tests"
+            }
+        },
+        "6.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Remediation Testing Trigger",
+            "status": "completed",
+            "parent": "6",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/6-plan.yaml"
+        },
+        "6.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Remediation Testing Trigger",
+            "status": "completed",
+            "parent": "6",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/6-plan.yaml",
+            "completed_at": "2025-12-20T23:24:28.112419Z"
+        },
+        "6.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Remediation Testing Trigger",
+            "status": "completed",
+            "parent": "6",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_file": "tests/sprint/test_remediation_testing_trigger.py",
+                "test_results": {
+                    "total": 22,
+                    "passed": 22,
+                    "failed": 0,
+                    "pass_rate": 100.0,
+                    "duration_seconds": 0.18
+                },
+                "test_results_artifact": "test-results/6-results.json",
+                "completed_at": "2025-12-20T23:32:49.286889Z"
+            }
+        },
+        "7.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: queue_helpers.py Commands",
+            "status": "completed",
+            "parent": "7",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/7-plan.yaml"
+        },
+        "7.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: queue_helpers.py Commands",
+            "status": "completed",
+            "parent": "7",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/7-plan.yaml",
+            "metadata": {
+                "completed_at": "2025-12-20T00:00:00Z",
+                "implementation_files": [
+                    "resources/commands/sprint/queue_helpers/cli.py",
+                    "resources/commands/sprint/queue_helpers/__main__.py",
+                    "resources/commands/sprint/queue_helpers/__init__.py"
+                ]
+            }
+        },
+        "7.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: queue_helpers.py Commands",
+            "status": "completed",
+            "parent": "7",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "completed_at": "2025-12-20T23:11:02.122825Z"
+        },
+        "8.d": {
+            "type": "discovery",
+            "story_type": "discovery",
+            "title": "Discovery: Validation Engine Skip Logic",
+            "status": "completed",
+            "parent": "8",
+            "phase": "discovery",
+            "phase_order": 1,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "artifact": "plans/8-plan.yaml"
+        },
+        "8.i": {
+            "type": "implementation",
+            "story_type": "implementation",
+            "title": "Implementation: Validation Engine Skip Logic",
+            "status": "completed",
+            "parent": "8",
+            "phase": "implementation",
+            "phase_order": 2,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "requires_artifact": "plans/8-plan.yaml",
+            "metadata": {
+                "completed_at": "2025-12-20T23:45:00.000000Z",
+                "implementation_files": [
+                    "resources/commands/sprint/validate_test_pass_rates.py"
+                ]
+            }
+        },
+        "8.t": {
+            "type": "testing",
+            "story_type": "testing",
+            "title": "Testing: Validation Engine Skip Logic",
+            "status": "completed",
+            "parent": "8",
+            "phase": "testing",
+            "phase_order": 3,
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "test_categories": [
+                "unit",
+                "integration",
+                "security"
+            ],
+            "metadata": {
+                "test_file": "tests/sprint/test_validation_skip_logic.py",
+                "test_results": {
+                    "total": 17,
+                    "passed": 17,
+                    "failed": 0,
+                    "pass_rate": 100.0,
+                    "duration_seconds": 0.31
+                },
+                "test_results_artifact": "test-results/8-results.json",
+                "completed_at": "2025-12-20T23:46:22.416416Z"
+            }
+        },
+        "-1": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Metadata Schema Extension",
+            "status": "unassigned",
+            "validates": "1",
+            "children": [
+                "-1.d",
+                "-1.i",
+                "-1.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "pending",
+                "validation_implementation": "failed",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-1.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Metadata Schema Extension",
+            "status": "completed",
+            "parent": "-1",
+            "validates": "1.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-1.i"
+            ],
+            "file": "stories/-1.d-validation-discovery.md"
+        },
+        "-1.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Metadata Schema Extension",
+            "status": "failed_validation",
+            "parent": "-1",
+            "validates": "1.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-1.t"
+            ],
+            "file": null,
+            "metadata": {
+                "validation_result": "CRITICAL_FAILURE",
+                "validation_date": "2025-12-21T01:46:11.856391+00:00",
+                "validation_report": "validation-results/-1.i-results.md",
+                "failure_reason": "Implementation missing from project repository - files created in global commands directory instead",
+                "remediation_required": true
+            }
+        },
+        "-1.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Metadata Schema Extension",
+            "status": "completed",
+            "parent": "-1",
+            "validates": "1.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "metadata": {
+                "validation_result": "requires_remediation",
+                "remediation_stories": [
+                    "R-1.t.1",
+                    "R-1.t.2"
+                ],
+                "pass_rate": "76%",
+                "unit_tests": "26/26 (100%)",
+                "integration_tests": "43/71 (61%)"
+            }
+        },
+        "-2": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Test Identity Capture in REMEDIATE",
+            "status": "unassigned",
+            "validates": "2",
+            "children": [
+                "-2.d",
+                "-2.i",
+                "-2.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "completed",
+                "validation_implementation": "pending",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-2.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "-2",
+            "validates": "2.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-2.i"
+            ],
+            "file": "stories/-2.d-validation-discovery.md"
+        },
+        "-2.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "-2",
+            "validates": "2.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-2.t"
+            ],
+            "file": "stories/validation/-2.i-validation-implementation.md"
+        },
+        "-2.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Test Identity Capture in REMEDIATE",
+            "status": "completed",
+            "parent": "-2",
+            "validates": "2.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": "stories/validation/-2.t-validation-testing.md"
+        },
+        "-3": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Overlap Calculation Algorithm",
+            "status": "unassigned",
+            "validates": "3",
+            "children": [
+                "-3.d",
+                "-3.i",
+                "-3.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "completed",
+                "validation_implementation": "pending",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-3.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "-3",
+            "validates": "3.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-3.i"
+            ],
+            "file": "stories/-3.d-validation-discovery.md"
+        },
+        "-3.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "-3",
+            "validates": "3.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-3.t"
+            ],
+            "file": "stories/validation/-3.i-validation-implementation.md",
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T02:27:42.731908Z",
+                "validation_report": "stories/validation/-3.i-validation-implementation.md"
+            }
+        },
+        "-3.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Overlap Calculation Algorithm",
+            "status": "completed",
+            "parent": "-3",
+            "validates": "3.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T02:31:48.063553+00:00",
+                "validation_report": "/tmp/validation_testing_results.json",
+                "checks_executed": [
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H"
+                ],
+                "checks_passed": 5,
+                "checks_failed": 0,
+                "test_pass_rate": "100%"
+            }
+        },
+        "-4": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Reconciliation Application Functions",
+            "status": "in_progress",
+            "validates": "4",
+            "children": [
+                "-4.d",
+                "-4.i",
+                "-4.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "pending",
+                "validation_implementation": "pending",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-4.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Reconciliation Application Functions",
+            "status": "completed",
+            "parent": "-4",
+            "validates": "4.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-4.i"
+            ],
+            "file": null
+        },
+        "-4.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Reconciliation Application Functions",
+            "status": "completed",
+            "parent": "-4",
+            "validates": "4.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-4.t"
+            ],
+            "file": null,
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T02:40:32.417219Z",
+                "validation_report": "stories/validation/-4.i-validation-implementation.md"
+            }
+        },
+        "-4.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Reconciliation Application Functions",
+            "status": "unassigned",
+            "parent": "-4",
+            "validates": "4.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [
+                "-4.t.1"
+            ],
+            "blocks": [],
+            "file": null
+        },
+        "-5": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Container Status Propagation",
+            "status": "completed",
+            "validates": "5",
+            "children": [
+                "-5.d",
+                "-5.i",
+                "-5.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "completed",
+                "validation_implementation": "completed",
+                "validation_testing": "completed"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-5.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Container Status Propagation",
+            "status": "completed",
+            "parent": "-5",
+            "validates": "5.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-5.i"
+            ],
+            "file": null,
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T03:00:39.715603+00:00",
+                "validation_report": "validation-results/-5.d-results.md",
+                "checks_executed": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "checks_passed": 3,
+                "checks_failed": 0
+            }
+        },
+        "-5.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Container Status Propagation",
+            "status": "completed",
+            "parent": "-5",
+            "validates": "5.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-5.t"
+            ],
+            "file": "stories/validation/-5.i-validation-implementation.md",
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T03:06:00.000000Z",
+                "validation_report": "stories/validation/-5.i-validation-implementation.md",
+                "checks_executed": [
+                    "I"
+                ],
+                "checks_passed": 1,
+                "checks_failed": 0,
+                "all_acceptance_criteria_met": true,
+                "no_remediation_needed": true,
+                "implementation_location": "resources/commands/sprint/queue_helpers/reconciliation.py",
+                "implementation_function": "propagate_status_to_parent",
+                "implementation_lines": "402-504",
+                "test_location": "tests/sprint/test_reconciliation_application.py",
+                "test_class": "TestPropagateStatusToParent",
+                "test_count": 14,
+                "test_pass_rate": "100%",
+                "note": "Implementation completed in Story 4 - verified and production-ready"
+            }
+        },
+        "-5.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Container Status Propagation",
+            "status": "completed",
+            "parent": "-5",
+            "validates": "5.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null,
+            "metadata": {
+                "validation_result": "PASS",
+                "validation_date": "2025-12-21T03:30:00.000000Z",
+                "validation_report": "C:/Users/Admin/AppData/Local/Temp/validation_testing_results.json",
+                "checks_executed": [
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H"
+                ],
+                "checks_passed": "5",
+                "checks_failed": "0",
+                "test_pass_rate": "100%"
+            }
+        },
+        "-6": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Remediation Testing Trigger",
+            "status": "unassigned",
+            "validates": "6",
+            "children": [
+                "-6.d",
+                "-6.i",
+                "-6.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "pending",
+                "validation_implementation": "completed",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-6.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Remediation Testing Trigger",
+            "status": "completed",
+            "parent": "-6",
+            "validates": "6.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-6.i"
+            ],
+            "file": null,
+            "completed_at": "2025-12-21T03:13:34Z",
+            "metadata": {
+                "validation_result": {
+                    "status": "PASS",
+                    "executed_at": "2025-12-21T03:13:34Z",
+                    "checks": {
+                        "A": {
+                            "status": "PASS",
+                            "description": "STEP 14 exists in execute-testing.md"
+                        },
+                        "B": {
+                            "status": "PASS",
+                            "description": "Remediation detection logic is correct"
+                        },
+                        "C": {
+                            "status": "PASS",
+                            "description": "Reconciliation trigger workflow matches plan"
+                        }
+                    },
+                    "notes": "All validation checks passed. Implementation matches discovery plan requirements."
+                }
+            }
+        },
+        "-6.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Remediation Testing Trigger",
+            "status": "completed",
+            "parent": "-6",
+            "validates": "6.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-6.t"
+            ],
+            "file": null,
+            "completed_at": "2025-12-21T03:21:01.017117+00:00",
+            "metadata": {
+                "validation_result": {
+                    "status": "PASS",
+                    "executed_at": "2025-12-21T03:21:01.017150+00:00",
+                    "check": {
+                        "I": {
+                            "status": "PASS",
+                            "description": "Implementation matches discovery plan exactly"
+                        }
+                    }
+                }
+            }
+        },
+        "-6.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Remediation Testing Trigger",
+            "status": "unassigned",
+            "parent": "-6",
+            "validates": "6.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null
+        },
+        "-7": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: queue_helpers.py Commands",
+            "status": "unassigned",
+            "validates": "7",
+            "children": [
+                "-7.d",
+                "-7.i",
+                "-7.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "pending",
+                "validation_implementation": "pending",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-7.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: queue_helpers.py Commands",
+            "status": "unassigned",
+            "parent": "-7",
+            "validates": "7.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-7.i"
+            ],
+            "file": null
+        },
+        "-7.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: queue_helpers.py Commands",
+            "status": "unassigned",
+            "parent": "-7",
+            "validates": "7.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-7.t"
+            ],
+            "file": null
+        },
+        "-7.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: queue_helpers.py Commands",
+            "status": "unassigned",
+            "parent": "-7",
+            "validates": "7.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null
+        },
+        "-8": {
+            "type": "validation",
+            "story_type": "validation",
+            "title": "Validate: Validation Engine Skip Logic",
+            "status": "unassigned",
+            "validates": "8",
+            "children": [
+                "-8.d",
+                "-8.i",
+                "-8.t"
+            ],
+            "phase_status": {
+                "validation_discovery": "pending",
+                "validation_implementation": "pending",
+                "validation_testing": "pending"
+            },
+            "target_has_phases": true,
+            "blocks": [],
+            "file": null
+        },
+        "-8.d": {
+            "type": "validation_discovery",
+            "story_type": "validation_discovery",
+            "title": "Validate Discovery: Validation Engine Skip Logic",
+            "status": "unassigned",
+            "parent": "-8",
+            "validates": "8.d",
+            "phase": "validation_discovery",
+            "phase_order": 1,
+            "checks": [
+                "A",
+                "B",
+                "C"
+            ],
+            "children": [],
+            "blocks": [
+                "-8.i"
+            ],
+            "file": null
+        },
+        "-8.i": {
+            "type": "validation_implementation",
+            "story_type": "validation_implementation",
+            "title": "Validate Implementation: Validation Engine Skip Logic",
+            "status": "unassigned",
+            "parent": "-8",
+            "validates": "8.i",
+            "phase": "validation_implementation",
+            "phase_order": 2,
+            "checks": [
+                "I"
+            ],
+            "children": [],
+            "blocks": [
+                "-8.t"
+            ],
+            "file": null
+        },
+        "-8.t": {
+            "type": "validation_testing",
+            "story_type": "validation_testing",
+            "title": "Validate Testing: Validation Engine Skip Logic",
+            "status": "unassigned",
+            "parent": "-8",
+            "validates": "8.t",
+            "phase": "validation_testing",
+            "phase_order": 3,
+            "checks": [
+                "D",
+                "E",
+                "F",
+                "G",
+                "H"
+            ],
+            "children": [],
+            "blocks": [],
+            "file": null
+        },
+        "1.i.1": {
+            "type": "remediation",
+            "story_type": "remediation",
+            "title": "Fix Implementation Location for Metadata Schema Extension",
+            "status": "completed",
+            "parent": "1.i",
+            "children": [],
+            "blocks": [
+                "-1.t"
+            ],
+            "file": "stories/1.i.1-fix-implementation-location.md",
+            "remediation_type": "validation_failure",
+            "validates_failure": "-1.i",
+            "priority": "P0",
+            "metadata": {
+                "created": "2025-12-20T01:50:00Z",
+                "source_validation": "-1.i",
+                "remediation_for": "1.i"
+            },
+            "completed_at": "2025-12-21T01:54:40.873036+00:00"
+        },
+        "-4.t.1": {
+            "type": "remediation",
+            "story_type": "remediation",
+            "title": "Fix Schema Mismatch in Reconciliation Metadata",
+            "status": "completed",
+            "parent": "-4.t",
+            "children": [],
+            "blocks": [],
+            "file": "stories/-4.t.1-fix-schema-mismatch-reconciliation-metadata.md",
+            "remediation_type": "validation_failure",
+            "validates_failure": "-4.t",
+            "priority": "P0",
+            "metadata": {
+                "source_validation": "-4.t",
+                "created": "2025-12-20T00:00:00Z"
+            },
+            "completed_at": "2025-12-21T02:55:15.479230Z"
+        }
+    },
+    "execution_queue": [
+        "-1.d",
+        "-1.i",
+        "1.i.1",
+        "-1.t",
+        "-2.d",
+        "-2.i",
+        "-2.t",
+        "-3.d",
+        "-3.i",
+        "-3.t",
+        "-4.d",
+        "-4.i",
+        "-4.t",
+        "-4.t.1",
+        "-5.d",
+        "-5.i",
+        "-5.t",
+        "-6.d",
+        "-6.i",
+        "-6.t",
+        "-7.d",
+        "-7.i",
+        "-7.t",
+        "-8.d",
+        "-8.i",
+        "-8.t",
         "1.d",
         "1.i",
-        "1.t"
-      ],
-      "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
-      },
-      "blocks": [
-        "2",
-        "3"
-      ],
-      "file": "stories/1-metadata-schema-extension.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
-    },
-    "2": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "1.t",
         "2.d",
         "2.i",
-        "2.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [],
-      "file": "stories/2-test-identity-capture-in-remediate.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
-    },
-    "3": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "2.t",
         "3.d",
         "3.i",
-        "3.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [
-        "4"
-      ],
-      "file": "stories/3-overlap-calculation-algorithm.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
-    },
-    "4": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Reconciliation Application Functions",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "3.t",
         "4.d",
         "4.i",
-        "4.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [
-        "5",
-        "6",
-        "7"
-      ],
-      "file": "stories/4-reconciliation-application-functions.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
-    },
-    "5": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Container Status Propagation",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "4.t",
         "5.d",
         "5.i",
-        "5.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [
-        "6"
-      ],
-      "file": "stories/5-container-status-propagation.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0"
-    },
-    "6": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Remediation Testing Trigger",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "5.t",
         "6.d",
         "6.i",
-        "6.t"
-      ],
-      "phase_status": {
-        "discovery": "pending",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [
-        "8"
-      ],
-      "file": "stories/6-remediation-testing-trigger.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0",
-      "metadata": {
-        "phase_status.discovery": "completed"
-      }
-    },
-    "7": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "queue_helpers.py Commands",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "6.t",
         "7.d",
         "7.i",
-        "7.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [],
-      "file": "stories/7-queue-helpers-commands.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0",
-      "completed_at": "2025-12-20T23:11:02.122894Z"
-    },
-    "8": {
-      "type": "feature",
-      "story_type": "feature",
-      "title": "Validation Engine Skip Logic",
-      "status": "completed",
-      "parent": null,
-      "children": [
+        "7.t",
         "8.d",
         "8.i",
         "8.t"
-      ],
-      "phase_status": {
-        "discovery": "completed",
-        "implementation": "completed",
-        "testing": "completed"
-      },
-      "blocks": [],
-      "file": "stories/8-validation-engine-skip-logic.md",
-      "advisories": [],
-      "_migrated_from": "implementation",
-      "_migration_version": "v4.0.0",
-      "completed_at": "2025-12-20T23:46:22.416465Z"
-    },
-    "1.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Metadata Schema Extension",
-      "status": "completed",
-      "parent": "1",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/1-plan.yaml"
-    },
-    "1.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Metadata Schema Extension",
-      "status": "completed",
-      "parent": "1",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [
-        "1.i.1"
-      ],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/1-plan.yaml",
-      "metadata": {
-        "requires_artifact": "plans/1-plan.yaml"
-      }
-    },
-    "1.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Metadata Schema Extension",
-      "status": "completed",
-      "parent": "1",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_requirements_from": "plans/1-plan.yaml"
-      }
-    },
-    "2.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "2",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/2-plan.yaml"
-    },
-    "2.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "2",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/2-plan.yaml",
-      "metadata": {
-        "requires_artifact": "plans/2-plan.yaml"
-      }
-    },
-    "2.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "2",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_requirements_from": "plans/2-plan.yaml",
-        "test_results": "test-results/2-results.json"
-      }
-    },
-    "3.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "3",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/3-plan.yaml"
-    },
-    "3.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "3",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/3-plan.yaml"
-    },
-    "3.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "3",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "test_file": "tests/sprint/test_overlap_calculation.py",
-      "test_count": 64,
-      "test_results": {
-        "passed": 64,
-        "failed": 0,
-        "skipped": 0
-      }
-    },
-    "4.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Reconciliation Application Functions",
-      "status": "completed",
-      "parent": "4",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/4-plan.yaml"
-    },
-    "4.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Reconciliation Application Functions",
-      "status": "completed",
-      "parent": "4",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/4-plan.yaml"
-    },
-    "4.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Reconciliation Application Functions",
-      "status": "completed",
-      "parent": "4",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_file": "tests/sprint/test_reconciliation_application.py",
-        "test_results": {
-          "total": 49,
-          "passed": 49,
-          "failed": 0,
-          "pass_rate": 100.0,
-          "duration_seconds": 0.8
-        },
-        "completed_at": "2025-12-20T00:00:00Z"
-      }
-    },
-    "5.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Container Status Propagation",
-      "status": "completed",
-      "parent": "5",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/5-plan.yaml"
-    },
-    "5.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Container Status Propagation",
-      "status": "completed",
-      "parent": "5",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/5-plan.yaml"
-    },
-    "5.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Container Status Propagation",
-      "status": "completed",
-      "parent": "5",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_file": "tests/sprint/test_reconciliation_application.py::TestPropagateStatusToParent",
-        "test_results": {
-          "total": 13,
-          "passed": 13,
-          "failed": 0,
-          "pass_rate": 100.0,
-          "duration_seconds": 0.1
-        },
-        "test_results_artifact": "test-results/5-results.json",
-        "completed_at": "2025-12-20T00:00:00Z",
-        "verification_type": "existing_tests"
-      }
-    },
-    "6.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Remediation Testing Trigger",
-      "status": "completed",
-      "parent": "6",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/6-plan.yaml"
-    },
-    "6.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Remediation Testing Trigger",
-      "status": "completed",
-      "parent": "6",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/6-plan.yaml",
-      "completed_at": "2025-12-20T23:24:28.112419Z"
-    },
-    "6.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Remediation Testing Trigger",
-      "status": "completed",
-      "parent": "6",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_file": "tests/sprint/test_remediation_testing_trigger.py",
-        "test_results": {
-          "total": 22,
-          "passed": 22,
-          "failed": 0,
-          "pass_rate": 100.0,
-          "duration_seconds": 0.18
-        },
-        "test_results_artifact": "test-results/6-results.json",
-        "completed_at": "2025-12-20T23:32:49.286889Z"
-      }
-    },
-    "7.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: queue_helpers.py Commands",
-      "status": "completed",
-      "parent": "7",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/7-plan.yaml"
-    },
-    "7.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: queue_helpers.py Commands",
-      "status": "completed",
-      "parent": "7",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/7-plan.yaml",
-      "metadata": {
-        "completed_at": "2025-12-20T00:00:00Z",
-        "implementation_files": [
-          "resources/commands/sprint/queue_helpers/cli.py",
-          "resources/commands/sprint/queue_helpers/__main__.py",
-          "resources/commands/sprint/queue_helpers/__init__.py"
-        ]
-      }
-    },
-    "7.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: queue_helpers.py Commands",
-      "status": "completed",
-      "parent": "7",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "completed_at": "2025-12-20T23:11:02.122825Z"
-    },
-    "8.d": {
-      "type": "discovery",
-      "story_type": "discovery",
-      "title": "Discovery: Validation Engine Skip Logic",
-      "status": "completed",
-      "parent": "8",
-      "phase": "discovery",
-      "phase_order": 1,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "artifact": "plans/8-plan.yaml"
-    },
-    "8.i": {
-      "type": "implementation",
-      "story_type": "implementation",
-      "title": "Implementation: Validation Engine Skip Logic",
-      "status": "completed",
-      "parent": "8",
-      "phase": "implementation",
-      "phase_order": 2,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "requires_artifact": "plans/8-plan.yaml",
-      "metadata": {
-        "completed_at": "2025-12-20T23:45:00.000000Z",
-        "implementation_files": [
-          "resources/commands/sprint/validate_test_pass_rates.py"
-        ]
-      }
-    },
-    "8.t": {
-      "type": "testing",
-      "story_type": "testing",
-      "title": "Testing: Validation Engine Skip Logic",
-      "status": "completed",
-      "parent": "8",
-      "phase": "testing",
-      "phase_order": 3,
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "test_categories": [
-        "unit",
-        "integration",
-        "security"
-      ],
-      "metadata": {
-        "test_file": "tests/sprint/test_validation_skip_logic.py",
-        "test_results": {
-          "total": 17,
-          "passed": 17,
-          "failed": 0,
-          "pass_rate": 100.0,
-          "duration_seconds": 0.31
-        },
-        "test_results_artifact": "test-results/8-results.json",
-        "completed_at": "2025-12-20T23:46:22.416416Z"
-      }
-    },
-    "-1": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Metadata Schema Extension",
-      "status": "unassigned",
-      "validates": "1",
-      "children": [
-        "-1.d",
-        "-1.i",
-        "-1.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "pending",
-        "validation_implementation": "failed",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-1.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Metadata Schema Extension",
-      "status": "completed",
-      "parent": "-1",
-      "validates": "1.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-1.i"
-      ],
-      "file": "stories/-1.d-validation-discovery.md"
-    },
-    "-1.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Metadata Schema Extension",
-      "status": "failed_validation",
-      "parent": "-1",
-      "validates": "1.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-1.t"
-      ],
-      "file": null,
-      "metadata": {
-        "validation_result": "CRITICAL_FAILURE",
-        "validation_date": "2025-12-21T01:46:11.856391+00:00",
-        "validation_report": "validation-results/-1.i-results.md",
-        "failure_reason": "Implementation missing from project repository - files created in global commands directory instead",
-        "remediation_required": true
-      }
-    },
-    "-1.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Metadata Schema Extension",
-      "status": "completed",
-      "parent": "-1",
-      "validates": "1.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "metadata": {
-        "validation_result": "requires_remediation",
-        "remediation_stories": [
-          "R-1.t.1",
-          "R-1.t.2"
-        ],
-        "pass_rate": "76%",
-        "unit_tests": "26/26 (100%)",
-        "integration_tests": "43/71 (61%)"
-      }
-    },
-    "-2": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Test Identity Capture in REMEDIATE",
-      "status": "unassigned",
-      "validates": "2",
-      "children": [
-        "-2.d",
-        "-2.i",
-        "-2.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "completed",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-2.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "-2",
-      "validates": "2.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-2.i"
-      ],
-      "file": "stories/-2.d-validation-discovery.md"
-    },
-    "-2.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "-2",
-      "validates": "2.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-2.t"
-      ],
-      "file": "stories/validation/-2.i-validation-implementation.md"
-    },
-    "-2.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Test Identity Capture in REMEDIATE",
-      "status": "completed",
-      "parent": "-2",
-      "validates": "2.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": "stories/validation/-2.t-validation-testing.md"
-    },
-    "-3": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Overlap Calculation Algorithm",
-      "status": "unassigned",
-      "validates": "3",
-      "children": [
-        "-3.d",
-        "-3.i",
-        "-3.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "completed",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-3.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "-3",
-      "validates": "3.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-3.i"
-      ],
-      "file": "stories/-3.d-validation-discovery.md"
-    },
-    "-3.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "-3",
-      "validates": "3.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-3.t"
-      ],
-      "file": "stories/validation/-3.i-validation-implementation.md",
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T02:27:42.731908Z",
-        "validation_report": "stories/validation/-3.i-validation-implementation.md"
-      }
-    },
-    "-3.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Overlap Calculation Algorithm",
-      "status": "completed",
-      "parent": "-3",
-      "validates": "3.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T02:31:48.063553+00:00",
-        "validation_report": "/tmp/validation_testing_results.json",
-        "checks_executed": [
-          "D",
-          "E",
-          "F",
-          "G",
-          "H"
-        ],
-        "checks_passed": 5,
-        "checks_failed": 0,
-        "test_pass_rate": "100%"
-      }
-    },
-    "-4": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Reconciliation Application Functions",
-      "status": "in_progress",
-      "validates": "4",
-      "children": [
-        "-4.d",
-        "-4.i",
-        "-4.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "pending",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-4.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Reconciliation Application Functions",
-      "status": "completed",
-      "parent": "-4",
-      "validates": "4.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-4.i"
-      ],
-      "file": null
-    },
-    "-4.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Reconciliation Application Functions",
-      "status": "completed",
-      "parent": "-4",
-      "validates": "4.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-4.t"
-      ],
-      "file": null,
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T02:40:32.417219Z",
-        "validation_report": "stories/validation/-4.i-validation-implementation.md"
-      }
-    },
-    "-4.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Reconciliation Application Functions",
-      "status": "unassigned",
-      "parent": "-4",
-      "validates": "4.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [
-        "-4.t.1"
-      ],
-      "blocks": [],
-      "file": null
-    },
-    "-5": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Container Status Propagation",
-      "status": "completed",
-      "validates": "5",
-      "children": [
-        "-5.d",
-        "-5.i",
-        "-5.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "completed",
-        "validation_implementation": "completed",
-        "validation_testing": "completed"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-5.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Container Status Propagation",
-      "status": "completed",
-      "parent": "-5",
-      "validates": "5.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-5.i"
-      ],
-      "file": null,
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T03:00:39.715603+00:00",
-        "validation_report": "validation-results/-5.d-results.md",
-        "checks_executed": [
-          "A",
-          "B",
-          "C"
-        ],
-        "checks_passed": 3,
-        "checks_failed": 0
-      }
-    },
-    "-5.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Container Status Propagation",
-      "status": "completed",
-      "parent": "-5",
-      "validates": "5.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-5.t"
-      ],
-      "file": "stories/validation/-5.i-validation-implementation.md",
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T03:06:00.000000Z",
-        "validation_report": "stories/validation/-5.i-validation-implementation.md",
-        "checks_executed": [
-          "I"
-        ],
-        "checks_passed": 1,
-        "checks_failed": 0,
-        "all_acceptance_criteria_met": true,
-        "no_remediation_needed": true,
-        "implementation_location": "resources/commands/sprint/queue_helpers/reconciliation.py",
-        "implementation_function": "propagate_status_to_parent",
-        "implementation_lines": "402-504",
-        "test_location": "tests/sprint/test_reconciliation_application.py",
-        "test_class": "TestPropagateStatusToParent",
-        "test_count": 14,
-        "test_pass_rate": "100%",
-        "note": "Implementation completed in Story 4 - verified and production-ready"
-      }
-    },
-    "-5.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Container Status Propagation",
-      "status": "completed",
-      "parent": "-5",
-      "validates": "5.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null,
-      "metadata": {
-        "validation_result": "PASS",
-        "validation_date": "2025-12-21T03:30:00.000000Z",
-        "validation_report": "C:/Users/Admin/AppData/Local/Temp/validation_testing_results.json",
-        "checks_executed": [
-          "D",
-          "E",
-          "F",
-          "G",
-          "H"
-        ],
-        "checks_passed": "5",
-        "checks_failed": "0",
-        "test_pass_rate": "100%"
-      }
-    },
-    "-6": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Remediation Testing Trigger",
-      "status": "unassigned",
-      "validates": "6",
-      "children": [
-        "-6.d",
-        "-6.i",
-        "-6.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "pending",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-6.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Remediation Testing Trigger",
-      "status": "completed",
-      "parent": "-6",
-      "validates": "6.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-6.i"
-      ],
-      "file": null,
-      "completed_at": "2025-12-21T03:13:34Z",
-      "metadata": {
-        "validation_result": {
-          "status": "PASS",
-          "executed_at": "2025-12-21T03:13:34Z",
-          "checks": {
-            "A": {
-              "status": "PASS",
-              "description": "STEP 14 exists in execute-testing.md"
-            },
-            "B": {
-              "status": "PASS",
-              "description": "Remediation detection logic is correct"
-            },
-            "C": {
-              "status": "PASS",
-              "description": "Reconciliation trigger workflow matches plan"
-            }
-          },
-          "notes": "All validation checks passed. Implementation matches discovery plan requirements."
-        }
-      }
-    },
-    "-6.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Remediation Testing Trigger",
-      "status": "unassigned",
-      "parent": "-6",
-      "validates": "6.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-6.t"
-      ],
-      "file": null
-    },
-    "-6.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Remediation Testing Trigger",
-      "status": "unassigned",
-      "parent": "-6",
-      "validates": "6.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null
-    },
-    "-7": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: queue_helpers.py Commands",
-      "status": "unassigned",
-      "validates": "7",
-      "children": [
-        "-7.d",
-        "-7.i",
-        "-7.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "pending",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-7.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: queue_helpers.py Commands",
-      "status": "unassigned",
-      "parent": "-7",
-      "validates": "7.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-7.i"
-      ],
-      "file": null
-    },
-    "-7.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: queue_helpers.py Commands",
-      "status": "unassigned",
-      "parent": "-7",
-      "validates": "7.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-7.t"
-      ],
-      "file": null
-    },
-    "-7.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: queue_helpers.py Commands",
-      "status": "unassigned",
-      "parent": "-7",
-      "validates": "7.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null
-    },
-    "-8": {
-      "type": "validation",
-      "story_type": "validation",
-      "title": "Validate: Validation Engine Skip Logic",
-      "status": "unassigned",
-      "validates": "8",
-      "children": [
-        "-8.d",
-        "-8.i",
-        "-8.t"
-      ],
-      "phase_status": {
-        "validation_discovery": "pending",
-        "validation_implementation": "pending",
-        "validation_testing": "pending"
-      },
-      "target_has_phases": true,
-      "blocks": [],
-      "file": null
-    },
-    "-8.d": {
-      "type": "validation_discovery",
-      "story_type": "validation_discovery",
-      "title": "Validate Discovery: Validation Engine Skip Logic",
-      "status": "unassigned",
-      "parent": "-8",
-      "validates": "8.d",
-      "phase": "validation_discovery",
-      "phase_order": 1,
-      "checks": [
-        "A",
-        "B",
-        "C"
-      ],
-      "children": [],
-      "blocks": [
-        "-8.i"
-      ],
-      "file": null
-    },
-    "-8.i": {
-      "type": "validation_implementation",
-      "story_type": "validation_implementation",
-      "title": "Validate Implementation: Validation Engine Skip Logic",
-      "status": "unassigned",
-      "parent": "-8",
-      "validates": "8.i",
-      "phase": "validation_implementation",
-      "phase_order": 2,
-      "checks": [
-        "I"
-      ],
-      "children": [],
-      "blocks": [
-        "-8.t"
-      ],
-      "file": null
-    },
-    "-8.t": {
-      "type": "validation_testing",
-      "story_type": "validation_testing",
-      "title": "Validate Testing: Validation Engine Skip Logic",
-      "status": "unassigned",
-      "parent": "-8",
-      "validates": "8.t",
-      "phase": "validation_testing",
-      "phase_order": 3,
-      "checks": [
-        "D",
-        "E",
-        "F",
-        "G",
-        "H"
-      ],
-      "children": [],
-      "blocks": [],
-      "file": null
-    },
-    "1.i.1": {
-      "type": "remediation",
-      "story_type": "remediation",
-      "title": "Fix Implementation Location for Metadata Schema Extension",
-      "status": "completed",
-      "parent": "1.i",
-      "children": [],
-      "blocks": [
-        "-1.t"
-      ],
-      "file": "stories/1.i.1-fix-implementation-location.md",
-      "remediation_type": "validation_failure",
-      "validates_failure": "-1.i",
-      "priority": "P0",
-      "metadata": {
-        "created": "2025-12-20T01:50:00Z",
-        "source_validation": "-1.i",
-        "remediation_for": "1.i"
-      },
-      "completed_at": "2025-12-21T01:54:40.873036+00:00"
-    },
-    "-4.t.1": {
-      "type": "remediation",
-      "story_type": "remediation",
-      "title": "Fix Schema Mismatch in Reconciliation Metadata",
-      "status": "completed",
-      "parent": "-4.t",
-      "children": [],
-      "blocks": [],
-      "file": "stories/-4.t.1-fix-schema-mismatch-reconciliation-metadata.md",
-      "remediation_type": "validation_failure",
-      "validates_failure": "-4.t",
-      "priority": "P0",
-      "metadata": {
-        "source_validation": "-4.t",
-        "created": "2025-12-20T00:00:00Z"
-      },
-      "completed_at": "2025-12-21T02:55:15.479230Z"
-    }
-  },
-  "execution_queue": [
-    "-1.d",
-    "-1.i",
-    "1.i.1",
-    "-1.t",
-    "-2.d",
-    "-2.i",
-    "-2.t",
-    "-3.d",
-    "-3.i",
-    "-3.t",
-    "-4.d",
-    "-4.i",
-    "-4.t",
-    "-4.t.1",
-    "-5.d",
-    "-5.i",
-    "-5.t",
-    "-6.d",
-    "-6.i",
-    "-6.t",
-    "-7.d",
-    "-7.i",
-    "-7.t",
-    "-8.d",
-    "-8.i",
-    "-8.t",
-    "1.d",
-    "1.i",
-    "1.t",
-    "2.d",
-    "2.i",
-    "2.t",
-    "3.d",
-    "3.i",
-    "3.t",
-    "4.d",
-    "4.i",
-    "4.t",
-    "5.d",
-    "5.i",
-    "5.t",
-    "6.d",
-    "6.i",
-    "6.t",
-    "7.d",
-    "7.i",
-    "7.t",
-    "8.d",
-    "8.i",
-    "8.t"
-  ],
-  "last_updated": "2025-12-21T03:06:00.000000+00:00"
+    ],
+    "last_updated": "2025-12-21T03:21:01.017158+00:00"
 }
