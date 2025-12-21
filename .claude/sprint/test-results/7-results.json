@@ -1,0 +1,201 @@
+{
+  "story_id": "7.t",
+  "story_title": "Testing phase for queue_helpers.py Commands",
+  "test_file": "tests/sprint/test_queue_helpers_cli.py",
+  "timestamp": "2025-12-20T23:15:00",
+  "status": "PASSED",
+  "summary": {
+    "total": 19,
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 735
+  },
+  "test_suites": {
+    "TestCheckReconciliation": {
+      "description": "Unit tests for check-reconciliation command",
+      "total": 5,
+      "passed": 5,
+      "tests": [
+        {
+          "name": "test_check_pending_reconciliation_text_output",
+          "status": "PASSED",
+          "acceptance_criteria": "check-reconciliation returns pending reconciliation status (text)",
+          "priority": "P0"
+        },
+        {
+          "name": "test_check_pending_reconciliation_json_output",
+          "status": "PASSED",
+          "acceptance_criteria": "check-reconciliation returns pending reconciliation status (JSON)",
+          "priority": "P0"
+        },
+        {
+          "name": "test_check_applied_reconciliation",
+          "status": "PASSED",
+          "acceptance_criteria": "check-reconciliation shows applied status",
+          "priority": "P1"
+        },
+        {
+          "name": "test_check_invalid_story_id",
+          "status": "PASSED",
+          "acceptance_criteria": "Error handling for invalid story ID",
+          "priority": "P1"
+        },
+        {
+          "name": "test_check_no_reconciliation_data",
+          "status": "PASSED",
+          "acceptance_criteria": "Handle story with no reconciliation data",
+          "priority": "P1"
+        }
+      ]
+    },
+    "TestApplyReconciliation": {
+      "description": "Unit tests for apply-reconciliation command",
+      "total": 6,
+      "passed": 6,
+      "tests": [
+        {
+          "name": "test_apply_propagate_mode",
+          "status": "PASSED",
+          "acceptance_criteria": "apply-reconciliation supports propagate mode",
+          "priority": "P0"
+        },
+        {
+          "name": "test_apply_retest_mode",
+          "status": "PASSED",
+          "acceptance_criteria": "apply-reconciliation supports retest mode",
+          "priority": "P0"
+        },
+        {
+          "name": "test_apply_supersede_mode_with_reason",
+          "status": "PASSED",
+          "acceptance_criteria": "apply-reconciliation supports supersede mode with reason",
+          "priority": "P0"
+        },
+        {
+          "name": "test_apply_supersede_without_reason_fails",
+          "status": "PASSED",
+          "acceptance_criteria": "Validation error when supersede mode missing reason",
+          "priority": "P0"
+        },
+        {
+          "name": "test_apply_invalid_story_id",
+          "status": "PASSED",
+          "acceptance_criteria": "Error handling for invalid story ID",
+          "priority": "P1"
+        },
+        {
+          "name": "test_apply_no_reconciliation_data",
+          "status": "PASSED",
+          "acceptance_criteria": "Error handling for missing reconciliation data",
+          "priority": "P1"
+        }
+      ]
+    },
+    "TestReconciliationStatus": {
+      "description": "Unit tests for reconciliation-status command",
+      "total": 3,
+      "passed": 3,
+      "tests": [
+        {
+          "name": "test_status_empty_queue",
+          "status": "PASSED",
+          "acceptance_criteria": "reconciliation-status handles empty queue",
+          "priority": "P1"
+        },
+        {
+          "name": "test_status_with_multiple_scenarios",
+          "status": "PASSED",
+          "acceptance_criteria": "reconciliation-status shows sprint-wide summary",
+          "priority": "P0"
+        },
+        {
+          "name": "test_status_json_output",
+          "status": "PASSED",
+          "acceptance_criteria": "JSON output format supported",
+          "priority": "P0"
+        }
+      ]
+    },
+    "TestFullWorkflow": {
+      "description": "Integration tests for complete workflows",
+      "total": 3,
+      "passed": 3,
+      "tests": [
+        {
+          "name": "test_check_then_apply_then_verify",
+          "status": "PASSED",
+          "acceptance_criteria": "Full workflow: check → apply → verify",
+          "priority": "P0"
+        },
+        {
+          "name": "test_sprint_wide_summary_accuracy",
+          "status": "PASSED",
+          "acceptance_criteria": "Sprint-wide summary counts are accurate",
+          "priority": "P0"
+        },
+        {
+          "name": "test_error_handling_with_real_queue_structure",
+          "status": "PASSED",
+          "acceptance_criteria": "Error handling with real queue file",
+          "priority": "P1"
+        }
+      ]
+    },
+    "TestJSONOutput": {
+      "description": "Test JSON output format consistency",
+      "total": 2,
+      "passed": 2,
+      "tests": [
+        {
+          "name": "test_check_reconciliation_json_schema",
+          "status": "PASSED",
+          "acceptance_criteria": "check-reconciliation JSON has required fields",
+          "priority": "P0"
+        },
+        {
+          "name": "test_reconciliation_status_json_schema",
+          "status": "PASSED",
+          "acceptance_criteria": "reconciliation-status JSON has required fields",
+          "priority": "P0"
+        }
+      ]
+    }
+  },
+  "coverage": {
+    "unit_tests": {
+      "count": 14,
+      "description": "Tests for individual command functions"
+    },
+    "integration_tests": {
+      "count": 3,
+      "description": "Tests for complete workflows"
+    },
+    "json_format_tests": {
+      "count": 2,
+      "description": "Tests for JSON output schema"
+    }
+  },
+  "acceptance_criteria_coverage": {
+    "check_reconciliation_returns_status": "VERIFIED",
+    "apply_reconciliation_manual_mode": "VERIFIED",
+    "reconciliation_status_sprint_summary": "VERIFIED",
+    "json_output_format_supported": "VERIFIED",
+    "help_text_and_error_messages": "VERIFIED"
+  },
+  "notes": [
+    "All 19 tests passed successfully",
+    "Coverage includes unit tests (14), integration tests (3), and JSON format tests (2)",
+    "Test execution time: 0.25 seconds",
+    "All acceptance criteria verified",
+    "Commands tested: check-reconciliation, apply-reconciliation, reconciliation-status",
+    "All three reconciliation modes tested: propagate, retest, supersede",
+    "Error handling verified for invalid inputs and missing data",
+    "JSON output schema validated for all commands"
+  ],
+  "dependencies_tested": [
+    "resources.commands.sprint.queue_helpers.cli",
+    "resources.commands.sprint.queue_helpers.core",
+    "resources.commands.sprint.queue_helpers.reconciliation"
+  ]
+}

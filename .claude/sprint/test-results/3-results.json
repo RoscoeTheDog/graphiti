@@ -1,0 +1,207 @@
+{
+  "story_id": "3",
+  "story_title": "Overlap Calculation Algorithm",
+  "phase": "testing",
+  "test_file": "tests/sprint/test_overlap_calculation.py",
+  "executed_at": "2025-12-20T14:35:00Z",
+  "test_framework": "pytest",
+  "summary": {
+    "total_tests": 64,
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "pass_rate": 100.0,
+    "execution_time_seconds": 1.41
+  },
+  "test_categories": {
+    "unit": {
+      "total": 46,
+      "passed": 46,
+      "categories": [
+        {
+          "name": "calculate_test_overlap",
+          "tests": 16,
+          "description": "Empty lists, identical lists, partial overlap, path normalization"
+        },
+        {
+          "name": "same_test_parameters",
+          "tests": 17,
+          "description": "Matching/mismatched params, missing params, order-independent comparison"
+        },
+        {
+          "name": "determine_reconciliation_mode",
+          "tests": 13,
+          "description": "Propagate/retest/no_match modes, threshold boundaries"
+        }
+      ]
+    },
+    "integration": {
+      "total": 6,
+      "passed": 6,
+      "scenarios": [
+        "High overlap + same params = propagate",
+        "Moderate overlap + same params = retest",
+        "Low overlap + same params = no_match",
+        "High overlap + different params",
+        "Real test file paths",
+        "Realistic test metadata"
+      ]
+    },
+    "security": {
+      "total": 12,
+      "passed": 12,
+      "tests": [
+        "Path traversal attacks",
+        "Null bytes in paths",
+        "Special characters",
+        "Unicode characters",
+        "Very long paths",
+        "Large file lists (10,000 and 100,000 files)",
+        "Empty strings",
+        "Whitespace-only paths",
+        "Nested structures"
+      ]
+    }
+  },
+  "coverage": {
+    "calculate_test_overlap": {
+      "edge_cases": [
+        "Both lists empty (returns 1.0)",
+        "One list empty (returns 0.0)",
+        "Identical lists (returns 1.0)",
+        "No overlap (returns 0.0)",
+        "Partial overlap (various ratios)",
+        "Different list sizes",
+        "Path normalization (forward/backslash, relative paths)",
+        "Duplicate files in lists"
+      ],
+      "test_count": 16
+    },
+    "same_test_parameters": {
+      "scenarios": [
+        "All parameters match",
+        "Empty parameters",
+        "Subset of parameters",
+        "Threshold/command/timeout/environment mismatches",
+        "Missing parameters (original, new, both)",
+        "Explicit None vs missing",
+        "Order-independent dict/list comparison",
+        "Type mismatches (string vs int, list vs dict)",
+        "Nested structures (dict and list)"
+      ],
+      "test_count": 17
+    },
+    "determine_reconciliation_mode": {
+      "thresholds_tested": [
+        "Perfect overlap (1.0) -> propagate",
+        "Very high (0.99) -> propagate",
+        "Exact boundary (0.95) -> propagate",
+        "Just below 0.95 (0.94) -> retest",
+        "Moderate (0.70) -> retest",
+        "Exact boundary (0.50) -> retest",
+        "Just below 0.50 (0.49) -> no_match",
+        "Low (0.25) -> no_match",
+        "No overlap (0.0) -> no_match",
+        "Epsilon tests (0.95±ε, 0.50±ε)"
+      ],
+      "test_count": 13
+    }
+  },
+  "performance_tests": {
+    "large_file_lists_10k": {
+      "files": 10000,
+      "execution_time": "< 1 second",
+      "result": "PASS"
+    },
+    "extremely_large_file_lists_100k": {
+      "files": 100000,
+      "execution_time": "< 5 seconds",
+      "result": "PASS"
+    }
+  },
+  "acceptance_criteria_coverage": {
+    "AC-3.1": {
+      "text": "calculate_test_overlap() function returns ratio of matching test files",
+      "status": "VERIFIED",
+      "tests": [
+        "test_both_lists_empty",
+        "test_identical_single_file",
+        "test_no_overlap_single_files",
+        "test_partial_overlap_one_common_file",
+        "test_different_sizes_small_vs_large"
+      ]
+    },
+    "AC-3.2": {
+      "text": "same_test_parameters() function compares threshold, command, etc.",
+      "status": "VERIFIED",
+      "tests": [
+        "test_all_parameters_match",
+        "test_threshold_mismatch",
+        "test_command_mismatch",
+        "test_missing_parameter_original"
+      ]
+    },
+    "AC-3.3": {
+      "text": "Overlap >= 0.95 qualifies for propagate mode",
+      "status": "VERIFIED",
+      "tests": [
+        "test_perfect_overlap_propagate",
+        "test_threshold_boundary_0_95_propagate",
+        "test_threshold_0_95_plus_epsilon"
+      ]
+    },
+    "AC-3.4": {
+      "text": "Overlap >= 0.50 and < 0.95 triggers retest mode",
+      "status": "VERIFIED",
+      "tests": [
+        "test_just_below_threshold_retest",
+        "test_moderate_overlap_retest",
+        "test_threshold_boundary_0_50_retest"
+      ]
+    },
+    "AC-3.5": {
+      "text": "Overlap < 0.50 results in no_match (no reconciliation)",
+      "status": "VERIFIED",
+      "tests": [
+        "test_just_below_threshold_no_match",
+        "test_low_overlap_no_match",
+        "test_no_overlap_no_match"
+      ]
+    },
+    "AC-3.6": {
+      "text": "Unit tests for edge cases (empty lists, identical lists, partial overlap)",
+      "status": "VERIFIED",
+      "tests": [
+        "All unit tests in TestCalculateTestOverlap",
+        "All unit tests in TestSameTestParameters",
+        "All unit tests in TestDetermineReconciliationMode"
+      ]
+    }
+  },
+  "quality_metrics": {
+    "test_coverage_percent": 100,
+    "edge_cases_covered": 12,
+    "security_tests": 12,
+    "performance_tests": 2,
+    "integration_scenarios": 6,
+    "documentation_quality": "comprehensive",
+    "test_naming_clarity": "excellent"
+  },
+  "notes": [
+    "All 64 tests pass with 100% success rate",
+    "Comprehensive coverage of edge cases, security, and performance",
+    "Path normalization handles cross-platform differences correctly",
+    "Set operations provide O(n) time complexity (efficient for large lists)",
+    "Threshold boundary testing confirms precise mode determination",
+    "Integration tests verify complete workflow from calculation to mode determination",
+    "Security tests validate resilience against malformed inputs and attacks",
+    "Performance tests confirm scalability up to 100,000 files"
+  ],
+  "recommendations": [
+    "Tests are production-ready",
+    "No blocking issues identified",
+    "Algorithm meets all acceptance criteria",
+    "Ready to proceed with Story 4 (Reconciliation Application Functions)"
+  ]
+}

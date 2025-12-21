@@ -24,3 +24,4 @@
 | s022 | sprint-orchestrate-v110-per-project | ACTIVE | 2025-12-18 18:44 | Execute full sprint orchestration for Per-Project Config |
 | s023 | complete-sprint-finish-and-document | ACTIVE | 2025-12-18 19:02 | Complete sprint FINISH and document daemon venv architecture |
 | s024 | sprint-orchestration-with-remediation | ACTIVE | 2025-12-19 18:45 | Sprint orchestration with remediation test reconciliat |
+| s025 | complete-remediation-test | ACTIVE | 2025-12-20 15:56 | Complete Remediation Test Reconciliation Sprint v1.0 |

@@ -1,0 +1,663 @@
+# Discovery Plan: Story 7 - queue_helpers.py Commands
+# Sprint: Remediation Test Reconciliation v1.0.0
+# Created: 2025-12-20
+
+story_id: "7"
+title: "queue_helpers.py Commands"
+phase: discovery
+status: completed
+
+## Overview
+
+Add CLI commands to the queue_helpers package for reconciliation management.
+These commands will provide manual control over the reconciliation process,
+including checking pending reconciliation status, applying reconciliation,
+and viewing sprint-wide reconciliation summaries.
+
+## Existing Infrastructure
+
+### Queue Helpers Package Location
+- **Path**: `resources/commands/sprint/queue_helpers/`
+- **Package Structure**:
+  - `__init__.py` - Package exports
+  - `core.py` - Queue load/save/metadata functions
+  - `overlap.py` - Overlap calculation and mode determination
+  - `reconciliation.py` - Reconciliation application functions
+
+### Existing Command Patterns (from session_tracking_cli.py)
+
+The project uses `argparse` with subcommands pattern:
+
+```python
+# CLI Structure Pattern
+1. Use argparse for command-line parsing
+2. Subcommand pattern with add_subparsers()
+3. Each subcommand has its own function (cmd_*)
+4. JSON output support via --json flag
+5. Error handling with sys.exit(1) on errors
+6. Clear status messages with [OK], [ERROR] prefixes
+7. Help text for all commands
+
+# Example Command Structure:
+def cmd_<command>(args: argparse.Namespace) -> None:
+    """Command implementation."""
+    try:
+        # Load data
+        # Perform action
+        # Display results
+        # Optional: JSON output if args.json
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        sys.exit(1)
+```
+
+### Queue JSON Structure
+
+**Location**: `.claude/sprint/.queue.json`
+
+**Relevant Fields for Reconciliation**:
+```json
+{
+  "stories": {
+    "story_id": {
+      "status": "pending|unassigned|in_progress|completed|superseded|blocked",
+      "metadata": {
+        "reconciliation": {
+          "status": "propagated|pending_retest|superseded",
+          "source_story": "remediation_story_id",
+          "needs_retest": true|false,
+          "retest_reason": "string",
+          "supersession_reason": "string",
+          "applied_at": "ISO timestamp",
+          // Additional fields vary by mode
+        },
+        "test_reconciliation": {
+          "target_validation_id": "validation_story_id",
+          "source_remediation_id": "remediation_story_id",
+          "test_overlap_ratio": 0.0-1.0,
+          "reconciliation_mode": "propagate|retest|supersede|no_match",
+          "test_files": ["list", "of", "test", "files"],
+          "pass_rate": 0.0-100.0
+        }
+      }
+    }
+  }
+}
+```
+
+### Reconciliation Application Functions
+
+**Location**: `resources/commands/sprint/queue_helpers/reconciliation.py`
+
+**Functions Available**:
+1. `apply_propagate_reconciliation(target_validation_id, source_remediation_id, test_results, sprint_dir)`
+   - Marks validation as completed by propagating remediation test results
+   - Sets status to 'completed'
+   - Propagates status to parent container
+
+2. `apply_retest_reconciliation(target_validation_id, source_remediation_id, test_results, retest_reason, sprint_dir)`
+   - Unblocks validation with needs_retest flag
+   - Sets status to 'unassigned' (ready for execution)
+   - Does NOT propagate to parent (validation still needs execution)
+
+3. `apply_supersede_reconciliation(target_validation_id, source_remediation_id, test_results, supersession_reason, sprint_dir)`
+   - Marks validation as superseded
+   - Sets status to 'superseded'
+   - Propagates status to parent (superseded counts as resolved)
+
+**Common Return Format**:
+```python
+{
+    'status': 'success|error|skipped',
+    'mode': 'propagate|retest|supersede',
+    'target': 'target_validation_id',
+    'source': 'source_remediation_id',
+    'message': 'Human-readable message',
+    'updated_stories': ['list', 'of', 'updated', 'story', 'ids']
+}
+```
+
+### Overlap Calculation Functions
+
+**Location**: `resources/commands/sprint/queue_helpers/overlap.py`
+
+**Functions Available**:
+1. `calculate_test_overlap(original_test_files, new_test_files)` -> float (0.0-1.0)
+2. `same_test_parameters(original_params, new_params)` -> bool
+3. `determine_reconciliation_mode(overlap_ratio)` -> 'propagate'|'retest'|'no_match'
+
+**Thresholds**:
+- >= 0.95: 'propagate' mode (very high overlap)
+- >= 0.50 and < 0.95: 'retest' mode (moderate overlap)
+- < 0.50: 'no_match' mode (low overlap)
+
+## Pending Reconciliation Concept
+
+**Definition**: A validation story has "pending reconciliation" when:
+1. Story has `metadata.test_reconciliation` field (set by REMEDIATE command)
+2. Reconciliation has NOT been applied yet (no `metadata.reconciliation` field)
+3. Story status is still 'pending' or 'blocked'
+
+**Reconciliation States**:
+- **Pending**: `test_reconciliation` exists, `reconciliation` does not exist
+- **Applied**: Both `test_reconciliation` and `reconciliation` exist
+- **No Reconciliation**: Neither field exists (normal validation story)
+
+## New Commands to Implement
+
+### 1. check-reconciliation --story-id <id>
+
+**Purpose**: Check pending reconciliation status for a specific validation story
+
+**Acceptance Criteria (P0)**:
+- Returns pending reconciliation status for given story ID
+- Shows reconciliation mode (propagate/retest/supersede/no_match)
+- Shows test overlap ratio
+- Shows source remediation story ID
+- Shows test results from remediation
+- Indicates if reconciliation has already been applied
+- Supports --json output format
+
+**Command Signature**:
+```bash
+python -m resources.commands.sprint.queue_helpers check-reconciliation --story-id <validation_story_id> [--json]
+```
+
+**Output Format (Human-Readable)**:
+```
+Reconciliation Status for Story: <story_id>
+================================================
+Status:                 [PENDING] | [APPLIED] | [NO RECONCILIATION]
+Reconciliation Mode:    propagate | retest | supersede | no_match
+Source Remediation:     <remediation_story_id>
+Test Overlap Ratio:     <ratio> (<percentage>%)
+Test Files Matched:     <count>/<total>
+
+Remediation Test Results:
+  Pass Rate:            <percentage>%
+  Total Tests:          <count>
+  Passed:               <count>
+  Failed:               <count>
+
+Next Action:
+  [For PENDING propagate]: Run 'apply-reconciliation --story-id <id> --mode propagate' to mark validation complete
+  [For PENDING retest]: Run 'apply-reconciliation --story-id <id> --mode retest' to unblock validation for retest
+  [For PENDING supersede]: Run 'apply-reconciliation --story-id <id> --mode supersede --reason "..."' to supersede validation
+  [For APPLIED]: Reconciliation already applied on <timestamp>
+  [For NO RECONCILIATION]: No reconciliation data available for this story
+```
+
+**Output Format (JSON)**:
+```json
+{
+  "story_id": "validation_story_id",
+  "status": "pending|applied|no_reconciliation",
+  "reconciliation_mode": "propagate|retest|supersede|no_match|null",
+  "source_remediation_id": "remediation_story_id|null",
+  "test_overlap_ratio": 0.0-1.0,
+  "test_files": {
+    "matched": 10,
+    "total": 12
+  },
+  "remediation_test_results": {
+    "pass_rate": 100.0,
+    "total": 50,
+    "passed": 50,
+    "failed": 0
+  },
+  "applied_at": "ISO timestamp|null",
+  "next_action": "string describing recommended action"
+}
+```
+
+**Implementation Steps**:
+1. Load queue from .queue.json
+2. Get story by ID (validate exists)
+3. Check for metadata.test_reconciliation field
+4. Check for metadata.reconciliation field
+5. Determine status (pending/applied/no_reconciliation)
+6. Extract relevant data from metadata
+7. Format output (human-readable or JSON)
+8. Return appropriate exit code (0 for success, 1 for error)
+
+### 2. apply-reconciliation
+
+**Purpose**: Manually apply reconciliation to a validation story
+
+**Acceptance Criteria**:
+- Allows manual reconciliation application
+- Supports all three reconciliation modes (propagate/retest/supersede)
+- Validates story ID exists
+- Validates reconciliation mode is valid
+- Calls appropriate reconciliation function
+- Updates queue.json
+- Supports --json output format
+- Provides clear error messages
+
+**Command Signature**:
+```bash
+python -m resources.commands.sprint.queue_helpers apply-reconciliation \
+  --story-id <validation_story_id> \
+  --mode <propagate|retest|supersede> \
+  [--reason <supersession_reason>] \
+  [--json]
+```
+
+**Arguments**:
+- `--story-id`: Validation story ID (required)
+- `--mode`: Reconciliation mode (required, choices: propagate|retest|supersede)
+- `--reason`: Supersession reason (required for supersede mode, ignored otherwise)
+- `--json`: Output JSON format
+
+**Output Format (Human-Readable)**:
+```
+Applying Reconciliation
+================================================
+Target Validation:      <validation_story_id>
+Source Remediation:     <remediation_story_id>
+Mode:                   <mode>
+
+[OK] Reconciliation applied successfully
+Updated Stories:
+  - <validation_story_id>: <old_status> -> <new_status>
+  - <parent_story_id>: <old_status> -> <new_status> (parent)
+
+Message: <reconciliation_message>
+```
+
+**Output Format (JSON)**:
+```json
+{
+  "status": "success|error|skipped",
+  "mode": "propagate|retest|supersede",
+  "target": "validation_story_id",
+  "source": "remediation_story_id",
+  "message": "Human-readable message",
+  "updated_stories": ["story_id1", "story_id2"],
+  "error": "Error message (only if status=error)"
+}
+```
+
+**Implementation Steps**:
+1. Load queue from .queue.json
+2. Get story by ID (validate exists)
+3. Get test_reconciliation metadata (validate exists)
+4. Extract source_remediation_id and test_results
+5. Validate mode argument
+6. For supersede mode: validate --reason provided
+7. Call appropriate reconciliation function:
+   - propagate: apply_propagate_reconciliation()
+   - retest: apply_retest_reconciliation()
+   - supersede: apply_supersede_reconciliation()
+8. Display results (human-readable or JSON)
+9. Return appropriate exit code
+
+### 3. reconciliation-status
+
+**Purpose**: Show sprint-wide reconciliation summary
+
+**Acceptance Criteria**:
+- Returns sprint-wide reconciliation summary
+- Shows count of pending reconciliations by mode
+- Shows count of applied reconciliations by mode
+- Shows count of validation stories with no reconciliation
+- Lists validation stories in each category
+- Supports --json output format
+
+**Command Signature**:
+```bash
+python -m resources.commands.sprint.queue_helpers reconciliation-status [--json]
+```
+
+**Output Format (Human-Readable)**:
+```
+Sprint Reconciliation Status
+================================================
+Sprint:     <sprint_name> (<sprint_id>)
+Version:    <sprint_version>
+Status:     <sprint_status>
+
+Summary:
+  Pending Reconciliations:     <count>
+    - Propagate:                <count>
+    - Retest:                   <count>
+    - Supersede:                <count>
+    - No Match:                 <count>
+
+  Applied Reconciliations:     <count>
+    - Propagated:               <count>
+    - Retest Unblocked:         <count>
+    - Superseded:               <count>
+
+  No Reconciliation:           <count>
+
+Pending Reconciliations (propagate):
+  - <story_id>: <title> (overlap: <ratio>, source: <source_id>)
+
+Pending Reconciliations (retest):
+  - <story_id>: <title> (overlap: <ratio>, source: <source_id>)
+
+... (other categories)
+```
+
+**Output Format (JSON)**:
+```json
+{
+  "sprint": {
+    "id": "sprint_id",
+    "name": "sprint_name",
+    "version": "sprint_version",
+    "status": "sprint_status"
+  },
+  "summary": {
+    "pending_reconciliations": {
+      "total": 10,
+      "propagate": 5,
+      "retest": 3,
+      "supersede": 1,
+      "no_match": 1
+    },
+    "applied_reconciliations": {
+      "total": 5,
+      "propagated": 3,
+      "retest_unblocked": 1,
+      "superseded": 1
+    },
+    "no_reconciliation": 20
+  },
+  "pending": {
+    "propagate": [
+      {
+        "story_id": "validation_story_id",
+        "title": "story_title",
+        "overlap_ratio": 0.98,
+        "source_remediation_id": "remediation_story_id"
+      }
+    ],
+    "retest": [...],
+    "supersede": [...],
+    "no_match": [...]
+  },
+  "applied": {
+    "propagated": [...],
+    "retest_unblocked": [...],
+    "superseded": [...]
+  },
+  "no_reconciliation": [...]
+}
+```
+
+**Implementation Steps**:
+1. Load queue from .queue.json
+2. Iterate through all stories
+3. For each validation story (type: 'testing', has '.t' suffix):
+   a. Check for metadata.test_reconciliation
+   b. Check for metadata.reconciliation
+   c. Categorize as pending/applied/no_reconciliation
+   d. Extract relevant data
+4. Build summary statistics
+5. Format output (human-readable or JSON)
+6. Return appropriate exit code
+
+## JSON Output Format Standards
+
+All commands will support `--json` flag for machine-readable output.
+
+**JSON Output Requirements**:
+1. Valid JSON (properly escaped, no syntax errors)
+2. Pretty-printed with 2-space indentation
+3. Consistent structure across commands
+4. Include error information if command fails
+5. Return exit code 0 for success, 1 for error
+
+**Common JSON Fields**:
+- `status`: "success" | "error"
+- `error`: Error message (only if status=error)
+- `data`: Command-specific data
+
+## Help Text and Error Messages
+
+### Help Text Requirements
+
+1. Clear command description
+2. Required vs optional arguments clearly marked
+3. Example usage
+4. Exit codes documented
+
+**Example Help Text**:
+```
+usage: queue_helpers check-reconciliation [-h] --story-id STORY_ID [--json]
+
+Check pending reconciliation status for a validation story
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --story-id STORY_ID   Validation story ID to check (required)
+  --json                Output JSON format
+
+examples:
+  queue_helpers check-reconciliation --story-id 1.t
+  queue_helpers check-reconciliation --story-id 1.t --json
+
+exit codes:
+  0  Success
+  1  Error (story not found, invalid JSON, etc.)
+```
+
+### Error Message Requirements
+
+1. Clear description of what went wrong
+2. Actionable guidance on how to fix
+3. Prefixed with [ERROR] for visibility
+4. Include relevant details (story ID, etc.)
+
+**Example Error Messages**:
+```
+[ERROR] Story not found: <story_id>
+  No story with ID '<story_id>' exists in the queue.
+  Run 'queue_helpers reconciliation-status' to see all validation stories.
+
+[ERROR] No reconciliation data for story: <story_id>
+  Story '<story_id>' does not have test_reconciliation metadata.
+  This story may not have been processed by REMEDIATE command.
+
+[ERROR] Invalid reconciliation mode: <mode>
+  Mode must be one of: propagate, retest, supersede
+
+[ERROR] Supersession reason required
+  --reason is required when using --mode supersede
+  Example: --reason "Remediation replaced original implementation"
+```
+
+## Implementation File Structure
+
+**New File**: `resources/commands/sprint/queue_helpers/cli.py`
+
+```python
+#!/usr/bin/env python3
+"""
+Queue Helpers CLI - Reconciliation management commands
+
+Commands:
+    check-reconciliation    Check pending reconciliation status
+    apply-reconciliation    Apply reconciliation to validation story
+    reconciliation-status   Show sprint-wide reconciliation summary
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any, Optional
+
+from .core import load_queue, save_queue, get_story
+from .reconciliation import (
+    apply_propagate_reconciliation,
+    apply_retest_reconciliation,
+    apply_supersede_reconciliation
+)
+from .overlap import determine_reconciliation_mode
+
+
+def cmd_check_reconciliation(args: argparse.Namespace) -> None:
+    """Check pending reconciliation status."""
+    # Implementation details
+
+def cmd_apply_reconciliation(args: argparse.Namespace) -> None:
+    """Apply reconciliation to validation story."""
+    # Implementation details
+
+def cmd_reconciliation_status(args: argparse.Namespace) -> None:
+    """Show sprint-wide reconciliation summary."""
+    # Implementation details
+
+
+def main():
+    """CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description="Queue Helpers - Reconciliation management commands"
+    )
+
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    # check-reconciliation subcommand
+    check_parser = subparsers.add_parser(
+        'check-reconciliation',
+        help='Check pending reconciliation status'
+    )
+    check_parser.add_argument('--story-id', required=True)
+    check_parser.add_argument('--json', action='store_true')
+    check_parser.set_defaults(func=cmd_check_reconciliation)
+
+    # apply-reconciliation subcommand
+    apply_parser = subparsers.add_parser(
+        'apply-reconciliation',
+        help='Apply reconciliation to validation story'
+    )
+    apply_parser.add_argument('--story-id', required=True)
+    apply_parser.add_argument(
+        '--mode',
+        required=True,
+        choices=['propagate', 'retest', 'supersede']
+    )
+    apply_parser.add_argument('--reason', help='Supersession reason (required for supersede mode)')
+    apply_parser.add_argument('--json', action='store_true')
+    apply_parser.set_defaults(func=cmd_apply_reconciliation)
+
+    # reconciliation-status subcommand
+    status_parser = subparsers.add_parser(
+        'reconciliation-status',
+        help='Show sprint-wide reconciliation summary'
+    )
+    status_parser.add_argument('--json', action='store_true')
+    status_parser.set_defaults(func=cmd_reconciliation_status)
+
+    # Parse and execute
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+**Update**: `resources/commands/sprint/queue_helpers/__init__.py`
+
+Add CLI exports:
+```python
+from .cli import (
+    cmd_check_reconciliation,
+    cmd_apply_reconciliation,
+    cmd_reconciliation_status,
+    main as cli_main
+)
+```
+
+## Testing Strategy
+
+### Unit Tests
+
+**Location**: `tests/sprint/test_queue_helpers_cli.py`
+
+**Test Coverage**:
+1. `test_check_reconciliation_pending` - Validate pending reconciliation detection
+2. `test_check_reconciliation_applied` - Validate applied reconciliation detection
+3. `test_check_reconciliation_no_data` - Validate no reconciliation case
+4. `test_check_reconciliation_invalid_story` - Error handling for invalid story ID
+5. `test_apply_reconciliation_propagate` - Test propagate mode application
+6. `test_apply_reconciliation_retest` - Test retest mode application
+7. `test_apply_reconciliation_supersede` - Test supersede mode application
+8. `test_apply_reconciliation_missing_reason` - Error handling for missing supersession reason
+9. `test_reconciliation_status_summary` - Test sprint-wide summary generation
+10. `test_json_output_format` - Validate JSON output format for all commands
+
+### Integration Tests
+
+**Test Scenarios**:
+1. Full workflow: check -> apply -> verify status change
+2. Multiple pending reconciliations
+3. Mixed pending/applied reconciliations
+4. Edge cases (empty queue, no validation stories, etc.)
+
+## Dependencies
+
+### Story Dependencies
+- **Story 4**: Reconciliation Application Functions (completed)
+  - Provides `apply_propagate_reconciliation()`
+  - Provides `apply_retest_reconciliation()`
+  - Provides `apply_supersede_reconciliation()`
+
+- **Story 3**: Overlap Calculation Algorithm (completed)
+  - Provides `determine_reconciliation_mode()`
+  - Provides overlap calculation logic
+
+- **Story 1/2**: Test Reconciliation Schema (completed)
+  - Defines metadata.test_reconciliation schema
+  - Defines metadata.reconciliation schema
+
+### External Dependencies
+- argparse (stdlib)
+- json (stdlib)
+- pathlib (stdlib)
+- typing (stdlib)
+
+## Risks and Mitigation
+
+### Risk 1: Queue File Concurrency
+**Risk**: Multiple processes modifying .queue.json simultaneously
+**Mitigation**:
+- Load-modify-save pattern with error handling
+- Future: Add file locking mechanism
+
+### Risk 2: Invalid Reconciliation State
+**Risk**: Applying reconciliation when test_reconciliation metadata missing
+**Mitigation**:
+- Validate metadata exists before application
+- Clear error messages
+
+### Risk 3: Supersession Without Reason
+**Risk**: User forgets to provide --reason for supersede mode
+**Mitigation**:
+- Make --reason required for supersede mode
+- Validate at CLI level before calling function
+- Clear error message
+
+## Success Criteria
+
+1. All three commands implemented and functional
+2. JSON output format supported and validated
+3. Error messages clear and actionable
+4. Help text comprehensive
+5. Unit tests passing (>80% coverage)
+6. Integration tests passing
+7. Story 7.d marked as completed
+8. Story 7 parent discovery phase marked as completed
+
+## Next Steps (for Implementation Phase)
+
+1. Create `cli.py` file with command implementations
+2. Update `__init__.py` with CLI exports
+3. Create unit tests in `tests/sprint/test_queue_helpers_cli.py`
+4. Manual testing of all three commands
+5. Documentation updates (if needed)
+6. Mark story 7.i as ready for implementation
