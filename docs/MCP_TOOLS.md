@@ -20,7 +20,9 @@ Graphiti provides an MCP server that exposes memory operations as tools for AI a
 
 The Graphiti MCP server supports two transport modes:
 
-### 1. HTTP Transport (Recommended - Daemon Architecture)
+### 1. SSE Transport (Recommended - Daemon Architecture)
+
+**Transport Type**: Server-Sent Events (SSE) over HTTP
 
 **Benefits:**
 - **Persistent server** - Single process shared across all Claude Code sessions
@@ -749,7 +751,7 @@ See [claude-mcp-installer/instance/CLAUDE_INSTALL.md](../claude-mcp-installer/in
 
 ---
 
-**Last Updated:** 2025-12-07
+**Last Updated:** 2025-12-20
 **Version:** 1.0.0
 
 ---
