@@ -1237,7 +1237,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: queue_helpers.py Commands",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "7",
       "children": [
         "-7.d",
@@ -1247,7 +1247,7 @@
       "phase_status": {
         "validation_discovery": "completed",
         "validation_implementation": "completed",
-        "validation_testing": "pending"
+        "validation_testing": "completed"
       },
       "target_has_phases": true,
       "blocks": [],
@@ -1327,7 +1327,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: queue_helpers.py Commands",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.t",
       "phase": "validation_testing",
@@ -1341,7 +1341,22 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "validation/-7.t-validation-report.md",
+      "metadata": {
+        "validation_result": "PASS",
+        "validation_date": "2025-12-21T03:42:40.181589+00:00",
+        "validation_report": ".claude/sprint/validation/-7.t-validation-report.md",
+        "checks_executed": [
+          "D",
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "checks_passed": 5,
+        "checks_failed": 0,
+        "test_pass_rate": "100%"
+      }
     },
     "-8": {
       "type": "validation",
@@ -1513,5 +1528,5 @@
     "8.i",
     "8.t"
   ],
-  "last_updated": "2025-12-21T03:31:09.851765+00:00"
+  "last_updated": "2025-12-21T03:42:40.181618+00:00"
 }
