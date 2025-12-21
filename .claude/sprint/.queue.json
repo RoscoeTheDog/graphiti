@@ -985,7 +985,9 @@
         "G",
         "H"
       ],
-      "children": [],
+      "children": [
+        "-4.t.1"
+      ],
       "blocks": [],
       "file": null
     },
@@ -1321,6 +1323,24 @@
         "remediation_for": "1.i"
       },
       "completed_at": "2025-12-21T01:54:40.873036+00:00"
+    },
+    "-4.t.1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Fix Schema Mismatch in Reconciliation Metadata",
+      "status": "completed",
+      "parent": "-4.t",
+      "children": [],
+      "blocks": [],
+      "file": "stories/-4.t.1-fix-schema-mismatch-reconciliation-metadata.md",
+      "remediation_type": "validation_failure",
+      "validates_failure": "-4.t",
+      "priority": "P0",
+      "metadata": {
+        "source_validation": "-4.t",
+        "created": "2025-12-20T00:00:00Z"
+      },
+      "completed_at": "2025-12-21T02:55:15.479230Z"
     }
   },
   "execution_queue": [
@@ -1337,6 +1357,7 @@
     "-4.d",
     "-4.i",
     "-4.t",
+    "-4.t.1",
     "-5.d",
     "-5.i",
     "-5.t",
@@ -1374,5 +1395,5 @@
     "8.i",
     "8.t"
   ],
-  "last_updated": "2025-12-21T02:40:32.417283+00:00"
+  "last_updated": "2025-12-21T02:55:15.479296Z"
 }

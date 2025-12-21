@@ -105,6 +105,7 @@ def apply_propagate_reconciliation(
             'source_story': source_remediation_id,
             'source_pass_rate': pass_rate,
             'source_test_count': test_count,
+            'remediation_count': 1,  # Single remediation story triggered this reconciliation
             'applied_at': datetime.utcnow().isoformat(),
             'propagation_note': (
                 f"Pass propagated from {source_remediation_id} "
@@ -234,6 +235,7 @@ def apply_retest_reconciliation(
             'source_story': source_remediation_id,
             'needs_retest': True,
             'retest_reason': retest_reason,
+            'remediation_count': 1,  # Single remediation story triggered this reconciliation
             'applied_at': datetime.utcnow().isoformat()
         }
 
@@ -349,6 +351,7 @@ def apply_supersede_reconciliation(
             'status': 'superseded',
             'superseded_by': source_remediation_id,
             'supersession_reason': supersession_reason,
+            'remediation_count': 1,  # Single remediation story supersedes this validation
             'applied_at': datetime.utcnow().isoformat()
         }
 
