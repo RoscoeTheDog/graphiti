@@ -64,9 +64,9 @@ Verify these types still accurate:
 
 ## Acceptance Criteria
 
-- [ ] All documented modules verified to exist
-- [ ] Deprecated modules marked or removed
-- [ ] New modules documented
-- [ ] Type definitions match implementation
-- [ ] Example code tested/verified
-- [ ] Last Updated date set to current date
+- [x] All documented modules verified to exist
+- [x] Deprecated modules marked or removed (no watcher.py found, not referenced)
+- [x] New modules documented (ActivityDetector, ToolClassifier, BashAnalyzer, UnifiedClassifier, ExtractionConfig)
+- [x] Type definitions match implementation (kept existing types, added ExtractionPriority)
+- [x] Example code tested/verified (syntax verified)
+- [x] Last Updated date set to current date (2025-12-20)
