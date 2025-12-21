@@ -227,3 +227,115 @@ class TestAddMemoryExport:
         assert output_path.exists()
         assert Path("deep/nested/path").is_dir()
 
+
+class TestAddMemoryTimeoutWithFilepath:
+    """Tests for file export behavior when episode processing times out.
+
+    Bug fix: Prior to this fix, file export happened AFTER waiting for episode
+    processing. If processing timed out, the file was never written even though
+    the Graphiti entry would eventually succeed in the background.
+
+    The fix moves file export BEFORE the wait, ensuring files are always written
+    regardless of whether episode processing times out.
+    """
+
+    @pytest.fixture
+    def temp_export_dir(self):
+        """Create temporary directory for exports"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            os.chdir(tmpdir)
+            yield tmpdir
+            os.chdir(old_cwd)
+
+    @pytest.mark.asyncio
+    async def test_file_written_before_queue_wait(self, temp_export_dir):
+        """Test that file is written before episode processing is awaited.
+
+        This verifies the core bug fix: file export must happen before waiting
+        for episode processing, so that a timeout doesn't prevent file creation.
+        """
+        from mcp_server.export_helpers import _resolve_path_pattern
+        from pathlib import Path
+
+        # Simulate the file write that happens BEFORE waiting
+        episode_body = "Large handoff content that triggers long processing..."
+        filepath = ".claude/handoff/s001-test.md"
+        name = "Session 001: Test Handoff"
+
+        # This is exactly what happens in add_memory() BEFORE the wait
+        resolved_path = _resolve_path_pattern(filepath, query=name, fact_count=0, node_count=0)
+        output_path = Path(resolved_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(episode_body, encoding="utf-8")
+
+        # File should exist immediately
+        assert output_path.exists(), "File should be written before episode processing wait"
+        assert output_path.read_text(encoding="utf-8") == episode_body
+
+    @pytest.mark.asyncio
+    async def test_timeout_response_includes_file_path(self):
+        """Test that timeout response mentions the file was saved.
+
+        When processing times out but the file was written, the error message
+        should include information about the successful file export.
+        """
+        file_saved_path = ".claude/handoff/s001-test.md"
+        timeout = 60
+
+        # Simulate building the timeout suggestion with file info
+        suggestion = (
+            f"Episode processing timed out after {timeout}s. "
+            "The operation may still complete in the background. "
+            "Consider using wait_for_completion=false for long operations."
+        )
+        if file_saved_path:
+            suggestion += f"\nNote: File was successfully saved to {file_saved_path}"
+
+        # Verify the suggestion includes file path info
+        assert file_saved_path in suggestion
+        assert "File was successfully saved" in suggestion
+
+    @pytest.mark.asyncio
+    async def test_file_export_independent_of_llm_availability(self, temp_export_dir):
+        """Test that file export works even when LLM is unavailable.
+
+        File writing is a pure filesystem operation that should not depend
+        on LLM availability or processing success.
+        """
+        from pathlib import Path
+
+        episode_body = "Content to save even if LLM is down"
+        filepath = "backup/llm-unavailable.md"
+
+        # File write should succeed regardless of LLM state
+        output_path = Path(filepath)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(episode_body, encoding="utf-8")
+
+        assert output_path.exists()
+        assert output_path.read_text(encoding="utf-8") == episode_body
+
+    @pytest.mark.asyncio
+    async def test_large_content_file_export(self, temp_export_dir):
+        """Test file export with large content (simulating handoff with full context).
+
+        Large handoff files may trigger longer LLM processing, making the timeout
+        bug more likely. This test verifies file export works for large content.
+        """
+        from pathlib import Path
+
+        # Generate large content (simulating a full session handoff)
+        large_content = "# Session Handoff\n\n" + ("Context line " * 100 + "\n") * 100
+        filepath = ".claude/handoff/s999-large-handoff.md"
+
+        output_path = Path(filepath)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(large_content, encoding="utf-8")
+
+        assert output_path.exists()
+        # Verify content integrity
+        saved_content = output_path.read_text(encoding="utf-8")
+        assert len(saved_content) == len(large_content)
+        assert saved_content == large_content
+

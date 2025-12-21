@@ -1334,38 +1334,8 @@ async def add_memory(
             asyncio.create_task(process_episode_queue(group_id_str))
 
         # =================================================================
-        # Wait for Completion (if requested - AC-18.8, AC-18.9)
-        # =================================================================
-        if should_wait and processing_complete:
-            try:
-                # Wait with timeout to prevent indefinite blocking
-                timeout = unified_config.mcp_tools.timeout_seconds
-                await asyncio.wait_for(processing_complete.wait(), timeout=float(timeout))
-            except asyncio.TimeoutError:
-                processing_time_ms = (time.perf_counter() - start_time) * 1000
-                response = create_timeout_error(
-                    operation="add_memory",
-                    timeout_seconds=timeout,
-                    suggestion=(
-                        f"Episode processing timed out after {timeout}s. "
-                        "The operation may still complete in the background. "
-                        "Consider using wait_for_completion=false for long operations."
-                    )
-                )
-                return format_response(response)
-
-            # Check processing result after waiting
-            if not processing_result["success"]:
-                response = create_error(
-                    category=ErrorCategory.INTERNAL,
-                    message=f"Episode processing failed: {processing_result['error']}",
-                    recoverable=True,
-                    suggestion="Check the error message and retry."
-                )
-                return format_response(response)
-
-        # =================================================================
-        # Optional File Export
+        # Optional File Export (BEFORE waiting - file write is independent of LLM processing)
+        # This ensures files are written even if episode processing times out.
         # =================================================================
         file_saved_path = None
         file_warnings = []
@@ -1399,11 +1369,50 @@ async def add_memory(
                     # Path is outside client root, show absolute
                     file_saved_path = str(output_path)
 
+                logger.info(f"File exported for episode '{name}': {file_saved_path}")
+
             except Exception as e:
                 # File export failed, but episode still queued
                 error_msg = str(e)
                 logger.error(f"File export failed for episode '{name}': {error_msg}")
                 file_warnings.append(f"File export failed: {error_msg}")
+
+        # =================================================================
+        # Wait for Completion (if requested - AC-18.8, AC-18.9)
+        # =================================================================
+        if should_wait and processing_complete:
+            try:
+                # Wait with timeout to prevent indefinite blocking
+                timeout = unified_config.mcp_tools.timeout_seconds
+                await asyncio.wait_for(processing_complete.wait(), timeout=float(timeout))
+            except asyncio.TimeoutError:
+                processing_time_ms = (time.perf_counter() - start_time) * 1000
+                suggestion = (
+                    f"Episode processing timed out after {timeout}s. "
+                    "The operation may still complete in the background. "
+                    "Consider using wait_for_completion=false for long operations."
+                )
+                if file_saved_path:
+                    suggestion += f"\nNote: File was successfully saved to {file_saved_path}"
+                response = create_timeout_error(
+                    operation="add_memory",
+                    timeout_seconds=timeout,
+                    suggestion=suggestion
+                )
+                result = format_response(response)
+                if file_warnings:
+                    result += f"\nWarning: {file_warnings[0]}"
+                return result
+
+            # Check processing result after waiting
+            if not processing_result["success"]:
+                response = create_error(
+                    category=ErrorCategory.INTERNAL,
+                    message=f"Episode processing failed: {processing_result['error']}",
+                    recoverable=True,
+                    suggestion="Check the error message and retry."
+                )
+                return format_response(response)
 
         # =================================================================
         # Build Response (Story 18: AC-18.1, AC-18.2, AC-18.3)
