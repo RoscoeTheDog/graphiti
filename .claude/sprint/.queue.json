@@ -792,7 +792,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Test Identity Capture in REMEDIATE",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.t",
       "phase": "validation_testing",
@@ -806,7 +806,7 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "stories/validation/-2.t-validation-testing.md"
     },
     "-3": {
       "type": "validation",
