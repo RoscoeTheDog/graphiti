@@ -852,7 +852,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Overlap Calculation Algorithm",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.i",
       "phase": "validation_implementation",
@@ -864,7 +864,12 @@
       "blocks": [
         "-3.t"
       ],
-      "file": null
+      "file": "stories/validation/-3.i-validation-implementation.md",
+      "metadata": {
+        "validation_result": "PASS",
+        "validation_date": "2025-12-21T02:27:42.731908Z",
+        "validation_report": "stories/validation/-3.i-validation-implementation.md"
+      }
     },
     "-3.t": {
       "type": "validation_testing",
@@ -1349,5 +1354,5 @@
     "8.i",
     "8.t"
   ],
-  "last_updated": "2025-12-21T02:07:59.701392+00:00"
+  "last_updated": "2025-12-21T02:27:42.731932Z"
 }
