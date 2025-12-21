@@ -2,18 +2,19 @@
 
 Complete API reference for Graphiti's session tracking and memory management system.
 
-**Version**: v1.0.0
-**Last Updated**: 2025-11-18
+**Version**: v1.1.0
+**Last Updated**: 2025-12-20
 
 ---
 
 ## Table of Contents
 
 1. [Session Tracking API](#session-tracking-api)
-2. [Filtering API](#filtering-api)
-3. [Path Resolution API](#path-resolution-api)
-4. [Configuration API](#configuration-api)
-5. [MCP Tools API](#mcp-tools-api)
+2. [Turn-Based Processing API](#turn-based-processing-api)
+3. [Filtering API](#filtering-api)
+4. [Path Resolution API](#path-resolution-api)
+5. [Configuration API](#configuration-api)
+6. [MCP Tools API](#mcp-tools-api)
 
 ---
 
@@ -159,6 +160,122 @@ manager = SessionManager(..., on_session_closed=on_session_closed)
 
 ---
 
+## Turn-Based Processing API
+
+### Activity Detection
+
+#### `graphiti_core.session_tracking.activity_detector`
+
+**ActivityDetector** - Detect turn boundaries in conversation streams
+
+```python
+from graphiti_core.session_tracking import ActivityDetector
+
+detector = ActivityDetector()
+
+# Detect if turn is complete (user->assistant pair)
+is_turn_complete = detector.detect_turn_boundary(messages)
+
+# Get activity metrics
+activity = detector.calculate_activity_vector(context)
+```
+
+**Methods**:
+- `detect_turn_boundary(messages: List[SessionMessage]) -> bool`
+  - Returns True when user->assistant turn pair is complete
+  - Looks for role transitions (USER -> ASSISTANT)
+- `calculate_activity_vector(context: ConversationContext) -> ActivityVector`
+  - Returns metrics like tool_call_count, file_modifications, bash_commands
+
+---
+
+### Tool Classification
+
+#### `graphiti_core.session_tracking.tool_classifier`
+
+**ToolClassifier** - Classify tool calls by extraction priority
+
+```python
+from graphiti_core.session_tracking import ToolClassifier, ExtractionPriority
+
+classifier = ToolClassifier()
+
+# Classify tool call
+priority = classifier.classify_tool(tool_name, tool_args)
+
+# Priority levels: CRITICAL, HIGH, MEDIUM, LOW
+if priority == ExtractionPriority.CRITICAL:
+    # File modifications, git commits
+    pass
+elif priority == ExtractionPriority.HIGH:
+    # Code edits, test runs
+    pass
+```
+
+**ExtractionPriority Enum**:
+```python
+class ExtractionPriority(str, Enum):
+    CRITICAL = "critical"  # File Write, Edit, Git commit
+    HIGH = "high"          # Code changes, test execution
+    MEDIUM = "medium"      # Read operations, searches
+    LOW = "low"            # Navigation, trivial operations
+```
+
+---
+
+### Bash Analysis
+
+#### `graphiti_core.session_tracking.bash_analyzer`
+
+**BashAnalyzer** - Extract semantic meaning from bash commands
+
+```python
+from graphiti_core.session_tracking import BashAnalyzer
+
+analyzer = BashAnalyzer()
+
+# Analyze bash command
+result = analyzer.analyze_command(
+    command="git commit -m 'feat: add new feature'",
+    output="[main abc123] feat: add new feature"
+)
+
+# Result includes:
+# - command_type: git_commit
+# - semantic_summary: "Committed code changes"
+# - extracted_entities: ["main", "abc123"]
+```
+
+**Detected Command Types**:
+- Git operations (commit, push, pull, merge)
+- Package management (npm, pip, cargo)
+- File operations (mkdir, rm, cp, mv)
+- Build/test commands (pytest, npm test)
+
+---
+
+### Unified Classification
+
+#### `graphiti_core.session_tracking.unified_classifier`
+
+**UnifiedClassifier** - Combine tool and bash classification
+
+```python
+from graphiti_core.session_tracking import UnifiedClassifier
+
+classifier = UnifiedClassifier()
+
+# Classify mixed content
+classification = classifier.classify_activity(
+    tool_calls=tool_calls,
+    bash_commands=bash_commands
+)
+
+# Returns unified priority and semantic summary
+```
+
+---
+
 ## Filtering API
 
 ### ContentMode Enum
@@ -287,6 +404,7 @@ config = load_graphiti_config("/path/to/graphiti.config.json")
 
 ```python
 from mcp_server.unified_config import GraphitiConfig, SessionTrackingConfig
+from graphiti_core.extraction_config import ExtractionConfig
 
 config = GraphitiConfig(
     neo4j_uri="neo4j+ssc://your-aura-instance.databases.neo4j.io",
@@ -308,9 +426,40 @@ config = GraphitiConfig(
             user_messages=ContentMode.FULL,
             agent_messages=ContentMode.FULL
         )
+    ),
+
+    extraction=ExtractionConfig(
+        preprocessing_prompt="default-session-turn.md",  # Built-in template
+        preprocessing_mode="prepend"  # Before reflexion hints
     )
 )
 ```
+
+**ExtractionConfig** - Control LLM extraction preprocessing:
+
+```python
+from graphiti_core.extraction_config import ExtractionConfig
+
+# Default: Use built-in session turn template
+config = ExtractionConfig()
+
+# Custom template file
+config = ExtractionConfig(
+    preprocessing_prompt="my-custom-template.md"
+)
+
+# Inline preprocessing instructions
+config = ExtractionConfig(
+    preprocessing_prompt="Focus on code changes and error patterns"
+)
+
+# Disable preprocessing
+config = ExtractionConfig(preprocessing_prompt=None)
+```
+
+**Fields**:
+- `preprocessing_prompt: str | bool | None` - Template filename, inline prompt, or None to disable
+- `preprocessing_mode: "prepend" | "append"` - Position relative to reflexion hints
 
 **Validation**:
 
@@ -335,6 +484,152 @@ else:
 ---
 
 ## MCP Tools API
+
+### Core Memory Tools
+
+#### `add_memory`
+
+**Add episodes to knowledge graph**
+
+```python
+result = await mcp_client.call_tool("add_memory", {
+    "name": "Session 2025-12-20",
+    "content": "Conversation content...",
+    "group_id": "my-project",
+    "source_type": "message"  # message, text, or json
+})
+```
+
+**Parameters**:
+- `name: str` - Episode name/identifier
+- `content: str | dict` - Episode content (text or JSON)
+- `group_id: str` - Project/group identifier for isolation
+- `source_type: "message" | "text" | "json"` - Content format
+
+---
+
+#### `search_memory_nodes`
+
+**Search for entities in knowledge graph**
+
+```python
+results = await mcp_client.call_tool("search_memory_nodes", {
+    "query": "authentication bug fixes",
+    "group_ids": ["my-project"],
+    "max_nodes": 20
+})
+```
+
+**Parameters**:
+- `query: str` - Semantic search query
+- `group_ids: List[str]` - Filter by project groups
+- `max_nodes: int` - Maximum results (default: 10)
+
+---
+
+#### `search_memory_facts`
+
+**Search for relationships in knowledge graph**
+
+```python
+results = await mcp_client.call_tool("search_memory_facts", {
+    "query": "code review relationships",
+    "group_ids": ["my-project"],
+    "max_facts": 20
+})
+```
+
+---
+
+#### `get_episodes`
+
+**Retrieve recent episodes**
+
+```python
+episodes = await mcp_client.call_tool("get_episodes", {
+    "group_id": "my-project",
+    "limit": 10
+})
+```
+
+---
+
+#### `delete_episode`
+
+**Remove episode from graph**
+
+```python
+result = await mcp_client.call_tool("delete_episode", {
+    "uuid": "episode-uuid-here"
+})
+```
+
+---
+
+#### `delete_entity_edge`
+
+**Remove entity or relationship**
+
+```python
+result = await mcp_client.call_tool("delete_entity_edge", {
+    "uuid": "entity-or-edge-uuid"
+})
+```
+
+---
+
+#### `clear_graph`
+
+**Clear all data (use with caution)**
+
+```python
+result = await mcp_client.call_tool("clear_graph")
+```
+
+---
+
+### Health Check Tools
+
+#### `health_check`
+
+**Check server and database connectivity**
+
+```python
+health = await mcp_client.call_tool("health_check")
+```
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "database_connected": true,
+  "llm_configured": true,
+  "session_tracking_enabled": true,
+  "uptime_seconds": 3600
+}
+```
+
+---
+
+#### `llm_health_check`
+
+**Check LLM provider connectivity**
+
+```python
+llm_health = await mcp_client.call_tool("llm_health_check")
+```
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "response_time_ms": 250
+}
+```
+
+---
 
 ### Session Tracking Tools
 
@@ -370,6 +665,80 @@ result = await mcp_client.call_tool("session_tracking_status")
     "user_messages": "FULL",
     "agent_messages": "FULL"
   }
+}
+```
+
+---
+
+#### `session_tracking_health`
+
+**Get session tracking health metrics**
+
+```python
+health = await mcp_client.call_tool("session_tracking_health")
+```
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "active_sessions": 2,
+  "sessions_indexed": 45,
+  "last_activity": "2025-12-20T10:30:00Z"
+}
+```
+
+---
+
+#### `get_failed_episodes`
+
+**Retrieve episodes that failed to index**
+
+```python
+failed = await mcp_client.call_tool("get_failed_episodes", {
+    "group_id": "my-project",
+    "limit": 10
+})
+```
+
+**Response**:
+```json
+{
+  "failed_episodes": [
+    {
+      "name": "Session-abc123",
+      "error": "LLM timeout",
+      "timestamp": "2025-12-20T09:15:00Z",
+      "retry_count": 3
+    }
+  ],
+  "total_failed": 1
+}
+```
+
+---
+
+#### `session_tracking_sync_history`
+
+**View synchronization history**
+
+```python
+history = await mcp_client.call_tool("session_tracking_sync_history", {
+    "limit": 20
+})
+```
+
+**Response**:
+```json
+{
+  "sync_events": [
+    {
+      "timestamp": "2025-12-20T10:00:00Z",
+      "session_id": "abc123",
+      "status": "success",
+      "duration_ms": 2500
+    }
+  ]
 }
 ```
 
