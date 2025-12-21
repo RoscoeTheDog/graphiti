@@ -7,9 +7,9 @@ Graphiti MCP server includes automatic session tracking that captures your conve
 **What is Session Tracking?**
 
 Session tracking automatically:
-- Monitors your Claude Code conversation files (`~/.claude/projects/{hash}/sessions/*.jsonl`)
-- Filters and processes conversation content (93% token reduction)
-- Indexes sessions into Graphiti's knowledge graph
+- Indexes conversation turns as they complete (user message + assistant response pairs)
+- Preprocesses content programmatically before LLM extraction
+- Extracts entities and relationships using single-pass LLM processing
 - Links related sessions for context continuity
 - Enables semantic search across past work
 
@@ -63,33 +63,37 @@ graphiti-mcp-session-tracking disable
 ### Architecture Flow
 
 ```
-Claude Code Session
-    ↓ (writes to)
-~/.claude/projects/{hash}/sessions/{session-id}.jsonl
-    ↓ (monitored by)
-Graphiti MCP Server - File Watcher
-    ↓ (processes)
-JSONL Parser + Smart Filter (93% token reduction)
-    ↓ (indexes to)
-Graphiti Knowledge Graph
-    ↓ (enables)
-Semantic Search & Context Retrieval
+Turn Complete (user→assistant pair)
+    ↓
+Preprocessor (filter noise programmatically, no LLM)
+    ↓
+Build context with preprocessing prompt
+    ↓
+Graphiti add_episode() with custom_prompt injection
+    ↓
+Single LLM pass: preprocessing + entity extraction
+    ↓
+Graph updated with entities and relationships
+    ↓
+Semantic Search & Context Retrieval enabled
 ```
 
 ### What Gets Captured
 
-**Included:**
-- User messages (full content)
-- Assistant responses (full text)
-- Tool calls (structure, no outputs)
-- MCP tools used
-- Files modified
-- Session timing and metadata
+Session tracking operates on **turn-pairs** (one user message + one assistant response). Each turn-pair is captured when the next user message arrives, confirming the previous turn is complete.
 
-**Excluded (for token efficiency):**
-- Tool result outputs (replaced with 1-line summaries)
-- Large file contents
-- Redundant system messages
+**Turn-Pair Components:**
+- **User message**: Full content with intent and requests
+- **Assistant response**: Full text including rationale and decisions
+- **Tool executions**: Commands used and their outcomes
+- **Files modified**: Paths and change descriptions
+- **Turn metadata**: Timing, duration, message counts
+
+**Preprocessing Strategy:**
+- **Programmatic filtering**: Noise removed before LLM processing (no cost)
+- **Custom prompt injection**: Context-specific extraction instructions
+- **Single-pass LLM**: Preprocessing + entity extraction in one call
+- **Token efficiency**: ~13% savings vs dual-pass summarization
 
 ---
 
@@ -225,24 +229,33 @@ Session tracking is controlled via configuration (`graphiti.config.json`). Use t
 
 ### Expected Costs
 
-**Per Session:**
-- Average: $0.17 per session
-- Range: $0.03 - $0.50 depending on session length
+**Per Turn-Pair:**
+- Average: ~$0.03 - $0.10 per turn
+- Varies based on: Turn content length, tool usage, complexity
 - Components:
-  - Token filtering: 93% reduction (free)
-  - Entity extraction: ~$0.17 (OpenAI gpt-4o-mini)
+  - Programmatic preprocessing: Free (no LLM)
+  - Entity extraction: ~$0.03 - $0.10 (OpenAI gpt-4o-mini, single-pass)
+  - Embedding generation: Negligible cost
+
+**Session Estimates** (typical 10-20 turns per session):
+- Short session (5-10 turns): ~$0.15 - $0.50
+- Medium session (10-20 turns): ~$0.30 - $1.00
+- Long session (20+ turns): ~$0.60 - $2.00+
 
 **Monthly Estimate:**
-- Light usage (10 sessions/month): ~$1.70/month
-- Regular usage (50 sessions/month): ~$8.50/month
-- Heavy usage (100 sessions/month): ~$17.00/month
+- Light usage (10 sessions/month, ~15 turns avg): ~$3.00 - $7.00/month
+- Regular usage (50 sessions/month, ~15 turns avg): ~$15.00 - $35.00/month
+- Heavy usage (100 sessions/month, ~15 turns avg): ~$30.00 - $70.00/month
+
+**Note**: Turn-based indexing provides real-time context at the cost of more frequent LLM calls compared to session-based batching. The single-pass architecture saves ~13% per turn vs dual-pass summarization.
 
 ### Cost Optimization Tips
 
-1. **Use Default Filtering**: The built-in smart filter reduces tokens by 93%
-2. **Session Cleanup**: Archive old sessions you don't need indexed
-3. **Opt-Out When Not Needed**: Disable tracking for experimental/test sessions
-4. **Monitor Usage**: Check token usage in session metadata
+1. **Leverage Programmatic Preprocessing**: Built-in filters remove noise before LLM (no cost)
+2. **Use Default Extraction Templates**: Optimized prompts for session content
+3. **Configure Rolling Window**: Use `keep_length_days` to limit historical indexing
+4. **Monitor Turn Frequency**: Long conversations with many turns cost more
+5. **Disable for Testing**: Turn off tracking for experimental/throwaway sessions
 
 
 ### Manual Sync Command
@@ -579,3 +592,7 @@ markdown = await exporter.export_handoff(
 **Feedback:**
 
 Session tracking is a new feature (v0.4.0). We welcome feedback and bug reports!
+
+---
+
+**Last Updated:** 2025-12-20
