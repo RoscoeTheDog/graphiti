@@ -41,6 +41,13 @@ from .cli import (
     main as cli_main
 )
 
+from .test_reconciliation import (
+    validate_test_reconciliation,
+    validate_reconciliation,
+    TestReconciliationMetadata,
+    ReconciliationMetadata,
+)
+
 __all__ = [
     # Core functions
     'load_queue',
@@ -61,5 +68,10 @@ __all__ = [
     'cmd_check_reconciliation',
     'cmd_apply_reconciliation',
     'cmd_reconciliation_status',
-    'cli_main'
+    'cli_main',
+    # Test reconciliation schema functions
+    'validate_test_reconciliation',
+    'validate_reconciliation',
+    'TestReconciliationMetadata',
+    'ReconciliationMetadata',
 ]

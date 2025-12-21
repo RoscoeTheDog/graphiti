@@ -103,6 +103,19 @@ def set_metadata(
     if story_id not in new_queue.get('stories', {}):
         raise ValueError(f"Story not found: {story_id}")
 
+    # Schema validation for specific metadata keys
+    if key == "test_reconciliation":
+        from .test_reconciliation import validate_test_reconciliation
+        is_valid, error = validate_test_reconciliation(value)
+        if not is_valid:
+            raise ValueError(f"Invalid test_reconciliation schema: {error}")
+
+    if key == "reconciliation":
+        from .test_reconciliation import validate_reconciliation
+        is_valid, error = validate_reconciliation(value)
+        if not is_valid:
+            raise ValueError(f"Invalid reconciliation schema: {error}")
+
     story = new_queue['stories'][story_id]
 
     # Initialize metadata if it doesn't exist
