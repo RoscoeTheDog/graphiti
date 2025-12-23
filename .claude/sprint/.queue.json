@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Generate requirements.txt from pyproject.toml",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "1.d",
@@ -48,8 +48,8 @@
         "2.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
+        "discovery": "completed",
+        "implementation": "ready",
         "testing": "pending"
       },
       "blocks": [
@@ -135,7 +135,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Generate requirements.txt from pyproject.toml",
-      "status": "pending",
+      "status": "completed",
       "parent": "1",
       "phase": "discovery",
       "phase_order": 1,
@@ -148,14 +148,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Generate requirements.txt from pyproject.toml",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/1-plan.yaml"
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
     },
     "1.t": {
       "type": "testing",
@@ -178,7 +181,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Deploy standalone package to ~/.graphiti/",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -191,14 +194,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Deploy standalone package to ~/.graphiti/",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/2-plan.yaml"
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
     },
     "2.t": {
       "type": "testing",

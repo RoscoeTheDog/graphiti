@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 15:09:28
+**Generated**: 2025-12-23 15:23:52
 
 ---
 
@@ -15,11 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 24
-- **Completion**: 0.0%
+- **Completion**: 8.3%
 
 ### By Status
 
-- pending: 15
+- completed: 2
+- in_progress: 1
+- pending: 12
 - unassigned: 9
 
 ### By Type
@@ -34,7 +36,7 @@
 ## Stories (Execution Order)
 
   ### Story 1.d: Discovery: Generate requirements.txt from pyproject.toml
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Generate requirements.txt from pyproject.toml
@@ -46,11 +48,11 @@
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Deploy standalone package to ~/.graphiti/
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Deploy standalone package to ~/.graphiti/
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Deploy standalone package to ~/.graphiti/
