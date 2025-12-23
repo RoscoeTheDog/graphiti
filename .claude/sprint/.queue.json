@@ -148,7 +148,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Generate requirements.txt from pyproject.toml",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
