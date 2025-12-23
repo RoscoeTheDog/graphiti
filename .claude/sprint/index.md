@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 15:23:52
+**Generated**: 2025-12-23 15:24:26
 
 ---
 
@@ -21,8 +21,8 @@
 
 - completed: 2
 - in_progress: 1
-- pending: 12
-- unassigned: 9
+- pending: 11
+- unassigned: 10
 
 ### By Type
 
@@ -40,7 +40,7 @@
   - Dependencies: Story 1
 
   ### Story 1.i: Implementation: Generate requirements.txt from pyproject.toml
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Generate requirements.txt from pyproject.toml
