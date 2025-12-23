@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Generate requirements.txt from pyproject.toml",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -23,9 +23,9 @@
         "1.t"
       ],
       "phase_status": {
-        "discovery": "pending",
-        "implementation": "pending",
-        "testing": "pending"
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [
         "2",
@@ -164,7 +164,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Generate requirements.txt from pyproject.toml",
-      "status": "pending",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
