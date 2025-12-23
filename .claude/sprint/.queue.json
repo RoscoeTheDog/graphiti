@@ -345,6 +345,72 @@
         "integration",
         "security"
       ]
+    },
+    "6": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Standalone uninstall scripts for all platforms",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/6-standalone-uninstall-scripts-f.md"
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Standalone uninstall scripts for all platforms",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "6.i"
+      ],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Standalone uninstall scripts for all platforms",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "6.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Standalone uninstall scripts for all platforms",
+      "status": "unassigned",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
     }
   },
   "execution_queue": [
@@ -362,6 +428,9 @@
     "4.t",
     "5.d",
     "5.i",
-    "5.t"
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t"
   ]
 }
