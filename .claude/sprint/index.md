@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:51:29
+**Generated**: 2025-12-23 20:49:42
 
 ---
 
@@ -15,13 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 77.1%
+- **Completion**: 89.6%
 
 ### By Status
 
-- completed: 37
+- blocked: 2
+- completed: 43
 - in_progress: 2
-- unassigned: 9
+- unassigned: 1
 
 ### By Type
 
@@ -90,36 +91,36 @@
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 
-  ### Story -4.t: Validate Testing: Fix NSSM service configuration
-  **Status**: unassigned | **Type**: validation_testing
+  ### Story -4.t: Validation_Testing_Results_ 4.T
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -4, Story -4.i
 
-  ### Story -5.d: Validate Discovery: End-to-end installation test
-  **Status**: unassigned | **Type**: validation_discovery
+  ### Story -5.d: Validation_Discovery_Results_ 5.D
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -5
   - Blocks: Story -5.i
 
-  ### Story -5.i: Validate Implementation: End-to-end installation test
-  **Status**: unassigned | **Type**: validation_implementation
+  ### Story -5.i: Validation_Implementation_Results_ 5.I
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -5, Story -5.d
   - Blocks: Story -5.t
 
-  ### Story -5.t: Validate Testing: End-to-end installation test
-  **Status**: unassigned | **Type**: validation_testing
+  ### Story -5.t: Validation_Testing_Results_ 5.T
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -5, Story -5.i
 
-  ### Story -6.d: Validate Discovery: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: validation_discovery
+  ### Story -6.d: Validation_Discovery_Results_ 6.D
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -6
   - Blocks: Story -6.i
 
-  ### Story -6.i: Validate Implementation: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: validation_implementation
+  ### Story -6.i: Validation_Implementation_Results_ 6.I
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -6, Story -6.d
   - Blocks: Story -6.t
 
   ### Story -6.t: Validate Testing: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: blocked | **Type**: validation_testing
   - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Generate requirements.txt from pyproject.toml

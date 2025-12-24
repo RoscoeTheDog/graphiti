@@ -825,7 +825,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Standalone uninstall scripts for all platforms",
-      "status": "unassigned",
+      "status": "blocked",
       "validates": "6",
       "children": [
         "-6.d",
@@ -885,7 +885,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Standalone uninstall scripts for all platforms",
-      "status": "unassigned",
+      "status": "blocked",
       "parent": "-6",
       "validates": "6.t",
       "phase": "validation_testing",
@@ -899,7 +899,10 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": null,
+      "metadata": {
+        "file": "validation_testing_results_-6.t.md"
+      }
     }
   },
   "execution_queue": [
