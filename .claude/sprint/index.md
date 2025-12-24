@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 18:08:07
+**Generated**: 2025-12-23 18:29:51
 
 ---
 
@@ -14,14 +14,14 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 24
-- **Completion**: 91.7%
+- **Total Stories**: 48
+- **Completion**: 54.2%
 
 ### By Status
 
-- completed: 22
+- completed: 26
 - in_progress: 1
-- unassigned: 1
+- unassigned: 21
 
 ### By Type
 
@@ -29,10 +29,98 @@
 - feature: 6
 - implementation: 6
 - testing: 6
+- validation: 6
+- validation_discovery: 6
+- validation_implementation: 6
+- validation_testing: 6
 
 ---
 
 ## Stories (Execution Order)
+
+  ### Story -1.d: Validate Discovery: Generate requirements.txt from pyproject.toml
+  **Status**: completed | **Type**: validation_discovery
+  - Dependencies: Story -1
+  - Blocks: Story -1.i
+
+  ### Story -1.i: Validate Implementation: Generate requirements.txt from pyproject.toml
+  **Status**: completed | **Type**: validation_implementation
+  - Dependencies: Story -1, Story -1.d
+  - Blocks: Story -1.t
+
+  ### Story -1.t: Validate Testing: Generate requirements.txt from pyproject.toml
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -1, Story -1.i
+
+  ### Story -2.d: Validate Discovery: Deploy standalone package to ~/.graphiti/
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -2
+  - Blocks: Story -2.i
+
+  ### Story -2.i: Validate Implementation: Deploy standalone package to ~/.graphiti/
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -2, Story -2.d
+  - Blocks: Story -2.t
+
+  ### Story -2.t: Validate Testing: Deploy standalone package to ~/.graphiti/
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -2, Story -2.i
+
+  ### Story -3.d: Validate Discovery: Update venv_manager to use deployed package
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -3
+  - Blocks: Story -3.i
+
+  ### Story -3.i: Validate Implementation: Update venv_manager to use deployed package
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -3, Story -3.d
+  - Blocks: Story -3.t
+
+  ### Story -3.t: Validate Testing: Update venv_manager to use deployed package
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -3, Story -3.i
+
+  ### Story -4.d: Validate Discovery: Fix NSSM service configuration
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -4
+  - Blocks: Story -4.i
+
+  ### Story -4.i: Validate Implementation: Fix NSSM service configuration
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -4, Story -4.d
+  - Blocks: Story -4.t
+
+  ### Story -4.t: Validate Testing: Fix NSSM service configuration
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -4, Story -4.i
+
+  ### Story -5.d: Validate Discovery: End-to-end installation test
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -5
+  - Blocks: Story -5.i
+
+  ### Story -5.i: Validate Implementation: End-to-end installation test
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -5, Story -5.d
+  - Blocks: Story -5.t
+
+  ### Story -5.t: Validate Testing: End-to-end installation test
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -5, Story -5.i
+
+  ### Story -6.d: Validate Discovery: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: validation_discovery
+  - Dependencies: Story -6
+  - Blocks: Story -6.i
+
+  ### Story -6.i: Validate Implementation: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: validation_implementation
+  - Dependencies: Story -6, Story -6.d
+  - Blocks: Story -6.t
+
+  ### Story -6.t: Validate Testing: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: validation_testing
+  - Dependencies: Story -6, Story -6.i
 
   ### Story 1.d: Discovery: Generate requirements.txt from pyproject.toml
   **Status**: completed | **Type**: discovery
@@ -105,7 +193,7 @@
   - Blocks: Story 6.t
 
   ### Story 6.t: Testing: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 6, Story 6.i
 
 ---

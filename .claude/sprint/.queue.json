@@ -429,7 +429,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Generate requirements.txt from pyproject.toml",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "1",
       "children": [
         "-1.d",
@@ -469,7 +469,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Generate requirements.txt from pyproject.toml",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.i",
       "phase": "validation_implementation",
