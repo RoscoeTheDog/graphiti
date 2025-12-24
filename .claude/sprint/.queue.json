@@ -507,7 +507,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Deploy standalone package to ~/.graphiti/",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "2",
       "children": [
         "-2.d",
@@ -565,7 +565,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Deploy standalone package to ~/.graphiti/",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.t",
       "phase": "validation_testing",

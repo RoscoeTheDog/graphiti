@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 18:29:51
+**Generated**: 2025-12-23 19:10:29
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 54.2%
+- **Completion**: 64.6%
 
 ### By Status
 
-- completed: 26
+- completed: 31
 - in_progress: 1
-- unassigned: 21
+- unassigned: 16
 
 ### By Type
 
@@ -48,22 +48,22 @@
   - Dependencies: Story -1, Story -1.d
   - Blocks: Story -1.t
 
-  ### Story -1.t: Validate Testing: Generate requirements.txt from pyproject.toml
-  **Status**: unassigned | **Type**: validation_testing
+  ### Story -1.t: Validation_Testing_Results_ 1.T
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -1, Story -1.i
 
-  ### Story -2.d: Validate Discovery: Deploy standalone package to ~/.graphiti/
-  **Status**: unassigned | **Type**: validation_discovery
+  ### Story -2.d: Validation_Discovery_Results_ 2.D
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -2
   - Blocks: Story -2.i
 
   ### Story -2.i: Validate Implementation: Deploy standalone package to ~/.graphiti/
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -2, Story -2.d
   - Blocks: Story -2.t
 
   ### Story -2.t: Validate Testing: Deploy standalone package to ~/.graphiti/
-  **Status**: unassigned | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Update venv_manager to use deployed package
