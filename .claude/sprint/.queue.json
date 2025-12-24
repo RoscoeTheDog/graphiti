@@ -330,7 +330,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: End-to-end installation test",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "implementation",
       "phase_order": 2,
