@@ -676,7 +676,7 @@
       "phase_status": {
         "validation_discovery": "pending",
         "validation_implementation": "pending",
-        "validation_testing": "pending"
+        "validation_testing": "completed"
       },
       "target_has_phases": true,
       "blocks": [],
@@ -727,7 +727,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Fix NSSM service configuration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4.t",
       "phase": "validation_testing",
@@ -741,7 +741,7 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "validation_testing_results_-4.t.md"
     },
     "-5": {
       "type": "validation",
