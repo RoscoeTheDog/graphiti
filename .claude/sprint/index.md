@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:43:57
+**Generated**: 2025-12-23 19:51:29
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 75.0%
+- **Completion**: 77.1%
 
 ### By Status
 
-- completed: 36
+- completed: 37
 - in_progress: 2
-- unassigned: 10
+- unassigned: 9
 
 ### By Type
 
@@ -86,7 +86,7 @@
   - Blocks: Story -4.i
 
   ### Story -4.i: Validate Implementation: Fix NSSM service configuration
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 

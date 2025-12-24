@@ -706,7 +706,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Fix NSSM service configuration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4.i",
       "phase": "validation_implementation",
@@ -718,7 +718,10 @@
       "blocks": [
         "-4.t"
       ],
-      "file": null
+      "file": null,
+      "metadata": {
+        "file": "validation_implementation_results_-4.i.md"
+      }
     },
     "-4.t": {
       "type": "validation_testing",
