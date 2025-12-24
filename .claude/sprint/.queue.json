@@ -1,0 +1,946 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "self-contained-daemon-deployment-v1.0.0",
+    "name": "Self-Contained Daemon Deployment",
+    "version": "1.0.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-23 14:49",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
+  },
+  "stories": {
+    "1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [
+        "2",
+        "3"
+      ],
+      "file": "stories/1-generate-requirements-txt.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [
+        "3",
+        "4"
+      ],
+      "file": "stories/2-deploy-standalone-package.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "pending",
+        "testing": "completed"
+      },
+      "blocks": [
+        "4"
+      ],
+      "file": "stories/3-update-venv-manager.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "4": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Fix NSSM service configuration",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [
+        "5"
+      ],
+      "file": "stories/4-fix-nssm-service-configuration.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "5": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "End-to-end installation test",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "completed",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/5-end-to-end-installation-test.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml"
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml"
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: End-to-end installation test",
+      "status": "completed",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": "stories/5.d-discovery-end-to-end-installation-test.md",
+      "artifact": "plans/5-plan.yaml",
+      "updated": "2025-12-24 01:14"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: End-to-end installation test",
+      "status": "completed",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: End-to-end installation test",
+      "status": "completed",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "completed",
+        "implementation": "pending",
+        "testing": "completed"
+      },
+      "blocks": [],
+      "file": "stories/6-standalone-uninstall-scripts-f.md"
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [
+        "6.i"
+      ],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [
+        "6.t"
+      ],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/6-plan.yaml"
+      }
+    },
+    "-1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "validates": "1",
+      "children": [
+        "-1.d",
+        "-1.i",
+        "-1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "completed",
+        "validation_implementation": "pending",
+        "validation_testing": "completed"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.i"
+      ],
+      "file": null
+    },
+    "-1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": null
+    },
+    "-1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Generate requirements.txt from pyproject.toml",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": "validation_testing_results_-1.t.md"
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": "validation_discovery_results_-2.d.md"
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Deploy standalone package to ~/.graphiti/",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update venv_manager to use deployed package",
+      "status": "completed",
+      "validates": "3",
+      "children": [
+        "-3.d",
+        "-3.i",
+        "-3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.i"
+      ],
+      "file": null,
+      "metadata": {
+        "file": "validation_discovery_results_-3.d.md"
+      }
+    },
+    "-3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.t"
+      ],
+      "file": "validation_implementation_results_-3.i.md"
+    },
+    "-3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update venv_manager to use deployed package",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": "validation_testing_results_-3.t.md"
+    },
+    "-4": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Fix NSSM service configuration",
+      "status": "completed",
+      "validates": "4",
+      "children": [
+        "-4.d",
+        "-4.i",
+        "-4.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "completed"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-4.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.i"
+      ],
+      "file": "validation_discovery_results_-4.d.md"
+    },
+    "-4.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.t"
+      ],
+      "file": null,
+      "metadata": {
+        "file": "validation_implementation_results_-4.i.md"
+      }
+    },
+    "-4.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Fix NSSM service configuration",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": "validation_testing_results_-4.t.md"
+    },
+    "-5": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: End-to-end installation test",
+      "status": "completed",
+      "validates": "5",
+      "children": [
+        "-5.d",
+        "-5.i",
+        "-5.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "completed"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-5.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: End-to-end installation test",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.i"
+      ],
+      "file": "validation_discovery_results_-5.d.md"
+    },
+    "-5.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: End-to-end installation test",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.t"
+      ],
+      "file": "validation_implementation_results_-5.i.md"
+    },
+    "-5.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: End-to-end installation test",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": "validation_testing_results_-5.t.md"
+    },
+    "-6": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "validates": "6",
+      "children": [
+        "-6.d",
+        "-6.i",
+        "-6.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "completed",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-6.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": "-6",
+      "validates": "6.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.i"
+      ],
+      "file": "validation_discovery_results_-6.d.md",
+      "updated": "2025-12-24 04:31"
+    },
+    "-6.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Standalone uninstall scripts for all platforms",
+      "status": "completed",
+      "parent": "-6",
+      "validates": "6.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.t"
+      ],
+      "file": "validation_implementation_results_-6.i.md",
+      "updated": "2025-12-23 20:41"
+    },
+    "-6.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Standalone uninstall scripts for all platforms",
+      "status": "skipped",
+      "parent": "-6",
+      "validates": "6.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "metadata": {
+        "file": "validation_testing_results_-6.t.md"
+      }
+    }
+  },
+  "execution_queue": [
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "-4.d",
+    "-4.i",
+    "-4.t",
+    "-5.d",
+    "-5.i",
+    "-5.t",
+    "-6.d",
+    "-6.i",
+    "-6.t",
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t"
+  ]
+}

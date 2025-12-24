@@ -309,6 +309,10 @@ class VenvManager:
         3. __file__ location search (for installed package scenarios)
         4. Upward from venv path (legacy fallback)
 
+        Note: This method is used for development/installation scenarios.
+        At runtime, the bootstrap service uses the deployed package at
+        ~/.graphiti/mcp_server/ (see package_deployer.py and bootstrap.py).
+
         Returns:
             Path to repository root if found, None otherwise
         """
@@ -411,10 +415,10 @@ class VenvManager:
 
     def install_package(self) -> Tuple[bool, str]:
         """
-        Install mcp_server package into the venv (non-editable install).
+        Install mcp_server package into the venv from requirements.txt.
 
-        Detects repository location dynamically and installs the package.
-        Uses uv pip if available in venv, falls back to standard pip.
+        Installs dependencies from ~/.graphiti/requirements.txt.
+        Uses uvx (preferred), then uv pip, then standard pip.
 
         Returns:
             Tuple of (success: bool, message: str)
@@ -428,51 +432,46 @@ class VenvManager:
                 "Call create_venv() first."
             )
 
-        # Detect repository location
-        repo_path = self.detect_repo_location()
-        if repo_path is None:
+        # Validate requirements.txt exists
+        requirements_path = Path.home() / ".graphiti" / "requirements.txt"
+        if not requirements_path.exists():
             error_msg = (
-                "Cannot find mcp_server package in repository. "
-                "Expected to find mcp_server/pyproject.toml searching upward from venv."
+                f"Requirements file not found at {requirements_path}. "
+                "Please run the daemon installation process first."
             )
             logger.error(error_msg)
             return False, error_msg
 
-        # Validate repo path (security: prevent path traversal)
-        try:
-            repo_path = repo_path.resolve()
-            mcp_server_path = repo_path / "mcp_server"
-            if not mcp_server_path.exists():
-                error_msg = f"mcp_server directory not found at {mcp_server_path}"
-                logger.error(error_msg)
-                return False, error_msg
-        except Exception as e:
-            error_msg = f"Error validating repository path: {e}"
-            logger.error(error_msg)
-            return False, error_msg
+        logger.debug(f"Using requirements file: {requirements_path}")
 
-        # Determine which pip to use (prefer uv pip if available in venv)
-        uv_exe = self.get_uv_executable()
-        if uv_exe:
-            pip_command = [str(uv_exe), "pip", "install"]
-            tool_name = "uv pip"
+        # Determine which tool to use (prefer uvx, then uv pip, then pip)
+        # Check for uvx in PATH first
+        uvx_path = shutil.which("uvx")
+        if uvx_path:
+            pip_command = [uvx_path, "pip", "install"]
+            tool_name = "uvx"
         else:
-            pip_exe = self.get_pip_executable()
-            pip_command = [str(pip_exe), "install"]
-            tool_name = "pip"
+            # Check for uv in venv
+            uv_exe = self.get_uv_executable()
+            if uv_exe:
+                pip_command = [str(uv_exe), "pip", "install"]
+                tool_name = "uv pip"
+            else:
+                # Fallback to standard pip
+                pip_exe = self.get_pip_executable()
+                pip_command = [str(pip_exe), "install"]
+                tool_name = "pip"
 
-        # Build install command (non-editable, use relative path ./mcp_server)
-        install_target = str(mcp_server_path.relative_to(repo_path))
-        install_command = pip_command + [install_target, "--quiet"]
+        # Build install command (install from requirements.txt)
+        install_command = pip_command + ["-r", str(requirements_path), "--quiet"]
 
-        logger.info(f"Installing mcp_server package using {tool_name}")
+        logger.info(f"Installing dependencies from {requirements_path} using {tool_name}")
         logger.debug(f"Install command: {' '.join(install_command)}")
-        logger.debug(f"Working directory: {repo_path}")
 
         try:
             result = subprocess.run(
                 install_command,
-                cwd=str(repo_path),  # Run from repo root
+                # No cwd needed - requirements.txt has absolute path
                 capture_output=True,
                 text=True,
                 check=False,

@@ -29,6 +29,7 @@ from .systemd_service import SystemdServiceManager
 from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
 from .wrapper_generator import WrapperGenerator, WrapperGenerationError
 from .path_integration import PathIntegration, PathIntegrationError
+from .package_deployer import PackageDeployer, PackageDeploymentError
 
 
 class UnsupportedPlatformError(Exception):
@@ -43,6 +44,7 @@ class DaemonManager:
         """Initialize manager with platform-specific implementation."""
         self.platform = platform.system()
         self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
+        self.package_deployer = PackageDeployer()  # Package deployment to ~/.graphiti/mcp_server/
         self.service_manager = self._get_service_manager()
         self.config_path = self._get_config_path()
         self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
@@ -73,6 +75,30 @@ class DaemonManager:
             if xdg_config:
                 return Path(xdg_config) / "graphiti" / "graphiti.config.json"
             return Path.home() / ".graphiti" / "graphiti.config.json"
+
+    def _get_uninstall_script_path(self) -> Optional[Path]:
+        """
+        Get path to standalone uninstall script for current platform.
+
+        Returns:
+            Path to uninstall script if it exists, None otherwise.
+
+        Note:
+            Standalone scripts can run without Python or repository access.
+            Useful as fallback when manager.py is unavailable.
+        """
+        script_dir = Path(__file__).parent
+
+        if self.platform == "Windows":
+            script_path = script_dir / "uninstall_windows.ps1"
+        elif self.platform == "Darwin":
+            script_path = script_dir / "uninstall_macos.sh"
+        elif self.platform == "Linux":
+            script_path = script_dir / "uninstall_linux.sh"
+        else:
+            return None
+
+        return script_path if script_path.exists() else None
 
     def install(self) -> bool:
         """Install bootstrap service (auto-start on boot)."""
@@ -107,6 +133,32 @@ class DaemonManager:
             print("  - Ensure you have write permissions to ~/.graphiti/")
             print("  - Check available disk space")
             print("  - Try: python -m venv --help (verify venv module available)")
+            return False
+
+        # Step 2.4: Deploy mcp_server package to standalone location
+        print()
+        print("Deploying mcp_server package to ~/.graphiti/mcp_server/...")
+        try:
+            success, msg = self.package_deployer.deploy_package()
+            if success:
+                print(f"[OK] {msg}")
+            else:
+                print(f"[FAILED] Package deployment failed: {msg}")
+                print()
+                print("Troubleshooting:")
+                print("  - Ensure write permissions to ~/.graphiti/")
+                print("  - Check available disk space")
+                print("  - Verify mcp_server/pyproject.toml exists in repository")
+                return False
+        except PackageDeploymentError as e:
+            print(f"[FAILED] Package deployment failed: {e}")
+            print()
+            print("Troubleshooting:")
+            print("  - Ensure you're running from the Graphiti repository directory")
+            print("  - Verify mcp_server/ directory structure is intact")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during package deployment: {e}")
             return False
 
         # Step 2.5: Install mcp_server package into venv
@@ -224,11 +276,40 @@ class DaemonManager:
             print()
             print(f"Config file preserved: {self.config_path}")
             print("  (You can manually delete ~/.graphiti/ if desired)")
+            print()
+
+            # Suggest standalone script for complete uninstall
+            standalone_script = self._get_uninstall_script_path()
+            if standalone_script:
+                print("For complete uninstall (including venv and deployed package):")
+                if self.platform == "Windows":
+                    print(f"  Run: powershell -File {standalone_script}")
+                else:
+                    print(f"  Run: {standalone_script}")
+                print()
+                print("See docs/UNINSTALL.md for details")
+            else:
+                print("Note: Standalone uninstall script not found.")
+                print("  Manual cleanup: Remove ~/.graphiti/ directory if desired")
+
             return True
         else:
             print()
             print("[FAILED] Failed to uninstall bootstrap service")
             print("  See error messages above for details")
+            print()
+
+            # Suggest standalone script as fallback
+            standalone_script = self._get_uninstall_script_path()
+            if standalone_script:
+                print("Alternative: Use standalone uninstall script")
+                if self.platform == "Windows":
+                    print(f"  Run: powershell -File {standalone_script}")
+                else:
+                    print(f"  Run: {standalone_script}")
+                print()
+                print("See docs/UNINSTALL.md for details")
+
             return False
 
     def status(self) -> dict:

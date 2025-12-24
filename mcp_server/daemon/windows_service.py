@@ -116,13 +116,14 @@ class WindowsServiceManager:
         print(f"Bootstrap script: {self.bootstrap_script}")
         print()
 
-        # Install service
+        # Install service with module invocation
         print("Installing service...")
         success, output = self._run_nssm(
             "install",
             self.service_name,
             str(self.python_exe),
-            str(self.bootstrap_script),
+            "-m",
+            "mcp_server.daemon.bootstrap",
         )
 
         if not success:
@@ -143,8 +144,9 @@ class WindowsServiceManager:
         # Set startup type to automatic
         self._run_nssm("set", self.service_name, "Start", "SERVICE_AUTO_START")
 
-        # Set working directory to mcp_server/daemon/
-        working_dir = self.bootstrap_script.parent
+        # Set working directory to ~/.graphiti/
+        working_dir = Path.home() / ".graphiti"
+        working_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         self._run_nssm("set", self.service_name, "AppDirectory", str(working_dir))
 
         # Configure stdout/stderr logging
