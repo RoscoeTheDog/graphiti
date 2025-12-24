@@ -787,7 +787,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: End-to-end installation test",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.i",
       "phase": "validation_implementation",
@@ -799,7 +799,7 @@
       "blocks": [
         "-5.t"
       ],
-      "file": null
+      "file": "validation_implementation_results_-5.i.md"
     },
     "-5.t": {
       "type": "validation_testing",
