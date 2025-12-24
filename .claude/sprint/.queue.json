@@ -757,7 +757,7 @@
       "phase_status": {
         "validation_discovery": "pending",
         "validation_implementation": "pending",
-        "validation_testing": "pending"
+        "validation_testing": "completed"
       },
       "target_has_phases": true,
       "blocks": [],
@@ -805,7 +805,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: End-to-end installation test",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.t",
       "phase": "validation_testing",
@@ -819,7 +819,7 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "validation_testing_results_-5.t.md"
     },
     "-6": {
       "type": "validation",
