@@ -767,7 +767,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: End-to-end installation test",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.d",
       "phase": "validation_discovery",
@@ -781,7 +781,7 @@
       "blocks": [
         "-5.i"
       ],
-      "file": null
+      "file": "validation_discovery_results_-5.d.md"
     },
     "-5.i": {
       "type": "validation_implementation",
