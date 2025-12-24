@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:10:29
+**Generated**: 2025-12-23 19:17:33
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 64.6%
+- **Completion**: 66.7%
 
 ### By Status
 
-- completed: 31
-- in_progress: 1
-- unassigned: 16
+- completed: 32
+- in_progress: 2
+- unassigned: 14
 
 ### By Type
 
@@ -67,7 +67,7 @@
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Update venv_manager to use deployed package
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -3
   - Blocks: Story -3.i
 
