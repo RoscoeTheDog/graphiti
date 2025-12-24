@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:17:33
+**Generated**: 2025-12-23 19:43:57
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 48
-- **Completion**: 66.7%
+- **Completion**: 75.0%
 
 ### By Status
 
-- completed: 32
+- completed: 36
 - in_progress: 2
-- unassigned: 14
+- unassigned: 10
 
 ### By Type
 
@@ -71,17 +71,17 @@
   - Dependencies: Story -3
   - Blocks: Story -3.i
 
-  ### Story -3.i: Validate Implementation: Update venv_manager to use deployed package
-  **Status**: unassigned | **Type**: validation_implementation
+  ### Story -3.i: Validation_Implementation_Results_ 3.I
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -3, Story -3.d
   - Blocks: Story -3.t
 
-  ### Story -3.t: Validate Testing: Update venv_manager to use deployed package
-  **Status**: unassigned | **Type**: validation_testing
+  ### Story -3.t: Validation_Testing_Results_ 3.T
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
-  ### Story -4.d: Validate Discovery: Fix NSSM service configuration
-  **Status**: unassigned | **Type**: validation_discovery
+  ### Story -4.d: Validation_Discovery_Results_ 4.D
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -4
   - Blocks: Story -4.i
 

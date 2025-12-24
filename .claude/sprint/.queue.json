@@ -666,7 +666,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Fix NSSM service configuration",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "4",
       "children": [
         "-4.d",
@@ -686,7 +686,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Fix NSSM service configuration",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4.d",
       "phase": "validation_discovery",
@@ -700,7 +700,7 @@
       "blocks": [
         "-4.i"
       ],
-      "file": null
+      "file": "validation_discovery_results_-4.d.md"
     },
     "-4.i": {
       "type": "validation_implementation",
