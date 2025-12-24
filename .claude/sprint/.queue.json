@@ -439,7 +439,7 @@
       "phase_status": {
         "validation_discovery": "completed",
         "validation_implementation": "pending",
-        "validation_testing": "pending"
+        "validation_testing": "completed"
       },
       "target_has_phases": true,
       "blocks": [],
@@ -487,7 +487,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Generate requirements.txt from pyproject.toml",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.t",
       "phase": "validation_testing",
@@ -501,7 +501,7 @@
       ],
       "children": [],
       "blocks": [],
-      "file": null
+      "file": "validation_testing_results_-1.t.md"
     },
     "-2": {
       "type": "validation",
