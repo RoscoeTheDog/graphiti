@@ -360,7 +360,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Standalone uninstall scripts for all platforms",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "6.d",
@@ -370,7 +370,7 @@
       "phase_status": {
         "discovery": "completed",
         "implementation": "pending",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/6-standalone-uninstall-scripts-f.md"
@@ -409,7 +409,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Standalone uninstall scripts for all platforms",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "testing",
       "phase_order": 3,
