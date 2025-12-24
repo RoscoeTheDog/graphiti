@@ -26,4 +26,4 @@
 | s024 | sprint-orchestration-with-remediation | ACTIVE | 2025-12-19 18:45 | Sprint orchestration with remediation test reconciliat |
 | s025 | complete-remediation-test | ACTIVE | 2025-12-20 15:56 | Complete Remediation Test Reconciliation Sprint v1.0 |
 | s026 | complete-sprint-orchestrate-and-finish | ACTIVE | 2025-12-20 21:30 | Complete Sprint ORCHESTRATE and FINISH for Remediation |
-| s027 | fix-graphiti-memory-mcp-connection | ACTIVE | 2025-12-23 22:57 | Fix graphiti-memory MCP connection after daemon deploy |
+| s027 | fix-graphiti-memory-mcp-connection | RESOLVED | 2025-12-23 22:57 | Fix graphiti-memory MCP connection after daemon deploy |
