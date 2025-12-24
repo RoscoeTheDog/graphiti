@@ -28,3 +28,4 @@
 | s026 | complete-sprint-orchestrate-and-finish | ACTIVE | 2025-12-20 21:30 | Complete Sprint ORCHESTRATE and FINISH for Remediation |
 | s027 | fix-graphiti-memory-mcp-connection | RESOLVED | 2025-12-23 22:57 | Fix graphiti-memory MCP connection after daemon deploy |
 | s028 | unified-installer-spec-and-deployment | ACTIVE | 2025-12-23 23:36 | Unified installer spec and deployment architecture gap |
+| s029 | per-user-daemon-architecture-v20-spec | ACTIVE | 2025-12-24 00:06 | Create v2.0 daemon architecture spec replacing system services |

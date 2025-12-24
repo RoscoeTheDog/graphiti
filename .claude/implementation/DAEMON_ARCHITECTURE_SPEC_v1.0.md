@@ -1,11 +1,20 @@
 # Graphiti MCP Server: Platform-Agnostic Daemon Architecture
 
 > **Version**: 1.0.0
-> **Status**: DESIGN COMPLETE - Ready for Sprint Creation
+> **Status**: ~~DESIGN COMPLETE~~ **SUPERSEDED** by v2.0
 > **Created**: 2024-12-13
-> **Updated**: 2024-12-13
+> **Updated**: 2024-12-24
 > **Author**: Claude + Human collaboration
-> **Next Step**: Create implementation sprint (6 phases)
+> **Superseded By**: [DAEMON_ARCHITECTURE_SPEC_v2.0.md](DAEMON_ARCHITECTURE_SPEC_v2.0.md)
+>
+> ---
+>
+> **DEPRECATION NOTICE**: This specification used system-level services (NSSM on Windows,
+> system-level systemd/launchd) which causes issues with `Path.home()` resolving to SYSTEM
+> user directories. The v2.0 spec uses **per-user service instances** (Task Scheduler,
+> user-level launchd/systemd) which properly isolates users and avoids privilege escalation.
+>
+> **Do not implement from this spec.** See v2.0 for the current architecture.
 
 ---
 
