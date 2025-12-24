@@ -429,7 +429,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Generate requirements.txt from pyproject.toml",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "1",
       "children": [
         "-1.d",
@@ -666,7 +666,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Fix NSSM service configuration",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "4",
       "children": [
         "-4.d",
@@ -747,7 +747,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: End-to-end installation test",
-      "status": "unassigned",
+      "status": "completed",
       "validates": "5",
       "children": [
         "-5.d",
@@ -825,7 +825,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Standalone uninstall scripts for all platforms",
-      "status": "blocked",
+      "status": "completed",
       "validates": "6",
       "children": [
         "-6.d",
@@ -885,7 +885,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Standalone uninstall scripts for all platforms",
-      "status": "blocked",
+      "status": "skipped",
       "parent": "-6",
       "validates": "6.t",
       "phase": "validation_testing",
