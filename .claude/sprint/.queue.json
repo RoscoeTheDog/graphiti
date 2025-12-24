@@ -113,7 +113,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "End-to-end installation test",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "5.d",
@@ -122,8 +122,8 @@
       ],
       "phase_status": {
         "discovery": "completed",
-        "implementation": "pending",
-        "testing": "pending"
+        "implementation": "completed",
+        "testing": "completed"
       },
       "blocks": [],
       "file": "stories/5-end-to-end-installation-test.md",
@@ -343,7 +343,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: End-to-end installation test",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
