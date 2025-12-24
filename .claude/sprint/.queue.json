@@ -89,7 +89,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Fix NSSM service configuration",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "4.d",
@@ -99,7 +99,7 @@
       "phase_status": {
         "discovery": "completed",
         "implementation": "completed",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [
         "5"
@@ -299,7 +299,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Fix NSSM service configuration",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "testing",
       "phase_order": 3,
