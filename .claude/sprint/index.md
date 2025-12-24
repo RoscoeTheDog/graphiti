@@ -1,60 +1,114 @@
-# Sprint Index: Self-Contained Daemon Deployment
+# Sprint Index (Auto-Generated from .queue.json)
 
-**Version**: 1.0.0
-**Status**: active
-**Branch**: dev
-**Created**: 2025-12-23 14:49
-**Queue Version**: 2.0.0
+**DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-## Stories
+**Generated**: 2025-12-23 16:23:44
 
-### Story 1: Generate requirements.txt from pyproject.toml
-- **Status**: completed
-- **Type**: feature
-- **Phases**: discovery=completed, implementation=completed, testing=completed
+---
 
-### Story 2: Deploy standalone package to ~/.graphiti/
-- **Status**: completed
-- **Type**: feature
-- **Phases**: discovery=completed, implementation=completed, testing=completed
+## Sprint Information
 
-### Story 3: Update venv_manager to use deployed package
-- **Status**: unassigned
-- **Type**: feature
-- **Phases**: discovery=pending, implementation=pending, testing=pending
+- **Sprint ID**: self-contained-daemon-deployment-v1.0.0
+- **Status**: active
+- **Branch**: dev
 
-### Story 4: Fix NSSM service configuration
-- **Status**: unassigned
-- **Type**: feature
-- **Phases**: discovery=pending, implementation=pending, testing=pending
+## Sprint Statistics
 
-### Story 5: End-to-end installation test
-- **Status**: unassigned
-- **Type**: feature
-- **Phases**: discovery=pending, implementation=pending, testing=pending
+- **Total Stories**: 24
+- **Completion**: 41.7%
 
-### Story 6: Standalone uninstall scripts for all platforms
-- **Status**: unassigned
-- **Type**: feature
-- **Phases**: discovery=pending, implementation=pending, testing=pending
+### By Status
 
-## Execution Queue
+- completed: 10
+- in_progress: 1
+- pending: 6
+- unassigned: 7
 
-1. [1.d] Discovery: Generate requirements.txt from pyproject.toml - completed
-2. [1.i] Implementation: Generate requirements.txt from pyproject.toml - completed
-3. [1.t] Testing: Generate requirements.txt from pyproject.toml - completed
-4. [2.d] Discovery: Deploy standalone package to ~/.graphiti/ - completed
-5. [2.i] Implementation: Deploy standalone package to ~/.graphiti/ - completed
-6. [2.t] Testing: Deploy standalone package to ~/.graphiti/ - completed
-7. [3.d] Discovery: Update venv_manager to use deployed package - pending
-8. [3.i] Implementation: Update venv_manager to use deployed package - pending
-9. [3.t] Testing: Update venv_manager to use deployed package - pending
-10. [4.d] Discovery: Fix NSSM service configuration - pending
-11. [4.i] Implementation: Fix NSSM service configuration - pending
-12. [4.t] Testing: Fix NSSM service configuration - pending
-13. [5.d] Discovery: End-to-end installation test - pending
-14. [5.i] Implementation: End-to-end installation test - pending
-15. [5.t] Testing: End-to-end installation test - pending
-16. [6.d] Discovery: Standalone uninstall scripts for all platforms - unassigned
-17. [6.i] Implementation: Standalone uninstall scripts for all platforms - unassigned
-18. [6.t] Testing: Standalone uninstall scripts for all platforms - unassigned
+### By Type
+
+- discovery: 6
+- feature: 6
+- implementation: 6
+- testing: 6
+
+---
+
+## Stories (Execution Order)
+
+  ### Story 1.d: Discovery: Generate requirements.txt from pyproject.toml
+  **Status**: completed | **Type**: discovery
+  - Dependencies: Story 1
+
+  ### Story 1.i: Implementation: Generate requirements.txt from pyproject.toml
+  **Status**: completed | **Type**: implementation
+  - Dependencies: Story 1
+
+  ### Story 1.t: Testing: Generate requirements.txt from pyproject.toml
+  **Status**: completed | **Type**: testing
+  - Dependencies: Story 1
+
+  ### Story 2.d: Discovery: Deploy standalone package to ~/.graphiti/
+  **Status**: completed | **Type**: discovery
+  - Dependencies: Story 2
+
+  ### Story 2.i: Implementation: Deploy standalone package to ~/.graphiti/
+  **Status**: completed | **Type**: implementation
+  - Dependencies: Story 2
+
+  ### Story 2.t: Testing: Deploy standalone package to ~/.graphiti/
+  **Status**: completed | **Type**: testing
+  - Dependencies: Story 2
+
+  ### Story 3.d: Discovery: Update venv_manager to use deployed package
+  **Status**: completed | **Type**: discovery
+  - Dependencies: Story 3
+
+  ### Story 3.i: Implementation: Update venv_manager to use deployed package
+  **Status**: completed | **Type**: implementation
+  - Dependencies: Story 3
+
+  ### Story 3.t: Testing: Update venv_manager to use deployed package
+  **Status**: unassigned | **Type**: testing
+  - Dependencies: Story 3
+
+  ### Story 4.d: Discovery: Fix NSSM service configuration
+  **Status**: pending | **Type**: discovery
+  - Dependencies: Story 4
+
+  ### Story 4.i: Implementation: Fix NSSM service configuration
+  **Status**: pending | **Type**: implementation
+  - Dependencies: Story 4
+
+  ### Story 4.t: Testing: Fix NSSM service configuration
+  **Status**: pending | **Type**: testing
+  - Dependencies: Story 4
+
+  ### Story 5.d: Discovery: End-to-end installation test
+  **Status**: pending | **Type**: discovery
+  - Dependencies: Story 5
+
+  ### Story 5.i: Implementation: End-to-end installation test
+  **Status**: pending | **Type**: implementation
+  - Dependencies: Story 5
+
+  ### Story 5.t: Testing: End-to-end installation test
+  **Status**: pending | **Type**: testing
+  - Dependencies: Story 5
+
+  ### Story 6.d: Discovery: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: discovery
+  - Dependencies: Story 6
+  - Blocks: Story 6.i
+
+  ### Story 6.i: Implementation: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: implementation
+  - Dependencies: Story 6, Story 6.d
+  - Blocks: Story 6.t
+
+  ### Story 6.t: Testing: Standalone uninstall scripts for all platforms
+  **Status**: unassigned | **Type**: testing
+  - Dependencies: Story 6, Story 6.i
+
+---
+
+**Note**: This index is automatically generated from `.queue.json`. To modify stories, use the queue helper scripts or update `.queue.json` directly.
