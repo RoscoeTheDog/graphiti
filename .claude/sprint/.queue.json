@@ -527,7 +527,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Deploy standalone package to ~/.graphiti/",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-2",
       "validates": "2.d",
       "phase": "validation_discovery",
@@ -541,7 +541,7 @@
       "blocks": [
         "-2.i"
       ],
-      "file": null
+      "file": "validation_discovery_results_-2.d.md"
     },
     "-2.i": {
       "type": "validation_implementation",
