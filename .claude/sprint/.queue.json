@@ -40,7 +40,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Deploy standalone package to ~/.graphiti/",
-      "status": "unassigned",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -50,7 +50,7 @@
       "phase_status": {
         "discovery": "completed",
         "implementation": "completed",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [
         "3",
@@ -210,7 +210,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Deploy standalone package to ~/.graphiti/",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
