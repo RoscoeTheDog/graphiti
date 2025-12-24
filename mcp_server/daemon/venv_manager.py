@@ -309,6 +309,10 @@ class VenvManager:
         3. __file__ location search (for installed package scenarios)
         4. Upward from venv path (legacy fallback)
 
+        Note: This method is used for development/installation scenarios.
+        At runtime, the bootstrap service uses the deployed package at
+        ~/.graphiti/mcp_server/ (see package_deployer.py and bootstrap.py).
+
         Returns:
             Path to repository root if found, None otherwise
         """

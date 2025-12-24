@@ -49,7 +49,7 @@
       ],
       "phase_status": {
         "discovery": "completed",
-        "implementation": "ready",
+        "implementation": "completed",
         "testing": "pending"
       },
       "blocks": [
@@ -194,7 +194,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Deploy standalone package to ~/.graphiti/",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,

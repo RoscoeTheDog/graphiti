@@ -219,17 +219,33 @@ class BootstrapService:
         self.mcp_process = None
 
     def _get_mcp_server_path(self) -> Path:
-        """Get path to MCP server script."""
-        # Check environment override
+        """
+        Get path to MCP server script.
+
+        Detection order:
+        1. GRAPHITI_MCP_SERVER environment variable (explicit override)
+        2. Deployed location (~/.graphiti/mcp_server/graphiti_mcp_server.py)
+        3. Relative path (development fallback)
+        """
+        # 1. Check environment override
         if env_path := os.environ.get("GRAPHITI_MCP_SERVER"):
+            logger.debug(f"Using MCP server path from env: {env_path}")
             return Path(env_path)
 
-        # Default: relative to this script
+        # 2. Check deployed location (production)
+        deployed_path = Path.home() / ".graphiti" / "mcp_server" / "graphiti_mcp_server.py"
+        if deployed_path.exists():
+            logger.info(f"Using deployed MCP server: {deployed_path}")
+            return deployed_path
+
+        # 3. Fallback to relative path (development)
         # bootstrap.py is in mcp_server/daemon/
         # graphiti_mcp_server.py is in mcp_server/
         bootstrap_dir = Path(__file__).parent  # mcp_server/daemon/
         mcp_server_dir = bootstrap_dir.parent  # mcp_server/
-        return mcp_server_dir / "graphiti_mcp_server.py"
+        relative_path = mcp_server_dir / "graphiti_mcp_server.py"
+        logger.info(f"Using relative MCP server path (development): {relative_path}")
+        return relative_path
 
     def _check_mcp_health(self) -> bool:
         """Check if MCP server process is still running."""
