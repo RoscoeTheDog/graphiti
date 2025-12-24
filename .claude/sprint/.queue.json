@@ -98,7 +98,7 @@
       ],
       "phase_status": {
         "discovery": "completed",
-        "implementation": "pending",
+        "implementation": "completed",
         "testing": "pending"
       },
       "blocks": [
@@ -286,7 +286,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Fix NSSM service configuration",
-      "status": "pending",
+      "status": "completed",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
