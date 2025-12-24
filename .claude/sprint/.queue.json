@@ -65,7 +65,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Update venv_manager to use deployed package",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "3.d",
@@ -75,7 +75,7 @@
       "phase_status": {
         "discovery": "completed",
         "implementation": "pending",
-        "testing": "pending"
+        "testing": "completed"
       },
       "blocks": [
         "4"
@@ -253,7 +253,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Update venv_manager to use deployed package",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
