@@ -76,6 +76,30 @@ class DaemonManager:
                 return Path(xdg_config) / "graphiti" / "graphiti.config.json"
             return Path.home() / ".graphiti" / "graphiti.config.json"
 
+    def _get_uninstall_script_path(self) -> Optional[Path]:
+        """
+        Get path to standalone uninstall script for current platform.
+
+        Returns:
+            Path to uninstall script if it exists, None otherwise.
+
+        Note:
+            Standalone scripts can run without Python or repository access.
+            Useful as fallback when manager.py is unavailable.
+        """
+        script_dir = Path(__file__).parent
+
+        if self.platform == "Windows":
+            script_path = script_dir / "uninstall_windows.ps1"
+        elif self.platform == "Darwin":
+            script_path = script_dir / "uninstall_macos.sh"
+        elif self.platform == "Linux":
+            script_path = script_dir / "uninstall_linux.sh"
+        else:
+            return None
+
+        return script_path if script_path.exists() else None
+
     def install(self) -> bool:
         """Install bootstrap service (auto-start on boot)."""
         print(f"Installing Graphiti bootstrap service on {self.platform}...")
@@ -252,11 +276,40 @@ class DaemonManager:
             print()
             print(f"Config file preserved: {self.config_path}")
             print("  (You can manually delete ~/.graphiti/ if desired)")
+            print()
+
+            # Suggest standalone script for complete uninstall
+            standalone_script = self._get_uninstall_script_path()
+            if standalone_script:
+                print("For complete uninstall (including venv and deployed package):")
+                if self.platform == "Windows":
+                    print(f"  Run: powershell -File {standalone_script}")
+                else:
+                    print(f"  Run: {standalone_script}")
+                print()
+                print("See docs/UNINSTALL.md for details")
+            else:
+                print("Note: Standalone uninstall script not found.")
+                print("  Manual cleanup: Remove ~/.graphiti/ directory if desired")
+
             return True
         else:
             print()
             print("[FAILED] Failed to uninstall bootstrap service")
             print("  See error messages above for details")
+            print()
+
+            # Suggest standalone script as fallback
+            standalone_script = self._get_uninstall_script_path()
+            if standalone_script:
+                print("Alternative: Use standalone uninstall script")
+                if self.platform == "Windows":
+                    print(f"  Run: powershell -File {standalone_script}")
+                else:
+                    print(f"  Run: {standalone_script}")
+                print()
+                print("See docs/UNINSTALL.md for details")
+
             return False
 
     def status(self) -> dict:

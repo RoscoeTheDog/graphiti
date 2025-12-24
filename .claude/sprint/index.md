@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 16:23:44
+**Generated**: 2025-12-23 18:08:07
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 24
-- **Completion**: 41.7%
+- **Completion**: 91.7%
 
 ### By Status
 
-- completed: 10
+- completed: 22
 - in_progress: 1
-- pending: 6
-- unassigned: 7
+- unassigned: 1
 
 ### By Type
 
@@ -68,40 +67,40 @@
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Update venv_manager to use deployed package
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Fix NSSM service configuration
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Fix NSSM service configuration
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Fix NSSM service configuration
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 4
 
-  ### Story 5.d: Discovery: End-to-end installation test
-  **Status**: pending | **Type**: discovery
+  ### Story 5.d: Discovery End To End Installation Test
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: End-to-end installation test
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: End-to-end installation test
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 6
   - Blocks: Story 6.i
 
   ### Story 6.i: Implementation: Standalone uninstall scripts for all platforms
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 6, Story 6.d
   - Blocks: Story 6.t
 

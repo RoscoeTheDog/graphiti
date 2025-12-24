@@ -360,7 +360,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Standalone uninstall scripts for all platforms",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "6.d",
@@ -394,7 +394,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Standalone uninstall scripts for all platforms",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "6",
       "phase": "implementation",
       "phase_order": 2,
@@ -420,7 +420,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/6-plan.yaml"
+      }
     }
   },
   "execution_queue": [

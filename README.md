@@ -624,12 +624,48 @@ Update your Claude Code MCP settings (`~/.claude/settings.json`):
 
 **Documentation:**
 - [Installation Guide](claude-mcp-installer/instance/CLAUDE_INSTALL.md)
+- [Uninstall Guide](docs/UNINSTALL.md)
 - [Troubleshooting](docs/TROUBLESHOOTING_DAEMON.md)
 
 The MCP server can also be deployed using Docker with Neo4j, making it easy to integrate Graphiti into your AI assistant
 workflows.
 
 For detailed setup instructions and usage examples, see the [MCP server README](./mcp_server/README.md).
+
+### Uninstalling the MCP Server
+
+To completely remove the Graphiti MCP Bootstrap Service:
+
+**Windows:**
+```powershell
+# Run as Administrator
+cd path\to\graphiti\mcp_server\daemon
+.\uninstall_windows.ps1
+```
+
+**macOS/Linux:**
+```bash
+cd path/to/graphiti/mcp_server/daemon
+./uninstall_macos.sh  # macOS
+./uninstall_linux.sh  # Linux
+```
+
+These standalone scripts can run **without Python or the repository** being present, making them suitable for recovery scenarios.
+
+**What gets removed:**
+- OS service (Windows Service, launchd agent, or systemd service)
+- Virtual environment (`~/.graphiti/.venv/`)
+- Deployed package (`~/.graphiti/mcp_server/`)
+- Wrapper scripts (`~/.graphiti/bin/`)
+- Service logs (`~/.graphiti/logs/`)
+
+**What gets preserved** (by default):
+- Your data (`~/.graphiti/data/`)
+- Configuration (`~/.graphiti/graphiti.config.json`)
+
+Use `--delete-all` (Unix) or `-DeleteAll` (Windows) to remove everything including data.
+
+For detailed instructions, troubleshooting, and manual removal steps, see [docs/UNINSTALL.md](docs/UNINSTALL.md).
 
 ## REST Service
 
