@@ -95,7 +95,7 @@
       ],
       "phases": {
         "discovery": {
-          "status": "in_progress",
+          "status": "completed",
           "id": "4.d"
         },
         "implementation": {

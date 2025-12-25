@@ -11,10 +11,12 @@ Create the main `GraphitiInstaller` class in `mcp_server/daemon/installer.py` th
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Design installer API (install, upgrade, uninstall method signatures)
-- [ ] Design error handling strategy (InstallationError class)
-- [ ] Design progress reporting mechanism
-- [ ] Review existing DaemonManager for code reuse opportunities
+- [x] (P0) Design installer API (install, upgrade, uninstall method signatures)
+- [x] Design error handling strategy (InstallationError class)
+- [x] Design progress reporting mechanism
+- [x] Review existing DaemonManager for code reuse opportunities
+
+**Discovery Output**: `.claude/sprint/discoveries/4.d-graphiti-installer-api-design.md`
 
 ### (i) Implementation Phase
 - [ ] (P0) Create `mcp_server/daemon/installer.py`
