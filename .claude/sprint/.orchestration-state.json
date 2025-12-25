@@ -1,40 +1,14 @@
 {
   "version": "1.4",
   "started_at": "2025-12-25T06:15:00Z",
-  "status": "in_progress",
-  "current_phase": "execution",
-  "current_section": 7,
-  "completed_sections": [
-    "parallel-after-1",
-    "story-2-impl",
-    "story-3-impl",
-    "story-4-impl",
-    "story-11-impl",
-    "parallel-after-4-11"
-  ],
-  "completed_stories": [
-    "1.d",
-    "1.i",
-    "1.t",
-    "2.d",
-    "2.i",
-    "3.d",
-    "3.i",
-    "3.t",
-    "4.d",
-    "4.i",
-    "4.t",
-    "11.d",
-    "11.i",
-    "11.t",
-    "5.d",
-    "6.d",
-    "12.d"
-  ],
-  "blocked_stories": [
-    "2.t"
-  ],
+  "completed_at": "2025-12-25T07:45:00Z",
+  "status": "completed_with_blocked",
+  "current_phase": "complete",
+  "current_section": 3,
+  "completed_sections": ["testing-batch-1", "testing-batch-2"],
+  "completed_stories": ["12.t", "5.t", "6.t"],
   "failed_stories": [],
+  "blocked_stories": ["2.t"],
   "args": {
     "validation_only": false,
     "skip_validation": false,
@@ -47,245 +21,59 @@
   "execution_plan": {
     "sections": [
       {
-        "id": "story-1-phases",
+        "id": "testing-batch-1",
         "type": "sequential",
-        "stories": [
-          "1.d",
-          "1.i",
-          "1.t"
-        ],
-        "reason": "Root story - no dependencies"
+        "stories": ["12.t"],
+        "reason": "Story 12 in_progress, testing phase pending",
+        "status": "completed"
       },
       {
-        "id": "parallel-after-1",
+        "id": "testing-batch-2",
         "type": "parallel",
-        "stories": [
-          "2.d",
-          "3.d",
-          "4.d",
-          "11.d"
-        ],
-        "reason": "All depend only on story 1 (discoveries)"
+        "stories": ["5.t", "6.t"],
+        "reason": "Independent testing phases for completed d/i",
+        "status": "completed"
       },
       {
-        "id": "story-2-impl",
+        "id": "blocked-remediation",
         "type": "sequential",
-        "stories": [
-          "2.i",
-          "2.t"
-        ],
-        "reason": "Story 2 implementation after its discovery"
-      },
-      {
-        "id": "story-3-impl",
-        "type": "sequential",
-        "stories": [
-          "3.i",
-          "3.t"
-        ],
-        "reason": "Story 3 implementation after its discovery"
-      },
-      {
-        "id": "story-4-impl",
-        "type": "sequential",
-        "stories": [
-          "4.i",
-          "4.t"
-        ],
-        "reason": "Story 4 implementation after its discovery"
-      },
-      {
-        "id": "story-11-impl",
-        "type": "sequential",
-        "stories": [
-          "11.i",
-          "11.t"
-        ],
-        "reason": "Story 11 implementation after its discovery"
-      },
-      {
-        "id": "parallel-after-4-11",
-        "type": "parallel",
-        "stories": [
-          "5.d",
-          "6.d",
-          "12.d"
-        ],
-        "reason": "5,6 depend on 4; 12 depends on 11"
-      },
-      {
-        "id": "story-5-impl",
-        "type": "sequential",
-        "stories": [
-          "5.i",
-          "5.t"
-        ],
-        "reason": "Story 5 implementation"
-      },
-      {
-        "id": "story-6-impl",
-        "type": "sequential",
-        "stories": [
-          "6.i",
-          "6.t"
-        ],
-        "reason": "Story 6 implementation"
-      },
-      {
-        "id": "story-12-impl",
-        "type": "sequential",
-        "stories": [
-          "12.i",
-          "12.t"
-        ],
-        "reason": "Story 12 implementation"
-      },
-      {
-        "id": "parallel-phase3",
-        "type": "parallel",
-        "stories": [
-          "7.d",
-          "8.d",
-          "9.d"
-        ],
-        "reason": "Platform managers depend on 1,2"
-      },
-      {
-        "id": "story-10-discovery",
-        "type": "sequential",
-        "stories": [
-          "10.d"
-        ],
-        "reason": "Depends on 1 and 5"
-      },
-      {
-        "id": "story-7-impl",
-        "type": "sequential",
-        "stories": [
-          "7.i",
-          "7.t"
-        ],
-        "reason": "Story 7 implementation"
-      },
-      {
-        "id": "story-8-impl",
-        "type": "sequential",
-        "stories": [
-          "8.i",
-          "8.t"
-        ],
-        "reason": "Story 8 implementation"
-      },
-      {
-        "id": "story-9-impl",
-        "type": "sequential",
-        "stories": [
-          "9.i",
-          "9.t"
-        ],
-        "reason": "Story 9 implementation"
-      },
-      {
-        "id": "story-10-impl",
-        "type": "sequential",
-        "stories": [
-          "10.i",
-          "10.t"
-        ],
-        "reason": "Story 10 implementation"
-      },
-      {
-        "id": "story-13",
-        "type": "sequential",
-        "stories": [
-          "13.d",
-          "13.i",
-          "13.t"
-        ],
-        "reason": "Depends on 11,12"
-      },
-      {
-        "id": "parallel-tests-14-15-16",
-        "type": "parallel",
-        "stories": [
-          "14.d",
-          "15.d",
-          "16.d"
-        ],
-        "reason": "Platform tests can run in parallel"
-      },
-      {
-        "id": "story-14-impl",
-        "type": "sequential",
-        "stories": [
-          "14.i",
-          "14.t"
-        ],
-        "reason": "Story 14 implementation"
-      },
-      {
-        "id": "story-15-impl",
-        "type": "sequential",
-        "stories": [
-          "15.i",
-          "15.t"
-        ],
-        "reason": "Story 15 implementation"
-      },
-      {
-        "id": "story-16-impl",
-        "type": "sequential",
-        "stories": [
-          "16.i",
-          "16.t"
-        ],
-        "reason": "Story 16 implementation"
-      },
-      {
-        "id": "story-17",
-        "type": "sequential",
-        "stories": [
-          "17.d",
-          "17.i",
-          "17.t"
-        ],
-        "reason": "Depends on 11,12,13,14"
-      },
-      {
-        "id": "story-18",
-        "type": "sequential",
-        "stories": [
-          "18.d",
-          "18.i",
-          "18.t"
-        ],
-        "reason": "Depends on 14,15,16"
-      },
-      {
-        "id": "story-19",
-        "type": "sequential",
-        "stories": [
-          "19.d",
-          "19.i",
-          "19.t"
-        ],
-        "reason": "Depends on 14,15,16"
-      },
-      {
-        "id": "story-20",
-        "type": "sequential",
-        "stories": [
-          "20.d",
-          "20.i",
-          "20.t"
-        ],
-        "reason": "Depends on 1,19 (final story)"
+        "stories": ["2.t"],
+        "reason": "Blocked - needs remediation (85.8% pass rate)",
+        "status": "blocked"
       }
     ],
-    "total_stories": 20,
-    "total_phases": 60,
-    "parallel_groups": 4,
-    "estimated_parallelization": "20%"
+    "total_stories": 4,
+    "parallel_groups": 1,
+    "estimated_parallelization": "25%"
   },
-  "last_updated": "2025-12-25T10:41:06.775063Z"
+  "results": {
+    "12.t": {
+      "status": "completed",
+      "pass_rate": 100,
+      "tests_passed": 9,
+      "tests_total": 9,
+      "test_file": "tests/daemon/test_config_migration.py"
+    },
+    "5.t": {
+      "status": "completed",
+      "pass_rate": 100,
+      "tests_passed": 10,
+      "tests_total": 10,
+      "test_file": "tests/daemon/test_frozen_packages.py"
+    },
+    "6.t": {
+      "status": "completed",
+      "pass_rate": 100,
+      "tests_passed": 10,
+      "tests_total": 10,
+      "test_file": "tests/daemon/test_version_tracking.py"
+    },
+    "2.t": {
+      "status": "blocked",
+      "pass_rate": 85.8,
+      "threshold": 90.0,
+      "failed_count": 24,
+      "reason": "Implementation phase (2.i) incomplete - hardcoded paths remain in manager.py, bootstrap.py, venv_manager.py"
+    }
+  }
 }
