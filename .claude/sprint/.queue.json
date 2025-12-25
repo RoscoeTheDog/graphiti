@@ -247,7 +247,7 @@
     {
       "id": "10",
       "title": "Fix Bootstrap Module Invocation",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 3,
       "file": "stories/10-fix-bootstrap-module-invocation.md",
@@ -265,7 +265,7 @@
           "id": "10.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "10.t"
         }
       }

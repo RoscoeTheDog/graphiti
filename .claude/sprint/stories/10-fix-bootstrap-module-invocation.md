@@ -1,7 +1,8 @@
 # Story 10: Fix Bootstrap Module Invocation
 
-**Status**: in_progress (discovery complete)
+**Status**: completed
 **Created**: 2025-12-25 02:02
+**Completed**: 2025-12-25
 **Phase**: 3 - Service Manager Updates
 
 ## Description
@@ -29,9 +30,11 @@ Fix the bootstrap module to work correctly when invoked via `-m mcp_server.daemo
 **Implementation Complete**: Added `_setup_frozen_path()` function at line 23-58 in bootstrap.py. Function executes before any relative imports and detects frozen mode by checking for lib/ directory structure. Tested successfully in development mode with `-m` invocation.
 
 ### (t) Testing Phase
-- [ ] (P0) Verify bootstrap runs with `-m` invocation from install dir
-- [ ] Verify bootstrap still works in development mode
-- [ ] Verify all imports resolve correctly in frozen mode
+- [x] (P0) Verify bootstrap runs with `-m` invocation from install dir
+- [x] Verify bootstrap still works in development mode
+- [x] Verify all imports resolve correctly in frozen mode
+
+**Testing Complete**: Created comprehensive test suite in `tests/daemon/test_bootstrap_frozen_path.py` with 12 tests (100% pass rate). All acceptance criteria verified. See `.claude/sprint/test-results/10.t-test-results.md` for detailed results.
 
 ## Dependencies
 
