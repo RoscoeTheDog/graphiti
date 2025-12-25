@@ -17,12 +17,12 @@ Implement VERSION and INSTALL_INFO file generation for tracking installed versio
 - [x] Determine how to get source version from repo
 
 ### (i) Implementation Phase
-- [ ] (P0) Implement `_write_version_info()` method in GraphitiInstaller
-- [ ] Create VERSION file with semantic version (e.g., "2.1.0")
-- [ ] Create INSTALL_INFO JSON with metadata (version, installed_at, source_commit, python_version, platform)
-- [ ] Implement `get_installed_version()` function to read VERSION
-- [ ] Implement `get_source_version()` function to read from repo
-- [ ] Implement `check_for_upgrade()` function using packaging.version
+- [x] (P0) Implement `_write_version_info()` method in GraphitiInstaller
+- [x] Create VERSION file with semantic version (e.g., "2.1.0")
+- [x] Create INSTALL_INFO JSON with metadata (version, installed_at, source_commit, python_version, platform)
+- [x] Implement `get_installed_version()` function to read VERSION
+- [x] Implement `get_source_version()` function to read from repo
+- [x] Implement `check_for_upgrade()` function using packaging.version
 
 ### (t) Testing Phase
 - [ ] (P0) Verify VERSION file is created correctly

@@ -22,13 +22,20 @@ Version: 2.1.0
 Created: 2025-12-25
 """
 
+import json
 import logging
 import os
+import platform
 import shutil
+import subprocess
 import sys
+import tomllib
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from packaging.version import InvalidVersion, Version
 
 from .paths import GraphitiPaths, get_paths
 
@@ -37,6 +44,217 @@ ProgressCallback = Callable[[str, int, int, str], None]
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# Version Tracking Functions
+# ============================================================================
+
+
+def get_source_version(source_dir: Path) -> str:
+    """
+    Detect version from source repository.
+
+    Args:
+        source_dir: Path to source repository root
+
+    Returns:
+        Semantic version string (e.g., "0.24.3" or "0.24.3-dev+abc1234")
+
+    Raises:
+        ValidationError: If version cannot be determined
+    """
+    # 1. Try pyproject.toml
+    pyproject = source_dir / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+
+            # Poetry format
+            if "tool" in data and "poetry" in data["tool"] and "version" in data["tool"]["poetry"]:
+                return data["tool"]["poetry"]["version"]
+
+            # PEP 621 format
+            if "project" in data and "version" in data["project"]:
+                return data["project"]["version"]
+        except Exception as e:
+            logger.warning(f"Failed to parse pyproject.toml: {e}")
+
+    # 2. Try git tag
+    try:
+        tag = subprocess.check_output(
+            ["git", "describe", "--tags", "--exact-match", "HEAD"],
+            cwd=source_dir,
+            stderr=subprocess.DEVNULL,
+            text=True
+        ).strip()
+        return tag.lstrip("v")  # Remove v prefix
+    except subprocess.CalledProcessError:
+        pass
+
+    # 3. Try git commit + pyproject version
+    try:
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "--short=7", "HEAD"],
+            cwd=source_dir,
+            stderr=subprocess.DEVNULL,
+            text=True
+        ).strip()
+
+        # Get base version from pyproject.toml (required for dev version)
+        if pyproject.exists():
+            try:
+                data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+                base_version = (
+                    data.get("tool", {}).get("poetry", {}).get("version") or
+                    data.get("project", {}).get("version")
+                )
+                if base_version:
+                    return f"{base_version}-dev+{commit}"
+            except Exception as e:
+                logger.warning(f"Failed to get base version for dev suffix: {e}")
+    except subprocess.CalledProcessError:
+        pass
+
+    # 4. Error - no version found
+    raise ValidationError(
+        "Cannot determine version from source repository",
+        step="get_source_version",
+        details={"source_dir": str(source_dir)}
+    )
+
+
+def get_installed_version(install_dir: Path) -> Optional[str]:
+    """
+    Read installed version from VERSION file.
+
+    Args:
+        install_dir: Path to installation directory
+
+    Returns:
+        Semantic version string (e.g., "0.24.3") or None if not installed
+    """
+    version_file = install_dir / "VERSION"
+
+    if not version_file.exists():
+        return None
+
+    try:
+        version = version_file.read_text(encoding="utf-8").strip()
+
+        # Validate format (basic check - full validation in upgrade logic)
+        if not version or not version[0].isdigit():
+            logger.warning(f"Invalid VERSION file format: {version}")
+            return None
+
+        return version
+    except Exception as e:
+        logger.warning(f"Failed to read VERSION file: {e}")
+        return None
+
+
+def check_for_upgrade(install_dir: Path, source_dir: Path) -> Dict[str, Any]:
+    """
+    Compare installed version with source version to detect upgrade.
+
+    Args:
+        install_dir: Path to installation directory
+        source_dir: Path to source repository
+
+    Returns:
+        Dictionary with upgrade info:
+        {
+            "upgrade_available": bool,
+            "installed_version": str or None,
+            "source_version": str,
+            "comparison": str  # "newer", "same", "older", "not_installed"
+        }
+
+    Raises:
+        ValidationError: If source version cannot be determined
+    """
+    # Get versions
+    installed = get_installed_version(install_dir)
+    source = get_source_version(source_dir)
+
+    # Not installed case
+    if installed is None:
+        return {
+            "upgrade_available": False,
+            "installed_version": None,
+            "source_version": source,
+            "comparison": "not_installed"
+        }
+
+    # Parse versions for comparison
+    try:
+        installed_ver = Version(installed)
+        source_ver = Version(source)
+    except InvalidVersion as e:
+        raise ValidationError(
+            f"Invalid version format: {e}",
+            step="check_for_upgrade",
+            details={"installed": installed, "source": source}
+        )
+
+    # Compare
+    if source_ver > installed_ver:
+        comparison = "newer"
+        upgrade_available = True
+    elif source_ver == installed_ver:
+        comparison = "same"
+        upgrade_available = False
+    else:
+        comparison = "older"
+        upgrade_available = False
+
+    return {
+        "upgrade_available": upgrade_available,
+        "installed_version": installed,
+        "source_version": source,
+        "comparison": comparison
+    }
+
+
+# ============================================================================
+# Exclusion Patterns for Package Deployment
+# ============================================================================
+
+# Files and directories to exclude when copying packages to lib/
+PACKAGE_EXCLUSIONS = {
+    # Virtual environments
+    ".venv",
+    "venv",
+
+    # Python bytecode and cache
+    "__pycache__",
+    "*.pyc",
+    "*.pyo",
+    ".pytest_cache",
+    ".mypy_cache",
+
+    # Testing and coverage
+    "tests",
+    ".coverage",
+    "htmlcov",
+    ".tox",
+
+    # Build artifacts
+    "build",
+    "dist",
+    "*.egg-info",
+    "*.egg",
+    "*.dist-info",
+
+    # Compiled extensions (rebuild in venv)
+    "*.so",
+    "*.pyd",
+
+    # Version control
+    ".git",
+    ".gitignore",
+    ".gitattributes",
+}
 
 
 # ============================================================================
@@ -498,6 +716,62 @@ class GraphitiInstaller:
                 ) from e
 
         logger.info("All directories created successfully")
+
+    # ========================================================================
+    # Version Tracking Methods
+    # ========================================================================
+
+    def _write_version_info(self, source_dir: Path) -> str:
+        """
+        Write VERSION and INSTALL_INFO files.
+
+        Args:
+            source_dir: Path to source repository
+
+        Returns:
+            Version string that was written
+
+        Raises:
+            ValidationError: If version cannot be determined from source
+        """
+        # Detect version from source
+        version = get_source_version(source_dir)
+
+        # Write VERSION file
+        version_file = self.paths.install_dir / "VERSION"
+        version_file.write_text(version, encoding="utf-8")
+        logger.info(f"Wrote VERSION file: {version}")
+
+        # Collect install metadata
+        install_info = {
+            "version": version,
+            "installed_at": datetime.utcnow().isoformat() + "Z",
+            "installed_from": str(source_dir.resolve()),
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "platform": platform.platform(),
+            "installer_version": "2.1.0"
+        }
+
+        # Add git commit if available
+        try:
+            commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=source_dir,
+                stderr=subprocess.DEVNULL,
+                text=True
+            ).strip()
+            install_info["source_commit"] = commit
+            logger.info(f"Added source commit to install info: {commit[:8]}")
+        except subprocess.CalledProcessError:
+            logger.info("No git commit found (not a git repo or git not available)")
+            # Not a git repo or no git - skip commit field
+
+        # Write INSTALL_INFO
+        info_file = self.paths.install_dir / "INSTALL_INFO"
+        info_file.write_text(json.dumps(install_info, indent=2), encoding="utf-8")
+        logger.info(f"Wrote INSTALL_INFO file")
+
+        return version
 
     # ========================================================================
     # Cleanup Methods
