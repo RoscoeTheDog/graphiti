@@ -26,7 +26,7 @@ class TestDaemonInstallVenvCreation:
     """Test venv creation during daemon install."""
 
     def test_daemon_install_creates_venv(self):
-        """daemon install creates venv at ~/.graphiti/.venv/"""
+        """daemon install creates venv at platform-specific location (v2.1)"""
         with patch('platform.system', return_value='Linux'):
             with patch('mcp_server.daemon.manager.SystemdServiceManager'):
                 manager = DaemonManager()
@@ -35,15 +35,22 @@ class TestDaemonInstallVenvCreation:
                 with patch.object(manager, 'venv_manager') as mock_venv:
                     mock_venv.create_venv.return_value = (True, "Venv created successfully")
                     mock_venv.validate_python_version.return_value = True
+                    mock_venv.install_package.return_value = (True, "Package installed")
 
-                    # Mock service manager install
-                    with patch.object(manager.service_manager, 'install', return_value=True):
-                        result = manager.install()
+                    # Mock package deployer
+                    with patch.object(manager.package_deployer, 'deploy_package', return_value=(True, "Deployed")):
+                        # Mock wrapper generator
+                        with patch.object(manager.wrapper_generator, 'generate_wrappers', return_value=(True, "Generated")):
+                            # Mock config creation
+                            with patch.object(manager, '_create_default_config', return_value=None):
+                                # Mock service manager install
+                                with patch.object(manager.service_manager, 'install', return_value=True):
+                                    result = manager.install()
 
-                        # Verify venv creation was attempted
-                        mock_venv.validate_python_version.assert_called_once()
-                        mock_venv.create_venv.assert_called_once()
-                        assert result is True
+                                    # Verify venv creation was attempted
+                                    mock_venv.validate_python_version.assert_called_once()
+                                    mock_venv.create_venv.assert_called_once()
+                                    assert result is True
 
     def test_daemon_install_skips_venv_if_exists(self):
         """daemon install skips venv creation if already exists"""
@@ -56,16 +63,23 @@ class TestDaemonInstallVenvCreation:
                     mock_venv.validate_python_version.return_value = True
                     # create_venv should not be called for existing venv
                     mock_venv.create_venv.return_value = (True, "Venv already exists, skipping creation")
+                    mock_venv.install_package.return_value = (True, "Package installed")
 
-                    # Mock service manager install
-                    with patch.object(manager.service_manager, 'install', return_value=True):
-                        result = manager.install()
+                    # Mock package deployer
+                    with patch.object(manager.package_deployer, 'deploy_package', return_value=(True, "Deployed")):
+                        # Mock wrapper generator
+                        with patch.object(manager.wrapper_generator, 'generate_wrappers', return_value=(True, "Generated")):
+                            # Mock config creation
+                            with patch.object(manager, '_create_default_config', return_value=None):
+                                # Mock service manager install
+                                with patch.object(manager.service_manager, 'install', return_value=True):
+                                    result = manager.install()
 
-                        # Verify venv creation was called (idempotency check is internal)
-                        mock_venv.validate_python_version.assert_called_once()
-                        # create_venv is called, but internally returns early if exists
-                        mock_venv.create_venv.assert_called_once()
-                        assert result is True
+                                    # Verify venv creation was called (idempotency check is internal)
+                                    mock_venv.validate_python_version.assert_called_once()
+                                    # create_venv is called, but internally returns early if exists
+                                    mock_venv.create_venv.assert_called_once()
+                                    assert result is True
 
     def test_daemon_install_fails_with_old_python(self):
         """daemon install fails gracefully if Python version < 3.10"""
@@ -102,14 +116,21 @@ class TestDaemonInstallWithUv:
                 with patch.object(manager, 'venv_manager') as mock_venv:
                     mock_venv.validate_python_version.return_value = True
                     mock_venv.create_venv.return_value = (True, "Venv created successfully using uv")
+                    mock_venv.install_package.return_value = (True, "Package installed")
 
-                    # Mock service manager install
-                    with patch.object(manager.service_manager, 'install', return_value=True):
-                        result = manager.install()
+                    # Mock package deployer
+                    with patch.object(manager.package_deployer, 'deploy_package', return_value=(True, "Deployed")):
+                        # Mock wrapper generator
+                        with patch.object(manager.wrapper_generator, 'generate_wrappers', return_value=(True, "Generated")):
+                            # Mock config creation
+                            with patch.object(manager, '_create_default_config', return_value=None):
+                                # Mock service manager install
+                                with patch.object(manager.service_manager, 'install', return_value=True):
+                                    result = manager.install()
 
-                        # Verify venv creation was called
-                        mock_venv.create_venv.assert_called_once()
-                        assert result is True
+                                    # Verify venv creation was called
+                                    mock_venv.create_venv.assert_called_once()
+                                    assert result is True
 
     def test_daemon_install_without_uv_fallback(self):
         """daemon install succeeds without uv (fallback to python -m venv)"""
@@ -121,14 +142,21 @@ class TestDaemonInstallWithUv:
                 with patch.object(manager, 'venv_manager') as mock_venv:
                     mock_venv.validate_python_version.return_value = True
                     mock_venv.create_venv.return_value = (True, "Venv created successfully using python -m venv")
+                    mock_venv.install_package.return_value = (True, "Package installed")
 
-                    # Mock service manager install
-                    with patch.object(manager.service_manager, 'install', return_value=True):
-                        result = manager.install()
+                    # Mock package deployer
+                    with patch.object(manager.package_deployer, 'deploy_package', return_value=(True, "Deployed")):
+                        # Mock wrapper generator
+                        with patch.object(manager.wrapper_generator, 'generate_wrappers', return_value=(True, "Generated")):
+                            # Mock config creation
+                            with patch.object(manager, '_create_default_config', return_value=None):
+                                # Mock service manager install
+                                with patch.object(manager.service_manager, 'install', return_value=True):
+                                    result = manager.install()
 
-                        # Verify venv creation was called
-                        mock_venv.create_venv.assert_called_once()
-                        assert result is True
+                                    # Verify venv creation was called
+                                    mock_venv.create_venv.assert_called_once()
+                                    assert result is True
 
 
 class TestDaemonStatusVenv:
@@ -283,16 +311,20 @@ class TestSecurityAndPermissions:
                         # Should NOT use shell=True (prevents injection)
                         assert call_kwargs.get('shell', False) is False
 
-    def test_path_traversal_prevention(self):
-        """Path traversal prevented (venv path is always ~/.graphiti/.venv)"""
-        manager = VenvManager()
+    def test_path_traversal_prevention(self, tmp_path):
+        """Path traversal prevented (venv path is always under install_dir/.venv)"""
+        from mcp_server.daemon.paths import get_install_dir
 
-        # Verify venv_path cannot be manipulated
-        expected_path = Path.home() / '.graphiti' / '.venv'
-        assert manager.venv_path == expected_path
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        # Verify path components are correct
-        assert manager.venv_path.parts[-2:] == ('.graphiti', '.venv')
+            # Verify venv_path cannot be manipulated - v2.1 uses platform-specific paths
+            expected_path = mock_install_dir / '.venv'
+            assert manager.venv_path == expected_path
+
+            # Verify path components are correct (v2.1 architecture)
+            assert manager.venv_path.parts[-2:] == ('Graphiti', '.venv')
 
 
 class TestDaemonInstallPackageIntegration:
@@ -319,64 +351,93 @@ class TestDaemonInstallPackageIntegration:
                         mock_venv.install_package.assert_called_once()
                         assert result is True
 
-    def test_daemon_install_uses_uv_pip_when_available(self):
+    def test_daemon_install_uses_uv_pip_when_available(self, tmp_path):
         """daemon install uses uv pip when uv is available"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_repo_root = Path('/home/user/graphiti')
-        mock_uv_path = manager.venv_path / 'bin' / 'uv'
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=mock_uv_path):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
+            mock_uv_path = manager.venv_path / 'bin' / 'uv'
 
-                        success, _ = manager.install_package()
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=mock_uv_path):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                        # Verify uv pip was used
-                        call_args = mock_run.call_args[0][0]
-                        assert 'uv' in str(call_args[0])
-                        assert success is True
+                                success, _ = manager.install_package()
 
-    def test_daemon_install_falls_back_to_pip_when_uv_not_available(self):
+                                # Verify uv pip was used with -r requirements.txt
+                                call_args = mock_run.call_args[0][0]
+                                assert 'uv' in str(call_args[0])
+                                assert '-r' in call_args
+                                assert success is True
+
+    def test_daemon_install_falls_back_to_pip_when_uv_not_available(self, tmp_path):
         """daemon install falls back to standard pip when uv not available"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_repo_root = Path('/home/user/graphiti')
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-                        with patch('platform.system', return_value='Linux'):
-                            success, _ = manager.install_package()
+        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
 
-                            # Verify standard pip was used
-                            call_args = mock_run.call_args[0][0]
-                            assert 'pip' in str(call_args[0])
-                            assert success is True
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-    def test_daemon_install_validates_package_installation(self):
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                                    with patch('platform.system', return_value='Linux'):
+                                        success, _ = manager.install_package()
+
+                                        # Verify standard pip was used with -r requirements.txt
+                                        call_args = mock_run.call_args[0][0]
+                                        assert 'pip' in str(call_args[0])
+                                        assert '-r' in call_args
+                                        assert success is True
+
+    def test_daemon_install_validates_package_installation(self, tmp_path):
         """daemon install validates package installation succeeded"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_repo_root = Path('/home/user/graphiti')
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation') as mock_validate:
-                    mock_validate.return_value = True
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
 
-                        success, message = manager.install_package()
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-                        # Verify validation was called
-                        mock_validate.assert_called_once_with('mcp_server')
-                        assert success is True
-                        assert 'success' in message.lower()
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
+                            with patch.object(manager, 'validate_installation') as mock_validate:
+                                mock_validate.return_value = True
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+
+                                    success, message = manager.install_package()
+
+                                    # Verify validation was called
+                                    mock_validate.assert_called_once_with('mcp_server')
+                                    assert success is True
+                                    assert 'success' in message.lower()
 
     def test_daemon_install_fails_gracefully_if_package_install_fails(self):
         """daemon install fails gracefully if package installation fails"""
@@ -394,42 +455,60 @@ class TestDaemonInstallPackageIntegration:
                     result = manager.install()
                     assert result is False
 
-    def test_installed_package_is_importable_from_venv_python(self):
+    def test_installed_package_is_importable_from_venv_python(self, tmp_path):
         """installed package is importable from venv Python interpreter"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        # Mock successful import validation
-        with patch('subprocess.run') as mock_run:
-            mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-            with patch('platform.system', return_value='Linux'):
-                result = manager.validate_installation('mcp_server')
+        mock_python_path = mock_install_dir / ".venv" / "bin" / "python"
 
-                # Verify validation uses venv Python
-                call_args = mock_run.call_args[0][0]
-                assert str(manager.venv_path / 'bin' / 'python') in str(call_args[0])
-                assert '-c' in call_args
-                assert 'import mcp_server' in ' '.join(call_args)
-                assert result is True
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-    def test_non_editable_install_means_package_changes_dont_affect_venv(self):
-        """non-editable install means package changes in repo don't affect venv"""
-        manager = VenvManager()
-
-        mock_repo_root = Path('/home/user/graphiti')
-
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    # Mock successful import validation
                     with patch('subprocess.run') as mock_run:
                         mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                        with patch('platform.system', return_value='Linux'):
+                            result = manager.validate_installation('mcp_server')
 
-                        manager.install_package()
+                            # Verify validation uses venv Python
+                            call_args = mock_run.call_args[0][0]
+                            assert str(mock_python_path) in str(call_args[0])
+                            assert '-c' in call_args
+                            assert 'import mcp_server' in ' '.join(call_args)
+                            assert result is True
 
-                        # Verify -e flag is NOT used (non-editable install)
-                        call_args = mock_run.call_args[0][0]
-                        assert '-e' not in call_args
-                        # Package is copied, not linked
-                        assert str(mock_repo_root / 'mcp_server') in str(call_args)
+    def test_non_editable_install_means_package_changes_dont_affect_venv(self, tmp_path):
+        """non-editable install means package changes in repo don't affect venv"""
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
+
+        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
+
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+
+                                    manager.install_package()
+
+                                    # Verify -e flag is NOT used (non-editable install)
+                                    call_args = mock_run.call_args[0][0]
+                                    assert '-e' not in call_args
+                                    # v2.1: Uses requirements.txt from install_dir
+                                    assert '-r' in call_args
 
 
 class TestPackageInstallationSecurity:
@@ -447,39 +526,59 @@ class TestPackageInstallationSecurity:
             assert success is False
             assert 'cannot find' in message.lower() or 'not found' in message.lower()
 
-    def test_subprocess_commands_properly_escaped_for_install(self):
+    def test_subprocess_commands_properly_escaped_for_install(self, tmp_path):
         """Subprocess commands are properly escaped (no shell injection)"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_repo_root = Path('/home/user/graphiti')
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
 
-                        manager.install_package()
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-                        # Verify subprocess.run called with shell=False (safe)
-                        call_kwargs = mock_run.call_args[1]
-                        assert call_kwargs.get('shell', False) is False
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-    def test_package_installation_does_not_require_elevated_privileges(self):
+                                    manager.install_package()
+
+                                    # Verify subprocess.run called with shell=False (safe)
+                                    call_kwargs = mock_run.call_args[1]
+                                    assert call_kwargs.get('shell', False) is False
+
+    def test_package_installation_does_not_require_elevated_privileges(self, tmp_path):
         """Package installation does not require elevated privileges"""
-        manager = VenvManager()
+        mock_install_dir = tmp_path / "Programs" / "Graphiti"
+        mock_install_dir.mkdir(parents=True, exist_ok=True)
 
-        mock_repo_root = Path('/home/user/graphiti')
+        # Create requirements.txt for v2.1 architecture
+        requirements_file = mock_install_dir / "requirements.txt"
+        requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-            with patch.object(manager, 'get_uv_executable', return_value=None):
-                with patch.object(manager, 'validate_installation', return_value=True):
-                    with patch('subprocess.run') as mock_run:
-                        mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
 
-                        manager.install_package()
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-                        # Verify no sudo or elevated privileges in command
-                        call_args = mock_run.call_args[0][0]
-                        assert 'sudo' not in str(call_args).lower()
-                        assert '--user' not in call_args  # No --user flag (installs to venv, not global)
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value=None):  # No uvx in PATH
+                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
+                            with patch.object(manager, 'validate_installation', return_value=True):
+                                with patch('subprocess.run') as mock_run:
+                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+
+                                    manager.install_package()
+
+                                    # Verify no sudo or elevated privileges in command
+                                    call_args = mock_run.call_args[0][0]
+                                    assert 'sudo' not in str(call_args).lower()
+                                    assert '--user' not in call_args  # No --user flag (installs to venv, not global)

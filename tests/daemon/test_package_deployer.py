@@ -80,15 +80,22 @@ class TestGetSourcePath:
                 source = deployer._get_source_path()
                 assert source == mcp_server_path
 
-    def test_get_source_path_raises_when_not_found(self):
+    def test_get_source_path_raises_when_not_found(self, tmp_path):
         """_get_source_path() raises PackageDeploymentError when source not found"""
         deployer = PackageDeployer()
 
-        with patch("pathlib.Path.cwd", return_value=Path("/nonexistent")):
+        # Create an empty directory with no mcp_server subdirectory
+        nonexistent_repo = tmp_path / "empty_repo"
+        nonexistent_repo.mkdir()
+
+        with patch("pathlib.Path.cwd", return_value=nonexistent_repo):
+            # Clear env var and mock __file__ location to point to tmp_path
             with patch.dict("os.environ", {}, clear=True):
-                with pytest.raises(PackageDeploymentError) as exc_info:
-                    deployer._get_source_path()
-                assert "Cannot find mcp_server source package" in str(exc_info.value)
+                # Mock __file__ to point to a non-existent location
+                with patch("mcp_server.daemon.package_deployer.__file__", str(nonexistent_repo / "fake.py")):
+                    with pytest.raises(PackageDeploymentError) as exc_info:
+                        deployer._get_source_path()
+                    assert "Cannot find mcp_server source package" in str(exc_info.value)
 
 
 class TestGetVersionFromPyproject:

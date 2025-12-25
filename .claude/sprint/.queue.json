@@ -36,7 +36,7 @@
     {
       "id": "2",
       "title": "Migrate Daemon Modules to New Path System",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 1,
       "file": "stories/2-migrate-daemon-modules-to-new-paths.md",
@@ -53,14 +53,15 @@
           "id": "2.i"
         },
         "testing": {
-          "status": "blocked",
+          "status": "completed",
           "id": "2.t",
           "metadata": {
-            "test_failure": {
-              "pass_rate": 85.8,
+            "test_success": {
+              "pass_rate": 100.0,
               "threshold": 90.0,
-              "failed_count": 24,
-              "reason": "Implementation phase (2.i) incomplete - hardcoded paths remain"
+              "passed_count": 356,
+              "skipped_count": 20,
+              "reason": "All daemon tests passing after v2.1 path architecture updates"
             }
           }
         }
