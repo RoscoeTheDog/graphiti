@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .windows_service import WindowsServiceManager
+from .task_scheduler_service import TaskSchedulerServiceManager
 from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
 from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
@@ -54,11 +54,17 @@ class DaemonManager:
         self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
-        """Get platform-specific service manager."""
+        """Get platform-specific service manager.
+
+        v2.1 Architecture: Service managers use frozen package paths from paths.py
+        instead of venv_manager. LaunchdServiceManager and TaskSchedulerServiceManager
+        take no constructor arguments. SystemdServiceManager still takes optional
+        venv_manager for backward compatibility.
+        """
         if self.platform == "Windows":
-            return WindowsServiceManager(venv_manager=self.venv_manager)
+            return TaskSchedulerServiceManager()
         elif self.platform == "Darwin":
-            return LaunchdServiceManager(venv_manager=self.venv_manager)
+            return LaunchdServiceManager()
         elif self.platform == "Linux":
             return SystemdServiceManager(venv_manager=self.venv_manager)
         else:

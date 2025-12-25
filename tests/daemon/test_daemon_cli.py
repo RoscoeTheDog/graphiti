@@ -37,12 +37,12 @@ class TestDaemonManagerInit:
     """Test DaemonManager initialization and platform detection."""
 
     def test_windows_platform_detection(self):
-        """Windows platform initializes WindowsServiceManager"""
+        """Windows platform initializes TaskSchedulerServiceManager"""
         with patch('platform.system', return_value='Windows'):
-            with patch('mcp_server.daemon.manager.WindowsServiceManager') as mock_windows:
+            with patch('mcp_server.daemon.manager.TaskSchedulerServiceManager') as mock_task_scheduler:
                 manager = DaemonManager()
                 assert manager.platform == 'Windows'
-                mock_windows.assert_called_once()
+                mock_task_scheduler.assert_called_once()
 
     def test_macos_platform_detection(self):
         """macOS platform initializes LaunchdServiceManager"""
@@ -77,7 +77,7 @@ class TestConfigPathDetection:
         mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Windows'):
             with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
-                with patch('mcp_server.daemon.manager.WindowsServiceManager'):
+                with patch('mcp_server.daemon.manager.TaskSchedulerServiceManager'):
                     manager = DaemonManager()
                     assert manager.config_path == mock_paths.config_file
 
