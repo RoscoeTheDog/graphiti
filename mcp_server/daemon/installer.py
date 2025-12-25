@@ -1263,3 +1263,40 @@ class GraphitiInstaller:
         self._verify_frozen_packages()
 
         logger.info("Frozen package deployment completed successfully")
+
+    # ========================================================================
+    # Config Migration Methods (Story 12)
+    # ========================================================================
+
+    def migrate_config(
+        self,
+        interactive: bool = True,
+        force_overwrite: bool = False,
+        backup: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Migrate v2.0 config to v2.1 location.
+
+        Delegates to installer_migration module for implementation.
+        See: mcp_server/daemon/installer_migration.py
+
+        Args:
+            interactive: If True, prompt user on conflicts. If False, skip on conflict.
+            force_overwrite: If True, overwrite v2.1 config without prompting.
+            backup: If True, create backup before migration.
+
+        Returns:
+            dict: Migration result (see installer_migration.migrate_config for details)
+
+        Raises:
+            FileNotFoundError: If v2.0 config doesn't exist
+            PermissionError: If cannot write to v2.1 config location
+            ValueError: If v2.0 config is invalid JSON
+        """
+        from .installer_migration import migrate_config as _migrate_impl
+        return _migrate_impl(
+            installer=self,
+            interactive=interactive,
+            force_overwrite=force_overwrite,
+            backup=backup
+        )

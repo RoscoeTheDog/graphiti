@@ -19,12 +19,14 @@ Implement configuration file migration from v2.0 (`~/.graphiti/graphiti.config.j
 **Discovery Complete**: See `.claude/sprint/plans/12-plan.yaml` for full design
 
 ### (i) Implementation Phase
-- [ ] (P0) Implement `migrate_config()` function
-- [ ] Backup existing v2.0 config before migration
-- [ ] Copy config to new location (preserving content)
-- [ ] Handle case where v2.1 config already exists (prompt user)
-- [ ] Merge any v2.1-specific defaults if needed
-- [ ] Log migration actions
+- [x] (P0) Implement `migrate_config()` function
+- [x] Backup existing v2.0 config before migration
+- [x] Copy config to new location (preserving content)
+- [x] Handle case where v2.1 config already exists (prompt user)
+- [x] Merge any v2.1-specific defaults if needed
+- [x] Log migration actions
+
+**Implementation Complete**: See `mcp_server/daemon/installer_migration.py` for full implementation
 
 ### (t) Testing Phase
 - [ ] (P0) Verify config is copied to correct new location
