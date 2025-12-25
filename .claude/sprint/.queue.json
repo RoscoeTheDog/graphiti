@@ -206,7 +206,7 @@
     {
       "id": "8",
       "title": "Update LaunchdServiceManager (macOS)",
-      "status": "in_progress",
+      "status": "completed",
       "type": "feature",
       "phase": 3,
       "file": "stories/8-update-launchd-service-manager.md",
@@ -239,15 +239,19 @@
           }
         },
         "testing": {
-          "status": "unassigned",
-          "id": "8.t"
+          "status": "completed",
+          "id": "8.t",
+          "metadata": {
+            "test_results": "17/17 tests passing (100%)",
+            "commit": "7a850f2"
+          }
         }
       }
     },
     {
       "id": "9",
       "title": "Update SystemdServiceManager (Linux)",
-      "status": "in_progress",
+      "status": "completed",
       "type": "feature",
       "phase": 3,
       "file": "stories/9-update-systemd-service-manager.md",
@@ -278,8 +282,12 @@
           }
         },
         "testing": {
-          "status": "unassigned",
-          "id": "9.t"
+          "status": "completed",
+          "id": "9.t",
+          "metadata": {
+            "test_results": "356/356 tests passing (100%)",
+            "commit": "7a850f2"
+          }
         }
       }
     },
