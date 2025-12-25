@@ -119,7 +119,7 @@
     {
       "id": "5",
       "title": "Implement Frozen Package Deployment",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 2,
       "file": "stories/5-implement-frozen-package-deployment.md",
@@ -136,7 +136,7 @@
           "id": "5.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "5.t"
         }
       }
