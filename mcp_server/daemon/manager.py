@@ -31,6 +31,7 @@ from .wrapper_generator import WrapperGenerator, WrapperGenerationError
 from .path_integration import PathIntegration, PathIntegrationError
 from .package_deployer import PackageDeployer, PackageDeploymentError
 from .paths import get_config_file, get_install_dir, get_log_dir
+from .v2_detection import detect_v2_0_installation
 
 
 class UnsupportedPlatformError(Exception):
@@ -97,6 +98,36 @@ class DaemonManager:
             return None
 
         return script_path if script_path.exists() else None
+
+    def detect_v2_installation(self) -> dict:
+        """
+        Detect v2.0 installation artifacts.
+
+        This method wraps the v2_detection.detect_v2_0_installation() function
+        to provide a unified interface through DaemonManager.
+
+        Returns:
+            dict: Detection results with the following structure:
+                {
+                    "detected": bool,           # True if v2.0 installation found
+                    "home_dir": Path or None,   # ~/.graphiti/ if exists
+                    "config_file": Path or None,  # ~/.graphiti/graphiti.config.json if exists
+                    "service_task": str or None   # Service/task name if found
+                }
+
+        Usage:
+            >>> manager = DaemonManager()
+            >>> result = manager.detect_v2_installation()
+            >>> if result["detected"]:
+            ...     print(f"v2.0 installation found: {result['home_dir']}")
+            ...     # Proceed with migration (Story 12)
+
+        See Also:
+            - v2_detection.detect_v2_0_installation() for implementation details
+            - Story 11: Implement v2.0 Installation Detection
+            - Story 12: Implement Config Migration (uses this detection)
+        """
+        return detect_v2_0_installation()
 
     def install(self) -> bool:
         """Install bootstrap service (auto-start on boot)."""
