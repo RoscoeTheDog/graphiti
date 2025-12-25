@@ -94,7 +94,7 @@
     {
       "id": "4",
       "title": "Create GraphitiInstaller Class",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 2,
       "file": "stories/4-create-graphiti-installer-class.md",
@@ -111,7 +111,7 @@
           "id": "4.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "4.t"
         }
       }
