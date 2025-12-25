@@ -326,7 +326,7 @@
     {
       "id": "13",
       "title": "Implement Old Installation Cleanup",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 4,
       "file": "stories/13-implement-old-installation-cleanup.md",
@@ -344,7 +344,7 @@
           "id": "13.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "13.t"
         }
       }
