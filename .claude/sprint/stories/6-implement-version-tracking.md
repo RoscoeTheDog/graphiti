@@ -11,10 +11,10 @@ Implement VERSION and INSTALL_INFO file generation for tracking installed versio
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Design VERSION file format (semantic version string)
-- [ ] Design INSTALL_INFO JSON schema
-- [ ] Design upgrade detection algorithm (version comparison)
-- [ ] Determine how to get source version from repo
+- [x] (P0) Design VERSION file format (semantic version string)
+- [x] Design INSTALL_INFO JSON schema
+- [x] Design upgrade detection algorithm (version comparison)
+- [x] Determine how to get source version from repo
 
 ### (i) Implementation Phase
 - [ ] (P0) Implement `_write_version_info()` method in GraphitiInstaller
