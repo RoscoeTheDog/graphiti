@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional
 
 from .venv_manager import VenvManager, VenvCreationError
-from .paths import get_log_dir
+from .paths import get_install_dir, get_log_dir
 
 
 class SystemdServiceManager:
@@ -36,7 +36,6 @@ class SystemdServiceManager:
         # Get venv Python executable - raise VenvCreationError if venv doesn't exist
         # (DaemonManager.install() ensures venv exists before instantiating service managers)
         self.python_exe = self.venv_manager.get_python_executable()
-        self.bootstrap_script = self._get_bootstrap_path()
 
         # User service directory
         xdg_config = os.environ.get("XDG_CONFIG_HOME", "")
@@ -48,14 +47,11 @@ class SystemdServiceManager:
         self.service_file = self.service_dir / f"{self.service_name}.service"
         self.log_dir = get_log_dir()
 
-    def _get_bootstrap_path(self) -> Path:
-        """Get path to bootstrap.py script."""
-        # bootstrap.py is in mcp_server/daemon/
-        return Path(__file__).parent / "bootstrap.py"
-
     def _create_service_unit(self) -> str:
         """Create systemd service unit file content."""
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        install_dir = get_install_dir()
+        lib_dir = install_dir / "lib"
 
         unit_content = f"""[Unit]
 Description=Graphiti MCP Bootstrap Service
@@ -64,11 +60,12 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart={self.python_exe} {self.bootstrap_script}
+ExecStart={self.python_exe} -m mcp_server.daemon.bootstrap
 Restart=always
 RestartSec=5
-WorkingDirectory={self.bootstrap_script.parent}
+WorkingDirectory={install_dir}
 Environment="PATH={os.environ.get('PATH', '/usr/local/bin:/usr/bin:/bin')}"
+Environment="PYTHONPATH={lib_dir}"
 StandardOutput=append:{self.log_dir / 'bootstrap-stdout.log'}
 StandardError=append:{self.log_dir / 'bootstrap-stderr.log'}
 
@@ -103,8 +100,9 @@ WantedBy=default.target
             print("✓ Service already installed")
             return True
 
+        install_dir = get_install_dir()
         print(f"Python: {self.python_exe}")
-        print(f"Bootstrap script: {self.bootstrap_script}")
+        print(f"Install directory: {install_dir}")
         print(f"Service file: {self.service_file}")
         print()
 

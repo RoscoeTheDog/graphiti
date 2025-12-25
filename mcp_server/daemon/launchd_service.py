@@ -14,8 +14,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .venv_manager import VenvManager, VenvCreationError
-from .paths import get_log_dir
+from .paths import get_install_dir, get_log_dir
 
 
 class LaunchdServiceManager:
@@ -24,20 +23,15 @@ class LaunchdServiceManager:
     name = "launchd (macOS Service Manager)"
     service_id = "com.graphiti.bootstrap"
 
-    def __init__(self, venv_manager: Optional[VenvManager] = None):
+    def __init__(self):
         """Initialize launchd service manager.
 
-        Args:
-            venv_manager: Optional VenvManager instance. If None, creates default instance.
-
-        Raises:
-            VenvCreationError: If venv doesn't exist (platform-specific location from paths.py)
+        Uses frozen package installation paths from get_install_dir().
+        Python executable: {INSTALL_DIR}/bin/python
+        Bootstrap module: mcp_server.daemon.bootstrap (invoked with -m)
         """
-        self.venv_manager = venv_manager or VenvManager()
-        # Get venv Python executable - raise VenvCreationError if venv doesn't exist
-        # (DaemonManager.install() ensures venv exists before instantiating service managers)
-        self.python_exe = self.venv_manager.get_python_executable()
-        self.bootstrap_script = self._get_bootstrap_path()
+        self.install_dir = get_install_dir()
+        self.python_exe = self.install_dir / "bin" / "python"
         self.plist_path = Path.home() / "Library" / "LaunchAgents" / f"{self.service_id}.plist"
         self.log_dir = get_log_dir()
 

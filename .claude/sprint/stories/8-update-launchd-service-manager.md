@@ -1,6 +1,6 @@
 # Story 8: Update LaunchdServiceManager (macOS)
 
-**Status**: unassigned
+**Status**: in_progress
 **Created**: 2025-12-25 02:02
 **Phase**: 3 - Service Manager Updates
 
@@ -11,10 +11,10 @@ Update the LaunchdServiceManager to use the new v2.1 installation paths for macO
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Review current launchd plist template
-- [ ] Identify all path references that need updating
-- [ ] Document PYTHONPATH requirements for frozen lib
-- [ ] Review log file path conventions (~/Library/Logs/)
+- [x] (P0) Review current launchd plist template
+- [x] Identify all path references that need updating
+- [x] Document PYTHONPATH requirements for frozen lib
+- [x] Review log file path conventions (~/Library/Logs/)
 
 ### (i) Implementation Phase
 - [ ] (P0) Update ProgramArguments to use `{INSTALL_DIR}/bin/python`

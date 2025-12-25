@@ -145,7 +145,7 @@
     {
       "id": "6",
       "title": "Implement Version Tracking",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 2,
       "file": "stories/6-implement-version-tracking.md",
@@ -170,7 +170,7 @@
     {
       "id": "7",
       "title": "Update WindowsTaskSchedulerManager",
-      "status": "unassigned",
+      "status": "blocked",
       "type": "feature",
       "phase": 3,
       "file": "stories/7-update-windows-task-scheduler-manager.md",
@@ -180,23 +180,33 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "7.d"
+          "status": "completed",
+          "id": "7.d",
+          "metadata": {
+            "artifact": "discoveries/7.d-windows-task-scheduler-manager-update.md",
+            "critical_finding": "WindowsTaskSchedulerManager does not exist - architectural decision required"
+          }
         },
         "implementation": {
-          "status": "unassigned",
-          "id": "7.i"
+          "status": "blocked",
+          "id": "7.i",
+          "metadata": {
+            "blocker": "WindowsTaskSchedulerManager class does not exist in codebase"
+          }
         },
         "testing": {
-          "status": "unassigned",
-          "id": "7.t"
+          "status": "blocked",
+          "id": "7.t",
+          "metadata": {
+            "blocker": "Blocked by implementation phase"
+          }
         }
       }
     },
     {
       "id": "8",
       "title": "Update LaunchdServiceManager (macOS)",
-      "status": "unassigned",
+      "status": "in_progress",
       "type": "feature",
       "phase": 3,
       "file": "stories/8-update-launchd-service-manager.md",
@@ -206,8 +216,11 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "8.d"
+          "status": "completed",
+          "id": "8.d",
+          "metadata": {
+            "artifact": "discoveries/8d-launchd-service-manager-analysis.md"
+          }
         },
         "implementation": {
           "status": "unassigned",
@@ -222,7 +235,7 @@
     {
       "id": "9",
       "title": "Update SystemdServiceManager (Linux)",
-      "status": "unassigned",
+      "status": "in_progress",
       "type": "feature",
       "phase": 3,
       "file": "stories/9-update-systemd-service-manager.md",
@@ -232,12 +245,25 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "9.d"
+          "status": "completed",
+          "id": "9.d",
+          "metadata": {
+            "artifact": "discoveries/9.d-systemd-service-discovery.md"
+          }
         },
         "implementation": {
-          "status": "unassigned",
-          "id": "9.i"
+          "status": "completed",
+          "id": "9.i",
+          "metadata": {
+            "changes": [
+              "Added get_install_dir import from paths.py",
+              "Removed _get_bootstrap_path() method and self.bootstrap_script",
+              "Updated ExecStart to use module invocation: python -m mcp_server.daemon.bootstrap",
+              "Updated WorkingDirectory to use get_install_dir()",
+              "Added Environment=PYTHONPATH={lib_dir} for frozen packages",
+              "Updated install() debug output to show install directory instead of bootstrap script"
+            ]
+          }
         },
         "testing": {
           "status": "unassigned",
