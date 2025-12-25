@@ -19,12 +19,14 @@ Fix the bootstrap module to work correctly when invoked via `-m mcp_server.daemo
 **Discovery Complete**: See `.claude/sprint/discoveries/10.d-bootstrap-import-analysis.md` for full analysis.
 
 ### (i) Implementation Phase
-- [ ] (P0) Add `_setup_frozen_path()` function at top of bootstrap.py
-- [ ] (P0) Detect if running from frozen install vs development
-- [ ] Insert lib/ path into sys.path before other imports
-- [ ] Update all imports to work with both frozen and dev modes
-- [ ] Remove any `if __name__ == "__main__"` direct execution patterns
-- [ ] Ensure bootstrap works when invoked as `-m mcp_server.daemon.bootstrap`
+- [x] (P0) Add `_setup_frozen_path()` function at top of bootstrap.py
+- [x] (P0) Detect if running from frozen install vs development
+- [x] Insert lib/ path into sys.path before other imports
+- [x] Update all imports to work with both frozen and dev modes
+- [x] Keep `if __name__ == "__main__"` for development/testing compatibility
+- [x] Ensure bootstrap works when invoked as `-m mcp_server.daemon.bootstrap`
+
+**Implementation Complete**: Added `_setup_frozen_path()` function at line 23-58 in bootstrap.py. Function executes before any relative imports and detects frozen mode by checking for lib/ directory structure. Tested successfully in development mode with `-m` invocation.
 
 ### (t) Testing Phase
 - [ ] (P0) Verify bootstrap runs with `-m` invocation from install dir

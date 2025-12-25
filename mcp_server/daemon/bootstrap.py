@@ -15,14 +15,59 @@ daemon.enabled in config, not via CLI commands.
 See: .claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md
 """
 
+# CRITICAL: Setup frozen package path BEFORE any relative imports
+import sys
+from pathlib import Path
+
+
+def _setup_frozen_path():
+    """
+    Ensure frozen packages in lib/ are importable.
+
+    This function MUST be called before any relative imports.
+
+    Detection:
+    - Frozen mode: bootstrap.py is in {INSTALL}/lib/mcp_server/daemon/
+    - Development mode: bootstrap.py is in {REPO}/mcp_server/daemon/
+
+    Strategy:
+    - Check if lib/ directory exists 2 levels up from bootstrap.py
+    - If exists AND contains mcp_server/, assume frozen installation
+    - Add lib/ to sys.path[0] to prioritize frozen packages
+    """
+    # Get current file's directory
+    # bootstrap.py location: mcp_server/daemon/bootstrap.py
+    bootstrap_dir = Path(__file__).parent.resolve()  # .../mcp_server/daemon/
+
+    # Calculate potential lib/ directory
+    # Frozen: .../lib/mcp_server/daemon/ -> .../lib/
+    potential_lib = bootstrap_dir.parent.parent  # Go up 2 levels: daemon -> mcp_server -> lib
+
+    # Check if this looks like a frozen installation
+    # Criteria: potential_lib is named 'lib' AND contains mcp_server/ directory
+    if potential_lib.name == "lib" and (potential_lib / "mcp_server").is_dir():
+        # Frozen installation detected
+        lib_path = potential_lib
+
+        # Add to sys.path if not already present
+        lib_path_str = str(lib_path)
+        if lib_path_str not in sys.path:
+            sys.path.insert(0, lib_path_str)
+            # Note: Logging not yet configured at this point
+            print(f"[bootstrap] Frozen mode detected: Added {lib_path} to sys.path", file=sys.stderr)
+    # else: Development mode - packages importable from repo root, no action needed
+
+
+# Call setup function IMMEDIATELY
+_setup_frozen_path()
+
+# NOW safe to do relative imports
 import json
 import logging
 import os
 import signal
 import subprocess
-import sys
 import time
-from pathlib import Path
 from typing import Optional
 
 from .venv_manager import (
