@@ -69,7 +69,7 @@
     {
       "id": "3",
       "title": "Path Resolution Test Suite",
-      "status": "in_progress",
+      "status": "completed",
       "type": "feature",
       "phase": 1,
       "file": "stories/3-path-resolution-test-suite.md",
@@ -86,7 +86,7 @@
           "id": "3.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "3.t"
         }
       }
