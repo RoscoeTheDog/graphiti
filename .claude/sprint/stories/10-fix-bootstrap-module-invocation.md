@@ -1,6 +1,6 @@
 # Story 10: Fix Bootstrap Module Invocation
 
-**Status**: unassigned
+**Status**: in_progress (discovery complete)
 **Created**: 2025-12-25 02:02
 **Phase**: 3 - Service Manager Updates
 
@@ -11,10 +11,12 @@ Fix the bootstrap module to work correctly when invoked via `-m mcp_server.daemo
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Analyze current bootstrap import issues (relative vs absolute)
-- [ ] Document why direct script execution fails
-- [ ] Design _setup_frozen_path() function
-- [ ] Identify all imports that need frozen path
+- [x] (P0) Analyze current bootstrap import issues (relative vs absolute)
+- [x] Document why direct script execution fails
+- [x] Design _setup_frozen_path() function
+- [x] Identify all imports that need frozen path
+
+**Discovery Complete**: See `.claude/sprint/discoveries/10.d-bootstrap-import-analysis.md` for full analysis.
 
 ### (i) Implementation Phase
 - [ ] (P0) Add `_setup_frozen_path()` function at top of bootstrap.py
