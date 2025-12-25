@@ -11,10 +11,16 @@ Create a comprehensive test suite for the paths.py module that validates path re
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Define test scenarios for Windows edge cases (missing LOCALAPPDATA)
-- [ ] Define test scenarios for macOS edge cases
-- [ ] Define test scenarios for Linux XDG edge cases (missing XDG vars)
-- [ ] Identify how to mock sys.platform for cross-platform testing
+- [x] (P0) Define test scenarios for Windows edge cases (missing LOCALAPPDATA)
+- [x] Define test scenarios for macOS edge cases
+- [x] Define test scenarios for Linux XDG edge cases (missing XDG vars)
+- [x] Identify how to mock sys.platform for cross-platform testing
+
+**Discovery Findings**: See `.claude/sprint/stories/3-discovery-findings.md`
+- 19 distinct test scenarios identified (5 Windows + 5 macOS + 6 Linux + 3 general)
+- Comprehensive mocking strategy documented
+- Test file structure designed (~23 tests)
+- Coverage targets: >90% line coverage, >85% branch coverage
 
 ### (i) Implementation Phase
 - [ ] (P0) Create tests/test_daemon_paths.py
