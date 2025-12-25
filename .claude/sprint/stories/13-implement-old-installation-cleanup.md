@@ -11,10 +11,12 @@ Implement cleanup of old v2.0 installation artifacts including Task Scheduler ta
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Design cleanup workflow with user prompts
-- [ ] Document what can be safely removed vs preserved
-- [ ] Design rollback mechanism if cleanup fails
-- [ ] Determine interactive vs non-interactive modes
+- [x] (P0) Design cleanup workflow with user prompts
+- [x] Document what can be safely removed vs preserved
+- [x] Design rollback mechanism if cleanup fails
+- [x] Determine interactive vs non-interactive modes
+
+**Discovery Complete**: See `.claude/sprint/plans/13-plan.yaml` for full design
 
 ### (i) Implementation Phase
 - [ ] (P0) Implement `cleanup_v2_0_installation()` function

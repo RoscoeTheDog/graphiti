@@ -257,7 +257,7 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "in_progress",
           "id": "10.d"
         },
         "implementation": {
@@ -336,7 +336,7 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "13.d"
         },
         "implementation": {
