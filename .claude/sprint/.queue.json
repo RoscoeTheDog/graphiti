@@ -407,7 +407,7 @@
     {
       "id": "14",
       "title": "Windows Fresh Install Test",
-      "status": "unassigned",
+      "status": "in_progress",
       "type": "testing",
       "phase": 5,
       "file": "stories/14-windows-fresh-install-test.md",
@@ -417,8 +417,13 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "14.d"
+          "status": "completed",
+          "id": "14.d",
+          "metadata": {
+            "artifact": "discoveries/14.d-windows-fresh-install-discovery.md",
+            "completed_date": "2025-12-25",
+            "summary": "Defined Windows test environment requirements, documented Task Scheduler integration, created 39-point test checklist, and identified 6 Windows-specific risks with mitigations"
+          }
         },
         "implementation": {
           "status": "unassigned",
