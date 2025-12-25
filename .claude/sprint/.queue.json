@@ -274,12 +274,15 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "11.d"
         },
         "implementation": {
           "status": "unassigned",
-          "id": "11.i"
+          "id": "11.i",
+          "metadata": {
+            "requires_artifact": "plans/11-plan.yaml"
+          }
         },
         "testing": {
           "status": "unassigned",
