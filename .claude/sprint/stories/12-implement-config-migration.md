@@ -11,10 +11,12 @@ Implement configuration file migration from v2.0 (`~/.graphiti/graphiti.config.j
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Design config migration strategy (copy vs merge)
-- [ ] Identify any config schema changes between v2.0 and v2.1
-- [ ] Document backup strategy before migration
-- [ ] Design conflict resolution for existing v2.1 config
+- [x] (P0) Design config migration strategy (copy vs merge)
+- [x] Identify any config schema changes between v2.0 and v2.1
+- [x] Document backup strategy before migration
+- [x] Design conflict resolution for existing v2.1 config
+
+**Discovery Complete**: See `.claude/sprint/plans/12-plan.yaml` for full design
 
 ### (i) Implementation Phase
 - [ ] (P0) Implement `migrate_config()` function

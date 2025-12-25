@@ -310,7 +310,7 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "12.d"
         },
         "implementation": {

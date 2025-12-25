@@ -1,0 +1,393 @@
+# Story 12: Config Migration Discovery Plan
+# Created: 2025-12-25
+# Status: Discovery Complete
+
+## 1. Config Migration Strategy
+
+### Decision: COPY with Optional Merge
+
+**Rationale:**
+- **Safety First**: Preserve v2.0 config completely (no modifications)
+- **Minimal Risk**: Copy operation won't corrupt existing config
+- **Backward Compatibility**: v2.0 installation can continue working during transition
+- **User Control**: Allow user to choose whether to merge with existing v2.1 config
+
+**Strategy Details:**
+
+#### Copy Operation
+1. Source: `~/.graphiti/graphiti.config.json` (v2.0 location)
+2. Destination: Platform-specific v2.1 location:
+   - Windows: `%LOCALAPPDATA%\Graphiti\config\graphiti.config.json`
+   - macOS: `~/Library/Preferences/Graphiti/graphiti.config.json`
+   - Linux: `~/.config/graphiti/graphiti.config.json`
+3. Preserve all content verbatim (JSON structure unchanged)
+4. Preserve file permissions where applicable
+
+#### Merge Behavior (when v2.1 config exists)
+- **Prompt User**: Ask whether to overwrite, merge, or skip
+- **Overwrite**: Replace v2.1 config with v2.0 config completely
+- **Merge**: Keep v2.1 settings, add v2.0 settings for missing keys
+- **Skip**: Keep existing v2.1 config, do not migrate
+
+**Alternative Considered: Merge-First**
+- Rejected because: Requires complex conflict resolution logic
+- Rejected because: Risk of corrupting both configs during merge
+- Rejected because: Harder to rollback on failure
+
+---
+
+## 2. Config Schema Analysis
+
+### Schema Compatibility: FULLY COMPATIBLE
+
+**Finding**: v2.0 and v2.1 use IDENTICAL schema (GraphitiConfig in unified_config.py)
+
+**Evidence:**
+- Same Pydantic models used for validation
+- Same top-level sections: database, llm, embedder, project, search, resilience, etc.
+- No breaking changes between versions (config is stable)
+
+**Schema Sections (GraphitiConfig):**
+```python
+class GraphitiConfig(BaseModel):
+    database: DatabaseConfig
+    llm: LLMConfig
+    embedder: EmbedderConfig
+    project: ProjectConfig
+    search: SearchConfig
+    resilience: ResilienceConfig
+    llm_resilience: Optional[LLMResilienceConfig]
+    mcp_tools: Optional[MCPToolsBehaviorConfig]
+    session_tracking: Optional[SessionTrackingConfig]
+    daemon: Optional[DaemonConfig]
+    performance: Optional[PerformanceConfig]
+    logging: Optional[LoggingConfig]
+    mcp_server: Optional[MCPServerConfig]
+```
+
+**Schema Changes Between v2.0 and v2.1:**
+- **NONE** - Schema is identical
+- v2.1 only changes file LOCATION, not structure
+- All optional fields remain optional
+- All required fields remain required
+
+**Validation:**
+- v2.0 config will pass v2.1 validation without modification
+- No schema migration needed
+- No field transformations needed
+
+### Implications for Migration
+- **Simple Copy**: Can copy config file verbatim without transformations
+- **No Validation Fixes**: Config will validate immediately after copy
+- **No User Intervention**: No need to prompt user to update config structure
+- **Rollback Safe**: Can revert by simply deleting v2.1 config file
+
+---
+
+## 3. Backup Strategy
+
+### Approach: CREATE TIMESTAMPED BACKUP BEFORE MIGRATION
+
+**Backup File Naming:**
+```
+~/.graphiti/graphiti.config.json.backup-YYYYMMDD-HHMMSS
+```
+
+**Example:**
+```
+~/.graphiti/graphiti.config.json.backup-20251225-140530
+```
+
+**Backup Process:**
+1. Check if source config exists: `~/.graphiti/graphiti.config.json`
+2. If exists, create backup: `cp source source.backup-{timestamp}`
+3. Verify backup created successfully (check file exists and size > 0)
+4. If backup fails, ABORT migration (do not proceed without backup)
+
+**Backup Location:**
+- **Same directory as source**: `~/.graphiti/` (easy to find for rollback)
+- **NOT in v2.1 location**: Keep backup separate from new config
+
+**Backup Retention:**
+- Keep indefinitely (user can manually delete if needed)
+- DO NOT auto-delete backups (preserve for rollback)
+- Log backup file path to migration log
+
+**Rollback Process (if user wants to revert):**
+1. Delete v2.1 config: `rm {v2.1_config_path}`
+2. Restore from backup: `cp backup source` (if user removed source)
+3. Or simply keep using v2.0 config (still works)
+
+**Why Not Backup v2.1 Config?**
+- If v2.1 config exists and user chooses overwrite, create backup first
+- Backup naming: `{v2.1_config}.backup-{timestamp}`
+- This allows rollback of both v2.0 and v2.1 changes
+
+---
+
+## 4. Conflict Resolution for Existing v2.1 Config
+
+### Decision: PROMPT USER WITH 3 OPTIONS
+
+**Scenario**: v2.1 config already exists at destination
+
+**Detection:**
+```python
+v2_1_config_path = get_config_file()  # From paths.py
+if v2_1_config_path.exists():
+    # Conflict detected - prompt user
+```
+
+**User Prompt:**
+```
+Config Migration Conflict Detected
+
+A v2.1 configuration file already exists at:
+{v2_1_config_path}
+
+You also have a v2.0 configuration at:
+~/.graphiti/graphiti.config.json
+
+Choose an option:
+1. Overwrite - Replace v2.1 config with v2.0 config (v2.1 config will be backed up)
+2. Merge - Keep v2.1 settings, add missing settings from v2.0
+3. Skip - Keep existing v2.1 config, do not migrate v2.0 config
+
+Your choice (1/2/3): _
+```
+
+**Option 1: Overwrite**
+```python
+# Backup existing v2.1 config
+backup_path = v2_1_config_path.with_suffix(f".json.backup-{timestamp}")
+shutil.copy(v2_1_config_path, backup_path)
+
+# Replace with v2.0 config
+shutil.copy(v2_0_config_path, v2_1_config_path)
+
+# Log action
+log.info(f"Overwrote v2.1 config (backup: {backup_path})")
+```
+
+**Option 2: Merge**
+```python
+# Load both configs
+v2_0_config = json.loads(v2_0_config_path.read_text())
+v2_1_config = json.loads(v2_1_config_path.read_text())
+
+# Backup v2.1 config before merge
+backup_path = v2_1_config_path.with_suffix(f".json.backup-{timestamp}")
+shutil.copy(v2_1_config_path, backup_path)
+
+# Merge: v2.1 takes precedence, add missing keys from v2.0
+merged_config = deep_merge(v2_1_config, v2_0_config)  # v2.1 keys win
+
+# Write merged config
+v2_1_config_path.write_text(json.dumps(merged_config, indent=2))
+
+# Log action
+log.info(f"Merged v2.0 config into v2.1 (backup: {backup_path})")
+```
+
+**Option 3: Skip**
+```python
+# Do nothing - keep v2.1 config as-is
+log.info("Migration skipped - keeping existing v2.1 config")
+return {
+    "migrated": False,
+    "reason": "user_skipped",
+    "v2_1_config": v2_1_config_path
+}
+```
+
+**Default Behavior (if --non-interactive flag):**
+- **Skip migration** (safest option)
+- Log warning: "v2.1 config exists, skipping migration (use --force to overwrite)"
+
+**Why Not Auto-Merge?**
+- Merging requires complex logic for nested dicts
+- Risk of introducing invalid config
+- User should decide which config is authoritative
+
+**Edge Cases:**
+1. **v2.1 config is invalid JSON**: Treat as "no config" → copy v2.0
+2. **v2.0 config is invalid JSON**: ABORT migration with error
+3. **Both configs identical**: Skip migration (already migrated)
+
+---
+
+## 5. Migration Function Signature
+
+```python
+def migrate_config(
+    interactive: bool = True,
+    force_overwrite: bool = False,
+    backup: bool = True
+) -> dict:
+    """
+    Migrate v2.0 config to v2.1 location.
+
+    Args:
+        interactive: If True, prompt user on conflicts. If False, skip on conflict.
+        force_overwrite: If True, overwrite v2.1 config without prompting.
+        backup: If True, create backup before migration.
+
+    Returns:
+        dict: Migration result
+            {
+                "migrated": bool,
+                "source": Path,
+                "destination": Path,
+                "backup_path": Path or None,
+                "action": "copied" | "merged" | "skipped" | "overwritten",
+                "errors": list[str]
+            }
+
+    Raises:
+        FileNotFoundError: If v2.0 config doesn't exist
+        PermissionError: If cannot write to v2.1 config location
+        ValueError: If v2.0 config is invalid JSON
+    """
+```
+
+---
+
+## 6. Testing Scenarios
+
+### Test Cases for Implementation Phase (Story 12.i)
+
+1. **Fresh Migration (no v2.1 config)**
+   - Setup: v2.0 config exists, v2.1 config does NOT exist
+   - Expected: Config copied to v2.1 location, backup created
+   - Verify: v2.1 config content identical to v2.0 config
+
+2. **Conflict with Overwrite**
+   - Setup: Both v2.0 and v2.1 configs exist
+   - User Choice: Option 1 (Overwrite)
+   - Expected: v2.1 config replaced, v2.1 backup created, v2.0 backup created
+   - Verify: v2.1 config content identical to v2.0 config
+
+3. **Conflict with Merge**
+   - Setup: v2.0 has key "custom_setting", v2.1 has key "new_setting"
+   - User Choice: Option 2 (Merge)
+   - Expected: v2.1 config has BOTH keys, v2.1 backup created
+   - Verify: Both settings preserved
+
+4. **Conflict with Skip**
+   - Setup: Both configs exist
+   - User Choice: Option 3 (Skip)
+   - Expected: v2.1 config unchanged, no backups created
+   - Verify: v2.1 config content identical to original
+
+5. **Non-Interactive Mode**
+   - Setup: Both configs exist, --non-interactive flag
+   - Expected: Migration skipped automatically
+   - Verify: Log message "Skipping migration (v2.1 config exists)"
+
+6. **Force Overwrite**
+   - Setup: Both configs exist, --force-overwrite flag
+   - Expected: v2.1 config replaced without prompt, backups created
+   - Verify: v2.1 config content identical to v2.0 config
+
+7. **No v2.0 Config**
+   - Setup: v2.0 config does NOT exist
+   - Expected: Migration skipped with log message
+   - Verify: No errors raised, graceful skip
+
+8. **Invalid v2.0 Config (corrupt JSON)**
+   - Setup: v2.0 config exists but contains invalid JSON
+   - Expected: Migration aborted with error message
+   - Verify: v2.1 config unchanged, error logged
+
+9. **Permission Denied on v2.1 Location**
+   - Setup: Cannot write to v2.1 config directory
+   - Expected: Migration aborted with PermissionError
+   - Verify: v2.0 config unchanged, error logged
+
+10. **Backup Failure**
+    - Setup: Cannot create backup file (disk full, permissions)
+    - Expected: Migration aborted before copying
+    - Verify: Neither config modified
+
+---
+
+## 7. Implementation Checklist
+
+### Phase (i): Implementation
+
+- [ ] Create `migrate_config()` function in `mcp_server/daemon/installer.py`
+- [ ] Implement backup logic (timestamped backups)
+- [ ] Implement conflict detection (check if v2.1 config exists)
+- [ ] Implement user prompt (3 options: overwrite, merge, skip)
+- [ ] Implement copy operation (preserve permissions)
+- [ ] Implement merge operation (deep merge, v2.1 wins)
+- [ ] Add logging for all migration actions
+- [ ] Add error handling (invalid JSON, permissions, disk full)
+- [ ] Add CLI integration (`graphiti-daemon migrate-config`)
+- [ ] Update installer to call `migrate_config()` automatically
+
+### Phase (t): Testing
+
+- [ ] Write test for fresh migration (no v2.1 config)
+- [ ] Write test for conflict with overwrite
+- [ ] Write test for conflict with merge
+- [ ] Write test for conflict with skip
+- [ ] Write test for non-interactive mode
+- [ ] Write test for force overwrite
+- [ ] Write test for no v2.0 config
+- [ ] Write test for invalid v2.0 config
+- [ ] Write test for permission denied
+- [ ] Write test for backup failure
+
+---
+
+## 8. Dependencies and Integration
+
+### Dependencies (from Story 11)
+- `mcp_server.daemon.v2_detection.detect_v2_0_installation()` - Detects v2.0 config
+- `mcp_server.daemon.paths.get_config_file()` - Gets v2.1 config path
+
+### Integration Points
+- **Installer (Story 4)**: Call `migrate_config()` during installation
+- **CLI**: Add `graphiti-daemon migrate-config` command
+- **Cleanup (Story 13)**: Reference v2.0 backup files for removal
+
+### No Breaking Changes
+- Migration is OPTIONAL (v2.0 config continues to work)
+- Does not modify v2.0 config (only copies)
+- Does not require schema migration (schemas identical)
+
+---
+
+## Discovery Phase Summary
+
+**Status**: ✅ Complete
+
+**Key Decisions:**
+1. ✅ Migration strategy: COPY with optional merge
+2. ✅ Schema compatibility: FULLY COMPATIBLE (no changes)
+3. ✅ Backup strategy: Timestamped backups in source directory
+4. ✅ Conflict resolution: Prompt user with 3 options (overwrite/merge/skip)
+
+**Deliverables:**
+- [x] Migration strategy design
+- [x] Schema compatibility analysis
+- [x] Backup strategy documented
+- [x] Conflict resolution logic designed
+- [x] Function signature defined
+- [x] Test scenarios identified
+- [x] Implementation checklist created
+
+**Ready for Implementation**: ✅ Yes
+
+**Estimated Implementation Effort**:
+- Implementation: 2-3 hours
+- Testing: 1-2 hours
+- Total: 3-5 hours
+
+**Risk Assessment**: 🟢 LOW
+- No schema migration needed
+- Copy operation is safe
+- Comprehensive backup strategy
+- User control over conflicts
+- Well-defined rollback process
