@@ -6,7 +6,7 @@
   "current_phase": "phase-3-complete",
   "current_section": 6,
   "completed_sections": ["unblocked-parallel-1", "unblocked-parallel-2", "unblocked-parallel-3", "phase-3-discovery", "phase-3-implementation", "phase-3-testing"],
-  "completed_stories": ["10.d", "13.d", "10.i", "13.i", "10.t", "13.t", "2.t", "7.d", "8.d", "9.d", "8.i", "9.i", "8.t", "9.t"],
+  "completed_stories": ["10.d", "13.d", "10.i", "13.i", "10.t", "13.t", "2.t", "7.d", "8.d", "9.d", "8.i", "9.i", "8.t", "9.t", "15.d", "16.d"],
   "failed_stories": [],
   "blocked_stories": ["7.i", "7.t"],
   "args": {

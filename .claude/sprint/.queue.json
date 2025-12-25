@@ -425,7 +425,7 @@
     {
       "id": "15",
       "title": "macOS Fresh Install Test",
-      "status": "unassigned",
+      "status": "in_progress",
       "type": "testing",
       "phase": 5,
       "file": "stories/15-macos-fresh-install-test.md",
@@ -435,8 +435,13 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "15.d"
+          "status": "completed",
+          "id": "15.d",
+          "metadata": {
+            "artifact": "discoveries/15.d-macos-fresh-install-discovery.md",
+            "completed_date": "2025-12-25",
+            "summary": "Defined macOS test environment requirements, documented expected v2.1 paths, created comprehensive test checklist, and identified 5 macOS-specific risks with mitigations"
+          }
         },
         "implementation": {
           "status": "unassigned",
@@ -451,7 +456,7 @@
     {
       "id": "16",
       "title": "Linux Fresh Install Test",
-      "status": "unassigned",
+      "status": "in_progress",
       "type": "testing",
       "phase": 5,
       "file": "stories/16-linux-fresh-install-test.md",
@@ -461,8 +466,12 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
-          "id": "16.d"
+          "status": "completed",
+          "id": "16.d",
+          "metadata": {
+            "artifact": "discoveries/16.d-linux-fresh-install-discovery.md",
+            "summary": "Defined Linux test environment requirements, documented XDG compliance verification, created comprehensive test checklist, and identified 8 potential Linux-specific issues with mitigations"
+          }
         },
         "implementation": {
           "status": "unassigned",
