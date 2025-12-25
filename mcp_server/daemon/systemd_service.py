@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional
 
 from .venv_manager import VenvManager, VenvCreationError
+from .paths import get_log_dir
 
 
 class SystemdServiceManager:
@@ -29,7 +30,7 @@ class SystemdServiceManager:
             venv_manager: Optional VenvManager instance. If None, creates default instance.
 
         Raises:
-            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+            VenvCreationError: If venv doesn't exist (platform-specific location from paths.py)
         """
         self.venv_manager = venv_manager or VenvManager()
         # Get venv Python executable - raise VenvCreationError if venv doesn't exist
@@ -45,7 +46,7 @@ class SystemdServiceManager:
             self.service_dir = Path.home() / ".config" / "systemd" / "user"
 
         self.service_file = self.service_dir / f"{self.service_name}.service"
-        self.log_dir = Path.home() / ".graphiti" / "logs"
+        self.log_dir = get_log_dir()
 
     def _get_bootstrap_path(self) -> Path:
         """Get path to bootstrap.py script."""

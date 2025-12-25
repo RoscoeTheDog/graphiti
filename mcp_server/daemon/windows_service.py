@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from .venv_manager import VenvManager, VenvCreationError
+from .paths import get_install_dir, get_log_dir
 
 
 class WindowsServiceManager:
@@ -35,7 +36,7 @@ class WindowsServiceManager:
             venv_manager: Optional VenvManager instance. If None, creates default instance.
 
         Raises:
-            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+            VenvCreationError: If venv doesn't exist (platform-specific location from paths.py)
         """
         self.nssm_path = self._find_nssm()
         self.venv_manager = venv_manager or VenvManager()
@@ -144,13 +145,13 @@ class WindowsServiceManager:
         # Set startup type to automatic
         self._run_nssm("set", self.service_name, "Start", "SERVICE_AUTO_START")
 
-        # Set working directory to ~/.graphiti/
-        working_dir = Path.home() / ".graphiti"
+        # Set working directory (platform-specific install directory)
+        working_dir = get_install_dir()
         working_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         self._run_nssm("set", self.service_name, "AppDirectory", str(working_dir))
 
         # Configure stdout/stderr logging
-        log_dir = Path.home() / ".graphiti" / "logs"
+        log_dir = get_log_dir()
         log_dir.mkdir(parents=True, exist_ok=True)
 
         stdout_log = log_dir / "bootstrap-stdout.log"
@@ -226,7 +227,7 @@ class WindowsServiceManager:
 
     def show_logs(self, follow: bool = False, lines: int = 50) -> None:
         """Show service logs (stdout and stderr)."""
-        log_dir = Path.home() / ".graphiti" / "logs"
+        log_dir = get_log_dir()
         stdout_log = log_dir / "bootstrap-stdout.log"
         stderr_log = log_dir / "bootstrap-stderr.log"
 

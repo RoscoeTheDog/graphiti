@@ -30,6 +30,7 @@ from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVers
 from .wrapper_generator import WrapperGenerator, WrapperGenerationError
 from .path_integration import PathIntegration, PathIntegrationError
 from .package_deployer import PackageDeployer, PackageDeploymentError
+from .paths import get_config_file, get_install_dir, get_log_dir
 
 
 class UnsupportedPlatformError(Exception):
@@ -43,11 +44,11 @@ class DaemonManager:
     def __init__(self):
         """Initialize manager with platform-specific implementation."""
         self.platform = platform.system()
-        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
-        self.package_deployer = PackageDeployer()  # Package deployment to ~/.graphiti/mcp_server/
+        self.venv_manager = VenvManager()  # Dedicated venv managed by paths.py
+        self.package_deployer = PackageDeployer()  # Package deployment to platform-specific install directory
         self.service_manager = self._get_service_manager()
-        self.config_path = self._get_config_path()
-        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
+        self.config_path = get_config_file()  # Platform-specific config file from paths.py
+        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in platform-specific bin directory
         self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
@@ -65,16 +66,13 @@ class DaemonManager:
             )
 
     def _get_config_path(self) -> Path:
-        """Get config path (platform-aware)."""
-        if self.platform == "Windows":
-            return Path.home() / ".graphiti" / "graphiti.config.json"
-        else:
-            # Unix: check XDG_CONFIG_HOME
-            import os
-            xdg_config = os.environ.get("XDG_CONFIG_HOME", "")
-            if xdg_config:
-                return Path(xdg_config) / "graphiti" / "graphiti.config.json"
-            return Path.home() / ".graphiti" / "graphiti.config.json"
+        """
+        Get config path (platform-aware).
+
+        NOTE: This method is deprecated. Use get_config_file() from paths.py instead.
+        Kept for backward compatibility only.
+        """
+        return get_config_file()
 
     def _get_uninstall_script_path(self) -> Optional[Path]:
         """
@@ -130,14 +128,14 @@ class DaemonManager:
             print(f"[FAILED] Venv creation failed: {e}")
             print()
             print("Troubleshooting:")
-            print("  - Ensure you have write permissions to ~/.graphiti/")
+            print(f"  - Ensure you have write permissions to {get_install_dir()}")
             print("  - Check available disk space")
             print("  - Try: python -m venv --help (verify venv module available)")
             return False
 
         # Step 2.4: Deploy mcp_server package to standalone location
         print()
-        print("Deploying mcp_server package to ~/.graphiti/mcp_server/...")
+        print(f"Deploying mcp_server package to {get_install_dir()}...")
         try:
             success, msg = self.package_deployer.deploy_package()
             if success:
@@ -146,7 +144,7 @@ class DaemonManager:
                 print(f"[FAILED] Package deployment failed: {msg}")
                 print()
                 print("Troubleshooting:")
-                print("  - Ensure write permissions to ~/.graphiti/")
+                print(f"  - Ensure write permissions to {get_install_dir()}")
                 print("  - Check available disk space")
                 print("  - Verify mcp_server/pyproject.toml exists in repository")
                 return False
@@ -194,7 +192,7 @@ class DaemonManager:
                 print(f"[FAILED] {msg}")
                 print()
                 print("Troubleshooting:")
-                print("  - Ensure write permissions to ~/.graphiti/bin/")
+                print(f"  - Ensure write permissions to {get_install_dir() / 'bin'}")
                 print("  - Check available disk space")
                 return False
         except WrapperGenerationError as e:
@@ -209,10 +207,10 @@ class DaemonManager:
             self.path_integration.display_instructions()
         except PathIntegrationError as e:
             print(f"[WARNING] PATH integration error: {e}")
-            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+            print(f"  You may need to manually add {get_install_dir() / 'bin'} to your PATH")
         except Exception as e:
             print(f"[WARNING] Unexpected error during PATH integration: {e}")
-            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+            print(f"  You may need to manually add {get_install_dir() / 'bin'} to your PATH")
 
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -275,7 +273,7 @@ class DaemonManager:
             print("[SUCCESS] Bootstrap service uninstalled successfully")
             print()
             print(f"Config file preserved: {self.config_path}")
-            print("  (You can manually delete ~/.graphiti/ if desired)")
+            print(f"  (You can manually delete {get_install_dir()} if desired)")
             print()
 
             # Suggest standalone script for complete uninstall
@@ -290,7 +288,7 @@ class DaemonManager:
                 print("See docs/UNINSTALL.md for details")
             else:
                 print("Note: Standalone uninstall script not found.")
-                print("  Manual cleanup: Remove ~/.graphiti/ directory if desired")
+                print(f"  Manual cleanup: Remove {get_install_dir()} directory if desired")
 
             return True
         else:
@@ -467,9 +465,9 @@ class DaemonManager:
                 "config_poll_seconds": 5,
                 "_config_poll_seconds_help": "How often bootstrap checks this file for changes",
                 "pid_file": None,
-                "_pid_file_help": "null = ~/.graphiti/graphiti-mcp.pid",
+                "_pid_file_help": f"null = {get_install_dir() / 'graphiti-mcp.pid'}",
                 "log_file": None,
-                "_log_file_help": "null = ~/.graphiti/logs/graphiti-mcp.log",
+                "_log_file_help": f"null = {get_log_dir() / 'graphiti-mcp.log'}",
                 "log_level": "INFO",
                 "_log_level_help": "DEBUG | INFO | WARNING | ERROR | CRITICAL",
                 "log_rotation": {

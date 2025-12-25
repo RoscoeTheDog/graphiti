@@ -11,8 +11,8 @@ This module provides:
 - Idempotent operations (safe to run multiple times)
 - Platform-agnostic path handling
 
-Design Principle: The daemon uses a dedicated venv at ~/.graphiti/.venv/
-to isolate its dependencies from the user's Python environment.
+Design Principle: The daemon uses a dedicated venv at the platform-specific
+install directory to isolate its dependencies from the user's Python environment.
 
 See: .claude/sprint/stories/1-dedicated-venv-creation.md
 """
@@ -23,6 +23,8 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
+
+from .paths import get_install_dir
 
 logger = logging.getLogger(__name__)
 
@@ -48,10 +50,10 @@ class VenvManager:
         Initialize VenvManager.
 
         Args:
-            venv_path: Path to venv directory. Defaults to ~/.graphiti/.venv/
+            venv_path: Path to venv directory. Defaults to platform-specific install dir from paths.py
         """
         if venv_path is None:
-            venv_path = Path.home() / ".graphiti" / ".venv"
+            venv_path = get_install_dir() / ".venv"
         self.venv_path = venv_path
 
     def validate_python_version(self) -> bool:
@@ -310,8 +312,8 @@ class VenvManager:
         4. Upward from venv path (legacy fallback)
 
         Note: This method is used for development/installation scenarios.
-        At runtime, the bootstrap service uses the deployed package at
-        ~/.graphiti/mcp_server/ (see package_deployer.py and bootstrap.py).
+        At runtime, the bootstrap service uses the deployed package at the
+        platform-specific install directory (see package_deployer.py and bootstrap.py).
 
         Returns:
             Path to repository root if found, None otherwise
@@ -417,7 +419,7 @@ class VenvManager:
         """
         Install mcp_server package into the venv from requirements.txt.
 
-        Installs dependencies from ~/.graphiti/requirements.txt.
+        Installs dependencies from requirements.txt in platform-specific install directory.
         Uses uvx (preferred), then uv pip, then standard pip.
 
         Returns:
@@ -433,7 +435,7 @@ class VenvManager:
             )
 
         # Validate requirements.txt exists
-        requirements_path = Path.home() / ".graphiti" / "requirements.txt"
+        requirements_path = get_install_dir() / "requirements.txt"
         if not requirements_path.exists():
             error_msg = (
                 f"Requirements file not found at {requirements_path}. "
