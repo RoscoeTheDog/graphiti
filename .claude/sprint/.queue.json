@@ -273,7 +273,7 @@
     {
       "id": "11",
       "title": "Implement v2.0 Installation Detection",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 4,
       "file": "stories/11-implement-v20-installation-detection.md",
@@ -293,7 +293,7 @@
           }
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "11.t"
         }
       }

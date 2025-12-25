@@ -1,0 +1,99 @@
+{
+  "story_id": "11",
+  "phase": "testing",
+  "executed_by": "testing:11.t",
+  "timestamp": "2025-12-25T10:45:00Z",
+
+  "summary": {
+    "total_tests": 29,
+    "passed": 27,
+    "failed": 0,
+    "skipped": 2,
+    "pass_rate": 100.0,
+    "duration_ms": 2030
+  },
+
+  "categories": {
+    "unit": {
+      "total": 27,
+      "passed": 27,
+      "failed": 0,
+      "coverage": null,
+      "notes": "All unit tests passed. 2 platform-specific tests skipped (macOS, Linux real detection on Windows environment)."
+    },
+    "integration": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "notes": "Integration tests deferred to Story 12 (Config Migration) which depends on v2.0 detection."
+    },
+    "security": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "vulnerabilities": [],
+      "notes": "Security tests covered in unit tests (permission handling, no credential leakage, no command injection)."
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-11.t.1": {
+      "covered": true,
+      "tests": [
+        "tests/daemon/test_v2_detection.py::TestDetectV20Installation::test_returns_true_when_home_dir_exists",
+        "tests/daemon/test_v2_detection.py::TestDetectWindowsTask::test_returns_task_name_when_found"
+      ],
+      "reason": "Test detection returns True when v2.0 artifacts exist"
+    },
+    "AC-11.t.2": {
+      "covered": true,
+      "tests": [
+        "tests/daemon/test_v2_detection.py::TestDetectV20Installation::test_returns_false_on_clean_system"
+      ],
+      "reason": "Test detection returns False on clean system"
+    },
+    "AC-11.t.3": {
+      "covered": true,
+      "tests": [
+        "tests/daemon/test_v2_detection.py::TestDetectWindowsTask::test_real_detection_on_windows",
+        "tests/daemon/test_v2_detection.py::TestDetectWindowsTask::test_returns_task_name_when_found",
+        "tests/daemon/test_v2_detection.py::TestDetectMacOSLaunchAgent::test_returns_service_id_when_plist_exists",
+        "tests/daemon/test_v2_detection.py::TestDetectLinuxService::test_returns_service_name_when_file_exists"
+      ],
+      "reason": "Verify detection works on current platform (Windows in this case, with mocks for macOS/Linux)"
+    }
+  },
+
+  "recommendations": [
+    {
+      "type": "optional",
+      "description": "Run platform-specific real detection tests on macOS and Linux environments",
+      "action": "Execute tests on macOS and Linux CI runners to verify platform-specific logic"
+    },
+    {
+      "type": "optional",
+      "description": "Add integration tests when Story 12 (Config Migration) is implemented",
+      "action": "Test v2_detection integration with DaemonManager.detect_v2_installation() method"
+    }
+  ],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false,
+
+  "notes": [
+    "All acceptance criteria from Story 11 (t) testing phase are covered",
+    "Unit tests include comprehensive platform-specific mocking",
+    "Error handling tests verify graceful degradation on permissions/timeouts",
+    "Security requirements validated (no credential leakage, safe permission handling)",
+    "2 platform-specific real detection tests skipped on Windows (expected behavior)"
+  ]
+}

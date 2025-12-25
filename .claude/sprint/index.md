@@ -33,16 +33,25 @@ Implement a professional-grade, per-user daemon architecture for the Graphiti MC
 #### Story 2: Migrate Daemon Modules to New Path System
 **Status**: unassigned
 **See**: [stories/2-migrate-daemon-modules-to-new-paths.md](stories/2-migrate-daemon-modules-to-new-paths.md)
+- Discovery (2.d): completed
+- Implementation (2.i): completed
+- Testing (2.t): blocked (85.8% pass rate - hardcoded paths remain)
 
 #### Story 3: Path Resolution Test Suite
-**Status**: unassigned
+**Status**: completed
 **See**: [stories/3-path-resolution-test-suite.md](stories/3-path-resolution-test-suite.md)
+- Discovery (3.d): completed
+- Implementation (3.i): completed
+- Testing (3.t): completed
 
 ### Phase 2: Installer Overhaul
 
 #### Story 4: Create GraphitiInstaller Class
-**Status**: unassigned
+**Status**: completed
 **See**: [stories/4-create-graphiti-installer-class.md](stories/4-create-graphiti-installer-class.md)
+- Discovery (4.d): completed
+- Implementation (4.i): completed
+- Testing (4.t): completed
 
 #### Story 5: Implement Frozen Package Deployment
 **Status**: unassigned
@@ -73,8 +82,11 @@ Implement a professional-grade, per-user daemon architecture for the Graphiti MC
 ### Phase 4: Migration
 
 #### Story 11: Implement v2.0 Installation Detection
-**Status**: unassigned
+**Status**: completed
 **See**: [stories/11-implement-v20-installation-detection.md](stories/11-implement-v20-installation-detection.md)
+- Discovery (11.d): completed
+- Implementation (11.i): completed
+- Testing (11.t): completed
 
 #### Story 12: Implement Config Migration
 **Status**: unassigned
