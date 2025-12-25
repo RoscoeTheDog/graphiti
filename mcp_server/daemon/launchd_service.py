@@ -18,7 +18,13 @@ from .paths import get_install_dir, get_log_dir
 
 
 class LaunchdServiceManager:
-    """Manages Graphiti bootstrap service on macOS via launchd."""
+    """Manages Graphiti bootstrap service on macOS via launchd.
+
+    Uses frozen package installation from {INSTALL_DIR}:
+    - Python: {INSTALL_DIR}/bin/python
+    - Bootstrap: -m mcp_server.daemon.bootstrap
+    - PYTHONPATH: {INSTALL_DIR}/lib
+    """
 
     name = "launchd (macOS Service Manager)"
     service_id = "com.graphiti.bootstrap"
@@ -35,28 +41,32 @@ class LaunchdServiceManager:
         self.plist_path = Path.home() / "Library" / "LaunchAgents" / f"{self.service_id}.plist"
         self.log_dir = get_log_dir()
 
-    def _get_bootstrap_path(self) -> Path:
-        """Get path to bootstrap.py script."""
-        # bootstrap.py is in mcp_server/daemon/
-        return Path(__file__).parent / "bootstrap.py"
-
     def _create_plist(self) -> dict:
-        """Create launchd plist configuration."""
+        """Create launchd plist configuration.
+
+        Plist uses frozen package paths:
+        - ProgramArguments: {INSTALL_DIR}/bin/python -m mcp_server.daemon.bootstrap
+        - WorkingDirectory: {INSTALL_DIR}
+        - PYTHONPATH: {INSTALL_DIR}/lib (for frozen package imports)
+        - Logs: {STATE_DIR}/logs/ (via get_log_dir())
+        """
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         plist = {
             "Label": self.service_id,
             "ProgramArguments": [
                 str(self.python_exe),
-                str(self.bootstrap_script),
+                "-m",
+                "mcp_server.daemon.bootstrap",
             ],
             "RunAtLoad": True,
             "KeepAlive": True,
             "StandardOutPath": str(self.log_dir / "bootstrap-stdout.log"),
             "StandardErrorPath": str(self.log_dir / "bootstrap-stderr.log"),
-            "WorkingDirectory": str(self.bootstrap_script.parent),
+            "WorkingDirectory": str(self.install_dir),
             "EnvironmentVariables": {
                 "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+                "PYTHONPATH": str(self.install_dir / "lib"),
             },
         }
 
@@ -89,7 +99,7 @@ class LaunchdServiceManager:
             return True
 
         print(f"Python: {self.python_exe}")
-        print(f"Bootstrap script: {self.bootstrap_script}")
+        print(f"Bootstrap module: mcp_server.daemon.bootstrap")
         print(f"Plist: {self.plist_path}")
         print()
 

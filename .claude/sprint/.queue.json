@@ -223,8 +223,20 @@
           }
         },
         "implementation": {
-          "status": "unassigned",
-          "id": "8.i"
+          "status": "completed",
+          "id": "8.i",
+          "metadata": {
+            "changes": [
+              "Removed VenvManager import and dependency",
+              "Added get_install_dir import from paths.py",
+              "Removed _get_bootstrap_path() method and self.bootstrap_script",
+              "Updated ProgramArguments to use module invocation: python -m mcp_server.daemon.bootstrap",
+              "Updated WorkingDirectory to use get_install_dir()",
+              "Added PYTHONPATH={INSTALL_DIR}/lib to EnvironmentVariables for frozen packages",
+              "Updated install() debug output to show bootstrap module instead of script path",
+              "Updated class and method docstrings to reflect frozen package architecture"
+            ]
+          }
         },
         "testing": {
           "status": "unassigned",

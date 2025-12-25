@@ -17,12 +17,22 @@ Update the LaunchdServiceManager to use the new v2.1 installation paths for macO
 - [x] Review log file path conventions (~/Library/Logs/)
 
 ### (i) Implementation Phase
-- [ ] (P0) Update ProgramArguments to use `{INSTALL_DIR}/bin/python`
-- [ ] (P0) Update WorkingDirectory to `{INSTALL_DIR}`
-- [ ] Add EnvironmentVariables with PYTHONPATH={INSTALL_DIR}/lib
-- [ ] Update StandardOutPath/StandardErrorPath to new log paths
-- [ ] Import and use paths.py for path resolution
-- [ ] Update plist template generation
+- [x] (P0) Update ProgramArguments to use `{INSTALL_DIR}/bin/python`
+- [x] (P0) Update WorkingDirectory to `{INSTALL_DIR}`
+- [x] Add EnvironmentVariables with PYTHONPATH={INSTALL_DIR}/lib
+- [x] Update StandardOutPath/StandardErrorPath to new log paths (already using get_log_dir())
+- [x] Import and use paths.py for path resolution
+- [x] Update plist template generation
+
+**Implementation Summary**:
+- Removed VenvManager dependency (no longer needed for frozen installs)
+- Updated imports to use get_install_dir() and get_log_dir() from paths.py
+- Removed obsolete _get_bootstrap_path() method
+- Updated __init__() to use frozen package paths
+- Updated _create_plist() to use module invocation (-m mcp_server.daemon.bootstrap)
+- Added PYTHONPATH environment variable pointing to {INSTALL_DIR}/lib
+- Updated WorkingDirectory to use install directory
+- Updated all docstrings to reflect frozen package architecture
 
 ### (t) Testing Phase
 - [ ] (P0) Verify generated plist has correct paths
