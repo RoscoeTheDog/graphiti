@@ -19,9 +19,18 @@
       "file": "stories/1-create-platform-aware-path-resolution.md",
       "dependencies": [],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "1.d" },
-        "implementation": { "status": "unassigned", "id": "1.i" },
-        "testing": { "status": "unassigned", "id": "1.t" }
+        "discovery": {
+          "status": "completed",
+          "id": "1.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "1.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "1.t"
+        }
       }
     },
     {
@@ -31,11 +40,22 @@
       "type": "feature",
       "phase": 1,
       "file": "stories/2-migrate-daemon-modules-to-new-paths.md",
-      "dependencies": ["1"],
+      "dependencies": [
+        "1"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "2.d" },
-        "implementation": { "status": "unassigned", "id": "2.i" },
-        "testing": { "status": "unassigned", "id": "2.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "2.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "2.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "2.t"
+        }
       }
     },
     {
@@ -45,11 +65,22 @@
       "type": "feature",
       "phase": 1,
       "file": "stories/3-path-resolution-test-suite.md",
-      "dependencies": ["1"],
+      "dependencies": [
+        "1"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "3.d" },
-        "implementation": { "status": "unassigned", "id": "3.i" },
-        "testing": { "status": "unassigned", "id": "3.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "3.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "3.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "3.t"
+        }
       }
     },
     {
@@ -59,11 +90,22 @@
       "type": "feature",
       "phase": 2,
       "file": "stories/4-create-graphiti-installer-class.md",
-      "dependencies": ["1"],
+      "dependencies": [
+        "1"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "4.d" },
-        "implementation": { "status": "unassigned", "id": "4.i" },
-        "testing": { "status": "unassigned", "id": "4.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "4.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "4.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "4.t"
+        }
       }
     },
     {
@@ -73,11 +115,22 @@
       "type": "feature",
       "phase": 2,
       "file": "stories/5-implement-frozen-package-deployment.md",
-      "dependencies": ["4"],
+      "dependencies": [
+        "4"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "5.d" },
-        "implementation": { "status": "unassigned", "id": "5.i" },
-        "testing": { "status": "unassigned", "id": "5.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "5.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "5.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "5.t"
+        }
       }
     },
     {
@@ -87,11 +140,22 @@
       "type": "feature",
       "phase": 2,
       "file": "stories/6-implement-version-tracking.md",
-      "dependencies": ["4"],
+      "dependencies": [
+        "4"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "6.d" },
-        "implementation": { "status": "unassigned", "id": "6.i" },
-        "testing": { "status": "unassigned", "id": "6.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "6.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "6.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "6.t"
+        }
       }
     },
     {
@@ -101,11 +165,23 @@
       "type": "feature",
       "phase": 3,
       "file": "stories/7-update-windows-task-scheduler-manager.md",
-      "dependencies": ["1", "2"],
+      "dependencies": [
+        "1",
+        "2"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "7.d" },
-        "implementation": { "status": "unassigned", "id": "7.i" },
-        "testing": { "status": "unassigned", "id": "7.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "7.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "7.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "7.t"
+        }
       }
     },
     {
@@ -115,11 +191,23 @@
       "type": "feature",
       "phase": 3,
       "file": "stories/8-update-launchd-service-manager.md",
-      "dependencies": ["1", "2"],
+      "dependencies": [
+        "1",
+        "2"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "8.d" },
-        "implementation": { "status": "unassigned", "id": "8.i" },
-        "testing": { "status": "unassigned", "id": "8.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "8.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "8.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "8.t"
+        }
       }
     },
     {
@@ -129,11 +217,23 @@
       "type": "feature",
       "phase": 3,
       "file": "stories/9-update-systemd-service-manager.md",
-      "dependencies": ["1", "2"],
+      "dependencies": [
+        "1",
+        "2"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "9.d" },
-        "implementation": { "status": "unassigned", "id": "9.i" },
-        "testing": { "status": "unassigned", "id": "9.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "9.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "9.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "9.t"
+        }
       }
     },
     {
@@ -143,11 +243,23 @@
       "type": "feature",
       "phase": 3,
       "file": "stories/10-fix-bootstrap-module-invocation.md",
-      "dependencies": ["1", "5"],
+      "dependencies": [
+        "1",
+        "5"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "10.d" },
-        "implementation": { "status": "unassigned", "id": "10.i" },
-        "testing": { "status": "unassigned", "id": "10.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "10.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "10.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "10.t"
+        }
       }
     },
     {
@@ -157,11 +269,22 @@
       "type": "feature",
       "phase": 4,
       "file": "stories/11-implement-v20-installation-detection.md",
-      "dependencies": ["1"],
+      "dependencies": [
+        "1"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "11.d" },
-        "implementation": { "status": "unassigned", "id": "11.i" },
-        "testing": { "status": "unassigned", "id": "11.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "11.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "11.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "11.t"
+        }
       }
     },
     {
@@ -171,11 +294,22 @@
       "type": "feature",
       "phase": 4,
       "file": "stories/12-implement-config-migration.md",
-      "dependencies": ["11"],
+      "dependencies": [
+        "11"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "12.d" },
-        "implementation": { "status": "unassigned", "id": "12.i" },
-        "testing": { "status": "unassigned", "id": "12.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "12.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "12.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "12.t"
+        }
       }
     },
     {
@@ -185,11 +319,23 @@
       "type": "feature",
       "phase": 4,
       "file": "stories/13-implement-old-installation-cleanup.md",
-      "dependencies": ["11", "12"],
+      "dependencies": [
+        "11",
+        "12"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "13.d" },
-        "implementation": { "status": "unassigned", "id": "13.i" },
-        "testing": { "status": "unassigned", "id": "13.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "13.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "13.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "13.t"
+        }
       }
     },
     {
@@ -199,11 +345,23 @@
       "type": "testing",
       "phase": 5,
       "file": "stories/14-windows-fresh-install-test.md",
-      "dependencies": ["7", "10"],
+      "dependencies": [
+        "7",
+        "10"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "14.d" },
-        "implementation": { "status": "unassigned", "id": "14.i" },
-        "testing": { "status": "unassigned", "id": "14.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "14.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "14.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "14.t"
+        }
       }
     },
     {
@@ -213,11 +371,23 @@
       "type": "testing",
       "phase": 5,
       "file": "stories/15-macos-fresh-install-test.md",
-      "dependencies": ["8", "10"],
+      "dependencies": [
+        "8",
+        "10"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "15.d" },
-        "implementation": { "status": "unassigned", "id": "15.i" },
-        "testing": { "status": "unassigned", "id": "15.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "15.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "15.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "15.t"
+        }
       }
     },
     {
@@ -227,11 +397,23 @@
       "type": "testing",
       "phase": 5,
       "file": "stories/16-linux-fresh-install-test.md",
-      "dependencies": ["9", "10"],
+      "dependencies": [
+        "9",
+        "10"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "16.d" },
-        "implementation": { "status": "unassigned", "id": "16.i" },
-        "testing": { "status": "unassigned", "id": "16.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "16.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "16.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "16.t"
+        }
       }
     },
     {
@@ -241,11 +423,25 @@
       "type": "testing",
       "phase": 5,
       "file": "stories/17-windows-v20-to-v21-migration-test.md",
-      "dependencies": ["11", "12", "13", "14"],
+      "dependencies": [
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "17.d" },
-        "implementation": { "status": "unassigned", "id": "17.i" },
-        "testing": { "status": "unassigned", "id": "17.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "17.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "17.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "17.t"
+        }
       }
     },
     {
@@ -255,11 +451,24 @@
       "type": "testing",
       "phase": 5,
       "file": "stories/18-cross-platform-service-lifecycle-test.md",
-      "dependencies": ["14", "15", "16"],
+      "dependencies": [
+        "14",
+        "15",
+        "16"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "18.d" },
-        "implementation": { "status": "unassigned", "id": "18.i" },
-        "testing": { "status": "unassigned", "id": "18.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "18.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "18.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "18.t"
+        }
       }
     },
     {
@@ -269,11 +478,24 @@
       "type": "documentation",
       "phase": 6,
       "file": "stories/19-update-installation-guide.md",
-      "dependencies": ["14", "15", "16"],
+      "dependencies": [
+        "14",
+        "15",
+        "16"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "19.d" },
-        "implementation": { "status": "unassigned", "id": "19.i" },
-        "testing": { "status": "unassigned", "id": "19.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "19.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "19.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "19.t"
+        }
       }
     },
     {
@@ -283,11 +505,23 @@
       "type": "documentation",
       "phase": 6,
       "file": "stories/20-update-configuration-documentation.md",
-      "dependencies": ["1", "19"],
+      "dependencies": [
+        "1",
+        "19"
+      ],
       "phases": {
-        "discovery": { "status": "unassigned", "id": "20.d" },
-        "implementation": { "status": "unassigned", "id": "20.i" },
-        "testing": { "status": "unassigned", "id": "20.t" }
+        "discovery": {
+          "status": "unassigned",
+          "id": "20.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "20.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "20.t"
+        }
       }
     }
   ]
