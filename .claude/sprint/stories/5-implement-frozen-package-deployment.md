@@ -11,18 +11,18 @@ Implement the frozen package deployment system that copies `mcp_server/` and `gr
 ## Acceptance Criteria
 
 ### (d) Discovery Phase
-- [ ] (P0) Analyze package copy strategy (what to include/exclude)
-- [ ] Document files to exclude: .pyc, __pycache__, .git, .pytest_cache
-- [ ] Determine how to find source packages (from repo or installed location)
-- [ ] Design package verification mechanism (ensure all __init__.py present)
+- [x] (P0) Analyze package copy strategy (what to include/exclude)
+- [x] Document files to exclude: .pyc, __pycache__, .git, .pytest_cache
+- [x] Determine how to find source packages (from repo or installed location)
+- [x] Design package verification mechanism (ensure all __init__.py present)
 
 ### (i) Implementation Phase
-- [ ] (P0) Implement `_freeze_packages()` method in GraphitiInstaller
-- [ ] Copy mcp_server/ package to {INSTALL}/lib/mcp_server/
-- [ ] Copy graphiti_core/ package to {INSTALL}/lib/graphiti_core/
-- [ ] Implement exclusion filters (.pyc, __pycache__, .git, etc.)
-- [ ] Ensure all __init__.py files are preserved
-- [ ] Implement source package discovery (find repo root)
+- [x] (P0) Implement `_freeze_packages()` method in GraphitiInstaller
+- [x] Copy mcp_server/ package to {INSTALL}/lib/mcp_server/
+- [x] Copy graphiti_core/ package to {INSTALL}/lib/graphiti_core/
+- [x] Implement exclusion filters (.pyc, __pycache__, .git, etc.)
+- [x] Ensure all __init__.py files are preserved
+- [x] Implement source package discovery (find repo root)
 
 ### (t) Testing Phase
 - [ ] (P0) Verify frozen packages are complete (no missing files)

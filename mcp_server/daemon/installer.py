@@ -463,16 +463,18 @@ class GraphitiInstaller:
             self.progress.step(2, "Creating directories")
             self._create_directories()
 
-            # TODO: Implement remaining steps in Story 5 (Frozen Package Deployment)
+            # TODO: Implement remaining steps (Stories 6-10)
             # self.progress.step(3, "Creating virtual environment")
             # self._create_venv()
             #
             # self.progress.step(4, "Installing dependencies")
             # self._install_dependencies(source_dir)
-            #
-            # self.progress.step(5, "Freezing packages")
-            # self._freeze_packages(source_dir)
-            #
+
+            # Story 5: Frozen Package Deployment (IMPLEMENTED)
+            self.progress.step(5, "Freezing packages")
+            self._freeze_packages(source_dir)
+
+            # TODO: Implement remaining steps (Stories 6-10)
             # self.progress.step(6, "Creating wrapper executables")
             # self._create_wrappers()
             #
@@ -491,13 +493,13 @@ class GraphitiInstaller:
             # self.progress.step(11, "Verifying installation")
             # self._verify_installation()
 
-            # For now, return skeleton result
-            self.progress.complete("Installation skeleton created (pending Stories 5-10)")
+            # For now, return partial result (steps 1-2, 5 complete)
+            self.progress.complete("Partial installation complete (steps 1-2, 5; pending 3-4, 6-11)")
             return InstallationResult(
                 success=True,
-                version="2.1.0-skeleton",
+                version="2.1.0-partial",
                 paths=self.paths,
-                details={"status": "skeleton", "pending": "Stories 5-10"}
+                details={"status": "partial", "completed": ["validate", "directories", "freeze_packages"], "pending": "Stories 3-4, 6-11"}
             )
 
         except ValidationError as e:
@@ -842,3 +844,422 @@ class GraphitiInstaller:
             step="rollback_upgrade",
             details={"backup_path": str(backup_path)}
         )
+
+    # ========================================================================
+    # Frozen Package Deployment Methods
+    # ========================================================================
+
+    def _find_repo_root(self, source_dir: Optional[Path] = None) -> Path:
+        """
+        Find the Graphiti repository root directory.
+
+        Detection strategy (priority order):
+            1. source_dir parameter (if provided)
+            2. GRAPHITI_REPO_PATH environment variable
+            3. Current working directory (if it contains mcp_server/)
+            4. Relative to __file__ (navigate up from daemon/ directory)
+
+        Args:
+            source_dir: Optional explicit path to repository root
+
+        Returns:
+            Path to repository root containing mcp_server/ and graphiti_core/
+
+        Raises:
+            ValidationError: If repository root cannot be found or is incomplete
+        """
+        logger.info("Searching for Graphiti repository root")
+
+        # Strategy 1: Explicit source_dir parameter
+        if source_dir:
+            if source_dir.exists() and (source_dir / "mcp_server").exists():
+                logger.info(f"Using explicit source_dir: {source_dir}")
+                return source_dir
+            else:
+                raise ValidationError(
+                    f"Provided source_dir does not contain mcp_server/: {source_dir}",
+                    step="find_repo_root",
+                    details={"source_dir": str(source_dir)}
+                )
+
+        # Strategy 2: GRAPHITI_REPO_PATH environment variable
+        env_path = os.environ.get("GRAPHITI_REPO_PATH")
+        if env_path:
+            env_path_obj = Path(env_path)
+            if env_path_obj.exists() and (env_path_obj / "mcp_server").exists():
+                logger.info(f"Using GRAPHITI_REPO_PATH: {env_path_obj}")
+                return env_path_obj
+            else:
+                logger.warning(f"GRAPHITI_REPO_PATH set but invalid: {env_path}")
+
+        # Strategy 3: Current working directory
+        cwd = Path.cwd()
+        if (cwd / "mcp_server").exists() and (cwd / "graphiti_core").exists():
+            logger.info(f"Using current working directory: {cwd}")
+            return cwd
+
+        # Strategy 4: Relative to __file__ (daemon/installer.py -> repo root)
+        # Navigate: mcp_server/daemon/installer.py -> mcp_server/ -> repo_root/
+        module_path = Path(__file__).resolve()
+        # Go up from daemon/installer.py to mcp_server/
+        mcp_server_dir = module_path.parent.parent
+        # Go up from mcp_server/ to repo root
+        repo_root = mcp_server_dir.parent
+
+        if (repo_root / "mcp_server").exists() and (repo_root / "graphiti_core").exists():
+            logger.info(f"Using __file__ relative path: {repo_root}")
+            return repo_root
+
+        # All strategies failed
+        raise ValidationError(
+            "Cannot find Graphiti repository root. Try setting GRAPHITI_REPO_PATH environment variable.",
+            step="find_repo_root",
+            details={
+                "cwd": str(cwd),
+                "module_path": str(module_path),
+                "tried_strategies": ["source_dir", "GRAPHITI_REPO_PATH", "cwd", "__file__"]
+            }
+        )
+
+    def _validate_source_packages(self, repo_root: Path) -> Tuple[Path, Path]:
+        """
+        Validate that both required packages exist in repository root.
+
+        Args:
+            repo_root: Path to repository root
+
+        Returns:
+            Tuple of (mcp_server_path, graphiti_core_path)
+
+        Raises:
+            ValidationError: If packages are missing or incomplete
+        """
+        logger.info(f"Validating source packages in {repo_root}")
+
+        mcp_server_path = repo_root / "mcp_server"
+        graphiti_core_path = repo_root / "graphiti_core"
+
+        # Validate mcp_server package
+        if not mcp_server_path.exists():
+            raise ValidationError(
+                f"mcp_server package not found in {repo_root}",
+                step="validate_source_packages",
+                details={"repo_root": str(repo_root)}
+            )
+
+        # Check for critical mcp_server files
+        mcp_server_init = mcp_server_path / "__init__.py"
+        mcp_server_main = mcp_server_path / "graphiti_mcp_server.py"
+        if not mcp_server_init.exists() or not mcp_server_main.exists():
+            raise ValidationError(
+                "mcp_server package incomplete (missing __init__.py or graphiti_mcp_server.py)",
+                step="validate_source_packages",
+                details={"path": str(mcp_server_path)}
+            )
+
+        # Validate graphiti_core package
+        if not graphiti_core_path.exists():
+            raise ValidationError(
+                f"graphiti_core package not found in {repo_root}",
+                step="validate_source_packages",
+                details={"repo_root": str(repo_root)}
+            )
+
+        # Check for critical graphiti_core files
+        graphiti_core_init = graphiti_core_path / "__init__.py"
+        if not graphiti_core_init.exists():
+            raise ValidationError(
+                "graphiti_core package incomplete (missing __init__.py)",
+                step="validate_source_packages",
+                details={"path": str(graphiti_core_path)}
+            )
+
+        logger.info(f"Source packages validated: mcp_server={mcp_server_path}, graphiti_core={graphiti_core_path}")
+        return (mcp_server_path, graphiti_core_path)
+
+    def _copy_packages(self, source_packages: Tuple[Path, Path]) -> None:
+        """
+        Copy mcp_server and graphiti_core packages to installation lib/ directory.
+
+        Args:
+            source_packages: Tuple of (mcp_server_path, graphiti_core_path)
+
+        Raises:
+            InstallationError: If copy fails or disk space exhausted
+        """
+        import fnmatch
+
+        mcp_server_src, graphiti_core_src = source_packages
+        lib_dir = self.paths.install_dir / "lib"
+
+        logger.info(f"Copying packages to {lib_dir}")
+
+        # Define ignore function for shutil.copytree
+        def ignore_patterns(directory: str, names: List[str]) -> List[str]:
+            """Return list of names to ignore during copy."""
+            ignored = []
+            for name in names:
+                # Check exact matches
+                if name in PACKAGE_EXCLUSIONS:
+                    ignored.append(name)
+                    continue
+
+                # Check pattern matches (*.pyc, *.pyo, etc.)
+                for pattern in PACKAGE_EXCLUSIONS:
+                    if "*" in pattern:
+                        # Simple glob matching
+                        if fnmatch.fnmatch(name, pattern):
+                            ignored.append(name)
+                            break
+
+            if ignored:
+                logger.debug(f"Ignoring in {directory}: {ignored}")
+
+            return ignored
+
+        try:
+            # Copy mcp_server package
+            mcp_server_dest = lib_dir / "mcp_server"
+            logger.info(f"Copying mcp_server: {mcp_server_src} -> {mcp_server_dest}")
+            shutil.copytree(
+                mcp_server_src,
+                mcp_server_dest,
+                ignore=ignore_patterns,
+                dirs_exist_ok=False  # Fail if destination already exists
+            )
+            logger.info("Successfully copied mcp_server package")
+
+            # Copy graphiti_core package
+            graphiti_core_dest = lib_dir / "graphiti_core"
+            logger.info(f"Copying graphiti_core: {graphiti_core_src} -> {graphiti_core_dest}")
+            shutil.copytree(
+                graphiti_core_src,
+                graphiti_core_dest,
+                ignore=ignore_patterns,
+                dirs_exist_ok=False
+            )
+            logger.info("Successfully copied graphiti_core package")
+
+        except OSError as e:
+            # Disk space or permission errors
+            raise InstallationError(
+                f"Failed to copy packages: {str(e)}",
+                step="copy_packages",
+                details={"error": str(e)}
+            ) from e
+
+    def _write_package_manifest(self, source_packages: Tuple[Path, Path]) -> None:
+        """
+        Write manifest file tracking copied packages and their versions.
+
+        The manifest includes:
+        - Package names and source paths
+        - Copy timestamp
+        - File counts and total size
+        - Platform information
+
+        Args:
+            source_packages: Tuple of (mcp_server_path, graphiti_core_path)
+
+        Raises:
+            InstallationError: If manifest write fails
+        """
+        mcp_server_src, graphiti_core_src = source_packages
+        lib_dir = self.paths.install_dir / "lib"
+        manifest_path = lib_dir / "PACKAGE_MANIFEST.json"
+
+        logger.info(f"Writing package manifest to {manifest_path}")
+
+        def count_files(directory: Path) -> Tuple[int, int]:
+            """Count files and total size in directory."""
+            file_count = 0
+            total_size = 0
+            for item in directory.rglob("*"):
+                if item.is_file():
+                    file_count += 1
+                    total_size += item.stat().st_size
+            return file_count, total_size
+
+        try:
+            # Gather package info
+            mcp_server_dest = lib_dir / "mcp_server"
+            graphiti_core_dest = lib_dir / "graphiti_core"
+
+            mcp_file_count, mcp_size = count_files(mcp_server_dest)
+            graphiti_file_count, graphiti_size = count_files(graphiti_core_dest)
+
+            manifest = {
+                "created": datetime.now().isoformat(),
+                "platform": sys.platform,
+                "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "packages": {
+                    "mcp_server": {
+                        "source": str(mcp_server_src),
+                        "destination": str(mcp_server_dest),
+                        "file_count": mcp_file_count,
+                        "total_size_bytes": mcp_size
+                    },
+                    "graphiti_core": {
+                        "source": str(graphiti_core_src),
+                        "destination": str(graphiti_core_dest),
+                        "file_count": graphiti_file_count,
+                        "total_size_bytes": graphiti_size
+                    }
+                },
+                "total_files": mcp_file_count + graphiti_file_count,
+                "total_size_bytes": mcp_size + graphiti_size
+            }
+
+            # Write manifest
+            with open(manifest_path, "w") as f:
+                json.dump(manifest, f, indent=2)
+
+            logger.info(f"Package manifest written: {mcp_file_count + graphiti_file_count} files, {(mcp_size + graphiti_size) / 1024:.1f} KB")
+
+        except Exception as e:
+            raise InstallationError(
+                f"Failed to write package manifest: {str(e)}",
+                step="write_package_manifest",
+                details={"error": str(e)}
+            ) from e
+
+    def _verify_frozen_packages(self) -> None:
+        """
+        Verify frozen packages are complete and importable.
+
+        Three-tier verification:
+            1. Structural check: Critical files and directories exist
+            2. Init file check: All packages have __init__.py
+            3. Import check: Packages are importable via PYTHONPATH
+
+        Raises:
+            InstallationError: If verification fails
+        """
+        lib_dir = self.paths.install_dir / "lib"
+        logger.info(f"Verifying frozen packages in {lib_dir}")
+
+        # Tier 1: Structural check
+        logger.info("Tier 1: Verifying package structure")
+        mcp_server_dir = lib_dir / "mcp_server"
+        graphiti_core_dir = lib_dir / "graphiti_core"
+
+        # Check mcp_server structure
+        mcp_critical_files = [
+            mcp_server_dir / "__init__.py",
+            mcp_server_dir / "graphiti_mcp_server.py",
+            mcp_server_dir / "daemon" / "__init__.py",
+            mcp_server_dir / "config" / "__init__.py",
+        ]
+
+        for file_path in mcp_critical_files:
+            if not file_path.exists():
+                raise InstallationError(
+                    f"Critical mcp_server file missing: {file_path.relative_to(lib_dir)}",
+                    step="verify_frozen_packages",
+                    details={"missing_file": str(file_path)}
+                )
+
+        # Check graphiti_core structure
+        graphiti_critical_files = [
+            graphiti_core_dir / "__init__.py",
+        ]
+
+        for file_path in graphiti_critical_files:
+            if not file_path.exists():
+                raise InstallationError(
+                    f"Critical graphiti_core file missing: {file_path.relative_to(lib_dir)}",
+                    step="verify_frozen_packages",
+                    details={"missing_file": str(file_path)}
+                )
+
+        logger.info("Tier 1: Package structure verified")
+
+        # Tier 2: Init file check
+        logger.info("Tier 2: Verifying __init__.py files")
+        for package_dir in [mcp_server_dir, graphiti_core_dir]:
+            for py_file in package_dir.rglob("*.py"):
+                parent = py_file.parent
+                if parent != package_dir and not parent.name.startswith("_"):
+                    # This is a subdirectory with .py files - it should have __init__.py
+                    init_file = parent / "__init__.py"
+                    if not init_file.exists():
+                        raise InstallationError(
+                            f"Missing __init__.py in {parent.relative_to(lib_dir)}",
+                            step="verify_frozen_packages",
+                            details={"directory": str(parent)}
+                        )
+
+        logger.info("Tier 2: All __init__.py files verified")
+
+        # Tier 3: Import check
+        logger.info("Tier 3: Verifying packages are importable")
+        original_path = sys.path.copy()
+        try:
+            # Add lib directory to Python path
+            sys.path.insert(0, str(lib_dir))
+
+            # Try importing both packages
+            try:
+                import mcp_server
+                logger.info("Successfully imported mcp_server")
+            except ImportError as e:
+                raise InstallationError(
+                    f"mcp_server package not importable: {str(e)}",
+                    step="verify_frozen_packages",
+                    details={"error": str(e)}
+                ) from e
+
+            try:
+                import graphiti_core
+                logger.info("Successfully imported graphiti_core")
+            except ImportError as e:
+                raise InstallationError(
+                    f"graphiti_core package not importable: {str(e)}",
+                    step="verify_frozen_packages",
+                    details={"error": str(e)}
+                ) from e
+
+            logger.info("Tier 3: Import verification passed")
+
+        finally:
+            # Restore original sys.path
+            sys.path = original_path
+
+        logger.info("All frozen package verification tiers passed")
+
+    def _freeze_packages(self, source_dir: Optional[Path] = None) -> None:
+        """
+        Freeze packages by copying mcp_server and graphiti_core to lib/ directory.
+
+        This is the main orchestration method that coordinates:
+            1. Repository root detection
+            2. Source package validation
+            3. Package copying with exclusions
+            4. Manifest creation
+            5. Comprehensive verification
+
+        Args:
+            source_dir: Optional explicit path to repository root
+
+        Raises:
+            ValidationError: If source packages are invalid or incomplete
+            InstallationError: If copy, manifest, or verification fails
+        """
+        logger.info("Starting frozen package deployment")
+
+        # Step 1: Find repository root
+        repo_root = self._find_repo_root(source_dir)
+
+        # Step 2: Validate source packages
+        source_packages = self._validate_source_packages(repo_root)
+
+        # Step 3: Copy packages to lib/
+        self._copy_packages(source_packages)
+
+        # Step 4: Write package manifest
+        self._write_package_manifest(source_packages)
+
+        # Step 5: Verify frozen packages
+        self._verify_frozen_packages()
+
+        logger.info("Frozen package deployment completed successfully")
