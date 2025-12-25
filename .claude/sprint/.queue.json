@@ -1,0 +1,294 @@
+{
+  "schema_version": "4.0",
+  "sprint": {
+    "id": "per-user-daemon-v21",
+    "name": "Per-User Daemon Architecture v2.1",
+    "version": "v2.1.0",
+    "status": "active",
+    "branch": "sprint/per-user-daemon-v21",
+    "base_branch": "dev",
+    "created": "2025-12-25T02:02:00Z"
+  },
+  "stories": [
+    {
+      "id": "1",
+      "title": "Create Platform-Aware Path Resolution Module",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/1-create-platform-aware-path-resolution.md",
+      "dependencies": [],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "1.d" },
+        "implementation": { "status": "unassigned", "id": "1.i" },
+        "testing": { "status": "unassigned", "id": "1.t" }
+      }
+    },
+    {
+      "id": "2",
+      "title": "Migrate Daemon Modules to New Path System",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/2-migrate-daemon-modules-to-new-paths.md",
+      "dependencies": ["1"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "2.d" },
+        "implementation": { "status": "unassigned", "id": "2.i" },
+        "testing": { "status": "unassigned", "id": "2.t" }
+      }
+    },
+    {
+      "id": "3",
+      "title": "Path Resolution Test Suite",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/3-path-resolution-test-suite.md",
+      "dependencies": ["1"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "3.d" },
+        "implementation": { "status": "unassigned", "id": "3.i" },
+        "testing": { "status": "unassigned", "id": "3.t" }
+      }
+    },
+    {
+      "id": "4",
+      "title": "Create GraphitiInstaller Class",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/4-create-graphiti-installer-class.md",
+      "dependencies": ["1"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "4.d" },
+        "implementation": { "status": "unassigned", "id": "4.i" },
+        "testing": { "status": "unassigned", "id": "4.t" }
+      }
+    },
+    {
+      "id": "5",
+      "title": "Implement Frozen Package Deployment",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/5-implement-frozen-package-deployment.md",
+      "dependencies": ["4"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "5.d" },
+        "implementation": { "status": "unassigned", "id": "5.i" },
+        "testing": { "status": "unassigned", "id": "5.t" }
+      }
+    },
+    {
+      "id": "6",
+      "title": "Implement Version Tracking",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/6-implement-version-tracking.md",
+      "dependencies": ["4"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "6.d" },
+        "implementation": { "status": "unassigned", "id": "6.i" },
+        "testing": { "status": "unassigned", "id": "6.t" }
+      }
+    },
+    {
+      "id": "7",
+      "title": "Update WindowsTaskSchedulerManager",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/7-update-windows-task-scheduler-manager.md",
+      "dependencies": ["1", "2"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "7.d" },
+        "implementation": { "status": "unassigned", "id": "7.i" },
+        "testing": { "status": "unassigned", "id": "7.t" }
+      }
+    },
+    {
+      "id": "8",
+      "title": "Update LaunchdServiceManager (macOS)",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/8-update-launchd-service-manager.md",
+      "dependencies": ["1", "2"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "8.d" },
+        "implementation": { "status": "unassigned", "id": "8.i" },
+        "testing": { "status": "unassigned", "id": "8.t" }
+      }
+    },
+    {
+      "id": "9",
+      "title": "Update SystemdServiceManager (Linux)",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/9-update-systemd-service-manager.md",
+      "dependencies": ["1", "2"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "9.d" },
+        "implementation": { "status": "unassigned", "id": "9.i" },
+        "testing": { "status": "unassigned", "id": "9.t" }
+      }
+    },
+    {
+      "id": "10",
+      "title": "Fix Bootstrap Module Invocation",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/10-fix-bootstrap-module-invocation.md",
+      "dependencies": ["1", "5"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "10.d" },
+        "implementation": { "status": "unassigned", "id": "10.i" },
+        "testing": { "status": "unassigned", "id": "10.t" }
+      }
+    },
+    {
+      "id": "11",
+      "title": "Implement v2.0 Installation Detection",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/11-implement-v20-installation-detection.md",
+      "dependencies": ["1"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "11.d" },
+        "implementation": { "status": "unassigned", "id": "11.i" },
+        "testing": { "status": "unassigned", "id": "11.t" }
+      }
+    },
+    {
+      "id": "12",
+      "title": "Implement Config Migration",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/12-implement-config-migration.md",
+      "dependencies": ["11"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "12.d" },
+        "implementation": { "status": "unassigned", "id": "12.i" },
+        "testing": { "status": "unassigned", "id": "12.t" }
+      }
+    },
+    {
+      "id": "13",
+      "title": "Implement Old Installation Cleanup",
+      "status": "unassigned",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/13-implement-old-installation-cleanup.md",
+      "dependencies": ["11", "12"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "13.d" },
+        "implementation": { "status": "unassigned", "id": "13.i" },
+        "testing": { "status": "unassigned", "id": "13.t" }
+      }
+    },
+    {
+      "id": "14",
+      "title": "Windows Fresh Install Test",
+      "status": "unassigned",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/14-windows-fresh-install-test.md",
+      "dependencies": ["7", "10"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "14.d" },
+        "implementation": { "status": "unassigned", "id": "14.i" },
+        "testing": { "status": "unassigned", "id": "14.t" }
+      }
+    },
+    {
+      "id": "15",
+      "title": "macOS Fresh Install Test",
+      "status": "unassigned",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/15-macos-fresh-install-test.md",
+      "dependencies": ["8", "10"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "15.d" },
+        "implementation": { "status": "unassigned", "id": "15.i" },
+        "testing": { "status": "unassigned", "id": "15.t" }
+      }
+    },
+    {
+      "id": "16",
+      "title": "Linux Fresh Install Test",
+      "status": "unassigned",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/16-linux-fresh-install-test.md",
+      "dependencies": ["9", "10"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "16.d" },
+        "implementation": { "status": "unassigned", "id": "16.i" },
+        "testing": { "status": "unassigned", "id": "16.t" }
+      }
+    },
+    {
+      "id": "17",
+      "title": "Windows v2.0 to v2.1 Migration Test",
+      "status": "unassigned",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/17-windows-v20-to-v21-migration-test.md",
+      "dependencies": ["11", "12", "13", "14"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "17.d" },
+        "implementation": { "status": "unassigned", "id": "17.i" },
+        "testing": { "status": "unassigned", "id": "17.t" }
+      }
+    },
+    {
+      "id": "18",
+      "title": "Cross-Platform Service Lifecycle Test",
+      "status": "unassigned",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/18-cross-platform-service-lifecycle-test.md",
+      "dependencies": ["14", "15", "16"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "18.d" },
+        "implementation": { "status": "unassigned", "id": "18.i" },
+        "testing": { "status": "unassigned", "id": "18.t" }
+      }
+    },
+    {
+      "id": "19",
+      "title": "Update Installation Guide",
+      "status": "unassigned",
+      "type": "documentation",
+      "phase": 6,
+      "file": "stories/19-update-installation-guide.md",
+      "dependencies": ["14", "15", "16"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "19.d" },
+        "implementation": { "status": "unassigned", "id": "19.i" },
+        "testing": { "status": "unassigned", "id": "19.t" }
+      }
+    },
+    {
+      "id": "20",
+      "title": "Update Configuration Documentation",
+      "status": "unassigned",
+      "type": "documentation",
+      "phase": 6,
+      "file": "stories/20-update-configuration-documentation.md",
+      "dependencies": ["1", "19"],
+      "phases": {
+        "discovery": { "status": "unassigned", "id": "20.d" },
+        "implementation": { "status": "unassigned", "id": "20.i" },
+        "testing": { "status": "unassigned", "id": "20.t" }
+      }
+    }
+  ]
+}
