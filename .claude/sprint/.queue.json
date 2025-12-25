@@ -53,8 +53,16 @@
           "id": "2.i"
         },
         "testing": {
-          "status": "unassigned",
-          "id": "2.t"
+          "status": "blocked",
+          "id": "2.t",
+          "metadata": {
+            "test_failure": {
+              "pass_rate": 85.8,
+              "threshold": 90.0,
+              "failed_count": 24,
+              "reason": "Implementation phase (2.i) incomplete - hardcoded paths remain"
+            }
+          }
         }
       }
     },
