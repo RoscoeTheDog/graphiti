@@ -262,3 +262,168 @@ def _detect_linux_service() -> Optional[str]:
     except Exception:
         # Any other error (permissions, etc.) - treat as not found
         return None
+
+
+def detect_v2_1_installation() -> dict:
+    """
+    Detect v2.1 installation artifacts.
+
+    Returns:
+        dict: Detection results with the following structure:
+            {
+                "detected": bool,           # True if v2.1 installation found
+                "install_dir": Path or None,  # Install directory if exists
+                "config_file": Path or None,  # Config file if exists
+                "service_exists": bool        # True if v2.1 service found
+            }
+
+    Platform-specific detection:
+        Windows:
+            - Install: %LOCALAPPDATA%\\graphiti\\
+            - Config: %LOCALAPPDATA%\\graphiti\\graphiti.config.json
+            - Service: Graphiti MCP Bootstrap (NSSM)
+
+        macOS:
+            - Install: ~/Library/Application Support/graphiti/
+            - Config: ~/Library/Application Support/graphiti/graphiti.config.json
+            - Service: com.graphiti.mcp.bootstrap (LaunchAgent)
+
+        Linux:
+            - Install: ~/.local/share/graphiti/
+            - Config: ~/.config/graphiti/graphiti.config.json
+            - Service: graphiti-mcp-bootstrap (systemd)
+
+    Error Handling:
+        - Gracefully handles permission errors
+        - Returns partial results if directory exists but service query fails
+        - Never raises exceptions - always returns dict
+    """
+    # Import here to avoid circular dependency
+    from .paths import get_install_dir, get_config_file
+
+    install_dir = get_install_dir()
+    config_file = get_config_file()
+
+    # Check for directory and config existence
+    install_dir_exists = install_dir.exists() and install_dir.is_dir()
+    config_file_exists = config_file.exists() and config_file.is_file()
+
+    # Platform-specific service detection
+    current_platform = platform.system()
+    service_exists = False
+
+    if current_platform == "Windows":
+        service_exists = _detect_v21_windows_service()
+    elif current_platform == "Darwin":
+        service_exists = _detect_v21_macos_service()
+    elif current_platform == "Linux":
+        service_exists = _detect_v21_linux_service()
+
+    # Detection is positive if install directory exists OR config exists
+    detected = install_dir_exists or config_file_exists
+
+    return {
+        "detected": detected,
+        "install_dir": install_dir if install_dir_exists else None,
+        "config_file": config_file if config_file_exists else None,
+        "service_exists": service_exists
+    }
+
+
+def _detect_v21_windows_service() -> bool:
+    """
+    Detect Windows v2.1 service (Graphiti MCP Bootstrap via NSSM).
+
+    Returns:
+        bool: True if v2.1 service found
+    """
+    service_name = "Graphiti MCP Bootstrap"
+
+    try:
+        cmd = [
+            "powershell.exe",
+            "-NoProfile",
+            "-Command",
+            f"Get-Service -Name '{service_name}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"
+        ]
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+        )
+
+        return result.returncode == 0 and result.stdout.strip() != ""
+
+    except Exception:
+        return False
+
+
+def _detect_v21_macos_service() -> bool:
+    """
+    Detect macOS v2.1 LaunchAgent (com.graphiti.mcp.bootstrap).
+
+    Returns:
+        bool: True if v2.1 service found
+    """
+    service_id = "com.graphiti.mcp.bootstrap"
+    plist_path = Path.home() / "Library" / "LaunchAgents" / f"{service_id}.plist"
+
+    # Check plist existence
+    if plist_path.exists():
+        return True
+
+    # Check if loaded
+    try:
+        cmd = ["launchctl", "list"]
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        return result.returncode == 0 and service_id in result.stdout
+
+    except Exception:
+        return False
+
+
+def _detect_v21_linux_service() -> bool:
+    """
+    Detect Linux v2.1 systemd service (graphiti-mcp-bootstrap).
+
+    Returns:
+        bool: True if v2.1 service found
+    """
+    service_name = "graphiti-mcp-bootstrap"
+
+    # Check for service file
+    xdg_config = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_config:
+        service_dir = Path(xdg_config) / "systemd" / "user"
+    else:
+        service_dir = Path.home() / ".config" / "systemd" / "user"
+
+    service_file = service_dir / f"{service_name}.service"
+
+    if service_file.exists():
+        return True
+
+    # Check if service is loaded
+    try:
+        cmd = ["systemctl", "--user", "status", service_name]
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        # Returns 0 (active), 3 (inactive), or 4 (not found)
+        return result.returncode in (0, 3)
+
+    except Exception:
+        return False

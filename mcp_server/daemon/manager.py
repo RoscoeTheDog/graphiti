@@ -32,6 +32,7 @@ from .path_integration import PathIntegration, PathIntegrationError
 from .package_deployer import PackageDeployer, PackageDeploymentError
 from .paths import get_config_file, get_install_dir, get_log_dir
 from .v2_detection import detect_v2_0_installation
+from .v2_cleanup import cleanup_v2_0_installation, V2Cleanup, CleanupError, V21NotInstalledError
 
 
 class UnsupportedPlatformError(Exception):
@@ -481,6 +482,88 @@ class DaemonManager:
 
         self.service_manager.show_logs(follow=follow, lines=lines)
 
+    def cleanup(self, interactive: bool = True, force_delete: bool = False, keep_logs: bool = False) -> bool:
+        """
+        Clean up v2.0 installation artifacts.
+
+        Args:
+            interactive: If True, prompt user for cleanup decisions
+            force_delete: If True (non-interactive only), actually delete directories
+            keep_logs: If True, preserve ~/.graphiti/logs/ during deletion
+
+        Returns:
+            bool: True if cleanup successful, False otherwise
+        """
+        print("Cleaning up v2.0 installation...")
+        print()
+
+        try:
+            result = cleanup_v2_0_installation(
+                interactive=interactive,
+                force_delete=force_delete,
+                keep_logs=keep_logs
+            )
+
+            if result["success"]:
+                print()
+                print("=" * 70)
+                print("Cleanup Complete")
+                print("=" * 70)
+                print()
+                print("Actions taken:")
+                for action in result["actions_taken"]:
+                    print(f"  - {action}")
+                print()
+
+                if result["backup_location"]:
+                    print(f"Backup created at: {result['backup_location']}")
+                    print()
+
+                if result["rollback_performed"]:
+                    print("⚠️  Cleanup encountered errors and was rolled back")
+                    print()
+
+                return True
+            else:
+                print()
+                print("=" * 70)
+                print("Cleanup Failed")
+                print("=" * 70)
+                print()
+                if result["errors"]:
+                    print("Errors:")
+                    for error in result["errors"]:
+                        print(f"  - {error}")
+                    print()
+
+                if result["rollback_performed"]:
+                    print("Cleanup was rolled back to prevent partial state")
+                    print()
+
+                return False
+
+        except V21NotInstalledError as e:
+            print()
+            print(f"[ERROR] {e}")
+            print()
+            print("V2.1 installation must be working before v2.0 cleanup.")
+            print("Run: graphiti-mcp daemon status (to verify v2.1)")
+            return False
+
+        except CleanupError as e:
+            print()
+            print(f"[ERROR] Critical cleanup failure: {e}")
+            print()
+            print("Manual intervention may be required.")
+            return False
+
+        except Exception as e:
+            print()
+            print(f"[ERROR] Unexpected error during cleanup: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def _create_default_config(self) -> None:
         """Create default graphiti.config.json."""
         default_config = {
@@ -614,6 +697,27 @@ def main():
         help="Number of lines to show (default: 50)",
     )
 
+    # Cleanup command
+    cleanup_parser = subparsers.add_parser(
+        "cleanup",
+        help="Clean up v2.0 installation artifacts",
+    )
+    cleanup_parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run cleanup without prompting (safe defaults)",
+    )
+    cleanup_parser.add_argument(
+        "--force-delete",
+        action="store_true",
+        help="Actually delete directories (non-interactive mode only)",
+    )
+    cleanup_parser.add_argument(
+        "--keep-logs",
+        action="store_true",
+        help="Preserve ~/.graphiti/logs/ during deletion",
+    )
+
     args = parser.parse_args()
 
     if not args.command:
@@ -623,6 +727,7 @@ def main():
         print("  graphiti-mcp daemon install    # Install service")
         print("  graphiti-mcp daemon status     # Check status")
         print("  graphiti-mcp daemon logs       # View logs")
+        print("  graphiti-mcp daemon cleanup    # Remove v2.0 artifacts")
         print("  graphiti-mcp daemon uninstall  # Remove service")
         sys.exit(1)
 
@@ -644,6 +749,14 @@ def main():
         elif args.command == "logs":
             manager.logs(follow=args.follow, lines=args.lines)
             sys.exit(0)
+
+        elif args.command == "cleanup":
+            success = manager.cleanup(
+                interactive=not args.non_interactive,
+                force_delete=args.force_delete,
+                keep_logs=args.keep_logs
+            )
+            sys.exit(0 if success else 1)
 
     except UnsupportedPlatformError as e:
         print(f"[ERROR] {e}")
