@@ -13,7 +13,7 @@
     {
       "id": "1",
       "title": "Create Platform-Aware Path Resolution Module",
-      "status": "unassigned",
+      "status": "completed",
       "type": "feature",
       "phase": 1,
       "file": "stories/1-create-platform-aware-path-resolution.md",
@@ -28,7 +28,7 @@
           "id": "1.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "1.t"
         }
       }
