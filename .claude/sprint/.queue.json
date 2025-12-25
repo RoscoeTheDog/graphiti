@@ -301,7 +301,7 @@
     {
       "id": "12",
       "title": "Implement Config Migration",
-      "status": "in_progress",
+      "status": "completed",
       "type": "feature",
       "phase": 4,
       "file": "stories/12-implement-config-migration.md",
@@ -318,7 +318,7 @@
           "id": "12.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "12.t"
         }
       }
