@@ -407,7 +407,7 @@
     {
       "id": "14",
       "title": "Windows Fresh Install Test",
-      "status": "in_progress",
+      "status": "completed",
       "type": "testing",
       "phase": 5,
       "file": "stories/14-windows-fresh-install-test.md",
@@ -426,12 +426,25 @@
           }
         },
         "implementation": {
-          "status": "unassigned",
-          "id": "14.i"
+          "status": "completed",
+          "id": "14.i",
+          "metadata": {
+            "completed_date": "2025-12-25",
+            "summary": "Windows fresh install validated - MCP server listening on port 8321, 356 daemon tests passing, fixed VenvManager path (install dir IS venv), fixed SessionFilter parameter name"
+          }
         },
         "testing": {
-          "status": "unassigned",
-          "id": "14.t"
+          "status": "completed",
+          "id": "14.t",
+          "metadata": {
+            "test_success": {
+              "pass_rate": 100.0,
+              "threshold": 90.0,
+              "passed_count": 356,
+              "skipped_count": 20,
+              "reason": "All daemon tests passing after Windows fresh install fixes"
+            }
+          }
         }
       }
     },
@@ -601,6 +614,446 @@
         "testing": {
           "status": "unassigned",
           "id": "20.t"
+        }
+      }
+    },
+    {
+      "id": "-1",
+      "title": "Validate Story 1: Create Platform-Aware Path Resolution Module",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "1",
+      "file": "stories/-1-validate-1.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-1.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-1.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-1.t"
+        }
+      }
+    },
+    {
+      "id": "-2",
+      "title": "Validate Story 2: Migrate Daemon Modules to New Path System",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "2",
+      "file": "stories/-2-validate-2.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-2.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-2.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-2.t"
+        }
+      }
+    },
+    {
+      "id": "-3",
+      "title": "Validate Story 3: Path Resolution Test Suite",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "3",
+      "file": "stories/-3-validate-3.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-3.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-3.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-3.t"
+        }
+      }
+    },
+    {
+      "id": "-4",
+      "title": "Validate Story 4: Create GraphitiInstaller Class",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "4",
+      "file": "stories/-4-validate-4.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-4.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-4.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-4.t"
+        }
+      }
+    },
+    {
+      "id": "-5",
+      "title": "Validate Story 5: Implement Frozen Package Deployment",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "5",
+      "file": "stories/-5-validate-5.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-5.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-5.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-5.t"
+        }
+      }
+    },
+    {
+      "id": "-6",
+      "title": "Validate Story 6: Implement Version Tracking",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "6",
+      "file": "stories/-6-validate-6.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-6.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-6.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-6.t"
+        }
+      }
+    },
+    {
+      "id": "-7",
+      "title": "Validate Story 7: Create WindowsTaskSchedulerManager",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "7",
+      "file": "stories/-7-validate-7.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-7.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-7.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-7.t"
+        }
+      }
+    },
+    {
+      "id": "-8",
+      "title": "Validate Story 8: Update LaunchdServiceManager (macOS)",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "8",
+      "file": "stories/-8-validate-8.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-8.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-8.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-8.t"
+        }
+      }
+    },
+    {
+      "id": "-9",
+      "title": "Validate Story 9: Update SystemdServiceManager (Linux)",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "9",
+      "file": "stories/-9-validate-9.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-9.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-9.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-9.t"
+        }
+      }
+    },
+    {
+      "id": "-10",
+      "title": "Validate Story 10: Fix Bootstrap Module Invocation",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "10",
+      "file": "stories/-10-validate-10.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-10.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-10.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-10.t"
+        }
+      }
+    },
+    {
+      "id": "-11",
+      "title": "Validate Story 11: Implement v2.0 Installation Detection",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "11",
+      "file": "stories/-11-validate-11.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-11.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-11.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-11.t"
+        }
+      }
+    },
+    {
+      "id": "-12",
+      "title": "Validate Story 12: Implement Config Migration",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "12",
+      "file": "stories/-12-validate-12.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-12.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-12.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-12.t"
+        }
+      }
+    },
+    {
+      "id": "-13",
+      "title": "Validate Story 13: Implement Old Installation Cleanup",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "13",
+      "file": "stories/-13-validate-13.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-13.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-13.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-13.t"
+        }
+      }
+    },
+    {
+      "id": "-14",
+      "title": "Validate Story 14: Windows Fresh Install Test",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "14",
+      "file": "stories/-14-validate-14.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-14.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-14.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-14.t"
+        }
+      }
+    },
+    {
+      "id": "-15",
+      "title": "Validate Story 15: macOS Fresh Install Test",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "15",
+      "file": "stories/-15-validate-15.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-15.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-15.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-15.t"
+        }
+      }
+    },
+    {
+      "id": "-16",
+      "title": "Validate Story 16: Linux Fresh Install Test",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "16",
+      "file": "stories/-16-validate-16.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-16.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-16.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-16.t"
+        }
+      }
+    },
+    {
+      "id": "-17",
+      "title": "Validate Story 17: Windows v2.0 to v2.1 Migration Test",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "17",
+      "file": "stories/-17-validate-17.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-17.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-17.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-17.t"
+        }
+      }
+    },
+    {
+      "id": "-18",
+      "title": "Validate Story 18: Cross-Platform Service Lifecycle Test",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "18",
+      "file": "stories/-18-validate-18.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-18.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-18.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-18.t"
+        }
+      }
+    },
+    {
+      "id": "-19",
+      "title": "Validate Story 19: Update Installation Guide",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "19",
+      "file": "stories/-19-validate-19.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-19.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-19.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-19.t"
+        }
+      }
+    },
+    {
+      "id": "-20",
+      "title": "Validate Story 20: Update Configuration Documentation",
+      "status": "unassigned",
+      "type": "validation",
+      "validates": "20",
+      "file": "stories/-20-validate-20.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-20.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-20.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-20.t"
         }
       }
     }
