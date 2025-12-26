@@ -114,7 +114,7 @@ class TaskSchedulerServiceManager:
   <Actions Context="Author">
     <Exec>
       <Command>{self.python_exe}</Command>
-      <Arguments>-m mcp_server.daemon.bootstrap</Arguments>
+      <Arguments>-c "import sys; sys.path.insert(0, r'{lib_dir}'); from mcp_server.daemon.bootstrap import main; main()"</Arguments>
       <WorkingDirectory>{self.install_dir}</WorkingDirectory>
     </Exec>
   </Actions>

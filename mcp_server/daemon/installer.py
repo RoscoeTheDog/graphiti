@@ -37,7 +37,15 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from packaging.version import InvalidVersion, Version
 
-from .paths import GraphitiPaths, get_paths
+from .paths import GraphitiPaths, get_paths, get_install_dir
+from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
+from .generate_requirements import (
+    parse_pyproject_toml,
+    generate_requirements_txt,
+    write_requirements_file,
+    PyprojectParseError,
+    RequirementsGenerationError,
+)
 
 # Type alias for progress callback
 ProgressCallback = Callable[[str, int, int, str], None]
@@ -364,11 +372,13 @@ class ProgressReporter:
     def complete(self, message: str) -> None:
         """Report successful completion."""
         self.current_step = self.total_steps
-        self._report(f"✓ {message}")
+        # Use ASCII-compatible checkmark for Windows console compatibility
+        self._report(f"[OK] {message}")
 
     def error(self, message: str) -> None:
         """Report error."""
-        self._report(f"✗ {message}")
+        # Use ASCII-compatible X for Windows console compatibility
+        self._report(f"[FAIL] {message}")
 
     def _report(self, message: str) -> None:
         """Internal: Send to callback and log."""
@@ -441,21 +451,22 @@ class GraphitiInstaller:
         Steps:
             1. _validate_environment() - Check Python version, disk space, permissions
             2. _create_directories() - Create install_dir, config_dir, state_dir
-            3. _create_venv() - Create virtual environment in install_dir/bin
-            4. _install_dependencies() - Install pip packages from requirements.txt
+            3. _create_venv() - Create virtual environment at install_dir
+            4. _install_dependencies() - Generate requirements.txt and install pip packages
             5. _freeze_packages() - Copy mcp_server and graphiti_core to lib/
-            6. _create_wrappers() - Generate platform executables (graphiti-mcp.exe, etc.)
-            7. _write_version_info() - Write VERSION and INSTALL_INFO files
-            8. _create_default_config() - Generate graphiti.config.json in config_dir
-            9. _register_service() - Register with Task Scheduler/launchd/systemd
-            10. _start_service() - Start bootstrap service
-            11. _verify_installation() - Health check via MCP connection
+            6. _create_pth_file() - Create .pth file for lib/ path resolution
+            7. _create_wrappers() - Generate platform executables (graphiti-mcp.exe, etc.)
+            8. _write_version_info() - Write VERSION and INSTALL_INFO files
+            9. _create_default_config() - Generate graphiti.config.json in config_dir
+            10. _register_service() - Register with Task Scheduler/launchd/systemd
+            11. _start_service() - Start bootstrap service
+            12. _verify_installation() - Health check via MCP connection
 
         Rollback:
             On failure at any step, calls _cleanup_on_failure() to remove partial install
         """
         try:
-            self.progress.start("Installing Graphiti MCP Server", total_steps=11)
+            self.progress.start("Installing Graphiti MCP Server", total_steps=12)
 
             self.progress.step(1, "Validating environment")
             self._validate_environment()
@@ -463,43 +474,59 @@ class GraphitiInstaller:
             self.progress.step(2, "Creating directories")
             self._create_directories()
 
-            # TODO: Implement remaining steps (Stories 6-10)
-            # self.progress.step(3, "Creating virtual environment")
-            # self._create_venv()
-            #
-            # self.progress.step(4, "Installing dependencies")
-            # self._install_dependencies(source_dir)
+            # Step 3: Create virtual environment
+            self.progress.step(3, "Creating virtual environment")
+            self._create_venv()
 
-            # Story 5: Frozen Package Deployment (IMPLEMENTED)
+            # Step 4: Install dependencies from pyproject.toml
+            self.progress.step(4, "Installing dependencies")
+            self._install_dependencies(source_dir)
+
+            # Step 5: Frozen Package Deployment - copy mcp_server and graphiti_core to lib/
             self.progress.step(5, "Freezing packages")
             self._freeze_packages(source_dir)
 
+            # Step 5b: Create .pth file so lib/ packages are importable
+            self.progress.step(6, "Configuring Python path")
+            self._create_pth_file()
+
             # TODO: Implement remaining steps (Stories 6-10)
-            # self.progress.step(6, "Creating wrapper executables")
+            # self.progress.step(7, "Creating wrapper executables")
             # self._create_wrappers()
             #
-            # self.progress.step(7, "Writing version information")
-            # version = self._write_version_info()
+            # self.progress.step(8, "Writing version information")
+            # version = self._write_version_info(source_dir)
             #
-            # self.progress.step(8, "Creating default configuration")
+            # self.progress.step(9, "Creating default configuration")
             # self._create_default_config()
             #
-            # self.progress.step(9, "Registering service")
+            # self.progress.step(10, "Registering service")
             # self._register_service()
             #
-            # self.progress.step(10, "Starting service")
+            # self.progress.step(11, "Starting service")
             # self._start_service()
             #
-            # self.progress.step(11, "Verifying installation")
+            # self.progress.step(12, "Verifying installation")
             # self._verify_installation()
 
-            # For now, return partial result (steps 1-2, 5 complete)
-            self.progress.complete("Partial installation complete (steps 1-2, 5; pending 3-4, 6-11)")
+            # Return result (steps 1-6 complete, 7-12 pending)
+            self.progress.complete("Core installation complete (steps 1-6; service registration pending)")
             return InstallationResult(
                 success=True,
-                version="2.1.0-partial",
+                version="2.1.0-core",
                 paths=self.paths,
-                details={"status": "partial", "completed": ["validate", "directories", "freeze_packages"], "pending": "Stories 3-4, 6-11"}
+                details={
+                    "status": "core_complete",
+                    "completed": [
+                        "validate",
+                        "directories",
+                        "venv",
+                        "dependencies",
+                        "freeze_packages",
+                        "pth_file"
+                    ],
+                    "pending": "Steps 7-12 (wrappers, version, config, service)"
+                }
             )
 
         except ValidationError as e:
@@ -718,6 +745,234 @@ class GraphitiInstaller:
                 ) from e
 
         logger.info("All directories created successfully")
+
+    # ========================================================================
+    # Virtual Environment and Dependency Methods
+    # ========================================================================
+
+    def _create_venv(self) -> None:
+        """
+        Create a dedicated virtual environment for the Graphiti daemon.
+
+        Uses VenvManager to create a venv at the install directory.
+        The install directory IS the venv (contains Scripts/, Lib/, pyvenv.cfg directly).
+
+        Note: Uses force=True when install_dir exists but is not a valid venv
+        (e.g., directory was created by _create_directories but venv not yet created).
+        This handles uv's requirement for --clear when directory already exists.
+
+        Raises:
+            InstallationError: If venv creation fails
+            ValidationError: If Python version is incompatible
+        """
+        logger.info("Creating virtual environment")
+
+        try:
+            # VenvManager uses install_dir as the venv path (v2.1 architecture)
+            venv_manager = VenvManager(venv_path=self.paths.install_dir)
+
+            # Check if we need to force-create (directory exists but not a valid venv)
+            # This handles the case where _create_directories created the install_dir
+            # but it's not yet a valid venv (no pyvenv.cfg)
+            force_create = (
+                self.paths.install_dir.exists() and
+                not venv_manager.detect_venv()
+            )
+
+            if force_create:
+                logger.info("Install directory exists but is not a valid venv, using force=True")
+
+            # Create the venv
+            success, message = venv_manager.create_venv(force=force_create)
+
+            if not success:
+                raise InstallationError(
+                    f"Failed to create virtual environment: {message}",
+                    step="create_venv",
+                    details={"venv_path": str(self.paths.install_dir)}
+                )
+
+            logger.info(f"Virtual environment ready: {message}")
+
+        except IncompatiblePythonVersionError as e:
+            raise ValidationError(
+                str(e),
+                step="create_venv",
+                details={"python_version": f"{sys.version_info.major}.{sys.version_info.minor}"}
+            )
+        except VenvCreationError as e:
+            raise InstallationError(
+                f"Venv creation failed: {str(e)}",
+                step="create_venv",
+                details={"error": str(e)}
+            )
+
+    def _generate_requirements(self, source_dir: Optional[Path] = None) -> Path:
+        """
+        Generate requirements.txt from pyproject.toml.
+
+        Args:
+            source_dir: Path to source repository (default: auto-detect)
+
+        Returns:
+            Path to generated requirements.txt file
+
+        Raises:
+            InstallationError: If requirements generation fails
+        """
+        logger.info("Generating requirements.txt from pyproject.toml")
+
+        # Find repository root
+        repo_root = self._find_repo_root(source_dir)
+
+        # Locate pyproject.toml
+        pyproject_path = repo_root / "mcp_server" / "pyproject.toml"
+        if not pyproject_path.exists():
+            raise InstallationError(
+                f"pyproject.toml not found at {pyproject_path}",
+                step="generate_requirements",
+                details={"pyproject_path": str(pyproject_path)}
+            )
+
+        # Output path: install_dir/requirements.txt (where VenvManager expects it)
+        requirements_path = self.paths.install_dir / "requirements.txt"
+
+        try:
+            # Parse pyproject.toml
+            pyproject_data = parse_pyproject_toml(pyproject_path)
+
+            # Generate requirements list (include all dependencies, no optional for now)
+            requirements = generate_requirements_txt(
+                pyproject_data,
+                include_optional=False,
+                optional_groups=None
+            )
+
+            # Write to install directory
+            write_requirements_file(requirements, requirements_path)
+
+            logger.info(f"Generated {len(requirements)} requirements to {requirements_path}")
+            return requirements_path
+
+        except PyprojectParseError as e:
+            raise InstallationError(
+                f"Failed to parse pyproject.toml: {str(e)}",
+                step="generate_requirements",
+                details={"error": str(e)}
+            )
+        except RequirementsGenerationError as e:
+            raise InstallationError(
+                f"Failed to generate requirements: {str(e)}",
+                step="generate_requirements",
+                details={"error": str(e)}
+            )
+
+    def _install_dependencies(self, source_dir: Optional[Path] = None) -> None:
+        """
+        Install pip dependencies into the virtual environment.
+
+        Steps:
+            1. Generate requirements.txt from pyproject.toml
+            2. Install packages using VenvManager.install_package()
+
+        Args:
+            source_dir: Path to source repository (default: auto-detect)
+
+        Raises:
+            InstallationError: If dependency installation fails
+        """
+        logger.info("Installing dependencies")
+
+        # Step 1: Generate requirements.txt
+        requirements_path = self._generate_requirements(source_dir)
+        logger.info(f"Using requirements file: {requirements_path}")
+
+        # Step 2: Install packages using VenvManager
+        try:
+            venv_manager = VenvManager(venv_path=self.paths.install_dir)
+
+            # Verify venv exists before installing
+            if not venv_manager.detect_venv():
+                raise InstallationError(
+                    "Virtual environment not found. Run _create_venv() first.",
+                    step="install_dependencies",
+                    details={"venv_path": str(self.paths.install_dir)}
+                )
+
+            # Install packages from requirements.txt
+            success, message = venv_manager.install_package()
+
+            if not success:
+                raise InstallationError(
+                    f"Failed to install dependencies: {message}",
+                    step="install_dependencies",
+                    details={"requirements_path": str(requirements_path)}
+                )
+
+            logger.info(f"Dependencies installed: {message}")
+
+        except VenvCreationError as e:
+            raise InstallationError(
+                f"Dependency installation failed: {str(e)}",
+                step="install_dependencies",
+                details={"error": str(e)}
+            )
+
+    def _create_pth_file(self) -> None:
+        """
+        Create a .pth file in site-packages to add lib/ to Python path.
+
+        This enables importing mcp_server and graphiti_core from the frozen
+        packages in lib/ without setting PYTHONPATH environment variable.
+
+        The .pth file is placed in:
+            - Windows: {install_dir}/Lib/site-packages/graphiti.pth
+            - Unix: {install_dir}/lib/python3.X/site-packages/graphiti.pth
+
+        Raises:
+            InstallationError: If .pth file creation fails
+        """
+        logger.info("Creating .pth file for lib/ path resolution")
+
+        lib_dir = self.paths.install_dir / "lib"
+
+        # Find site-packages directory
+        if sys.platform == "win32":
+            site_packages = self.paths.install_dir / "Lib" / "site-packages"
+        else:
+            # Unix: lib/python3.X/site-packages
+            python_version = f"python{sys.version_info.major}.{sys.version_info.minor}"
+            site_packages = self.paths.install_dir / "lib" / python_version / "site-packages"
+
+        # Create site-packages if it doesn't exist (should exist after venv creation)
+        if not site_packages.exists():
+            logger.warning(f"site-packages not found at {site_packages}, creating...")
+            try:
+                site_packages.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                raise InstallationError(
+                    f"Failed to create site-packages directory: {str(e)}",
+                    step="create_pth_file",
+                    details={"site_packages": str(site_packages)}
+                )
+
+        # Create graphiti.pth file
+        pth_file = site_packages / "graphiti.pth"
+
+        try:
+            # Write the lib directory path to .pth file
+            # .pth files should contain absolute paths, one per line
+            pth_content = str(lib_dir.resolve())
+            pth_file.write_text(pth_content, encoding="utf-8")
+
+            logger.info(f"Created {pth_file} pointing to {lib_dir}")
+
+        except Exception as e:
+            raise InstallationError(
+                f"Failed to create .pth file: {str(e)}",
+                step="create_pth_file",
+                details={"pth_file": str(pth_file), "error": str(e)}
+            )
 
     # ========================================================================
     # Version Tracking Methods
@@ -1144,11 +1399,11 @@ class GraphitiInstaller:
         graphiti_core_dir = lib_dir / "graphiti_core"
 
         # Check mcp_server structure
+        # Note: mcp_server/config/ is a data directory (YAML configs), not a Python package
         mcp_critical_files = [
             mcp_server_dir / "__init__.py",
             mcp_server_dir / "graphiti_mcp_server.py",
             mcp_server_dir / "daemon" / "__init__.py",
-            mcp_server_dir / "config" / "__init__.py",
         ]
 
         for file_path in mcp_critical_files:
@@ -1174,22 +1429,25 @@ class GraphitiInstaller:
 
         logger.info("Tier 1: Package structure verified")
 
-        # Tier 2: Init file check
-        logger.info("Tier 2: Verifying __init__.py files")
+        # Tier 2: Init file check (warning only - some packages use namespace packages)
+        logger.info("Tier 2: Checking __init__.py files")
+        missing_init_dirs = []
         for package_dir in [mcp_server_dir, graphiti_core_dir]:
             for py_file in package_dir.rglob("*.py"):
                 parent = py_file.parent
                 if parent != package_dir and not parent.name.startswith("_"):
-                    # This is a subdirectory with .py files - it should have __init__.py
+                    # This is a subdirectory with .py files - should have __init__.py
                     init_file = parent / "__init__.py"
                     if not init_file.exists():
-                        raise InstallationError(
-                            f"Missing __init__.py in {parent.relative_to(lib_dir)}",
-                            step="verify_frozen_packages",
-                            details={"directory": str(parent)}
-                        )
+                        rel_path = parent.relative_to(lib_dir)
+                        if str(rel_path) not in missing_init_dirs:
+                            missing_init_dirs.append(str(rel_path))
+                            logger.warning(f"Missing __init__.py in {rel_path} (may be namespace package)")
 
-        logger.info("Tier 2: All __init__.py files verified")
+        if missing_init_dirs:
+            logger.info(f"Tier 2: {len(missing_init_dirs)} directories without __init__.py (non-blocking)")
+        else:
+            logger.info("Tier 2: All __init__.py files verified")
 
         # Tier 3: Import check
         logger.info("Tier 3: Verifying packages are importable")

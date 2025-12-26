@@ -360,22 +360,27 @@ class TestDaemonInstallPackageIntegration:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
+        mock_uv_path = str(mock_install_dir / "uv.exe")
+
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
-            mock_uv_path = manager.venv_path / 'bin' / 'uv'
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=mock_uv_path):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=mock_uv_path):  # uv available in PATH
                         with patch.object(manager, 'validate_installation', return_value=True):
                             with patch('subprocess.run') as mock_run:
                                 mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                                 success, _ = manager.install_package()
 
-                                # Verify uv pip was used with -r requirements.txt
+                                # Verify uv pip was used with --python and -r requirements.txt
                                 call_args = mock_run.call_args[0][0]
                                 assert 'uv' in str(call_args[0])
+                                assert 'pip' in call_args
+                                assert 'install' in call_args
+                                assert '--python' in call_args
                                 assert '-r' in call_args
                                 assert success is True
 
@@ -388,26 +393,26 @@ class TestDaemonInstallPackageIntegration:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+        mock_pip_path = mock_install_dir / "Scripts" / "pip.exe"
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
 
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=None):  # No uv in PATH
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
                                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-                                    with patch('platform.system', return_value='Linux'):
-                                        success, _ = manager.install_package()
+                                    success, _ = manager.install_package()
 
-                                        # Verify standard pip was used with -r requirements.txt
-                                        call_args = mock_run.call_args[0][0]
-                                        assert 'pip' in str(call_args[0])
-                                        assert '-r' in call_args
-                                        assert success is True
+                                    # Verify standard pip was used with -r requirements.txt
+                                    call_args = mock_run.call_args[0][0]
+                                    assert 'pip' in str(call_args[0])
+                                    assert '-r' in call_args
+                                    assert success is True
 
     def test_daemon_install_validates_package_installation(self, tmp_path):
         """daemon install validates package installation succeeded"""
@@ -418,14 +423,15 @@ class TestDaemonInstallPackageIntegration:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+        mock_pip_path = mock_install_dir / "Scripts" / "pip.exe"
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
 
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=None):  # No uv in PATH
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
                             with patch.object(manager, 'validate_installation') as mock_validate:
                                 mock_validate.return_value = True
@@ -489,14 +495,15 @@ class TestDaemonInstallPackageIntegration:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+        mock_pip_path = mock_install_dir / "Scripts" / "pip.exe"
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
 
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=None):  # No uv in PATH
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
@@ -514,8 +521,8 @@ class TestDaemonInstallPackageIntegration:
 class TestPackageInstallationSecurity:
     """Security tests for package installation."""
 
-    def test_repo_path_validated_before_installation(self, tmp_path):
-        """Repo path is validated before installation (prevent path traversal)"""
+    def test_requirements_file_validated_before_installation(self, tmp_path):
+        """Requirements file is validated before installation"""
         # Create mock venv directory structure to pass detect_venv
         mock_venv = tmp_path / "Programs" / "Graphiti"
         mock_venv.mkdir(parents=True)
@@ -530,13 +537,13 @@ class TestPackageInstallationSecurity:
 
         manager = VenvManager(venv_path=mock_venv)
 
-        # Mock repo detection returns None (invalid path)
-        with patch.object(manager, 'detect_repo_location', return_value=None):
+        # No requirements.txt exists, should fail
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_venv):
             success, message = manager.install_package()
 
-            # Installation should fail if repo path cannot be validated
+            # Installation should fail if requirements.txt cannot be found
             assert success is False
-            assert 'cannot find' in message.lower() or 'not found' in message.lower()
+            assert 'requirements' in message.lower() or 'not found' in message.lower()
 
     def test_subprocess_commands_properly_escaped_for_install(self, tmp_path):
         """Subprocess commands are properly escaped (no shell injection)"""
@@ -547,14 +554,15 @@ class TestPackageInstallationSecurity:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+        mock_pip_path = mock_install_dir / "Scripts" / "pip.exe"
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
 
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=None):  # No uv in PATH
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
@@ -575,14 +583,15 @@ class TestPackageInstallationSecurity:
         requirements_file = mock_install_dir / "requirements.txt"
         requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        mock_pip_path = mock_install_dir / ".venv" / "bin" / "pip"
+        mock_pip_path = mock_install_dir / "Scripts" / "pip.exe"
+        mock_python_path = mock_install_dir / "Scripts" / "python.exe"
 
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                with patch('shutil.which', return_value=None):  # No uvx in PATH
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+                with patch.object(manager, 'get_python_executable', return_value=mock_python_path):
+                    with patch('shutil.which', return_value=None):  # No uv in PATH
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip_path):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:

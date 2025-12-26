@@ -220,3 +220,295 @@ def test_installation_error_exception():
         raise InstallationError("custom error")
 
     assert "custom error" in str(exc_info.value)
+
+
+# ============================================================================
+# Tests for new installer methods (Steps 3-6)
+# ============================================================================
+
+
+def test_create_venv():
+    """
+    Test _create_venv() creates virtual environment.
+
+    Verifies that the method calls VenvManager.create_venv() correctly.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock VenvManager
+        with patch('mcp_server.daemon.installer.VenvManager') as MockVenvManager:
+            mock_venv_manager = MagicMock()
+            mock_venv_manager.create_venv.return_value = (True, "Venv created successfully")
+            MockVenvManager.return_value = mock_venv_manager
+
+            # Call the method
+            installer._create_venv()
+
+            # Verify VenvManager was called with correct path
+            MockVenvManager.assert_called_once_with(venv_path=mock_paths.install_dir)
+            mock_venv_manager.create_venv.assert_called_once_with(force=False)
+
+
+def test_create_venv_handles_failure():
+    """
+    Test _create_venv() raises InstallationError on failure.
+
+    Verifies that the method properly handles venv creation failures.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller, InstallationError
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock VenvManager to return failure
+        with patch('mcp_server.daemon.installer.VenvManager') as MockVenvManager:
+            mock_venv_manager = MagicMock()
+            mock_venv_manager.create_venv.return_value = (False, "Venv creation failed")
+            MockVenvManager.return_value = mock_venv_manager
+
+            # Verify InstallationError is raised
+            with pytest.raises(InstallationError) as exc_info:
+                installer._create_venv()
+
+            assert "Failed to create virtual environment" in str(exc_info.value)
+
+
+def test_generate_requirements():
+    """
+    Test _generate_requirements() generates requirements.txt from pyproject.toml.
+
+    Verifies that the method correctly parses pyproject.toml and writes requirements.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock the helper functions
+        with patch.object(installer, '_find_repo_root') as mock_find_root, \
+             patch('mcp_server.daemon.installer.parse_pyproject_toml') as mock_parse, \
+             patch('mcp_server.daemon.installer.generate_requirements_txt') as mock_gen, \
+             patch('mcp_server.daemon.installer.write_requirements_file') as mock_write:
+
+            # Set up mocks
+            mock_repo_root = temp_dir / "graphiti_repo"
+            mock_find_root.return_value = mock_repo_root
+
+            # Create mock pyproject.toml path existence
+            mock_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
+            with patch.object(Path, 'exists', return_value=True):
+                mock_parse.return_value = {"project": {"dependencies": ["mcp>=1.0"]}}
+                mock_gen.return_value = ["mcp>=1.0"]
+
+                # Call the method
+                result = installer._generate_requirements()
+
+                # Verify the workflow
+                mock_find_root.assert_called_once()
+                mock_gen.assert_called_once()
+                mock_write.assert_called_once()
+
+
+def test_install_dependencies():
+    """
+    Test _install_dependencies() installs pip packages.
+
+    Verifies that the method generates requirements and installs packages.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock _generate_requirements and VenvManager
+        with patch.object(installer, '_generate_requirements') as mock_gen_req, \
+             patch('mcp_server.daemon.installer.VenvManager') as MockVenvManager:
+
+            mock_gen_req.return_value = temp_dir / "requirements.txt"
+
+            mock_venv_manager = MagicMock()
+            mock_venv_manager.detect_venv.return_value = True
+            mock_venv_manager.install_package.return_value = (True, "Packages installed")
+            MockVenvManager.return_value = mock_venv_manager
+
+            # Call the method
+            installer._install_dependencies()
+
+            # Verify the workflow
+            mock_gen_req.assert_called_once()
+            mock_venv_manager.detect_venv.assert_called_once()
+            mock_venv_manager.install_package.assert_called_once()
+
+
+def test_install_dependencies_requires_venv():
+    """
+    Test _install_dependencies() raises error if venv doesn't exist.
+
+    Verifies that the method checks for venv before installing.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller, InstallationError
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock _generate_requirements and VenvManager (venv not detected)
+        with patch.object(installer, '_generate_requirements') as mock_gen_req, \
+             patch('mcp_server.daemon.installer.VenvManager') as MockVenvManager:
+
+            mock_gen_req.return_value = temp_dir / "requirements.txt"
+
+            mock_venv_manager = MagicMock()
+            mock_venv_manager.detect_venv.return_value = False  # No venv
+            MockVenvManager.return_value = mock_venv_manager
+
+            # Verify InstallationError is raised
+            with pytest.raises(InstallationError) as exc_info:
+                installer._install_dependencies()
+
+            assert "Virtual environment not found" in str(exc_info.value)
+
+
+def test_create_pth_file():
+    """
+    Test _create_pth_file() creates .pth file in site-packages.
+
+    Verifies that the method creates the .pth file with correct content.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.mkdtemp())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        try:
+            # Create lib directory
+            lib_dir = temp_dir / "lib"
+            lib_dir.mkdir(parents=True, exist_ok=True)
+
+            # Create site-packages based on platform
+            if sys.platform == "win32":
+                site_packages = temp_dir / "Lib" / "site-packages"
+            else:
+                python_version = f"python{sys.version_info.major}.{sys.version_info.minor}"
+                site_packages = temp_dir / "lib" / python_version / "site-packages"
+
+            site_packages.mkdir(parents=True, exist_ok=True)
+
+            # Call the method
+            installer._create_pth_file()
+
+            # Verify .pth file was created
+            pth_file = site_packages / "graphiti.pth"
+            assert pth_file.exists(), ".pth file should be created"
+
+            # Verify content
+            content = pth_file.read_text(encoding="utf-8")
+            assert str(lib_dir.resolve()) in content, ".pth should contain lib directory path"
+
+        finally:
+            # Cleanup
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_install_flow_includes_new_steps():
+    """
+    Test that install() calls the new methods in correct order.
+
+    Verifies that install() now includes venv creation, dependency installation,
+    and .pth file creation.
+    """
+    from mcp_server.daemon.installer import GraphitiInstaller
+
+    with patch('mcp_server.daemon.installer.get_paths') as mock_get_paths:
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+
+        mock_paths = MagicMock()
+        mock_paths.install_dir = temp_dir / "graphiti_test_install"
+        mock_paths.config_dir = temp_dir / "graphiti_test_config"
+        mock_paths.state_dir = temp_dir / "graphiti_test_state"
+        mock_get_paths.return_value = mock_paths
+
+        installer = GraphitiInstaller()
+
+        # Mock all the methods to track call order
+        call_order = []
+
+        def track_call(name):
+            def _track(*args, **kwargs):
+                call_order.append(name)
+            return _track
+
+        with patch.object(installer, '_validate_environment', side_effect=track_call('validate')), \
+             patch.object(installer, '_create_directories', side_effect=track_call('directories')), \
+             patch.object(installer, '_create_venv', side_effect=track_call('venv')), \
+             patch.object(installer, '_install_dependencies', side_effect=track_call('dependencies')), \
+             patch.object(installer, '_freeze_packages', side_effect=track_call('freeze')), \
+             patch.object(installer, '_create_pth_file', side_effect=track_call('pth_file')):
+
+            # Call install
+            result = installer.install()
+
+            # Verify all methods were called in order
+            assert 'validate' in call_order, "validate should be called"
+            assert 'directories' in call_order, "directories should be called"
+            assert 'venv' in call_order, "venv should be called"
+            assert 'dependencies' in call_order, "dependencies should be called"
+            assert 'freeze' in call_order, "freeze should be called"
+            assert 'pth_file' in call_order, "pth_file should be called"
+
+            # Verify order: validate -> directories -> venv -> dependencies -> freeze -> pth_file
+            validate_idx = call_order.index('validate')
+            directories_idx = call_order.index('directories')
+            venv_idx = call_order.index('venv')
+            dependencies_idx = call_order.index('dependencies')
+            freeze_idx = call_order.index('freeze')
+            pth_file_idx = call_order.index('pth_file')
+
+            assert validate_idx < directories_idx < venv_idx < dependencies_idx < freeze_idx < pth_file_idx, \
+                "Methods should be called in correct order"

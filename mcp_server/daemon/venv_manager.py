@@ -448,23 +448,42 @@ class VenvManager:
 
         logger.debug(f"Using requirements file: {requirements_path}")
 
-        # Determine which tool to use (prefer uvx, then uv pip, then pip)
-        # Check for uvx in PATH first
-        uvx_path = shutil.which("uvx")
-        if uvx_path:
-            pip_command = [uvx_path, "pip", "install"]
-            tool_name = "uvx"
+        # Determine which tool to use
+        # Priority: uv (with --python flag) > pip
+        # Note: We MUST specify the target Python to install into the venv, not globally
+        python_exe = self.get_python_executable()
+
+        # Check for uv in PATH first (preferred - faster)
+        uv_path = shutil.which("uv")
+        if uv_path:
+            # Use uv pip install with --python to target the venv
+            pip_command = [uv_path, "pip", "install", "--python", str(python_exe)]
+            tool_name = "uv"
         else:
-            # Check for uv in venv
-            uv_exe = self.get_uv_executable()
-            if uv_exe:
-                pip_command = [str(uv_exe), "pip", "install"]
-                tool_name = "uv pip"
-            else:
-                # Fallback to standard pip
+            # Fallback to venv's pip
+            try:
                 pip_exe = self.get_pip_executable()
                 pip_command = [str(pip_exe), "install"]
                 tool_name = "pip"
+            except VenvCreationError:
+                # pip not available in venv (common with uv-created venvs)
+                # Try to bootstrap pip using ensurepip
+                logger.info("pip not found in venv, attempting to bootstrap with ensurepip")
+                try:
+                    result = subprocess.run(
+                        [str(python_exe), "-m", "ensurepip", "--upgrade"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        timeout=60,
+                    )
+                    if result.returncode != 0:
+                        return False, f"Failed to bootstrap pip: {result.stderr}"
+                    pip_exe = self.get_pip_executable()
+                    pip_command = [str(pip_exe), "install"]
+                    tool_name = "pip (bootstrapped)"
+                except Exception as e:
+                    return False, f"Failed to bootstrap pip: {e}"
 
         # Build install command (install from requirements.txt)
         install_command = pip_command + ["-r", str(requirements_path), "--quiet"]

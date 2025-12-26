@@ -13,6 +13,7 @@ Updated for v2.1 architecture using platform-specific paths via paths.py module.
 
 import sys
 import subprocess
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock, call
 
@@ -494,29 +495,47 @@ class TestValidateInstallation:
 
 
 class TestInstallPackage:
-    """Test package installation."""
+    """Test package installation.
 
-    def test_install_package_uses_uv_pip_when_available(self):
-        """VenvManager.install_package() uses uv pip when uv available in venv"""
-        manager = VenvManager()
+    v2.1 Implementation:
+    - Uses `uv pip install --python <venv_python>` when uv is available in PATH
+    - Falls back to venv's pip when uv not available
+    - Installs from requirements.txt (not editable from source)
+    """
 
-        mock_repo_root = Path('/home/user/graphiti')
+    def test_install_package_uses_uv_pip_when_available(self, tmp_path):
+        """VenvManager.install_package() uses uv pip with --python flag when uv available"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=Path('/venv/bin/uv')):
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
+
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+
+            with patch.object(manager, 'detect_venv', return_value=True):
+                # Mock uv in PATH (v2.1 uses uv from PATH, not venv)
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
                         with patch.object(manager, 'validate_installation', return_value=True):
                             with patch('subprocess.run') as mock_run:
                                 mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                                 success, message = manager.install_package()
 
-                                # Verify uv pip was used
+                                # Verify uv pip was used with --python flag
                                 call_args = mock_run.call_args[0][0]
                                 assert 'uv' in str(call_args[0])
                                 assert 'pip' in call_args
                                 assert 'install' in call_args
+                                assert '--python' in call_args, "v2.1: uv requires --python flag"
                                 assert success is True
 
     def test_install_package_falls_back_to_pip_when_uv_not_available(self, tmp_path):
@@ -530,12 +549,19 @@ class TestInstallPackage:
             requirements_file = mock_install_dir / "requirements.txt"
             requirements_file.write_text("mcp_server>=1.0.0\n")
 
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+                mock_pip = Path('C:/venv/Scripts/pip.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+                mock_pip = Path('/venv/bin/pip')
+
             with patch.object(manager, 'detect_venv', return_value=True):
-                # Mock uvx not in PATH
+                # Mock uv NOT in PATH
                 with patch('shutil.which', return_value=None):
-                    # Mock no uv in venv
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
+                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
                                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
@@ -548,26 +574,35 @@ class TestInstallPackage:
                                     assert 'install' in call_args
                                     assert success is True
 
-    def test_install_package_uses_non_editable_install(self):
+    def test_install_package_uses_non_editable_install(self, tmp_path):
         """VenvManager.install_package() uses non-editable install (no -e flag)"""
-        manager = VenvManager()
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        mock_repo_root = Path('/home/user/graphiti')
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
-                            with patch.object(manager, 'validate_installation', return_value=True):
-                                with patch('subprocess.run') as mock_run:
-                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
 
-                                    manager.install_package()
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                                    # Verify -e flag is NOT in command
-                                    call_args = mock_run.call_args[0][0]
-                                    assert '-e' not in call_args
+                                manager.install_package()
+
+                                # Verify -e flag is NOT in command
+                                call_args = mock_run.call_args[0][0]
+                                assert '-e' not in call_args
 
     def test_install_package_constructs_correct_path(self, tmp_path):
         """VenvManager.install_package() constructs correct install command with requirements.txt"""
@@ -582,28 +617,30 @@ class TestInstallPackage:
 
             # Use platform-agnostic path construction
             if sys.platform == "win32":
-                mock_pip = Path('C:/venv/bin/pip')
+                mock_python = Path('C:/venv/Scripts/python.exe')
             else:
-                mock_pip = Path('/venv/bin/pip')
+                mock_python = Path('/venv/bin/python')
 
             with patch.object(manager, 'detect_venv', return_value=True):
-                # Mock uvx not in PATH
-                with patch('shutil.which', return_value=None):
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=mock_pip):
-                            with patch.object(manager, 'validate_installation', return_value=True):
-                                with patch('subprocess.run') as mock_run:
-                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                # Mock uv in PATH (v2.1: uses uv pip install --python <path>)
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
-                                    manager.install_package()
+                                manager.install_package()
 
-                                    # v2.1: Verify requirements.txt path is included
-                                    call_args = mock_run.call_args[0][0]
-                                    # Implementation uses -r requirements.txt flag
-                                    assert '-r' in call_args, \
-                                        f"Expected '-r' flag not found in {call_args}"
-                                    assert any('requirements.txt' in str(arg) for arg in call_args), \
-                                        f"Expected requirements.txt path not found in {call_args}"
+                                # v2.1: Verify requirements.txt path is included
+                                call_args = mock_run.call_args[0][0]
+                                # Implementation uses -r requirements.txt flag
+                                assert '-r' in call_args, \
+                                    f"Expected '-r' flag not found in {call_args}"
+                                assert any('requirements.txt' in str(arg) for arg in call_args), \
+                                    f"Expected requirements.txt path not found in {call_args}"
+                                # v2.1: Verify --python flag is used with uv
+                                assert '--python' in call_args, \
+                                    f"Expected '--python' flag for uv not found in {call_args}"
 
     def test_install_package_raises_error_on_failure(self):
         """VenvManager.install_package() raises error on installation failure"""
@@ -643,12 +680,19 @@ class TestInstallPackage:
                                 # Verify validation was called
                                 mock_validate.assert_called_once_with('mcp_server')
 
-    def test_install_package_handles_repo_not_found(self):
-        """VenvManager.install_package() handles case when repo location cannot be detected"""
-        manager = VenvManager()
+    def test_install_package_handles_missing_requirements_file(self):
+        """VenvManager.install_package() handles case when requirements.txt is missing"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            manager = VenvManager(venv_path=temp_path)
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=None):
-                success, message = manager.install_package()
-                assert success is False
-                assert 'cannot find' in message.lower() or 'not found' in message.lower()
+            # Create minimal venv structure but no requirements.txt
+            # The install_package() checks for requirements.txt at get_install_dir() / "requirements.txt"
+            # We need to patch get_install_dir to return our temp path (which has no requirements.txt)
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch.object(manager, 'get_python_executable', return_value=temp_path / "Scripts" / "python.exe"):
+                    with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=temp_path):
+                        # Requirements file doesn't exist at temp_path/requirements.txt
+                        success, message = manager.install_package()
+                        assert success is False
+                        assert 'requirements' in message.lower() or 'not found' in message.lower()
