@@ -338,20 +338,27 @@ class TestSecurityServiceFiles:
         for manager_class, platform, template_method, install_dir_patch in service_managers:
             with patch('platform.system', return_value=platform):
                 mock_install_dir = Path.home() / '.graphiti'
+                # Mock both paths.get_install_dir and venv_manager.get_install_dir
                 with patch(install_dir_patch, return_value=mock_install_dir):
-                    service_manager = manager_class()
+                    with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+                        # Also mock VenvManager.detect_venv to return True (venv exists)
+                        with patch.object(VenvManager, 'detect_venv', return_value=True):
+                            # Mock get_python_executable to return a mock path
+                            mock_python = mock_install_dir / 'bin' / 'python'
+                            with patch.object(VenvManager, 'get_python_executable', return_value=mock_python):
+                                service_manager = manager_class()
 
-                    # Call actual template generation method
-                    template_content = getattr(service_manager, template_method)()
+                                # Call actual template generation method
+                                template_content = getattr(service_manager, template_method)()
 
-                    # Convert to string for verification
-                    template_str = str(template_content).lower()
+                                # Convert to string for verification
+                                template_str = str(template_content).lower()
 
-                    # Verify no credential patterns
-                    assert 'password=' not in template_str
-                    assert 'api_key=' not in template_str
-                    assert 'secret=' not in template_str
-                    assert 'token=' not in template_str
+                                # Verify no credential patterns
+                                assert 'password=' not in template_str
+                                assert 'api_key=' not in template_str
+                                assert 'secret=' not in template_str
+                                assert 'token=' not in template_str
 
     def test_install_dir_path_resolution_prevents_path_traversal(self):
         """Install dir path resolution doesn't allow path traversal"""

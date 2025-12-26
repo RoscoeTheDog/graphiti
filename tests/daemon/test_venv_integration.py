@@ -312,19 +312,19 @@ class TestSecurityAndPermissions:
                         assert call_kwargs.get('shell', False) is False
 
     def test_path_traversal_prevention(self, tmp_path):
-        """Path traversal prevented (venv path is always under install_dir/.venv)"""
+        """Path traversal prevented (venv path IS the install_dir in v2.1 architecture)"""
         from mcp_server.daemon.paths import get_install_dir
 
         mock_install_dir = tmp_path / "Programs" / "Graphiti"
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
-            # Verify venv_path cannot be manipulated - v2.1 uses platform-specific paths
-            expected_path = mock_install_dir / '.venv'
+            # v2.1: Install dir IS the venv - no .venv subdirectory
+            expected_path = mock_install_dir
             assert manager.venv_path == expected_path
 
-            # Verify path components are correct (v2.1 architecture)
-            assert manager.venv_path.parts[-2:] == ('Graphiti', '.venv')
+            # Verify path component is correct (v2.1 architecture)
+            assert manager.venv_path.parts[-1] == 'Graphiti'
 
 
 class TestDaemonInstallPackageIntegration:
@@ -514,9 +514,21 @@ class TestDaemonInstallPackageIntegration:
 class TestPackageInstallationSecurity:
     """Security tests for package installation."""
 
-    def test_repo_path_validated_before_installation(self):
+    def test_repo_path_validated_before_installation(self, tmp_path):
         """Repo path is validated before installation (prevent path traversal)"""
-        manager = VenvManager()
+        # Create mock venv directory structure to pass detect_venv
+        mock_venv = tmp_path / "Programs" / "Graphiti"
+        mock_venv.mkdir(parents=True)
+        (mock_venv / "pyvenv.cfg").touch()
+        # Create platform-appropriate activate script
+        if sys.platform == "win32":
+            (mock_venv / "Scripts").mkdir()
+            (mock_venv / "Scripts" / "activate.bat").touch()
+        else:
+            (mock_venv / "bin").mkdir()
+            (mock_venv / "bin" / "activate").touch()
+
+        manager = VenvManager(venv_path=mock_venv)
 
         # Mock repo detection returns None (invalid path)
         with patch.object(manager, 'detect_repo_location', return_value=None):

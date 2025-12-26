@@ -244,7 +244,8 @@ class TestPlatformAgnosticPaths:
             venv_str = str(manager.venv_path)
             # Note: Path normalizes to OS format, so on Windows it will be backslashes
             # We verify it's a valid Path object that can handle both formats
-            assert manager.venv_path.parts[-1] == '.venv'
+            # v2.1: Install dir IS the venv (no .venv subdirectory)
+            assert manager.venv_path.parts[-1] == 'Graphiti'
 
     def test_unix_path_handling(self):
         """VenvManager path handling works on Unix (forward slashes)"""
@@ -256,7 +257,9 @@ class TestPlatformAgnosticPaths:
 
             # On Unix, Path should use forward slashes
             venv_str = str(manager.venv_path)
-            assert manager.venv_path.parts[-1] == '.venv'
+            # v2.1: Install dir IS the venv (no .venv subdirectory)
+            # On Linux: ends with 'graphiti' (lowercase)
+            assert manager.venv_path.parts[-1] in ('Graphiti', 'graphiti')
 
     def test_path_operations_work_on_windows(self):
         """Path operations (mkdir, exists, etc.) work correctly on Windows"""
@@ -312,17 +315,18 @@ class TestEdgeCases:
                         manager.create_venv()
 
     def test_venv_path_is_always_under_graphiti_home(self, tmp_path):
-        """Venv path is always under platform-specific install dir/.venv (v2.1 architecture)"""
+        """Venv path IS the platform-specific install dir (v2.1 architecture)"""
         mock_install_dir = get_mock_install_dir(tmp_path)
         with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
             manager = VenvManager()
 
-            # Verify venv path is constructed correctly for v2.1 architecture
-            # On Windows: Programs/Graphiti/.venv, on Linux: share/graphiti/.venv
-            assert manager.venv_path.parts[-2:] == ('Graphiti', '.venv')
+            # Verify venv path is the install dir itself (v2.1 architecture)
+            # Install dir IS the venv - no .venv subdirectory
+            # On Windows: Programs/Graphiti, on Linux: share/graphiti
+            assert manager.venv_path.parts[-1] in ('Graphiti', 'graphiti')
 
-            # Verify it's under the mocked install dir
-            assert manager.venv_path == mock_install_dir / '.venv'
+            # Verify it IS the mocked install dir (not a subdirectory)
+            assert manager.venv_path == mock_install_dir
 
 
 class TestGetUvExecutable:

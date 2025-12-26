@@ -50,10 +50,12 @@ class VenvManager:
         Initialize VenvManager.
 
         Args:
-            venv_path: Path to venv directory. Defaults to platform-specific install dir from paths.py
+            venv_path: Path to venv directory. Defaults to platform-specific install dir from paths.py.
+                      Note: The install dir IS the venv (contains Scripts/, Lib/, pyvenv.cfg directly).
         """
         if venv_path is None:
-            venv_path = get_install_dir() / ".venv"
+            # Install dir IS the venv - no .venv subdirectory
+            venv_path = get_install_dir()
         self.venv_path = venv_path
 
     def validate_python_version(self) -> bool:

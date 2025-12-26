@@ -2634,7 +2634,7 @@ async def initialize_session_tracking() -> None:
         # Create filter
         filter_config = unified_config.session_tracking.filter
         session_filter = SessionFilter(
-            filter_config=filter_config
+            config=filter_config
         ) if filter_config else SessionFilter()
 
         # Helper function to resolve effective config for a session
