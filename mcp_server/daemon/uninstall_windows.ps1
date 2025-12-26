@@ -113,15 +113,11 @@ if ($DryRun) {
 }
 
 # Check for admin rights (required for service removal)
-if (-not (Test-Administrator)) {
-    Write-Error "This script requires administrator privileges to remove services."
+$IsAdmin = Test-Administrator
+if (-not $IsAdmin) {
+    Write-Warning "Running without administrator privileges."
+    Write-Host "Service removal will be skipped. For complete uninstall, run as Administrator."
     Write-Host ""
-    Write-Host "Please run PowerShell as Administrator and try again:" -ForegroundColor $WarningColor
-    Write-Host "  1. Right-click PowerShell" -ForegroundColor $WarningColor
-    Write-Host "  2. Select 'Run as Administrator'" -ForegroundColor $WarningColor
-    Write-Host "  3. Re-run this script" -ForegroundColor $WarningColor
-    Write-Host ""
-    exit 1
 }
 
 # Define paths
@@ -162,49 +158,55 @@ foreach ($loc in $NssmLocations) {
     }
 }
 
-if ($NssmPath) {
-    Write-Host "Found NSSM: $NssmPath"
+if ($IsAdmin) {
+    if ($NssmPath) {
+        Write-Host "Found NSSM: $NssmPath"
 
-    # Check if service exists
-    $statusOutput = & $NssmPath status $ServiceName 2>&1
-    $serviceExists = $LASTEXITCODE -eq 0
+        # Check if service exists
+        $statusOutput = & $NssmPath status $ServiceName 2>&1
+        $serviceExists = $LASTEXITCODE -eq 0
 
-    if ($serviceExists) {
-        # Stop service
-        Write-Step "Stopping service '$ServiceName'..."
-        if (-not $DryRun) {
-            $stopOutput = & $NssmPath stop $ServiceName 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "Service stopped"
+        if ($serviceExists) {
+            # Stop service
+            Write-Step "Stopping service '$ServiceName'..."
+            if (-not $DryRun) {
+                $stopOutput = & $NssmPath stop $ServiceName 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Service stopped"
+                } else {
+                    Write-Warning "Failed to stop service (may already be stopped)"
+                }
             } else {
-                Write-Warning "Failed to stop service (may already be stopped)"
+                Write-Host "[DRY RUN] Would stop service"
+            }
+
+            # Remove service
+            Write-Step "Removing service '$ServiceName'..."
+            if (-not $DryRun) {
+                $removeOutput = & $NssmPath remove $ServiceName confirm 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Service removed"
+                } else {
+                    Write-Error "Failed to remove service: $removeOutput"
+                    $ExitCode = 1
+                }
+            } else {
+                Write-Host "[DRY RUN] Would remove service"
             }
         } else {
-            Write-Host "[DRY RUN] Would stop service"
-        }
-
-        # Remove service
-        Write-Step "Removing service '$ServiceName'..."
-        if (-not $DryRun) {
-            $removeOutput = & $NssmPath remove $ServiceName confirm 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "Service removed"
-            } else {
-                Write-Error "Failed to remove service: $removeOutput"
-                $ExitCode = 1
-            }
-        } else {
-            Write-Host "[DRY RUN] Would remove service"
+            Write-Warning "Service '$ServiceName' not found (may not be installed)"
         }
     } else {
-        Write-Warning "Service '$ServiceName' not found (may not be installed)"
+        Write-Warning "NSSM not found - skipping service removal"
+        Write-Host "If service exists, remove manually:"
+        Write-Host "  1. Install NSSM from https://nssm.cc/"
+        Write-Host "  2. Run: nssm stop $ServiceName"
+        Write-Host "  3. Run: nssm remove $ServiceName confirm"
+        Write-Host ""
     }
 } else {
-    Write-Warning "NSSM not found - skipping service removal"
-    Write-Host "If service exists, remove manually:"
-    Write-Host "  1. Install NSSM from https://nssm.cc/"
-    Write-Host "  2. Run: nssm stop $ServiceName"
-    Write-Host "  3. Run: nssm remove $ServiceName confirm"
+    Write-Warning "Skipping service removal (requires Administrator)"
+    Write-Host "To remove service, re-run this script as Administrator"
     Write-Host ""
 }
 
