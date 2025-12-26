@@ -23,6 +23,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from .paths import get_install_dir
+
 logger = logging.getLogger(__name__)
 
 
@@ -46,13 +48,15 @@ class WrapperGenerator:
         Initialize WrapperGenerator.
 
         Args:
-            venv_path: Path to venv directory. Defaults to ~/.graphiti/.venv/
-            bin_path: Path to bin directory. Defaults to ~/.graphiti/bin/
+            venv_path: Path to venv directory. Defaults to platform-specific install dir.
+            bin_path: Path to bin directory. Defaults to install_dir/bin/
         """
+        install_dir = get_install_dir()
         if venv_path is None:
-            venv_path = Path.home() / ".graphiti" / ".venv"
+            # v2.1 architecture: install_dir IS the venv (contains Scripts/ or bin/)
+            venv_path = install_dir
         if bin_path is None:
-            bin_path = Path.home() / ".graphiti" / "bin"
+            bin_path = install_dir / "bin"
 
         self.venv_path = venv_path
         self.bin_path = bin_path

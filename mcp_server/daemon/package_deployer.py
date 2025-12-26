@@ -23,6 +23,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
+from .paths import get_install_dir
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,10 +54,11 @@ class PackageDeployer:
         Initialize PackageDeployer.
 
         Args:
-            deploy_path: Path to deployment directory. Defaults to ~/.graphiti/mcp_server/
+            deploy_path: Path to deployment directory. Defaults to install_dir/lib/
         """
         if deploy_path is None:
-            deploy_path = Path.home() / ".graphiti" / "mcp_server"
+            # v2.1 architecture: deploy to lib/ under install_dir
+            deploy_path = get_install_dir() / "lib"
         self.deploy_path = deploy_path
         self.version_file = self.deploy_path / ".version"
 

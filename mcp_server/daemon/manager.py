@@ -33,6 +33,13 @@ from .package_deployer import PackageDeployer, PackageDeploymentError
 from .paths import get_config_file, get_install_dir, get_log_dir
 from .v2_detection import detect_v2_0_installation
 from .v2_cleanup import cleanup_v2_0_installation, V2Cleanup, CleanupError, V21NotInstalledError
+from .generate_requirements import (
+    parse_pyproject_toml,
+    generate_requirements_txt,
+    write_requirements_file,
+    PyprojectParseError,
+    RequirementsGenerationError,
+)
 
 
 class UnsupportedPlatformError(Exception):
@@ -197,9 +204,26 @@ class DaemonManager:
             print(f"[FAILED] Unexpected error during package deployment: {e}")
             return False
 
+        # Step 2.4b: Generate requirements.txt from pyproject.toml
+        print()
+        print("Generating requirements.txt from pyproject.toml...")
+        try:
+            requirements_path = self._generate_requirements()
+            print(f"[OK] Generated requirements.txt at {requirements_path}")
+        except (PyprojectParseError, RequirementsGenerationError) as e:
+            print(f"[FAILED] Requirements generation failed: {e}")
+            print()
+            print("Troubleshooting:")
+            print("  - Ensure you're running from the Graphiti repository directory")
+            print("  - Verify mcp_server/pyproject.toml exists and is valid")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during requirements generation: {e}")
+            return False
+
         # Step 2.5: Install mcp_server package into venv
         print()
-        print("Installing mcp_server package...")
+        print("Installing mcp_server dependencies...")
         try:
             success, msg = self.venv_manager.install_package()
             if success:
@@ -657,6 +681,93 @@ class DaemonManager:
         except Exception as e:
             print(f"[WARNING] Error reading existing config: {e}")
             print("  Proceeding with existing config unchanged")
+
+    def _generate_requirements(self) -> Path:
+        """
+        Generate requirements.txt from pyproject.toml.
+
+        Finds the repository root and generates requirements.txt from
+        mcp_server/pyproject.toml into the install directory.
+
+        Returns:
+            Path to generated requirements.txt file
+
+        Raises:
+            PyprojectParseError: If pyproject.toml is invalid
+            RequirementsGenerationError: If requirements generation fails
+        """
+        # Find repository root (where mcp_server/ and graphiti_core/ are)
+        repo_root = self._find_repo_root()
+
+        # Locate pyproject.toml
+        pyproject_path = repo_root / "mcp_server" / "pyproject.toml"
+        if not pyproject_path.exists():
+            raise RequirementsGenerationError(
+                f"pyproject.toml not found at {pyproject_path}"
+            )
+
+        # Output path: install_dir/requirements.txt
+        requirements_path = get_install_dir() / "requirements.txt"
+
+        # Parse pyproject.toml
+        pyproject_data = parse_pyproject_toml(pyproject_path)
+
+        # Generate requirements list (exclude graphiti-core, it's frozen)
+        requirements = generate_requirements_txt(
+            pyproject_data,
+            include_optional=False,
+            optional_groups=None
+        )
+
+        # Write to install directory
+        write_requirements_file(requirements, requirements_path)
+
+        return requirements_path
+
+    def _find_repo_root(self) -> Path:
+        """
+        Find the Graphiti repository root directory.
+
+        Detection strategy (priority order):
+            1. GRAPHITI_REPO_PATH environment variable
+            2. Current working directory (if it contains mcp_server/)
+            3. Relative to __file__ (navigate up from daemon/ directory)
+
+        Returns:
+            Path to repository root containing mcp_server/ and graphiti_core/
+
+        Raises:
+            RequirementsGenerationError: If repository root cannot be found
+        """
+        import os
+
+        # Strategy 1: GRAPHITI_REPO_PATH environment variable
+        env_path = os.environ.get("GRAPHITI_REPO_PATH")
+        if env_path:
+            env_path_obj = Path(env_path)
+            if env_path_obj.exists() and (env_path_obj / "mcp_server").exists():
+                return env_path_obj
+
+        # Strategy 2: Current working directory
+        cwd = Path.cwd()
+        if (cwd / "mcp_server").exists() and (cwd / "graphiti_core").exists():
+            return cwd
+
+        # Strategy 3: Relative to __file__ (daemon/manager.py -> repo root)
+        module_path = Path(__file__).resolve()
+        # Go up from daemon/manager.py to mcp_server/
+        mcp_server_dir = module_path.parent.parent
+        # Go up from mcp_server/ to repo root
+        repo_root = mcp_server_dir.parent
+
+        if (repo_root / "mcp_server").exists() and (repo_root / "graphiti_core").exists():
+            return repo_root
+
+        # All strategies failed
+        raise RequirementsGenerationError(
+            "Cannot find Graphiti repository root. "
+            "Try running from the repository directory or set GRAPHITI_REPO_PATH."
+        )
 
 
 def main():
