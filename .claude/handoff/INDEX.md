@@ -33,3 +33,4 @@
 | s033 | windows-v21-daemon-testing-story-14 | ACTIVE | 2025-12-25 18:06 | Windows v2.1 daemon testing - Story 14 completed w |
 | s034 | update-test-suite-for-new-installer | ACTIVE | 2025-12-25 18:53 | Update test suite for new installer implementation |
 | s035 | fix-daemon-paths-to-use-v21 | ACTIVE | 2025-12-26 00:32 | Fix daemon paths to use v2.1 architecture location |
+| s036 | fix-daemon-v21-deployment-add-graphiti | ACTIVE | 2025-12-26 01:06 | Fix daemon v2.1 deployment - add graphiti_core fre |
