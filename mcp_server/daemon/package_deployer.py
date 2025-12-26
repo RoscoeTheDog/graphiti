@@ -62,9 +62,9 @@ class PackageDeployer:
         self.deploy_path = deploy_path
         self.version_file = self.deploy_path / ".version"
 
-    def _get_source_path(self) -> Path:
+    def _get_repo_root(self) -> Path:
         """
-        Detect the source mcp_server package location.
+        Detect the repository root containing mcp_server/ and graphiti_core/.
 
         Detection order:
         1. GRAPHITI_REPO_PATH environment variable
@@ -72,22 +72,24 @@ class PackageDeployer:
         3. Relative to this file (__file__)
 
         Returns:
-            Path to mcp_server source directory
+            Path to repository root
 
         Raises:
-            PackageDeploymentError: If source cannot be found
+            PackageDeploymentError: If repository root cannot be found
         """
         import os
 
         def _check_path(path: Path, source: str) -> Optional[Path]:
-            """Check if path contains mcp_server/pyproject.toml."""
+            """Check if path contains mcp_server/ and graphiti_core/."""
             try:
                 resolved = path.resolve()
                 mcp_server_dir = resolved / "mcp_server"
-                pyproject = mcp_server_dir / "pyproject.toml"
-                if pyproject.exists():
-                    logger.debug(f"Source package found at: {mcp_server_dir} (via {source})")
-                    return mcp_server_dir
+                graphiti_core_dir = resolved / "graphiti_core"
+                mcp_pyproject = mcp_server_dir / "pyproject.toml"
+                graphiti_init = graphiti_core_dir / "__init__.py"
+                if mcp_pyproject.exists() and graphiti_init.exists():
+                    logger.debug(f"Repository root found at: {resolved} (via {source})")
+                    return resolved
             except Exception:
                 pass
             return None
@@ -107,20 +109,36 @@ class PackageDeployer:
 
         # 3. Check relative to this file
         try:
-            # Go up from package_deployer.py: daemon/ -> mcp_server/ (source)
+            # Go up from package_deployer.py: daemon/ -> mcp_server/ -> repo_root
             file_path = Path(__file__).resolve()
-            mcp_server_dir = file_path.parent.parent
-            pyproject = mcp_server_dir / "pyproject.toml"
-            if pyproject.exists():
-                logger.debug(f"Source package found at: {mcp_server_dir} (via __file__ location)")
-                return mcp_server_dir
+            repo_root = file_path.parent.parent.parent
+            if _check_path(repo_root, "__file__ location"):
+                return repo_root
         except Exception:
             pass
 
         raise PackageDeploymentError(
-            "Cannot find mcp_server source package. "
-            "Expected to find mcp_server/pyproject.toml in repository."
+            "Cannot find Graphiti repository root. "
+            "Expected to find mcp_server/pyproject.toml and graphiti_core/__init__.py."
         )
+
+    def _get_source_path(self) -> Path:
+        """
+        Get the mcp_server source directory.
+
+        Returns:
+            Path to mcp_server source directory
+        """
+        return self._get_repo_root() / "mcp_server"
+
+    def _get_graphiti_core_path(self) -> Path:
+        """
+        Get the graphiti_core source directory.
+
+        Returns:
+            Path to graphiti_core source directory
+        """
+        return self._get_repo_root() / "graphiti_core"
 
     def _get_version_from_pyproject(self, source_path: Path) -> str:
         """
@@ -221,7 +239,8 @@ class PackageDeployer:
         Checks:
         - Deployment directory exists
         - Version file exists and is readable
-        - Key files are present (graphiti_mcp_server.py, daemon/, config/)
+        - Key packages present (mcp_server/, graphiti_core/)
+        - Key files are present within packages
 
         Returns:
             True if deployment is valid
@@ -235,11 +254,16 @@ class PackageDeployer:
             logger.debug(f"Version file missing: {self.version_file}")
             return False
 
-        # Check key files
+        # Check key directories and files
         key_files = [
-            self.deploy_path / "graphiti_mcp_server.py",
-            self.deploy_path / "daemon",
-            self.deploy_path / "config",
+            # mcp_server package
+            self.deploy_path / "mcp_server",
+            self.deploy_path / "mcp_server" / "graphiti_mcp_server.py",
+            self.deploy_path / "mcp_server" / "daemon",
+            self.deploy_path / "mcp_server" / "config",
+            # graphiti_core package
+            self.deploy_path / "graphiti_core",
+            self.deploy_path / "graphiti_core" / "__init__.py",
         ]
 
         for key_file in key_files:
@@ -250,9 +274,39 @@ class PackageDeployer:
         logger.debug(f"Deployment verified: {self.deploy_path}")
         return True
 
+    def _deploy_single_package(
+        self, source_path: Path, dest_path: Path, package_name: str
+    ) -> None:
+        """
+        Deploy a single package to destination.
+
+        Args:
+            source_path: Source package directory
+            dest_path: Destination directory
+            package_name: Name for logging
+        """
+        def ignore_patterns(dir_path, names):
+            """Custom ignore function for shutil.copytree."""
+            ignored = []
+            dir_path_obj = Path(dir_path)
+            for name in names:
+                full_path = dir_path_obj / name
+                if self._should_ignore(full_path, source_path):
+                    ignored.append(name)
+                    logger.debug(f"Excluding from {package_name}: {name}")
+            return ignored
+
+        logger.info(f"Deploying {package_name} from {source_path} to {dest_path}")
+        shutil.copytree(
+            source_path,
+            dest_path,
+            ignore=ignore_patterns,
+            dirs_exist_ok=False,
+        )
+
     def deploy_package(self, force: bool = False) -> Tuple[bool, str]:
         """
-        Deploy mcp_server package to standalone location.
+        Deploy mcp_server and graphiti_core packages to standalone location.
 
         Idempotent: skips deployment if already deployed and version matches,
         unless force=True.
@@ -266,15 +320,16 @@ class PackageDeployer:
         Raises:
             PackageDeploymentError: If deployment fails
         """
-        # Get source package location
+        # Get source package locations
         try:
-            source_path = self._get_source_path()
+            mcp_server_path = self._get_source_path()
+            graphiti_core_path = self._get_graphiti_core_path()
         except PackageDeploymentError as e:
-            logger.error(f"Cannot find source package: {e}")
+            logger.error(f"Cannot find source packages: {e}")
             raise
 
         # Get version from pyproject.toml
-        version = self._get_version_from_pyproject(source_path)
+        version = self._get_version_from_pyproject(mcp_server_path)
 
         # Check if deployment already exists and is current
         if not force and self.verify_deployment():
@@ -305,32 +360,23 @@ class PackageDeployer:
         # Ensure parent directory exists
         self.deploy_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Deploy package using copytree with custom ignore
-        logger.info(f"Deploying package from {source_path} to {self.deploy_path}")
+        # Deploy packages
         try:
-            def ignore_patterns(dir_path, names):
-                """Custom ignore function for shutil.copytree."""
-                ignored = []
-                dir_path_obj = Path(dir_path)
-                for name in names:
-                    full_path = dir_path_obj / name
-                    if self._should_ignore(full_path, source_path):
-                        ignored.append(name)
-                        logger.debug(f"Excluding: {full_path.relative_to(source_path)}")
-                return ignored
-
             # Remove existing deployment if present (after backup)
             if self.deploy_path.exists():
                 logger.debug(f"Removing existing deployment: {self.deploy_path}")
                 shutil.rmtree(self.deploy_path)
 
-            # Copy package to deployment location
-            shutil.copytree(
-                source_path,
-                self.deploy_path,
-                ignore=ignore_patterns,
-                dirs_exist_ok=False,  # Should not exist after removal
-            )
+            # Create deployment directory
+            self.deploy_path.mkdir(parents=True, exist_ok=True)
+
+            # Deploy mcp_server to lib/mcp_server/
+            mcp_dest = self.deploy_path / "mcp_server"
+            self._deploy_single_package(mcp_server_path, mcp_dest, "mcp_server")
+
+            # Deploy graphiti_core to lib/graphiti_core/
+            graphiti_dest = self.deploy_path / "graphiti_core"
+            self._deploy_single_package(graphiti_core_path, graphiti_dest, "graphiti_core")
 
             # Create version file
             self.version_file.write_text(version)

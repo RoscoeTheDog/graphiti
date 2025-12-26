@@ -97,7 +97,7 @@ WantedBy=default.target
         """Install bootstrap service using systemd."""
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
         install_dir = get_install_dir()
@@ -114,34 +114,34 @@ WantedBy=default.target
         try:
             unit_content = self._create_service_unit()
             self.service_file.write_text(unit_content)
-            print(f"✓ Service file created: {self.service_file}")
+            print(f"[OK] Service file created: {self.service_file}")
         except Exception as e:
-            print(f"✗ Failed to create service file: {e}")
+            print(f"[ERROR] Failed to create service file: {e}")
             return False
 
         # Reload systemd daemon
         print("Reloading systemd daemon...")
         success, output = self._run_systemctl("daemon-reload")
         if not success:
-            print(f"⚠ Warning: Failed to reload daemon: {output}")
+            print(f"[WARN] Warning: Failed to reload daemon: {output}")
 
         # Enable service (auto-start on boot)
         print("Enabling service...")
         success, output = self._run_systemctl("enable", self.service_name)
         if not success:
-            print(f"✗ Failed to enable service: {output}")
+            print(f"[ERROR] Failed to enable service: {output}")
             return False
 
         # Start service
         print("Starting service...")
         success, output = self._run_systemctl("start", self.service_name)
         if not success:
-            print(f"✗ Failed to start service: {output}")
+            print(f"[ERROR] Failed to start service: {output}")
             print("  You can start it manually later via:")
             print(f"  systemctl --user start {self.service_name}")
             return True  # Service installed, just not started
 
-        print(f"✓ Service '{self.service_name}' started and enabled")
+        print(f"[OK] Service '{self.service_name}' started and enabled")
         return True
 
     def uninstall(self) -> bool:
@@ -154,29 +154,29 @@ WantedBy=default.target
         print("Stopping service...")
         success, output = self._run_systemctl("stop", self.service_name)
         if not success:
-            print(f"⚠ Warning: Failed to stop service: {output}")
+            print(f"[WARN] Warning: Failed to stop service: {output}")
 
         # Disable service
         print("Disabling service...")
         success, output = self._run_systemctl("disable", self.service_name)
         if not success:
-            print(f"⚠ Warning: Failed to disable service: {output}")
+            print(f"[WARN] Warning: Failed to disable service: {output}")
 
         # Remove service file
         print("Removing service file...")
         try:
             if self.service_file.exists():
                 self.service_file.unlink()
-                print(f"✓ Service file removed: {self.service_file}")
+                print(f"[OK] Service file removed: {self.service_file}")
         except Exception as e:
-            print(f"✗ Failed to remove service file: {e}")
+            print(f"[ERROR] Failed to remove service file: {e}")
             return False
 
         # Reload systemd daemon
         print("Reloading systemd daemon...")
         self._run_systemctl("daemon-reload")
 
-        print(f"✓ Service '{self.service_name}' removed")
+        print(f"[OK] Service '{self.service_name}' removed")
         return True
 
     def is_installed(self) -> bool:

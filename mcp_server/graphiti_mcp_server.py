@@ -2759,9 +2759,9 @@ async def initialize_session_tracking() -> None:
                 # Session isolation: error in one session doesn't affect others (AC-19.3)
 
         # Create session manager
+        # Note: keep_length_days was removed from SessionManager in favor of config-based cleanup
         session_manager = SessionManager(
             path_resolver=path_resolver,
-            keep_length_days=unified_config.session_tracking.keep_length_days,
             on_session_closed=on_session_closed
         )
 
@@ -2859,10 +2859,14 @@ async def initialize_server() -> MCPConfig:
     # Initialize session tracking if enabled
     await initialize_session_tracking()
 
+    # Set MCP server host/port from CLI or env (for logging purposes)
+    # Note: run_sse_async() receives explicit host/port parameters, this is for backward compat
     if args.host:
         logger.info(f'Setting MCP server host to: {args.host}')
-        # Set MCP server host from CLI or env
         mcp.settings.host = args.host
+    if args.port:
+        logger.info(f'Setting MCP server port to: {args.port}')
+        mcp.settings.port = args.port
 
     # Return MCP configuration
     return MCPConfig.from_cli(args)
@@ -2885,8 +2889,14 @@ async def run_mcp_server():
         if mcp_config.transport == 'stdio':
             await mcp.run_stdio_async()
         elif mcp_config.transport == 'sse':
+            # Get host and port from config or unified config with defaults
+            sse_host = mcp_config.host or unified_config.daemon.host or "127.0.0.1"
+            sse_port = mcp_config.port or unified_config.daemon.port or 8321
+            # Set host/port on mcp.settings (run_sse_async reads from settings)
+            mcp.settings.host = sse_host
+            mcp.settings.port = sse_port
             logger.info(
-                f'Running MCP server with SSE transport on {mcp.settings.host}:{mcp.settings.port}'
+                f'Running MCP server with SSE transport on {sse_host}:{sse_port}'
             )
             await mcp.run_sse_async()
         elif mcp_config.transport == 'http':

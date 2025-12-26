@@ -550,7 +550,7 @@ class DaemonManager:
                     print()
 
                 if result["rollback_performed"]:
-                    print("⚠️  Cleanup encountered errors and was rolled back")
+                    print("[WARN]  Cleanup encountered errors and was rolled back")
                     print()
 
                 return True

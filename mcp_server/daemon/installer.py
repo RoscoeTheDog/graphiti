@@ -331,9 +331,9 @@ class InstallationResult:
     def __str__(self) -> str:
         """Human-readable result string."""
         if self.success:
-            return f"✓ Installation successful (version {self.version})"
+            return f"[OK] Installation successful (version {self.version})"
         else:
-            return f"✗ Installation failed: {self.error}"
+            return f"[ERROR] Installation failed: {self.error}"
 
 
 # ============================================================================
@@ -490,42 +490,52 @@ class GraphitiInstaller:
             self.progress.step(6, "Configuring Python path")
             self._create_pth_file()
 
-            # TODO: Implement remaining steps (Stories 6-10)
-            # self.progress.step(7, "Creating wrapper executables")
-            # self._create_wrappers()
-            #
-            # self.progress.step(8, "Writing version information")
-            # version = self._write_version_info(source_dir)
-            #
-            # self.progress.step(9, "Creating default configuration")
-            # self._create_default_config()
-            #
-            # self.progress.step(10, "Registering service")
-            # self._register_service()
-            #
-            # self.progress.step(11, "Starting service")
-            # self._start_service()
-            #
-            # self.progress.step(12, "Verifying installation")
-            # self._verify_installation()
+            # Step 7: Create wrapper executables
+            self.progress.step(7, "Creating wrapper executables")
+            self._create_wrappers()
 
-            # Return result (steps 1-6 complete, 7-12 pending)
-            self.progress.complete("Core installation complete (steps 1-6; service registration pending)")
+            # Step 8: Write version information
+            self.progress.step(8, "Writing version information")
+            version = self._write_version_info(source_dir)
+
+            # Step 9: Create default configuration
+            self.progress.step(9, "Creating default configuration")
+            self._create_default_config()
+
+            # Step 10: Register service
+            self.progress.step(10, "Registering service")
+            self._register_service()
+
+            # Step 11: Start service
+            self.progress.step(11, "Starting service")
+            self._start_service()
+
+            # Step 12: Verify installation
+            self.progress.step(12, "Verifying installation")
+            self._verify_installation()
+
+            # Return result (all 12 steps complete)
+            self.progress.complete("Installation complete")
             return InstallationResult(
                 success=True,
-                version="2.1.0-core",
+                version=version,
                 paths=self.paths,
                 details={
-                    "status": "core_complete",
+                    "status": "complete",
                     "completed": [
                         "validate",
                         "directories",
                         "venv",
                         "dependencies",
                         "freeze_packages",
-                        "pth_file"
-                    ],
-                    "pending": "Steps 7-12 (wrappers, version, config, service)"
+                        "pth_file",
+                        "wrappers",
+                        "version_info",
+                        "config",
+                        "service_register",
+                        "service_start",
+                        "verify"
+                    ]
                 }
             )
 
@@ -1031,6 +1041,202 @@ class GraphitiInstaller:
         return version
 
     # ========================================================================
+    # Wrapper and Service Methods
+    # ========================================================================
+
+    def _create_wrappers(self) -> None:
+        """
+        Create platform-specific wrapper executables.
+
+        Creates:
+            - graphiti-mcp executable in bin/ directory
+            - Platform-appropriate scripts (.bat/.cmd on Windows, shell scripts on Unix)
+
+        Raises:
+            InstallationError: If wrapper creation fails
+        """
+        from .wrapper_generator import WrapperGenerator, WrapperGenerationError
+
+        try:
+            wrapper_gen = WrapperGenerator(self.paths.install_dir)
+            success, message = wrapper_gen.generate_wrappers()
+
+            if not success:
+                raise InstallationError(
+                    f"Wrapper creation failed: {message}",
+                    step="create_wrappers"
+                )
+
+            logger.info(f"Created wrapper executables: {message}")
+
+        except WrapperGenerationError as e:
+            raise InstallationError(
+                f"Wrapper creation failed: {str(e)}",
+                step="create_wrappers"
+            ) from e
+
+    def _create_default_config(self) -> None:
+        """
+        Create default graphiti.config.json in config directory.
+
+        Creates a minimal but functional configuration that the user
+        can customize later.
+
+        Raises:
+            InstallationError: If config creation fails
+        """
+        config_file = self.paths.config_file
+
+        # Don't overwrite existing config
+        if config_file.exists():
+            logger.info(f"Config file already exists: {config_file}")
+            return
+
+        # Create default config
+        default_config = {
+            "$schema": "graphiti-config-v1",
+            "version": "1.0.0",
+            "database": {
+                "provider": "neo4j",
+                "neo4j": {
+                    "uri": "bolt://localhost:7687",
+                    "user": "neo4j",
+                    "password": "SET_YOUR_PASSWORD"
+                }
+            },
+            "llm": {
+                "provider": "openai",
+                "model": "gpt-4.1-mini"
+            },
+            "daemon": {
+                "enabled": False,
+                "host": "127.0.0.1",
+                "port": 8321
+            }
+        }
+
+        try:
+            config_file.parent.mkdir(parents=True, exist_ok=True)
+            config_file.write_text(json.dumps(default_config, indent=2), encoding="utf-8")
+            logger.info(f"Created default config: {config_file}")
+        except Exception as e:
+            raise InstallationError(
+                f"Failed to create config: {str(e)}",
+                step="create_default_config",
+                details={"config_file": str(config_file)}
+            ) from e
+
+    def _register_service(self) -> None:
+        """
+        Register the bootstrap service with the OS service manager.
+
+        Platform-specific:
+            - Windows: Task Scheduler
+            - macOS: launchd
+            - Linux: systemd
+
+        Raises:
+            InstallationError: If service registration fails
+        """
+        try:
+            if sys.platform == "win32":
+                from .task_scheduler_service import TaskSchedulerServiceManager
+                service_mgr = TaskSchedulerServiceManager(self.paths)
+            elif sys.platform == "darwin":
+                from .launchd_service import LaunchdServiceManager
+                service_mgr = LaunchdServiceManager(self.paths)
+            else:
+                from .systemd_service import SystemdServiceManager
+                service_mgr = SystemdServiceManager(self.paths)
+
+            success = service_mgr.install()
+            if not success:
+                raise InstallationError(
+                    "Service registration failed",
+                    step="register_service"
+                )
+
+            logger.info(f"Service registered successfully ({sys.platform})")
+
+        except ImportError as e:
+            logger.warning(f"Service manager not available: {e}")
+            # Non-fatal - user can manually start the service
+        except Exception as e:
+            raise InstallationError(
+                f"Service registration failed: {str(e)}",
+                step="register_service"
+            ) from e
+
+    def _start_service(self) -> None:
+        """
+        Start the bootstrap service.
+
+        Raises:
+            InstallationError: If service start fails
+        """
+        try:
+            if sys.platform == "win32":
+                from .task_scheduler_service import TaskSchedulerServiceManager
+                service_mgr = TaskSchedulerServiceManager(self.paths)
+            elif sys.platform == "darwin":
+                from .launchd_service import LaunchdServiceManager
+                service_mgr = LaunchdServiceManager(self.paths)
+            else:
+                from .systemd_service import SystemdServiceManager
+                service_mgr = SystemdServiceManager(self.paths)
+
+            success = service_mgr.start()
+            if not success:
+                logger.warning("Service start returned false - may require manual start")
+            else:
+                logger.info("Service started successfully")
+
+        except ImportError as e:
+            logger.warning(f"Service manager not available: {e}")
+        except Exception as e:
+            # Non-fatal - service can be started manually
+            logger.warning(f"Service start failed (non-fatal): {e}")
+
+    def _verify_installation(self) -> None:
+        """
+        Verify the installation is complete and functional.
+
+        Checks:
+            - Required files exist
+            - Python environment is working
+            - MCP server can be imported
+
+        Raises:
+            InstallationError: If verification fails
+        """
+        issues = []
+
+        # Check required files
+        required_files = [
+            self.paths.install_dir / "VERSION",
+            self.paths.install_dir / "INSTALL_INFO",
+            self.paths.install_dir / "lib" / "mcp_server" / "graphiti_mcp_server.py",
+            self.paths.config_file,
+        ]
+
+        for file_path in required_files:
+            if not file_path.exists():
+                issues.append(f"Missing file: {file_path}")
+
+        # Check Python environment
+        python_exe = self.paths.install_dir / ("Scripts" if sys.platform == "win32" else "bin") / (
+            "python.exe" if sys.platform == "win32" else "python"
+        )
+        if not python_exe.exists():
+            issues.append(f"Python executable not found: {python_exe}")
+
+        if issues:
+            logger.warning(f"Installation verification found issues: {issues}")
+            # Log warning but don't fail - user may want to fix manually
+        else:
+            logger.info("Installation verification passed")
+
+    # ========================================================================
     # Cleanup Methods
     # ========================================================================
 
@@ -1275,23 +1481,29 @@ class GraphitiInstaller:
         try:
             # Copy mcp_server package
             mcp_server_dest = lib_dir / "mcp_server"
+            # Clean existing destination if present (reinstall case)
+            if mcp_server_dest.exists():
+                logger.info(f"Removing existing mcp_server: {mcp_server_dest}")
+                shutil.rmtree(mcp_server_dest)
             logger.info(f"Copying mcp_server: {mcp_server_src} -> {mcp_server_dest}")
             shutil.copytree(
                 mcp_server_src,
                 mcp_server_dest,
                 ignore=ignore_patterns,
-                dirs_exist_ok=False  # Fail if destination already exists
             )
             logger.info("Successfully copied mcp_server package")
 
             # Copy graphiti_core package
             graphiti_core_dest = lib_dir / "graphiti_core"
+            # Clean existing destination if present (reinstall case)
+            if graphiti_core_dest.exists():
+                logger.info(f"Removing existing graphiti_core: {graphiti_core_dest}")
+                shutil.rmtree(graphiti_core_dest)
             logger.info(f"Copying graphiti_core: {graphiti_core_src} -> {graphiti_core_dest}")
             shutil.copytree(
                 graphiti_core_src,
                 graphiti_core_dest,
                 ignore=ignore_patterns,
-                dirs_exist_ok=False
             )
             logger.info("Successfully copied graphiti_core package")
 

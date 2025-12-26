@@ -215,7 +215,7 @@ class BootstrapService:
         cmd = [
             sys.executable,
             str(mcp_server_path),
-            "--transport", "http",
+            "--transport", "sse",
             "--host", host,
             "--port", str(port),
         ]
@@ -277,7 +277,8 @@ class BootstrapService:
             return Path(env_path)
 
         # 2. Check deployed location (production)
-        deployed_path = get_install_dir() / "mcp_server" / "graphiti_mcp_server.py"
+        # v2.1 architecture: packages are in lib/ subdirectory
+        deployed_path = get_install_dir() / "lib" / "mcp_server" / "graphiti_mcp_server.py"
         if deployed_path.exists():
             logger.info(f"Using deployed MCP server: {deployed_path}")
             return deployed_path

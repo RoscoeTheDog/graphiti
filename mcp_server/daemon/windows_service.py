@@ -96,7 +96,7 @@ class WindowsServiceManager:
     def install(self) -> bool:
         """Install bootstrap service using NSSM."""
         if not self.nssm_path:
-            print("✗ NSSM not found")
+            print("[ERROR] NSSM not found")
             print()
             print("NSSM is required to install services on Windows.")
             print("Please install NSSM:")
@@ -109,7 +109,7 @@ class WindowsServiceManager:
 
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
         print(f"Using NSSM: {self.nssm_path}")
@@ -128,7 +128,7 @@ class WindowsServiceManager:
         )
 
         if not success:
-            print(f"✗ Failed to install service: {output}")
+            print(f"[ERROR] Failed to install service: {output}")
             return False
 
         # Set display name
@@ -171,18 +171,18 @@ class WindowsServiceManager:
         success, output = self._run_nssm("start", self.service_name)
 
         if not success:
-            print(f"✗ Failed to start service: {output}")
+            print(f"[ERROR] Failed to start service: {output}")
             print("  You can start it manually later via Services app or:")
             print(f"  nssm start {self.service_name}")
             return True  # Service installed, just not started
 
-        print(f"✓ Service '{self.service_name}' started")
+        print(f"[OK] Service '{self.service_name}' started")
         return True
 
     def uninstall(self) -> bool:
         """Uninstall bootstrap service using NSSM."""
         if not self.nssm_path:
-            print("✗ NSSM not found")
+            print("[ERROR] NSSM not found")
             return False
 
         if not self.is_installed():
@@ -198,10 +198,10 @@ class WindowsServiceManager:
         success, output = self._run_nssm("remove", self.service_name, "confirm")
 
         if not success:
-            print(f"✗ Failed to remove service: {output}")
+            print(f"[ERROR] Failed to remove service: {output}")
             return False
 
-        print(f"✓ Service '{self.service_name}' removed")
+        print(f"[OK] Service '{self.service_name}' removed")
         return True
 
     def is_installed(self) -> bool:

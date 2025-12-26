@@ -436,7 +436,7 @@ class V2Cleanup:
 
             if choice == "1":
                 print()
-                confirm = input("⚠️  This will DELETE all v2.0 data. Continue? (yes/no) [no]: ").strip().lower()
+                confirm = input("[WARN]  This will DELETE all v2.0 data. Continue? (yes/no) [no]: ").strip().lower()
                 if confirm == "yes":
                     return "delete_all"
                 else:

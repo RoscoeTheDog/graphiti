@@ -156,7 +156,7 @@ class TaskSchedulerServiceManager:
         """Install bootstrap service using Task Scheduler."""
         # Check if already installed
         if self.is_installed():
-            print("✓ Task already installed")
+            print("[OK] Task already installed")
             return True
 
         print(f"Python: {self.python_exe}")
@@ -196,10 +196,10 @@ class TaskSchedulerServiceManager:
                 pass
 
             if not success:
-                print(f"✗ Failed to create task: {output}")
+                print(f"[ERROR] Failed to create task: {output}")
                 return False
 
-            print(f"✓ Task '{self.task_name}' created")
+            print(f"[OK] Task '{self.task_name}' created")
 
             # Set PYTHONPATH environment variable for the task
             # Note: Task Scheduler doesn't directly support env vars in XML,
@@ -211,15 +211,15 @@ class TaskSchedulerServiceManager:
             success, output = self._run_schtasks("/Run", "/TN", self.full_task_name)
 
             if not success:
-                print(f"⚠ Warning: Failed to start task immediately: {output}")
+                print(f"[WARN] Failed to start task immediately: {output}")
                 print("  Task will start at next logon")
             else:
-                print(f"✓ Task '{self.task_name}' started")
+                print(f"[OK] Task '{self.task_name}' started")
 
             return True
 
         except Exception as e:
-            print(f"✗ Failed to install task: {e}")
+            print(f"[ERROR] Failed to install task: {e}")
             return False
 
     def _create_env_wrapper(self) -> None:
@@ -260,7 +260,7 @@ set PYTHONPATH={lib_dir}
         )
 
         if not success:
-            print(f"✗ Failed to remove task: {output}")
+            print(f"[ERROR] Failed to remove task: {output}")
             return False
 
         # Remove wrapper script if exists
@@ -271,7 +271,7 @@ set PYTHONPATH={lib_dir}
         except Exception:
             pass  # Non-critical
 
-        print(f"✓ Task '{self.task_name}' removed")
+        print(f"[OK] Task '{self.task_name}' removed")
         return True
 
     def is_installed(self) -> bool:

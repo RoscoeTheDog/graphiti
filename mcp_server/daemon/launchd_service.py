@@ -95,7 +95,7 @@ class LaunchdServiceManager:
         """Install bootstrap service using launchd."""
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
         print(f"Python: {self.python_exe}")
@@ -112,9 +112,9 @@ class LaunchdServiceManager:
             plist_data = self._create_plist()
             with open(self.plist_path, "wb") as f:
                 plistlib.dump(plist_data, f)
-            print(f"✓ Plist created: {self.plist_path}")
+            print(f"[OK] Plist created: {self.plist_path}")
         except Exception as e:
-            print(f"✗ Failed to create plist: {e}")
+            print(f"[ERROR] Failed to create plist: {e}")
             return False
 
         # Load service
@@ -122,10 +122,10 @@ class LaunchdServiceManager:
         success, output = self._run_launchctl("load", str(self.plist_path))
 
         if not success:
-            print(f"✗ Failed to load service: {output}")
+            print(f"[ERROR] Failed to load service: {output}")
             return False
 
-        print(f"✓ Service '{self.service_id}' loaded and started")
+        print(f"[OK] Service '{self.service_id}' loaded and started")
         return True
 
     def uninstall(self) -> bool:
@@ -139,7 +139,7 @@ class LaunchdServiceManager:
         success, output = self._run_launchctl("unload", str(self.plist_path))
 
         if not success:
-            print(f"⚠ Warning: Failed to unload service: {output}")
+            print(f"[WARN] Warning: Failed to unload service: {output}")
             # Continue anyway to delete plist
 
         # Remove plist file
@@ -147,12 +147,12 @@ class LaunchdServiceManager:
         try:
             if self.plist_path.exists():
                 self.plist_path.unlink()
-                print(f"✓ Plist removed: {self.plist_path}")
+                print(f"[OK] Plist removed: {self.plist_path}")
         except Exception as e:
-            print(f"✗ Failed to remove plist: {e}")
+            print(f"[ERROR] Failed to remove plist: {e}")
             return False
 
-        print(f"✓ Service '{self.service_id}' removed")
+        print(f"[OK] Service '{self.service_id}' removed")
         return True
 
     def is_installed(self) -> bool:
