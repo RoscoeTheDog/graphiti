@@ -7,13 +7,19 @@
 #   installation files. It can run WITHOUT Python or the repository being present,
 #   making it suitable for recovery scenarios.
 #
+#   v2.1 Architecture (macOS Library convention):
+#   - Install Dir: ~/Library/Application Support/Graphiti (lib/, .venv/, bin/)
+#   - Config Dir:  ~/Library/Preferences/Graphiti (graphiti.config.json)
+#   - Logs Dir:    ~/Library/Logs/Graphiti (service logs)
+#   - Cache Dir:   ~/Library/Caches/Graphiti (runtime data)
+#
 #   What it does:
 #   - Unloads and removes launchd plist: ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
-#   - Deletes ~/.graphiti/.venv/ (virtual environment)
-#   - Deletes ~/.graphiti/mcp_server/ (deployed package)
-#   - Deletes ~/.graphiti/bin/ (wrapper scripts)
-#   - Deletes ~/.graphiti/logs/ (service logs)
-#   - Optionally preserves ~/.graphiti/data/ and ~/.graphiti/graphiti.config.json
+#   - Deletes ~/Library/Application Support/Graphiti/.venv/ (virtual environment)
+#   - Deletes ~/Library/Application Support/Graphiti/lib/ (deployed packages)
+#   - Deletes ~/Library/Application Support/Graphiti/bin/ (wrapper scripts)
+#   - Deletes ~/Library/Logs/Graphiti/ (service logs)
+#   - Optionally preserves ~/Library/Caches/Graphiti/ and ~/Library/Preferences/Graphiti/graphiti.config.json
 #
 # Usage:
 #   ./uninstall_macos.sh              # Interactive mode
@@ -25,9 +31,12 @@
 # Manual removal if script fails:
 #   1. launchctl unload ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
 #   2. rm ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
-#   3. rm -rf ~/.graphiti
-#   4. Remove from Claude config: ~/Library/Application Support/Claude/claude_desktop_config.json
-#   5. Remove from PATH in ~/.zshrc or ~/.bash_profile
+#   3. rm -rf ~/Library/Application\ Support/Graphiti
+#   4. rm -rf ~/Library/Preferences/Graphiti
+#   5. rm -rf ~/Library/Logs/Graphiti
+#   6. rm -rf ~/Library/Caches/Graphiti
+#   7. Remove from Claude config: ~/Library/Application Support/Claude/claude_desktop_config.json
+#   8. Remove from PATH in ~/.zshrc or ~/.bash_profile
 #
 # Version: 1.0.0
 # Created: 2025-12-23
@@ -111,14 +120,17 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-# Define paths
-GRAPHITI_DIR="$HOME/.graphiti"
-VENV_DIR="$GRAPHITI_DIR/.venv"
-PACKAGE_DIR="$GRAPHITI_DIR/mcp_server"
-BIN_DIR="$GRAPHITI_DIR/bin"
-LOGS_DIR="$GRAPHITI_DIR/logs"
-CONFIG_FILE="$GRAPHITI_DIR/graphiti.config.json"
-DATA_DIR="$GRAPHITI_DIR/data"
+# Define paths - v2.1 macOS Library convention
+INSTALL_DIR="$HOME/Library/Application Support/Graphiti"
+CONFIG_DIR="$HOME/Library/Preferences/Graphiti"
+LOGS_DIR="$HOME/Library/Logs/Graphiti"
+CACHE_DIR="$HOME/Library/Caches/Graphiti"
+
+VENV_DIR="$INSTALL_DIR/.venv"
+LIB_DIR="$INSTALL_DIR/lib"  # contains mcp_server, graphiti_core
+BIN_DIR="$INSTALL_DIR/bin"
+DATA_DIR="$CACHE_DIR"
+CONFIG_FILE="$CONFIG_DIR/graphiti.config.json"
 
 SERVICE_ID="com.graphiti.bootstrap"
 PLIST_PATH="$HOME/Library/LaunchAgents/${SERVICE_ID}.plist"
@@ -188,9 +200,9 @@ delete_dir() {
 }
 
 delete_dir "$VENV_DIR" "Virtual environment (.venv)"
-delete_dir "$PACKAGE_DIR" "Deployed package (mcp_server)"
-delete_dir "$BIN_DIR" "Wrapper scripts (bin)"
-delete_dir "$LOGS_DIR" "Service logs (logs)"
+delete_dir "$LIB_DIR" "Deployed packages (lib/)"
+delete_dir "$BIN_DIR" "Wrapper scripts (bin/)"
+delete_dir "$LOGS_DIR" "Service logs (Library/Logs/Graphiti)"
 
 # STEP 3: Handle config and data (preserve by default)
 echo ""
@@ -198,10 +210,10 @@ step "Checking for user data and configuration..."
 
 PRESERVE_ITEMS=()
 if [ -f "$CONFIG_FILE" ]; then
-    PRESERVE_ITEMS+=("$CONFIG_FILE|Configuration file (graphiti.config.json)")
+    PRESERVE_ITEMS+=("$CONFIG_FILE|Configuration file (Preferences/Graphiti/graphiti.config.json)")
 fi
 if [ -d "$DATA_DIR" ]; then
-    PRESERVE_ITEMS+=("$DATA_DIR|User data (data/)")
+    PRESERVE_ITEMS+=("$DATA_DIR|User data (Caches/Graphiti)")
 fi
 
 if [ ${#PRESERVE_ITEMS[@]} -gt 0 ]; then
@@ -263,26 +275,38 @@ else
     echo "No config or data found to preserve"
 fi
 
-# STEP 4: Clean up ~/.graphiti if empty
+# STEP 4: Clean up v2.1 directories if empty
 echo ""
-if [ -d "$GRAPHITI_DIR" ]; then
-    if [ -z "$(ls -A "$GRAPHITI_DIR")" ]; then
-        step "Removing empty ~/.graphiti directory..."
-        if [ "$DRY_RUN" = false ]; then
-            if rmdir "$GRAPHITI_DIR" 2>&1; then
-                success "Deleted: ~/.graphiti"
+
+cleanup_if_empty() {
+    local dir_path=$1
+    local dir_name=$2
+
+    if [ -d "$dir_path" ]; then
+        if [ -z "$(ls -A "$dir_path")" ]; then
+            step "Removing empty $dir_name directory..."
+            if [ "$DRY_RUN" = false ]; then
+                if rmdir "$dir_path" 2>&1; then
+                    success "Deleted: $dir_name"
+                else
+                    warning "Failed to delete $dir_name"
+                fi
             else
-                warning "Failed to delete ~/.graphiti"
+                echo "[DRY RUN] Would delete: $dir_path"
             fi
         else
-            echo "[DRY RUN] Would delete: $GRAPHITI_DIR"
+            warning "$dir_name is not empty - leaving directory intact"
+            echo "Remaining files:"
+            find "$dir_path" -type f -o -type d | head -20 | sed 's/^/  - /'
         fi
-    else
-        warning "~/.graphiti is not empty - leaving directory intact"
-        echo "Remaining files:"
-        find "$GRAPHITI_DIR" -type f -o -type d | sed 's/^/  - /'
     fi
-fi
+}
+
+# Clean up all v2.1 directories if empty
+cleanup_if_empty "$INSTALL_DIR" "Library/Application Support/Graphiti"
+cleanup_if_empty "$CONFIG_DIR" "Library/Preferences/Graphiti"
+cleanup_if_empty "$LOGS_DIR" "Library/Logs/Graphiti"
+cleanup_if_empty "$CACHE_DIR" "Library/Caches/Graphiti"
 
 # STEP 5: Manual steps (Claude config, PATH)
 echo ""

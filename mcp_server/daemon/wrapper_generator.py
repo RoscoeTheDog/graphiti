@@ -6,10 +6,15 @@ without requiring activation.
 
 This module provides:
 - Platform-specific wrapper script generation (Windows .cmd, Unix shell)
-- Automatic bin directory creation (~/.graphiti/bin/)
+- Automatic bin directory creation in platform-specific install directory
 - Absolute path handling to venv Python
 - Executable permissions on Unix scripts
 - Validation of generated wrappers
+
+v2.1 Architecture - Bin Directory Locations:
+- Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\bin\\
+- macOS: ~/Library/Application Support/Graphiti/bin/
+- Linux: ~/.local/share/graphiti/bin/
 
 Design Principle: Wrapper scripts enable direct CLI invocation by absolute path,
 supporting PATH integration without activation overhead.
@@ -91,7 +96,12 @@ class WrapperGenerator:
 
     def create_bin_directory(self) -> None:
         """
-        Create ~/.graphiti/bin/ directory if it doesn't exist.
+        Create the bin directory if it doesn't exist.
+
+        v2.1 Architecture Locations:
+        - Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\bin\\
+        - macOS: ~/Library/Application Support/Graphiti/bin/
+        - Linux: ~/.local/share/graphiti/bin/
 
         Idempotent: safe to call multiple times.
 
@@ -104,7 +114,7 @@ class WrapperGenerator:
         except Exception as e:
             raise WrapperGenerationError(
                 f"Failed to create bin directory {self.bin_path}: {e}\n"
-                "Check write permissions to ~/.graphiti/"
+                "Check write permissions to the install directory"
             )
 
     def generate_windows_wrapper(

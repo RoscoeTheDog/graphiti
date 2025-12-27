@@ -1,7 +1,13 @@
 """
 Graphiti Package Deployer
 
-Deploys the mcp_server package to ~/.graphiti/mcp_server/ during daemon installation.
+Deploys the mcp_server package to the platform-specific install directory during
+daemon installation.
+
+v2.1 Architecture Paths:
+- Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\lib\\
+- macOS: ~/Library/Application Support/Graphiti/lib/
+- Linux: ~/.local/share/graphiti/lib/
 
 This module provides:
 - Package deployment to standalone location
@@ -10,8 +16,8 @@ This module provides:
 - Backup of existing deployments
 - Platform-agnostic path handling
 
-Design Principle: Deploy a standalone copy of mcp_server/ to ~/.graphiti/mcp_server/
-so the bootstrap service can run independent of the repository location.
+Design Principle: Deploy a standalone copy of mcp_server/ to the platform-specific
+install directory so the bootstrap service can run independent of the repository location.
 
 See: .claude/sprint/plans/2-plan.yaml
 """
@@ -209,7 +215,7 @@ class PackageDeployer:
         """
         Backup existing deployment before replacement.
 
-        Creates a timestamped backup: ~/.graphiti/mcp_server.backup.YYYYMMDD-HHMMSS/
+        Creates a timestamped backup: {install_dir}/lib.backup.YYYYMMDD-HHMMSS/
 
         Returns:
             Path to backup directory if created, None if no existing deployment

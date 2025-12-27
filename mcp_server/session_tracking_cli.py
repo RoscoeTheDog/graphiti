@@ -22,20 +22,25 @@ def find_config_file() -> Optional[Path]:
 
     Search order:
         1. ./graphiti.config.json (project root)
-        2. ~/.graphiti/graphiti.config.json (global)
+        2. Platform-specific config directory (v2.1 architecture):
+           - Windows: %LOCALAPPDATA%\\Graphiti\\config\\graphiti.config.json
+           - macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+           - Linux: ~/.config/graphiti/graphiti.config.json
 
     Returns:
         Path to config file, or None if not found
     """
+    from mcp_server.daemon.paths import get_config_file
+
     # Try project root first
     project_config = Path("graphiti.config.json")
     if project_config.exists():
         return project_config
 
-    # Try global config
-    global_config = Path.home() / ".graphiti" / "graphiti.config.json"
-    if global_config.exists():
-        return global_config
+    # Try platform-specific config (v2.1 architecture)
+    platform_config = get_config_file()
+    if platform_config.exists():
+        return platform_config
 
     return None
 
@@ -43,15 +48,22 @@ def find_config_file() -> Optional[Path]:
 def ensure_global_config() -> Path:
     """Ensure global config directory and file exist.
 
+    Uses v2.1 platform-specific paths:
+        - Windows: %LOCALAPPDATA%\\Graphiti\\config\\graphiti.config.json
+        - macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+        - Linux: ~/.config/graphiti/graphiti.config.json
+
     Returns:
         Path to global config file
     """
-    global_config_dir = Path.home() / ".graphiti"
-    global_config_dir.mkdir(parents=True, exist_ok=True)
+    from mcp_server.daemon.paths import get_config_file, get_config_dir
 
-    global_config_path = global_config_dir / "graphiti.config.json"
+    config_dir = get_config_dir()
+    config_dir.mkdir(parents=True, exist_ok=True)
 
-    if not global_config_path.exists():
+    config_path = get_config_file()
+
+    if not config_path.exists():
         # Create minimal config with defaults
         minimal_config = {
             "version": "1.0.0",
@@ -59,10 +71,10 @@ def ensure_global_config() -> Path:
                 "enabled": False
             }
         }
-        global_config_path.write_text(json.dumps(minimal_config, indent=2))
-        print(f"Created new global config at {global_config_path}")
+        config_path.write_text(json.dumps(minimal_config, indent=2))
+        print(f"Created new global config at {config_path}")
 
-    return global_config_path
+    return config_path
 
 
 def load_config(config_path: Path) -> dict:
@@ -185,8 +197,10 @@ def cmd_status(args: argparse.Namespace) -> None:
     print(f"Status:             {'[ENABLED]' if enabled else '[DISABLED]'}")
 
     if enabled:
+        # Show the configured watch path or default from Claude Desktop data location
+        default_watch = "~/.claude/projects/ (Claude Desktop default)"
         print(f"\nConfiguration:")
-        print(f"  Watch path:       {watch_path or '~/.claude/projects/ (default)'}")
+        print(f"  Watch path:       {watch_path or default_watch}")
         print(f"  Store in graph:   {store_in_graph}")
 
         if filter_config:

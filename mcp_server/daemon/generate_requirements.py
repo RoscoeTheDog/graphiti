@@ -9,7 +9,12 @@ This module provides:
 - Extraction of dependencies from [project.dependencies]
 - Optional inclusion of [project.optional-dependencies]
 - Platform-agnostic path handling
-- Output to ~/.graphiti/requirements.txt
+- Output to platform-specific install directory
+
+v2.1 Architecture - Requirements.txt Locations:
+- Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\requirements.txt
+- macOS: ~/Library/Application Support/Graphiti/requirements.txt
+- Linux: ~/.local/share/graphiti/requirements.txt
 
 Design Principle: Enable standalone pip installations without access to pyproject.toml
 by pre-generating requirements.txt during daemon deployment.
@@ -249,7 +254,7 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Generate from mcp_server/pyproject.toml to ~/.graphiti/requirements.txt
+  # Generate from mcp_server/pyproject.toml to platform-specific install directory
   python generate_requirements.py
 
   # Include optional dependencies
@@ -260,6 +265,11 @@ Examples:
 
   # Custom input/output paths
   python generate_requirements.py --input /path/to/pyproject.toml --output /path/to/requirements.txt
+
+v2.1 Architecture - Default output locations:
+  - Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\requirements.txt
+  - macOS: ~/Library/Application Support/Graphiti/requirements.txt
+  - Linux: ~/.local/share/graphiti/requirements.txt
         """
     )
 
@@ -274,7 +284,7 @@ Examples:
         '--output',
         type=Path,
         default=None,
-        help='Path to output requirements.txt (default: ~/.graphiti/requirements.txt)'
+        help='Path to output requirements.txt (default: platform-specific install directory)'
     )
 
     parser.add_argument(
@@ -313,8 +323,9 @@ Examples:
 
     # Determine output path
     if args.output is None:
-        # Default: ~/.graphiti/requirements.txt
-        output_path = Path.home() / '.graphiti' / 'requirements.txt'
+        # Default: platform-specific install directory (v2.1 architecture)
+        from .paths import get_install_dir
+        output_path = get_install_dir() / 'requirements.txt'
     else:
         output_path = args.output
 

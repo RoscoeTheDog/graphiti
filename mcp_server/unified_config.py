@@ -11,7 +11,10 @@ Consolidates all configuration sources:
 
 Config search order:
 1. ./graphiti.config.json (project root)
-2. ~/.claude/graphiti.config.json (global)
+2. Platform-specific config directory (v2.1 architecture):
+   - Windows: %LOCALAPPDATA%\\Graphiti\\config\\graphiti.config.json
+   - macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+   - Linux: ~/.config/graphiti/graphiti.config.json
 3. Built-in defaults
 4. Environment variable overrides (for sensitive data only)
 """
@@ -563,7 +566,7 @@ class SummarizationConfig(BaseModel):
     )
     tool_classification_cache: Optional[str] = Field(
         default=None,
-        description="Path to tool classification cache. Default: ~/.graphiti/tool_cache.json"
+        description="Path to tool classification cache. Default: platform-specific state directory"
     )
 
     @field_validator('extraction_threshold')
@@ -641,14 +644,14 @@ class DaemonConfig(BaseModel):
         default=None,
         description=(
             "Path to PID file for daemon process. "
-            "null = ~/.graphiti/graphiti-mcp.pid"
+            "null = platform-specific state directory (see paths module)"
         )
     )
     log_file: Optional[str] = Field(
         default=None,
         description=(
             "Path to daemon log file. "
-            "null = ~/.graphiti/logs/graphiti-mcp.log"
+            "null = platform-specific log directory (see paths module)"
         )
     )
     log_level: str = Field(
@@ -913,37 +916,45 @@ class GraphitiConfig(BaseModel):
         Args:
             config_path: Path to config file. If None, searches in:
                 1. ./graphiti.config.json (project root)
-                2. ~/.graphiti/graphiti.config.json (global)
+                2. Platform-specific config directory (v2.1 architecture)
                 3. Falls back to defaults
 
         Returns:
             GraphitiConfig instance
         """
         if config_path is None:
-            # Search order: project root -> global -> defaults
-            global_config_path = Path.home() / ".graphiti" / "graphiti.config.json"
-            old_global_config_path = Path.home() / ".claude" / "graphiti.config.json"
+            # Import paths module for v2.1 platform-aware paths
+            from mcp_server.daemon.paths import get_config_file
 
-            # Migration: Check for old ~/.claude/ location and migrate to ~/.graphiti/
-            if old_global_config_path.exists() and not global_config_path.exists():
-                try:
-                    global_config_path.parent.mkdir(parents=True, exist_ok=True)
-                    import shutil
-                    shutil.copy2(old_global_config_path, global_config_path)
-                    logger.info(f"Migrated config from {old_global_config_path} to {global_config_path}")
+            # Search order: project root -> platform-specific -> defaults
+            v21_config_path = get_config_file()
 
-                    # Create deprecation notice
-                    deprecation_notice = old_global_config_path.parent / "graphiti.config.json.deprecated"
-                    deprecation_notice.write_text(
-                        "This config has been migrated to ~/.graphiti/graphiti.config.json\n"
-                        "Graphiti now uses ~/.graphiti/ for global configuration (MCP server independence).\n"
-                    )
-                except Exception as e:
-                    logger.warning(f"Failed to migrate config from {old_global_config_path}: {e}")
+            # Legacy paths for migration
+            legacy_graphiti_path = Path.home() / ".graphiti" / "graphiti.config.json"
+            legacy_claude_path = Path.home() / ".claude" / "graphiti.config.json"
+
+            # Migration: Check for legacy locations and migrate to v2.1 path
+            for legacy_path in [legacy_graphiti_path, legacy_claude_path]:
+                if legacy_path.exists() and not v21_config_path.exists():
+                    try:
+                        v21_config_path.parent.mkdir(parents=True, exist_ok=True)
+                        import shutil
+                        shutil.copy2(legacy_path, v21_config_path)
+                        logger.info(f"Migrated config from {legacy_path} to {v21_config_path}")
+
+                        # Create deprecation notice
+                        deprecation_notice = legacy_path.parent / "graphiti.config.json.deprecated"
+                        deprecation_notice.write_text(
+                            f"This config has been migrated to {v21_config_path}\n"
+                            "Graphiti v2.1 uses platform-specific directories.\n"
+                        )
+                        break
+                    except Exception as e:
+                        logger.warning(f"Failed to migrate config from {legacy_path}: {e}")
 
             search_paths = [
                 Path.cwd() / "graphiti.config.json",
-                global_config_path,
+                v21_config_path,
             ]
 
             for path in search_paths:
