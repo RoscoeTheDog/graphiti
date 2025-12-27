@@ -2,7 +2,7 @@
 Unit Tests for PackageDeployer (Story 2.i)
 
 Tests package deployment functionality:
-- PackageDeployer.deploy_package() creates ~/.graphiti/mcp_server/ directory
+- PackageDeployer.deploy_package() creates install_dir/lib/ directory (v2.1 architecture)
 - PackageDeployer.deploy_package() copies all mcp_server/ files excluding .venv, __pycache__, tests
 - PackageDeployer.deploy_package() creates .version file with current version from pyproject.toml
 - PackageDeployer.deploy_package() is idempotent (running twice produces same result)
@@ -24,15 +24,16 @@ from mcp_server.daemon.package_deployer import (
     PackageDeployer,
     PackageDeploymentError,
 )
+from mcp_server.daemon.paths import get_install_dir
 
 
 class TestPackageDeployerInit:
     """Test PackageDeployer initialization."""
 
     def test_default_deploy_path(self):
-        """PackageDeployer uses ~/.graphiti/mcp_server/ as default deploy path"""
+        """PackageDeployer uses install_dir/lib/ as default deploy path (v2.1 architecture)"""
         deployer = PackageDeployer()
-        expected_path = Path.home() / ".graphiti" / "mcp_server"
+        expected_path = get_install_dir() / "lib"
         assert deployer.deploy_path == expected_path
 
     def test_custom_deploy_path(self):
@@ -54,31 +55,44 @@ class TestGetSourcePath:
     def test_get_source_path_from_cwd(self):
         """_get_source_path() detects source from current working directory"""
         with TemporaryDirectory() as tmpdir:
-            # Create mock repo structure
-            repo_path = Path(tmpdir) / "graphiti"
+            tmpdir_path = Path(tmpdir)
+            # Create mock repo structure with both required directories
+            repo_path = tmpdir_path / "graphiti"
             mcp_server_path = repo_path / "mcp_server"
+            graphiti_core_path = repo_path / "graphiti_core"
             mcp_server_path.mkdir(parents=True)
+            graphiti_core_path.mkdir(parents=True)
             (mcp_server_path / "pyproject.toml").write_text("version = '1.0.0'")
+            (graphiti_core_path / "__init__.py").write_text("# graphiti_core")
 
             deployer = PackageDeployer()
 
+            # Must mock both cwd and __file__ to prevent fallback to real repo
             with patch("pathlib.Path.cwd", return_value=repo_path):
-                source = deployer._get_source_path()
-                assert source == mcp_server_path
+                with patch("mcp_server.daemon.package_deployer.__file__", str(tmpdir_path / "fake.py")):
+                    source = deployer._get_source_path()
+                    assert source == mcp_server_path
 
     def test_get_source_path_from_env_var(self):
         """_get_source_path() uses GRAPHITI_REPO_PATH environment variable"""
         with TemporaryDirectory() as tmpdir:
-            repo_path = Path(tmpdir) / "graphiti"
+            tmpdir_path = Path(tmpdir)
+            # Create mock repo structure with both required directories
+            repo_path = tmpdir_path / "graphiti"
             mcp_server_path = repo_path / "mcp_server"
+            graphiti_core_path = repo_path / "graphiti_core"
             mcp_server_path.mkdir(parents=True)
+            graphiti_core_path.mkdir(parents=True)
             (mcp_server_path / "pyproject.toml").write_text("version = '1.0.0'")
+            (graphiti_core_path / "__init__.py").write_text("# graphiti_core")
 
             deployer = PackageDeployer()
 
-            with patch.dict("os.environ", {"GRAPHITI_REPO_PATH": str(repo_path)}):
-                source = deployer._get_source_path()
-                assert source == mcp_server_path
+            # Mock __file__ to prevent fallback to real repo
+            with patch("mcp_server.daemon.package_deployer.__file__", str(tmpdir_path / "fake.py")):
+                with patch.dict("os.environ", {"GRAPHITI_REPO_PATH": str(repo_path)}):
+                    source = deployer._get_source_path()
+                    assert source == mcp_server_path
 
     def test_get_source_path_raises_when_not_found(self, tmp_path):
         """_get_source_path() raises PackageDeploymentError when source not found"""
@@ -95,7 +109,7 @@ class TestGetSourcePath:
                 with patch("mcp_server.daemon.package_deployer.__file__", str(nonexistent_repo / "fake.py")):
                     with pytest.raises(PackageDeploymentError) as exc_info:
                         deployer._get_source_path()
-                    assert "Cannot find mcp_server source package" in str(exc_info.value)
+                    assert "Cannot find Graphiti repository root" in str(exc_info.value)
 
 
 class TestGetVersionFromPyproject:
@@ -230,14 +244,24 @@ class TestVerifyDeployment:
     def test_valid_deployment_returns_true(self):
         """verify_deployment() returns True for valid deployment"""
         with TemporaryDirectory() as tmpdir:
-            deploy_path = Path(tmpdir) / "mcp_server"
+            # v2.1: deploy_path is lib/, packages are in lib/mcp_server/ and lib/graphiti_core/
+            deploy_path = Path(tmpdir) / "lib"
             deploy_path.mkdir()
 
-            # Create required files
+            # Create required files - mcp_server package
+            mcp_server = deploy_path / "mcp_server"
+            mcp_server.mkdir()
+            (mcp_server / "graphiti_mcp_server.py").write_text("# MCP server")
+            (mcp_server / "daemon").mkdir()
+            (mcp_server / "config").mkdir()
+
+            # Create required files - graphiti_core package
+            graphiti_core = deploy_path / "graphiti_core"
+            graphiti_core.mkdir()
+            (graphiti_core / "__init__.py").write_text("# graphiti_core")
+
+            # Version file at deploy_path level
             (deploy_path / ".version").write_text("1.0.0")
-            (deploy_path / "graphiti_mcp_server.py").write_text("# MCP server")
-            (deploy_path / "daemon").mkdir()
-            (deploy_path / "config").mkdir()
 
             deployer = PackageDeployer(deploy_path=deploy_path)
             assert deployer.verify_deployment() is True
@@ -245,11 +269,19 @@ class TestVerifyDeployment:
     def test_missing_version_file_returns_false(self):
         """verify_deployment() returns False when .version file missing"""
         with TemporaryDirectory() as tmpdir:
-            deploy_path = Path(tmpdir) / "mcp_server"
+            deploy_path = Path(tmpdir) / "lib"
             deploy_path.mkdir()
-            (deploy_path / "graphiti_mcp_server.py").write_text("# MCP server")
-            (deploy_path / "daemon").mkdir()
-            (deploy_path / "config").mkdir()
+
+            # Create packages but no version file
+            mcp_server = deploy_path / "mcp_server"
+            mcp_server.mkdir()
+            (mcp_server / "graphiti_mcp_server.py").write_text("# MCP server")
+            (mcp_server / "daemon").mkdir()
+            (mcp_server / "config").mkdir()
+
+            graphiti_core = deploy_path / "graphiti_core"
+            graphiti_core.mkdir()
+            (graphiti_core / "__init__.py").write_text("# graphiti_core")
 
             deployer = PackageDeployer(deploy_path=deploy_path)
             assert deployer.verify_deployment() is False
@@ -257,10 +289,10 @@ class TestVerifyDeployment:
     def test_missing_key_files_returns_false(self):
         """verify_deployment() returns False when key files missing"""
         with TemporaryDirectory() as tmpdir:
-            deploy_path = Path(tmpdir) / "mcp_server"
+            deploy_path = Path(tmpdir) / "lib"
             deploy_path.mkdir()
             (deploy_path / ".version").write_text("1.0.0")
-            # Missing graphiti_mcp_server.py, daemon/, config/
+            # Missing mcp_server/, graphiti_core/
 
             deployer = PackageDeployer(deploy_path=deploy_path)
             assert deployer.verify_deployment() is False
@@ -295,35 +327,47 @@ class TestDeployPackage:
     def test_deploy_excludes_venv_pycache_tests(self):
         """deploy_package() excludes .venv, __pycache__, tests during copy"""
         with TemporaryDirectory() as tmpdir:
-            # Create source with excluded directories
-            source_path = Path(tmpdir) / "mcp_server"
-            source_path.mkdir()
-            (source_path / "pyproject.toml").write_text('version = "1.0.0"')
-            (source_path / "graphiti_mcp_server.py").write_text("# MCP")
-            (source_path / "daemon").mkdir()
-            (source_path / "config").mkdir()
+            tmpdir_path = Path(tmpdir)
 
-            # Create excluded directories
-            (source_path / ".venv").mkdir()
-            (source_path / ".venv" / "lib").mkdir()
-            (source_path / "__pycache__").mkdir()
-            (source_path / "tests").mkdir()
-            (source_path / "tests" / "test_something.py").write_text("test")
+            # Create mcp_server source with excluded directories
+            mcp_source = tmpdir_path / "mcp_server"
+            mcp_source.mkdir()
+            (mcp_source / "pyproject.toml").write_text('version = "1.0.0"')
+            (mcp_source / "graphiti_mcp_server.py").write_text("# MCP")
+            (mcp_source / "daemon").mkdir()
+            (mcp_source / "config").mkdir()
 
-            deploy_path = Path(tmpdir) / "deploy" / "mcp_server"
+            # Create excluded directories in mcp_server
+            (mcp_source / ".venv").mkdir()
+            (mcp_source / ".venv" / "lib").mkdir()
+            (mcp_source / "__pycache__").mkdir()
+            (mcp_source / "tests").mkdir()
+            (mcp_source / "tests" / "test_something.py").write_text("test")
+
+            # Create graphiti_core source (required by v2.1)
+            graphiti_source = tmpdir_path / "graphiti_core"
+            graphiti_source.mkdir()
+            (graphiti_source / "__init__.py").write_text("# graphiti_core")
+
+            # deploy_path is the lib/ directory
+            deploy_path = tmpdir_path / "deploy" / "lib"
             deployer = PackageDeployer(deploy_path=deploy_path)
 
-            with patch.object(deployer, "_get_source_path", return_value=source_path):
+            with patch.object(deployer, "_get_source_path", return_value=mcp_source), \
+                 patch.object(deployer, "_get_graphiti_core_path", return_value=graphiti_source):
                 success, msg = deployer.deploy_package()
 
             assert success is True
-            # Verify excluded directories not copied
-            assert not (deploy_path / ".venv").exists()
-            assert not (deploy_path / "__pycache__").exists()
-            assert not (deploy_path / "tests").exists()
+            # Verify excluded directories not copied (in mcp_server subdirectory)
+            mcp_deployed = deploy_path / "mcp_server"
+            assert not (mcp_deployed / ".venv").exists()
+            assert not (mcp_deployed / "__pycache__").exists()
+            assert not (mcp_deployed / "tests").exists()
             # Verify required directories copied
-            assert (deploy_path / "daemon").exists()
-            assert (deploy_path / "config").exists()
+            assert (mcp_deployed / "daemon").exists()
+            assert (mcp_deployed / "config").exists()
+            # Verify graphiti_core deployed
+            assert (deploy_path / "graphiti_core" / "__init__.py").exists()
 
     def test_deploy_creates_version_file(self):
         """deploy_package() creates .version file with version from pyproject.toml"""

@@ -457,10 +457,10 @@ def test_create_pth_file():
 
 def test_install_flow_includes_new_steps():
     """
-    Test that install() calls the new methods in correct order.
+    Test that install() calls all 12 steps in correct order.
 
-    Verifies that install() now includes venv creation, dependency installation,
-    and .pth file creation.
+    Verifies that install() includes all steps from venv creation through
+    service registration and verification.
     """
     from mcp_server.daemon.installer import GraphitiInstaller
 
@@ -482,33 +482,57 @@ def test_install_flow_includes_new_steps():
         def track_call(name):
             def _track(*args, **kwargs):
                 call_order.append(name)
+                # Return a version string for _write_version_info
+                if name == 'write_version':
+                    return "1.0.0"
             return _track
 
+        # Mock all 12 steps
         with patch.object(installer, '_validate_environment', side_effect=track_call('validate')), \
              patch.object(installer, '_create_directories', side_effect=track_call('directories')), \
              patch.object(installer, '_create_venv', side_effect=track_call('venv')), \
              patch.object(installer, '_install_dependencies', side_effect=track_call('dependencies')), \
              patch.object(installer, '_freeze_packages', side_effect=track_call('freeze')), \
-             patch.object(installer, '_create_pth_file', side_effect=track_call('pth_file')):
+             patch.object(installer, '_create_pth_file', side_effect=track_call('pth_file')), \
+             patch.object(installer, '_create_wrappers', side_effect=track_call('wrappers')), \
+             patch.object(installer, '_write_version_info', side_effect=track_call('write_version')), \
+             patch.object(installer, '_create_default_config', side_effect=track_call('config')), \
+             patch.object(installer, '_register_service', side_effect=track_call('register')), \
+             patch.object(installer, '_start_service', side_effect=track_call('start')), \
+             patch.object(installer, '_verify_installation', side_effect=track_call('verify')):
 
             # Call install
             result = installer.install()
 
-            # Verify all methods were called in order
+            # Verify all methods were called
             assert 'validate' in call_order, "validate should be called"
             assert 'directories' in call_order, "directories should be called"
             assert 'venv' in call_order, "venv should be called"
             assert 'dependencies' in call_order, "dependencies should be called"
             assert 'freeze' in call_order, "freeze should be called"
             assert 'pth_file' in call_order, "pth_file should be called"
+            assert 'wrappers' in call_order, "wrappers should be called"
+            assert 'write_version' in call_order, "write_version should be called"
+            assert 'config' in call_order, "config should be called"
+            assert 'register' in call_order, "register should be called"
+            assert 'start' in call_order, "start should be called"
+            assert 'verify' in call_order, "verify should be called"
 
-            # Verify order: validate -> directories -> venv -> dependencies -> freeze -> pth_file
-            validate_idx = call_order.index('validate')
-            directories_idx = call_order.index('directories')
-            venv_idx = call_order.index('venv')
-            dependencies_idx = call_order.index('dependencies')
-            freeze_idx = call_order.index('freeze')
-            pth_file_idx = call_order.index('pth_file')
+            # Verify order of all 12 steps
+            indices = {name: call_order.index(name) for name in [
+                'validate', 'directories', 'venv', 'dependencies', 'freeze', 'pth_file',
+                'wrappers', 'write_version', 'config', 'register', 'start', 'verify'
+            ]}
 
-            assert validate_idx < directories_idx < venv_idx < dependencies_idx < freeze_idx < pth_file_idx, \
-                "Methods should be called in correct order"
+            assert indices['validate'] < indices['directories'] < indices['venv'], \
+                "Steps 1-3 should be in order"
+            assert indices['venv'] < indices['dependencies'] < indices['freeze'], \
+                "Steps 3-5 should be in order"
+            assert indices['freeze'] < indices['pth_file'] < indices['wrappers'], \
+                "Steps 5-7 should be in order"
+            assert indices['wrappers'] < indices['write_version'] < indices['config'], \
+                "Steps 7-9 should be in order"
+            assert indices['config'] < indices['register'] < indices['start'], \
+                "Steps 9-11 should be in order"
+            assert indices['start'] < indices['verify'], \
+                "Steps 11-12 should be in order"
