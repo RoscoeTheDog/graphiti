@@ -1,12 +1,14 @@
 # Story 18: Cross-Platform Service Lifecycle Test
 
-**Status**: unassigned
+**Status**: deferred
 **Created**: 2025-12-25 02:02
 **Phase**: 5 - End-to-End Testing
 
 ## Description
 
 Test the complete service lifecycle (install, start, stop, restart, uninstall) on all platforms, ensuring clean uninstall leaves no artifacts.
+
+**Deferral Note**: Service managers are functional and tested via unit tests. Dedicated E2E lifecycle tests deferred as service functionality is covered by Stories 14-16 install tests and individual service manager unit tests.
 
 ## Acceptance Criteria
 

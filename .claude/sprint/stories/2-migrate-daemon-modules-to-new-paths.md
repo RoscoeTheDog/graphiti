@@ -1,6 +1,6 @@
 # Story 2: Migrate Daemon Modules to New Path System
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-25 02:02
 **Phase**: 1 - Path Infrastructure
 
@@ -20,17 +20,17 @@ Update all daemon modules to use the new paths.py module instead of hardcoded `~
 - [x] Document all `~/.graphiti` or `Path.home()` references found
 
 ### (i) Implementation Phase
-- [ ] (P0) Update manager.py to import and use paths.py functions
-- [ ] (P0) Update bootstrap.py to import and use paths.py functions
-- [ ] Update venv_manager.py to use paths.py functions
-- [ ] Update config loading to use get_config_file()
-- [ ] Update log file paths to use get_log_dir()
-- [ ] Remove all hardcoded `~/.graphiti` references
+- [x] (P0) Update manager.py to import and use paths.py functions
+- [x] (P0) Update bootstrap.py to import and use paths.py functions
+- [x] Update venv_manager.py to use paths.py functions
+- [x] Update config loading to use get_config_file()
+- [x] Update log file paths to use get_log_dir()
+- [x] Remove all hardcoded `~/.graphiti` references
 
 ### (t) Testing Phase
-- [ ] (P0) Verify no `~/.graphiti` strings remain in daemon/ directory
-- [ ] Verify no `Path.home() / ".graphiti"` patterns remain
-- [ ] Run existing daemon tests (should still pass)
+- [x] (P0) Verify no `~/.graphiti` strings remain in daemon/ directory
+- [x] Verify no `Path.home() / ".graphiti"` patterns remain
+- [x] Run existing daemon tests (should still pass)
 
 ## Dependencies
 

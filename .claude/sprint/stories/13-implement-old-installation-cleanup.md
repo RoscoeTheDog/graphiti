@@ -1,6 +1,6 @@
 # Story 13: Implement Old Installation Cleanup
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-25 02:02
 **Phase**: 4 - Migration
 
@@ -19,18 +19,20 @@ Implement cleanup of old v2.0 installation artifacts including Task Scheduler ta
 **Discovery Complete**: See `.claude/sprint/plans/13-plan.yaml` for full design
 
 ### (i) Implementation Phase
-- [ ] (P0) Implement `cleanup_v2_0_installation()` function
-- [ ] Stop running v2.0 services before cleanup
-- [ ] Windows: Delete GraphitiBootstrap_* Task Scheduler task
-- [ ] macOS: Unload and remove LaunchAgent plist
-- [ ] Linux: Stop and disable systemd user service
-- [ ] Prompt user before removing ~/.graphiti/ directory
-- [ ] Preserve logs if user requests
+- [x] (P0) Implement `cleanup_v2_0_installation()` function
+- [x] Stop running v2.0 services before cleanup
+- [x] Windows: Delete GraphitiBootstrap_* Task Scheduler task
+- [x] macOS: Unload and remove LaunchAgent plist
+- [x] Linux: Stop and disable systemd user service
+- [x] Prompt user before removing ~/.graphiti/ directory
+- [x] Preserve logs if user requests
+
+**Implementation Complete**: See `mcp_server/daemon/v2_cleanup.py` (615 lines) for full implementation
 
 ### (t) Testing Phase
-- [ ] (P0) Verify old Task Scheduler task is removed (Windows)
-- [ ] Verify ~/.graphiti/ removal is prompted (not automatic)
-- [ ] Verify cleanup doesn't affect v2.1 installation
+- [x] (P0) Verify old Task Scheduler task is removed (Windows)
+- [x] Verify ~/.graphiti/ removal is prompted (not automatic)
+- [x] Verify cleanup doesn't affect v2.1 installation
 
 ## Dependencies
 

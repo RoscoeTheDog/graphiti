@@ -1,6 +1,6 @@
 # Story 17: Windows v2.0 to v2.1 Migration Test
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-25 02:02
 **Phase**: 5 - End-to-End Testing
 
@@ -10,24 +10,28 @@ Test the complete migration path from v2.0 installation (~/.graphiti/) to v2.1 o
 
 ## Acceptance Criteria
 
-### (d) Discovery Phase
-- [ ] (P0) Create v2.0 test fixture (~/.graphiti/ structure)
-- [ ] Document expected migration behavior
-- [ ] Define success criteria for migration
-- [ ] Document rollback procedure if migration fails
+### (d) Discovery Phase ✅ COMPLETE
+- [x] (P0) Create v2.0 test fixture (~/.graphiti/ structure)
+- [x] Document expected migration behavior
+- [x] Define success criteria for migration
+- [x] Document rollback procedure if migration fails
 
-### (i) Implementation Phase
-- [ ] (P0) Set up v2.0 installation fixture with config and logs
-- [ ] Run migration process
-- [ ] Verify old Task Scheduler task is detected
-- [ ] Verify config is copied to new location
+### (i) Implementation Phase ✅ COMPLETE
+- [x] (P0) Set up v2.0 installation fixture with config and logs
+- [x] Run migration process
+- [x] Verify old Task Scheduler task is detected
+- [x] Verify config is copied to new location
 
-### (t) Testing Phase
-- [ ] (P0) Verify config content is preserved after migration
-- [ ] (P0) Verify old Task Scheduler task is removed
-- [ ] Verify new v2.1 installation works after migration
-- [ ] Verify no data loss during migration
-- [ ] Test migration when v2.1 already partially exists
+**Artifact**: `tests/daemon/test_config_migration.py` - comprehensive migration tests
+
+### (t) Testing Phase ✅ COMPLETE
+- [x] (P0) Verify config content is preserved after migration
+- [x] (P0) Verify old Task Scheduler task is removed
+- [x] Verify new v2.1 installation works after migration
+- [x] Verify no data loss during migration
+- [x] Test migration when v2.1 already partially exists
+
+**Artifact**: `tests/daemon/test_config_migration.py` covers all migration scenarios
 
 ## Dependencies
 

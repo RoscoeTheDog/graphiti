@@ -1,6 +1,6 @@
 # Story 9: Update SystemdServiceManager (Linux)
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-25 02:02
 **Phase**: 3 - Service Manager Updates
 
@@ -25,9 +25,9 @@ Update the SystemdServiceManager to use the new v2.1 installation paths for Linu
 - [x] Update unit file template generation
 
 ### (t) Testing Phase
-- [ ] (P0) Verify generated unit file has correct paths
-- [ ] Verify Environment line sets PYTHONPATH correctly
-- [ ] Verify log paths use XDG_STATE_HOME/graphiti/logs/
+- [x] (P0) Verify generated unit file has correct paths
+- [x] Verify Environment line sets PYTHONPATH correctly
+- [x] Verify log paths use XDG_STATE_HOME/graphiti/logs/
 
 ## Dependencies
 

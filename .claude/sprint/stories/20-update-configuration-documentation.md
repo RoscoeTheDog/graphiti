@@ -1,6 +1,6 @@
 # Story 20: Update Configuration Documentation
 
-**Status**: unassigned
+**Status**: completed
 **Created**: 2025-12-25 02:02
 **Phase**: 6 - Documentation
 
@@ -10,24 +10,28 @@ Update CONFIGURATION.md and related documentation with new v2.1 paths, directory
 
 ## Acceptance Criteria
 
-### (d) Discovery Phase
-- [ ] (P0) Identify all path references in CONFIGURATION.md
-- [ ] Document new directory structure for each platform
-- [ ] Identify config file location changes
-- [ ] Review existing path documentation accuracy
+### (d) Discovery Phase ✅ COMPLETE
+- [x] (P0) Identify all path references in CONFIGURATION.md
+- [x] Document new directory structure for each platform
+- [x] Identify config file location changes
+- [x] Review existing path documentation accuracy
 
-### (i) Implementation Phase
-- [ ] (P0) Update CONFIGURATION.md with v2.1 paths
-- [ ] Add new "Directory Structure" section
-- [ ] Document environment variable overrides (LOCALAPPDATA, XDG_*)
-- [ ] Add migration notes for config file location changes
-- [ ] Update any path examples in code blocks
-- [ ] Document VERSION and INSTALL_INFO files
+### (i) Implementation Phase ✅ COMPLETE
+- [x] (P0) Update CONFIGURATION.md with v2.1 paths
+- [x] Add new "Directory Structure" section
+- [x] Document environment variable overrides (LOCALAPPDATA, XDG_*)
+- [x] Add migration notes for config file location changes
+- [x] Update any path examples in code blocks
+- [x] Document VERSION and INSTALL_INFO files
 
-### (t) Testing Phase
-- [ ] (P0) Verify all documented paths match actual v2.1 paths
-- [ ] Verify environment variable documentation is accurate
-- [ ] Cross-reference with paths.py implementation
+**Artifact**: `CONFIGURATION.md` updated with v2.1 architecture paths
+
+### (t) Testing Phase ✅ COMPLETE
+- [x] (P0) Verify all documented paths match actual v2.1 paths
+- [x] Verify environment variable documentation is accurate
+- [x] Cross-reference with paths.py implementation
+
+**Artifact**: Path documentation verified against `graphiti_mcp_installer/daemon/paths.py`
 
 ## Dependencies
 

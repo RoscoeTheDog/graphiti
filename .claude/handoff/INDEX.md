@@ -36,3 +36,4 @@
 | s036 | fix-daemon-v21-deployment-add-graphiti | ACTIVE | 2025-12-26 01:06 | Fix daemon v2.1 deployment - add graphiti_core fre |
 | s037 | fix-daemon-v21-sse-transport-and | ACTIVE | 2025-12-26 01:32 | Fix daemon v2.1 SSE transport and installer packag |
 | s038 | fix-daemon-tests-and-identify-stale-v20 | ACTIVE | 2025-12-27 00:24 | Fix daemon tests and identify stale v2.0 reference |
+| s039 | complete-v21-path-migration-and-sprint | ACTIVE | 2025-12-27 09:23 | Complete v2.1 path migration and sprint status rea |
