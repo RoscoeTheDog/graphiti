@@ -59,20 +59,25 @@ def find_config_file() -> Optional[Path]:
 
     Search order:
         1. ./graphiti.config.json (project root)
-        2. ~/.graphiti/graphiti.config.json (global)
+        2. Platform-specific config directory (v2.1 architecture):
+           - Windows: %LOCALAPPDATA%\\Graphiti\\config\\graphiti.config.json
+           - macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+           - Linux: ~/.config/graphiti/graphiti.config.json
 
     Returns:
         Path to config file, or None if not found
     """
+    from mcp_server.daemon.paths import get_config_file
+
     # Try project root first
     project_config = Path("graphiti.config.json")
     if project_config.exists():
         return project_config
 
-    # Try global config
-    global_config = Path.home() / ".graphiti" / "graphiti.config.json"
-    if global_config.exists():
-        return global_config
+    # Try platform-specific config (v2.1 architecture)
+    platform_config = get_config_file()
+    if platform_config.exists():
+        return platform_config
 
     return None
 
@@ -333,10 +338,11 @@ def cmd_effective(args: argparse.Namespace) -> None:
     config_path = find_config_file()
 
     if config_path is None:
+        from mcp_server.daemon.paths import get_config_file
         print("[ERROR] No configuration file found.")
         print("\nSearched locations:")
         print("  1. ./graphiti.config.json (project root)")
-        print("  2. ~/.graphiti/graphiti.config.json (global)")
+        print(f"  2. {get_config_file()} (platform-specific)")
         print("\nTo create a config file, see documentation:")
         print("  https://github.com/getzep/graphiti/blob/main/CONFIGURATION.md")
         sys.exit(1)
@@ -609,24 +615,31 @@ def _save_config_dict(config_path: Path, config: dict) -> None:
 def _ensure_global_config() -> Path:
     """Ensure global config directory and file exist.
 
+    Uses v2.1 platform-specific paths:
+        - Windows: %LOCALAPPDATA%\\Graphiti\\config\\graphiti.config.json
+        - macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+        - Linux: ~/.config/graphiti/graphiti.config.json
+
     Returns:
         Path to global config file
     """
-    global_config_dir = Path.home() / ".graphiti"
-    global_config_dir.mkdir(parents=True, exist_ok=True)
+    from mcp_server.daemon.paths import get_config_file, get_config_dir
 
-    global_config_path = global_config_dir / "graphiti.config.json"
+    config_dir = get_config_dir()
+    config_dir.mkdir(parents=True, exist_ok=True)
 
-    if not global_config_path.exists():
+    config_path = get_config_file()
+
+    if not config_path.exists():
         # Create minimal config with defaults
         minimal_config = {
             "version": "1.0.0",
             "project_overrides": {}
         }
-        global_config_path.write_text(json.dumps(minimal_config, indent=2))
-        print(f"Created new global config at {global_config_path}")
+        config_path.write_text(json.dumps(minimal_config, indent=2))
+        print(f"Created new global config at {config_path}")
 
-    return global_config_path
+    return config_path
 
 
 def cmd_set_override(args: argparse.Namespace) -> None:

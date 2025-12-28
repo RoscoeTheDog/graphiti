@@ -19,18 +19,18 @@ Manual installation (if not using graphiti-mcp daemon install):
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/python3</string>
-        <string>/path/to/mcp_server/daemon/bootstrap.py</string>
+        <string>~/Library/Application Support/Graphiti/lib/mcp_server/daemon/bootstrap.py</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/Users/username/.graphiti/logs/bootstrap-stdout.log</string>
+    <string>/Users/username/Library/Logs/Graphiti/bootstrap-stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/username/.graphiti/logs/bootstrap-stderr.log</string>
+    <string>/Users/username/Library/Logs/Graphiti/bootstrap-stderr.log</string>
     <key>WorkingDirectory</key>
-    <string>/path/to/mcp_server/daemon</string>
+    <string>/Users/username/Library/Application Support/Graphiti/lib/mcp_server/daemon</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>

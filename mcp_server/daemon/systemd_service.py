@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional
 
 from .venv_manager import VenvManager, VenvCreationError
+from .paths import get_install_dir, get_log_dir
 
 
 class SystemdServiceManager:
@@ -29,13 +30,12 @@ class SystemdServiceManager:
             venv_manager: Optional VenvManager instance. If None, creates default instance.
 
         Raises:
-            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+            VenvCreationError: If venv doesn't exist (platform-specific location from paths.py)
         """
         self.venv_manager = venv_manager or VenvManager()
         # Get venv Python executable - raise VenvCreationError if venv doesn't exist
         # (DaemonManager.install() ensures venv exists before instantiating service managers)
         self.python_exe = self.venv_manager.get_python_executable()
-        self.bootstrap_script = self._get_bootstrap_path()
 
         # User service directory
         xdg_config = os.environ.get("XDG_CONFIG_HOME", "")
@@ -45,16 +45,13 @@ class SystemdServiceManager:
             self.service_dir = Path.home() / ".config" / "systemd" / "user"
 
         self.service_file = self.service_dir / f"{self.service_name}.service"
-        self.log_dir = Path.home() / ".graphiti" / "logs"
-
-    def _get_bootstrap_path(self) -> Path:
-        """Get path to bootstrap.py script."""
-        # bootstrap.py is in mcp_server/daemon/
-        return Path(__file__).parent / "bootstrap.py"
+        self.log_dir = get_log_dir()
 
     def _create_service_unit(self) -> str:
         """Create systemd service unit file content."""
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        install_dir = get_install_dir()
+        lib_dir = install_dir / "lib"
 
         unit_content = f"""[Unit]
 Description=Graphiti MCP Bootstrap Service
@@ -63,11 +60,12 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart={self.python_exe} {self.bootstrap_script}
+ExecStart={self.python_exe} -m mcp_server.daemon.bootstrap
 Restart=always
 RestartSec=5
-WorkingDirectory={self.bootstrap_script.parent}
+WorkingDirectory={install_dir}
 Environment="PATH={os.environ.get('PATH', '/usr/local/bin:/usr/bin:/bin')}"
+Environment="PYTHONPATH={lib_dir}"
 StandardOutput=append:{self.log_dir / 'bootstrap-stdout.log'}
 StandardError=append:{self.log_dir / 'bootstrap-stderr.log'}
 
@@ -99,11 +97,12 @@ WantedBy=default.target
         """Install bootstrap service using systemd."""
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
+        install_dir = get_install_dir()
         print(f"Python: {self.python_exe}")
-        print(f"Bootstrap script: {self.bootstrap_script}")
+        print(f"Install directory: {install_dir}")
         print(f"Service file: {self.service_file}")
         print()
 
@@ -115,34 +114,34 @@ WantedBy=default.target
         try:
             unit_content = self._create_service_unit()
             self.service_file.write_text(unit_content)
-            print(f"✓ Service file created: {self.service_file}")
+            print(f"[OK] Service file created: {self.service_file}")
         except Exception as e:
-            print(f"✗ Failed to create service file: {e}")
+            print(f"[ERROR] Failed to create service file: {e}")
             return False
 
         # Reload systemd daemon
         print("Reloading systemd daemon...")
         success, output = self._run_systemctl("daemon-reload")
         if not success:
-            print(f"⚠ Warning: Failed to reload daemon: {output}")
+            print(f"[WARN] Warning: Failed to reload daemon: {output}")
 
         # Enable service (auto-start on boot)
         print("Enabling service...")
         success, output = self._run_systemctl("enable", self.service_name)
         if not success:
-            print(f"✗ Failed to enable service: {output}")
+            print(f"[ERROR] Failed to enable service: {output}")
             return False
 
         # Start service
         print("Starting service...")
         success, output = self._run_systemctl("start", self.service_name)
         if not success:
-            print(f"✗ Failed to start service: {output}")
+            print(f"[ERROR] Failed to start service: {output}")
             print("  You can start it manually later via:")
             print(f"  systemctl --user start {self.service_name}")
             return True  # Service installed, just not started
 
-        print(f"✓ Service '{self.service_name}' started and enabled")
+        print(f"[OK] Service '{self.service_name}' started and enabled")
         return True
 
     def uninstall(self) -> bool:
@@ -155,29 +154,29 @@ WantedBy=default.target
         print("Stopping service...")
         success, output = self._run_systemctl("stop", self.service_name)
         if not success:
-            print(f"⚠ Warning: Failed to stop service: {output}")
+            print(f"[WARN] Warning: Failed to stop service: {output}")
 
         # Disable service
         print("Disabling service...")
         success, output = self._run_systemctl("disable", self.service_name)
         if not success:
-            print(f"⚠ Warning: Failed to disable service: {output}")
+            print(f"[WARN] Warning: Failed to disable service: {output}")
 
         # Remove service file
         print("Removing service file...")
         try:
             if self.service_file.exists():
                 self.service_file.unlink()
-                print(f"✓ Service file removed: {self.service_file}")
+                print(f"[OK] Service file removed: {self.service_file}")
         except Exception as e:
-            print(f"✗ Failed to remove service file: {e}")
+            print(f"[ERROR] Failed to remove service file: {e}")
             return False
 
         # Reload systemd daemon
         print("Reloading systemd daemon...")
         self._run_systemctl("daemon-reload")
 
-        print(f"✓ Service '{self.service_name}' removed")
+        print(f"[OK] Service '{self.service_name}' removed")
         return True
 
     def is_installed(self) -> bool:

@@ -7,15 +7,21 @@
 #   installation files. It can run WITHOUT Python or the repository being present,
 #   making it suitable for recovery scenarios.
 #
+#   Follows XDG Base Directory Specification (v2.1 architecture):
+#   - Install Dir: ${XDG_DATA_HOME:-~/.local/share}/graphiti
+#     Contains: lib/ (mcp_server, graphiti_core), .venv/, bin/
+#   - Config Dir: ${XDG_CONFIG_HOME:-~/.config}/graphiti
+#     Contains: graphiti.config.json
+#   - State Dir: ${XDG_STATE_HOME:-~/.local/state}/graphiti
+#     Contains: logs/, data/
+#
 #   What it does:
 #   - Stops and disables systemd user service: graphiti-bootstrap.service
 #   - Removes service file: ~/.config/systemd/user/graphiti-bootstrap.service
 #   - Reloads systemd daemon
-#   - Deletes ~/.graphiti/.venv/ (virtual environment)
-#   - Deletes ~/.graphiti/mcp_server/ (deployed package)
-#   - Deletes ~/.graphiti/bin/ (wrapper scripts)
-#   - Deletes ~/.graphiti/logs/ (service logs)
-#   - Optionally preserves ~/.graphiti/data/ and ~/.graphiti/graphiti.config.json
+#   - Deletes install dir: ~/.local/share/graphiti (.venv, lib, bin)
+#   - Deletes state dir logs: ~/.local/state/graphiti/logs
+#   - Optionally preserves config and data directories
 #
 # Usage:
 #   ./uninstall_linux.sh              # Interactive mode
@@ -29,9 +35,11 @@
 #   2. systemctl --user disable graphiti-bootstrap
 #   3. rm ~/.config/systemd/user/graphiti-bootstrap.service
 #   4. systemctl --user daemon-reload
-#   5. rm -rf ~/.graphiti
-#   6. Remove from Claude config: ~/.config/Claude/claude_desktop_config.json
-#   7. Remove from PATH in ~/.bashrc or ~/.zshrc
+#   5. rm -rf ~/.local/share/graphiti    # Install dir (venv, lib, bin)
+#   6. rm -rf ~/.config/graphiti         # Config dir (graphiti.config.json)
+#   7. rm -rf ~/.local/state/graphiti    # State dir (logs, data)
+#   8. Remove from Claude config: ~/.config/Claude/claude_desktop_config.json
+#   9. Remove from PATH in ~/.bashrc or ~/.zshrc
 #
 # Version: 1.0.0
 # Created: 2025-12-23
@@ -115,23 +123,30 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-# Define paths
-GRAPHITI_DIR="$HOME/.graphiti"
-VENV_DIR="$GRAPHITI_DIR/.venv"
-PACKAGE_DIR="$GRAPHITI_DIR/mcp_server"
-BIN_DIR="$GRAPHITI_DIR/bin"
-LOGS_DIR="$GRAPHITI_DIR/logs"
-CONFIG_FILE="$GRAPHITI_DIR/graphiti.config.json"
-DATA_DIR="$GRAPHITI_DIR/data"
+# Define paths following XDG Base Directory Specification (v2.1 architecture)
+XDG_DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
+XDG_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_STATE="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# Install directory: Contains lib/, .venv/, bin/
+INSTALL_DIR="$XDG_DATA/graphiti"
+# Config directory: Contains graphiti.config.json
+CONFIG_DIR="$XDG_CONFIG/graphiti"
+# State directory: Contains logs/, data/
+STATE_DIR="$XDG_STATE/graphiti"
+
+# Specific paths within each directory
+VENV_DIR="$INSTALL_DIR/.venv"
+LIB_DIR="$INSTALL_DIR/lib"           # contains mcp_server, graphiti_core
+BIN_DIR="$INSTALL_DIR/bin"
+LOGS_DIR="$STATE_DIR/logs"
+DATA_DIR="$STATE_DIR/data"
+CONFIG_FILE="$CONFIG_DIR/graphiti.config.json"
 
 SERVICE_NAME="graphiti-bootstrap"
 
 # Service directory (respect XDG_CONFIG_HOME)
-if [ -n "${XDG_CONFIG_HOME:-}" ]; then
-    SERVICE_DIR="$XDG_CONFIG_HOME/systemd/user"
-else
-    SERVICE_DIR="$HOME/.config/systemd/user"
-fi
+SERVICE_DIR="$XDG_CONFIG/systemd/user"
 SERVICE_FILE="$SERVICE_DIR/${SERVICE_NAME}.service"
 
 # Track exit code
@@ -223,9 +238,9 @@ delete_dir() {
 }
 
 delete_dir "$VENV_DIR" "Virtual environment (.venv)"
-delete_dir "$PACKAGE_DIR" "Deployed package (mcp_server)"
-delete_dir "$BIN_DIR" "Wrapper scripts (bin)"
-delete_dir "$LOGS_DIR" "Service logs (logs)"
+delete_dir "$LIB_DIR" "Library packages (lib/)"
+delete_dir "$BIN_DIR" "Wrapper scripts (bin/)"
+delete_dir "$LOGS_DIR" "Service logs (logs/)"
 
 # STEP 3: Handle config and data (preserve by default)
 echo ""
@@ -298,26 +313,37 @@ else
     echo "No config or data found to preserve"
 fi
 
-# STEP 4: Clean up ~/.graphiti if empty
+# STEP 4: Clean up XDG directories if empty
 echo ""
-if [ -d "$GRAPHITI_DIR" ]; then
-    if [ -z "$(ls -A "$GRAPHITI_DIR")" ]; then
-        step "Removing empty ~/.graphiti directory..."
-        if [ "$DRY_RUN" = false ]; then
-            if rmdir "$GRAPHITI_DIR" 2>&1; then
-                success "Deleted: ~/.graphiti"
+
+cleanup_empty_dir() {
+    local dir_path=$1
+    local dir_desc=$2
+
+    if [ -d "$dir_path" ]; then
+        if [ -z "$(ls -A "$dir_path")" ]; then
+            step "Removing empty $dir_desc..."
+            if [ "$DRY_RUN" = false ]; then
+                if rmdir "$dir_path" 2>&1; then
+                    success "Deleted: $dir_path"
+                else
+                    warning "Failed to delete $dir_path"
+                fi
             else
-                warning "Failed to delete ~/.graphiti"
+                echo "[DRY RUN] Would delete: $dir_path"
             fi
         else
-            echo "[DRY RUN] Would delete: $GRAPHITI_DIR"
+            warning "$dir_desc is not empty - leaving directory intact"
+            echo "Remaining files:"
+            find "$dir_path" -type f -o -type d | sed 's/^/  - /'
         fi
-    else
-        warning "~/.graphiti is not empty - leaving directory intact"
-        echo "Remaining files:"
-        find "$GRAPHITI_DIR" -type f -o -type d | sed 's/^/  - /'
     fi
-fi
+}
+
+# Clean up all three XDG directories if empty
+cleanup_empty_dir "$INSTALL_DIR" "install directory ($INSTALL_DIR)"
+cleanup_empty_dir "$CONFIG_DIR" "config directory ($CONFIG_DIR)"
+cleanup_empty_dir "$STATE_DIR" "state directory ($STATE_DIR)"
 
 # STEP 5: Manual steps (Claude config, PATH)
 echo ""
@@ -336,7 +362,7 @@ echo ""
 
 echo -e "${CYAN}2. Remove from PATH (if added):${NC}"
 echo "   - Edit ~/.bashrc or ~/.zshrc"
-echo "   - Remove line: export PATH=\"$BIN_DIR:\$PATH\""
+echo "   - Remove line: export PATH=\"\$HOME/.local/share/graphiti/bin:\$PATH\""
 echo "   - Run: source ~/.bashrc (or source ~/.zshrc)"
 echo ""
 

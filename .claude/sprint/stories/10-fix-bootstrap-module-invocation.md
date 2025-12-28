@@ -1,0 +1,60 @@
+# Story 10: Fix Bootstrap Module Invocation
+
+**Status**: completed
+**Created**: 2025-12-25 02:02
+**Completed**: 2025-12-25
+**Phase**: 3 - Service Manager Updates
+
+## Description
+
+Fix the bootstrap module to work correctly when invoked via `-m mcp_server.daemon.bootstrap` from the frozen installation, including proper sys.path setup for frozen packages.
+
+## Acceptance Criteria
+
+### (d) Discovery Phase
+- [x] (P0) Analyze current bootstrap import issues (relative vs absolute)
+- [x] Document why direct script execution fails
+- [x] Design _setup_frozen_path() function
+- [x] Identify all imports that need frozen path
+
+**Discovery Complete**: See `.claude/sprint/discoveries/10.d-bootstrap-import-analysis.md` for full analysis.
+
+### (i) Implementation Phase
+- [x] (P0) Add `_setup_frozen_path()` function at top of bootstrap.py
+- [x] (P0) Detect if running from frozen install vs development
+- [x] Insert lib/ path into sys.path before other imports
+- [x] Update all imports to work with both frozen and dev modes
+- [x] Keep `if __name__ == "__main__"` for development/testing compatibility
+- [x] Ensure bootstrap works when invoked as `-m mcp_server.daemon.bootstrap`
+
+**Implementation Complete**: Added `_setup_frozen_path()` function at line 23-58 in bootstrap.py. Function executes before any relative imports and detects frozen mode by checking for lib/ directory structure. Tested successfully in development mode with `-m` invocation.
+
+### (t) Testing Phase
+- [x] (P0) Verify bootstrap runs with `-m` invocation from install dir
+- [x] Verify bootstrap still works in development mode
+- [x] Verify all imports resolve correctly in frozen mode
+
+**Testing Complete**: Created comprehensive test suite in `tests/daemon/test_bootstrap_frozen_path.py` with 12 tests (100% pass rate). All acceptance criteria verified. See `.claude/sprint/test-results/10.t-test-results.md` for detailed results.
+
+## Dependencies
+
+- Story 1: Create Platform-Aware Path Resolution Module
+- Story 5: Implement Frozen Package Deployment
+
+## Implementation Notes
+
+```python
+def _setup_frozen_path():
+    """Ensure frozen packages in lib/ are importable."""
+    if getattr(sys, 'frozen', False):
+        base = Path(sys.executable).parent.parent
+    else:
+        # bootstrap.py is in {INSTALL}/lib/mcp_server/daemon/
+        base = Path(__file__).parent.parent.parent.parent
+
+    lib_path = base / "lib"
+    if lib_path.exists() and str(lib_path) not in sys.path:
+        sys.path.insert(0, str(lib_path))
+
+_setup_frozen_path()
+```

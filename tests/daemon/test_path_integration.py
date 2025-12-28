@@ -345,9 +345,10 @@ class TestEdgeCases:
     """Test edge cases and error handling."""
 
     def test_path_integration_default_bin_path(self):
-        """Test PathIntegration uses default bin path when not specified."""
+        """Test PathIntegration uses default bin path when not specified (v2.1 paths)."""
+        from mcp_server.daemon.paths import get_install_dir
         integration = PathIntegration()
-        expected_path = Path.home() / ".graphiti" / "bin"
+        expected_path = get_install_dir() / "bin"
         assert integration.bin_path == expected_path
 
     def test_path_integration_custom_bin_path(self, tmp_path):

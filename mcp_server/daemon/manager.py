@@ -23,13 +23,23 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .windows_service import WindowsServiceManager
+from .task_scheduler_service import TaskSchedulerServiceManager
 from .launchd_service import LaunchdServiceManager
 from .systemd_service import SystemdServiceManager
 from .venv_manager import VenvManager, VenvCreationError, IncompatiblePythonVersionError
 from .wrapper_generator import WrapperGenerator, WrapperGenerationError
 from .path_integration import PathIntegration, PathIntegrationError
 from .package_deployer import PackageDeployer, PackageDeploymentError
+from .paths import get_config_file, get_install_dir, get_log_dir
+from .v2_detection import detect_v2_0_installation
+from .v2_cleanup import cleanup_v2_0_installation, V2Cleanup, CleanupError, V21NotInstalledError
+from .generate_requirements import (
+    parse_pyproject_toml,
+    generate_requirements_txt,
+    write_requirements_file,
+    PyprojectParseError,
+    RequirementsGenerationError,
+)
 
 
 class UnsupportedPlatformError(Exception):
@@ -43,19 +53,25 @@ class DaemonManager:
     def __init__(self):
         """Initialize manager with platform-specific implementation."""
         self.platform = platform.system()
-        self.venv_manager = VenvManager()  # Dedicated venv at ~/.graphiti/.venv/
-        self.package_deployer = PackageDeployer()  # Package deployment to ~/.graphiti/mcp_server/
+        self.venv_manager = VenvManager()  # Dedicated venv managed by paths.py
+        self.package_deployer = PackageDeployer()  # Package deployment to platform-specific install directory
         self.service_manager = self._get_service_manager()
-        self.config_path = self._get_config_path()
-        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in ~/.graphiti/bin/
+        self.config_path = get_config_file()  # Platform-specific config file from paths.py
+        self.wrapper_generator = WrapperGenerator()  # Wrapper scripts in platform-specific bin directory
         self.path_integration = PathIntegration()  # PATH detection and instructions
 
     def _get_service_manager(self):
-        """Get platform-specific service manager."""
+        """Get platform-specific service manager.
+
+        v2.1 Architecture: Service managers use frozen package paths from paths.py
+        instead of venv_manager. LaunchdServiceManager and TaskSchedulerServiceManager
+        take no constructor arguments. SystemdServiceManager still takes optional
+        venv_manager for backward compatibility.
+        """
         if self.platform == "Windows":
-            return WindowsServiceManager(venv_manager=self.venv_manager)
+            return TaskSchedulerServiceManager()
         elif self.platform == "Darwin":
-            return LaunchdServiceManager(venv_manager=self.venv_manager)
+            return LaunchdServiceManager()
         elif self.platform == "Linux":
             return SystemdServiceManager(venv_manager=self.venv_manager)
         else:
@@ -65,16 +81,13 @@ class DaemonManager:
             )
 
     def _get_config_path(self) -> Path:
-        """Get config path (platform-aware)."""
-        if self.platform == "Windows":
-            return Path.home() / ".graphiti" / "graphiti.config.json"
-        else:
-            # Unix: check XDG_CONFIG_HOME
-            import os
-            xdg_config = os.environ.get("XDG_CONFIG_HOME", "")
-            if xdg_config:
-                return Path(xdg_config) / "graphiti" / "graphiti.config.json"
-            return Path.home() / ".graphiti" / "graphiti.config.json"
+        """
+        Get config path (platform-aware).
+
+        NOTE: This method is deprecated. Use get_config_file() from paths.py instead.
+        Kept for backward compatibility only.
+        """
+        return get_config_file()
 
     def _get_uninstall_script_path(self) -> Optional[Path]:
         """
@@ -99,6 +112,36 @@ class DaemonManager:
             return None
 
         return script_path if script_path.exists() else None
+
+    def detect_v2_installation(self) -> dict:
+        """
+        Detect v2.0 installation artifacts.
+
+        This method wraps the v2_detection.detect_v2_0_installation() function
+        to provide a unified interface through DaemonManager.
+
+        Returns:
+            dict: Detection results with the following structure:
+                {
+                    "detected": bool,           # True if v2.0 installation found
+                    "home_dir": Path or None,   # ~/.graphiti/ if exists
+                    "config_file": Path or None,  # ~/.graphiti/graphiti.config.json if exists
+                    "service_task": str or None   # Service/task name if found
+                }
+
+        Usage:
+            >>> manager = DaemonManager()
+            >>> result = manager.detect_v2_installation()
+            >>> if result["detected"]:
+            ...     print(f"v2.0 installation found: {result['home_dir']}")
+            ...     # Proceed with migration (Story 12)
+
+        See Also:
+            - v2_detection.detect_v2_0_installation() for implementation details
+            - Story 11: Implement v2.0 Installation Detection
+            - Story 12: Implement Config Migration (uses this detection)
+        """
+        return detect_v2_0_installation()
 
     def install(self) -> bool:
         """Install bootstrap service (auto-start on boot)."""
@@ -130,14 +173,14 @@ class DaemonManager:
             print(f"[FAILED] Venv creation failed: {e}")
             print()
             print("Troubleshooting:")
-            print("  - Ensure you have write permissions to ~/.graphiti/")
+            print(f"  - Ensure you have write permissions to {get_install_dir()}")
             print("  - Check available disk space")
             print("  - Try: python -m venv --help (verify venv module available)")
             return False
 
         # Step 2.4: Deploy mcp_server package to standalone location
         print()
-        print("Deploying mcp_server package to ~/.graphiti/mcp_server/...")
+        print(f"Deploying mcp_server package to {get_install_dir()}...")
         try:
             success, msg = self.package_deployer.deploy_package()
             if success:
@@ -146,7 +189,7 @@ class DaemonManager:
                 print(f"[FAILED] Package deployment failed: {msg}")
                 print()
                 print("Troubleshooting:")
-                print("  - Ensure write permissions to ~/.graphiti/")
+                print(f"  - Ensure write permissions to {get_install_dir()}")
                 print("  - Check available disk space")
                 print("  - Verify mcp_server/pyproject.toml exists in repository")
                 return False
@@ -161,9 +204,26 @@ class DaemonManager:
             print(f"[FAILED] Unexpected error during package deployment: {e}")
             return False
 
+        # Step 2.4b: Generate requirements.txt from pyproject.toml
+        print()
+        print("Generating requirements.txt from pyproject.toml...")
+        try:
+            requirements_path = self._generate_requirements()
+            print(f"[OK] Generated requirements.txt at {requirements_path}")
+        except (PyprojectParseError, RequirementsGenerationError) as e:
+            print(f"[FAILED] Requirements generation failed: {e}")
+            print()
+            print("Troubleshooting:")
+            print("  - Ensure you're running from the Graphiti repository directory")
+            print("  - Verify mcp_server/pyproject.toml exists and is valid")
+            return False
+        except Exception as e:
+            print(f"[FAILED] Unexpected error during requirements generation: {e}")
+            return False
+
         # Step 2.5: Install mcp_server package into venv
         print()
-        print("Installing mcp_server package...")
+        print("Installing mcp_server dependencies...")
         try:
             success, msg = self.venv_manager.install_package()
             if success:
@@ -194,7 +254,7 @@ class DaemonManager:
                 print(f"[FAILED] {msg}")
                 print()
                 print("Troubleshooting:")
-                print("  - Ensure write permissions to ~/.graphiti/bin/")
+                print(f"  - Ensure write permissions to {get_install_dir() / 'bin'}")
                 print("  - Check available disk space")
                 return False
         except WrapperGenerationError as e:
@@ -209,10 +269,10 @@ class DaemonManager:
             self.path_integration.display_instructions()
         except PathIntegrationError as e:
             print(f"[WARNING] PATH integration error: {e}")
-            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+            print(f"  You may need to manually add {get_install_dir() / 'bin'} to your PATH")
         except Exception as e:
             print(f"[WARNING] Unexpected error during PATH integration: {e}")
-            print("  You may need to manually add ~/.graphiti/bin/ to your PATH")
+            print(f"  You may need to manually add {get_install_dir() / 'bin'} to your PATH")
 
         # Step 3: Ensure config directory exists
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -275,7 +335,7 @@ class DaemonManager:
             print("[SUCCESS] Bootstrap service uninstalled successfully")
             print()
             print(f"Config file preserved: {self.config_path}")
-            print("  (You can manually delete ~/.graphiti/ if desired)")
+            print(f"  (You can manually delete {get_install_dir()} if desired)")
             print()
 
             # Suggest standalone script for complete uninstall
@@ -290,7 +350,7 @@ class DaemonManager:
                 print("See docs/UNINSTALL.md for details")
             else:
                 print("Note: Standalone uninstall script not found.")
-                print("  Manual cleanup: Remove ~/.graphiti/ directory if desired")
+                print(f"  Manual cleanup: Remove {get_install_dir()} directory if desired")
 
             return True
         else:
@@ -452,6 +512,88 @@ class DaemonManager:
 
         self.service_manager.show_logs(follow=follow, lines=lines)
 
+    def cleanup(self, interactive: bool = True, force_delete: bool = False, keep_logs: bool = False) -> bool:
+        """
+        Clean up v2.0 installation artifacts.
+
+        Args:
+            interactive: If True, prompt user for cleanup decisions
+            force_delete: If True (non-interactive only), actually delete directories
+            keep_logs: If True, preserve ~/.graphiti/logs/ during deletion
+
+        Returns:
+            bool: True if cleanup successful, False otherwise
+        """
+        print("Cleaning up v2.0 installation...")
+        print()
+
+        try:
+            result = cleanup_v2_0_installation(
+                interactive=interactive,
+                force_delete=force_delete,
+                keep_logs=keep_logs
+            )
+
+            if result["success"]:
+                print()
+                print("=" * 70)
+                print("Cleanup Complete")
+                print("=" * 70)
+                print()
+                print("Actions taken:")
+                for action in result["actions_taken"]:
+                    print(f"  - {action}")
+                print()
+
+                if result["backup_location"]:
+                    print(f"Backup created at: {result['backup_location']}")
+                    print()
+
+                if result["rollback_performed"]:
+                    print("[WARN]  Cleanup encountered errors and was rolled back")
+                    print()
+
+                return True
+            else:
+                print()
+                print("=" * 70)
+                print("Cleanup Failed")
+                print("=" * 70)
+                print()
+                if result["errors"]:
+                    print("Errors:")
+                    for error in result["errors"]:
+                        print(f"  - {error}")
+                    print()
+
+                if result["rollback_performed"]:
+                    print("Cleanup was rolled back to prevent partial state")
+                    print()
+
+                return False
+
+        except V21NotInstalledError as e:
+            print()
+            print(f"[ERROR] {e}")
+            print()
+            print("V2.1 installation must be working before v2.0 cleanup.")
+            print("Run: graphiti-mcp daemon status (to verify v2.1)")
+            return False
+
+        except CleanupError as e:
+            print()
+            print(f"[ERROR] Critical cleanup failure: {e}")
+            print()
+            print("Manual intervention may be required.")
+            return False
+
+        except Exception as e:
+            print()
+            print(f"[ERROR] Unexpected error during cleanup: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def _create_default_config(self) -> None:
         """Create default graphiti.config.json."""
         default_config = {
@@ -467,9 +609,9 @@ class DaemonManager:
                 "config_poll_seconds": 5,
                 "_config_poll_seconds_help": "How often bootstrap checks this file for changes",
                 "pid_file": None,
-                "_pid_file_help": "null = ~/.graphiti/graphiti-mcp.pid",
+                "_pid_file_help": f"null = {get_install_dir() / 'graphiti-mcp.pid'}",
                 "log_file": None,
-                "_log_file_help": "null = ~/.graphiti/logs/graphiti-mcp.log",
+                "_log_file_help": f"null = {get_log_dir() / 'graphiti-mcp.log'}",
                 "log_level": "INFO",
                 "_log_level_help": "DEBUG | INFO | WARNING | ERROR | CRITICAL",
                 "log_rotation": {
@@ -540,6 +682,93 @@ class DaemonManager:
             print(f"[WARNING] Error reading existing config: {e}")
             print("  Proceeding with existing config unchanged")
 
+    def _generate_requirements(self) -> Path:
+        """
+        Generate requirements.txt from pyproject.toml.
+
+        Finds the repository root and generates requirements.txt from
+        mcp_server/pyproject.toml into the install directory.
+
+        Returns:
+            Path to generated requirements.txt file
+
+        Raises:
+            PyprojectParseError: If pyproject.toml is invalid
+            RequirementsGenerationError: If requirements generation fails
+        """
+        # Find repository root (where mcp_server/ and graphiti_core/ are)
+        repo_root = self._find_repo_root()
+
+        # Locate pyproject.toml
+        pyproject_path = repo_root / "mcp_server" / "pyproject.toml"
+        if not pyproject_path.exists():
+            raise RequirementsGenerationError(
+                f"pyproject.toml not found at {pyproject_path}"
+            )
+
+        # Output path: install_dir/requirements.txt
+        requirements_path = get_install_dir() / "requirements.txt"
+
+        # Parse pyproject.toml
+        pyproject_data = parse_pyproject_toml(pyproject_path)
+
+        # Generate requirements list (exclude graphiti-core, it's frozen)
+        requirements = generate_requirements_txt(
+            pyproject_data,
+            include_optional=False,
+            optional_groups=None
+        )
+
+        # Write to install directory
+        write_requirements_file(requirements, requirements_path)
+
+        return requirements_path
+
+    def _find_repo_root(self) -> Path:
+        """
+        Find the Graphiti repository root directory.
+
+        Detection strategy (priority order):
+            1. GRAPHITI_REPO_PATH environment variable
+            2. Current working directory (if it contains mcp_server/)
+            3. Relative to __file__ (navigate up from daemon/ directory)
+
+        Returns:
+            Path to repository root containing mcp_server/ and graphiti_core/
+
+        Raises:
+            RequirementsGenerationError: If repository root cannot be found
+        """
+        import os
+
+        # Strategy 1: GRAPHITI_REPO_PATH environment variable
+        env_path = os.environ.get("GRAPHITI_REPO_PATH")
+        if env_path:
+            env_path_obj = Path(env_path)
+            if env_path_obj.exists() and (env_path_obj / "mcp_server").exists():
+                return env_path_obj
+
+        # Strategy 2: Current working directory
+        cwd = Path.cwd()
+        if (cwd / "mcp_server").exists() and (cwd / "graphiti_core").exists():
+            return cwd
+
+        # Strategy 3: Relative to __file__ (daemon/manager.py -> repo root)
+        module_path = Path(__file__).resolve()
+        # Go up from daemon/manager.py to mcp_server/
+        mcp_server_dir = module_path.parent.parent
+        # Go up from mcp_server/ to repo root
+        repo_root = mcp_server_dir.parent
+
+        if (repo_root / "mcp_server").exists() and (repo_root / "graphiti_core").exists():
+            return repo_root
+
+        # All strategies failed
+        raise RequirementsGenerationError(
+            "Cannot find Graphiti repository root. "
+            "Try running from the repository directory or set GRAPHITI_REPO_PATH."
+        )
+
 
 def main():
     """Entry point for graphiti-mcp daemon CLI."""
@@ -585,6 +814,27 @@ def main():
         help="Number of lines to show (default: 50)",
     )
 
+    # Cleanup command
+    cleanup_parser = subparsers.add_parser(
+        "cleanup",
+        help="Clean up v2.0 installation artifacts",
+    )
+    cleanup_parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run cleanup without prompting (safe defaults)",
+    )
+    cleanup_parser.add_argument(
+        "--force-delete",
+        action="store_true",
+        help="Actually delete directories (non-interactive mode only)",
+    )
+    cleanup_parser.add_argument(
+        "--keep-logs",
+        action="store_true",
+        help="Preserve ~/.graphiti/logs/ during deletion",
+    )
+
     args = parser.parse_args()
 
     if not args.command:
@@ -594,6 +844,7 @@ def main():
         print("  graphiti-mcp daemon install    # Install service")
         print("  graphiti-mcp daemon status     # Check status")
         print("  graphiti-mcp daemon logs       # View logs")
+        print("  graphiti-mcp daemon cleanup    # Remove v2.0 artifacts")
         print("  graphiti-mcp daemon uninstall  # Remove service")
         sys.exit(1)
 
@@ -615,6 +866,14 @@ def main():
         elif args.command == "logs":
             manager.logs(follow=args.follow, lines=args.lines)
             sys.exit(0)
+
+        elif args.command == "cleanup":
+            success = manager.cleanup(
+                interactive=not args.non_interactive,
+                force_delete=args.force_delete,
+                keep_logs=args.keep_logs
+            )
+            sys.exit(0 if success else 1)
 
     except UnsupportedPlatformError as e:
         print(f"[ERROR] {e}")

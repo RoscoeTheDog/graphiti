@@ -23,6 +23,7 @@ from mcp_server.daemon.wrapper_generator import (
     WrapperGenerator,
     WrapperGenerationError,
 )
+from mcp_server.daemon.paths import get_install_dir
 
 
 @pytest.fixture
@@ -56,12 +57,13 @@ class TestWrapperGeneratorBasics:
     """Test basic WrapperGenerator functionality."""
 
     def test_init_with_default_paths(self):
-        """WrapperGenerator uses default paths when none provided"""
+        """WrapperGenerator uses default paths when none provided (v2.1 architecture)"""
         generator = WrapperGenerator()
 
-        # Should use ~/.graphiti/.venv and ~/.graphiti/bin
-        assert generator.venv_path == Path.home() / ".graphiti" / ".venv"
-        assert generator.bin_path == Path.home() / ".graphiti" / "bin"
+        # v2.1: install_dir IS the venv, bin/ is under install_dir
+        install_dir = get_install_dir()
+        assert generator.venv_path == install_dir
+        assert generator.bin_path == install_dir / "bin"
 
     def test_init_with_custom_paths(self, temp_venv, temp_bin):
         """WrapperGenerator accepts custom venv and bin paths"""

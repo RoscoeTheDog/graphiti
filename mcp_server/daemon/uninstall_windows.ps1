@@ -1,19 +1,23 @@
 <#
 .SYNOPSIS
-    Standalone uninstall script for Graphiti MCP Bootstrap Service on Windows
+    Standalone uninstall script for Graphiti MCP Bootstrap Service on Windows (v2.1)
 
 .DESCRIPTION
     This PowerShell script removes the Graphiti MCP Bootstrap Service and cleans up
     installation files. It can run WITHOUT Python or the repository being present,
     making it suitable for recovery scenarios.
 
+    v2.1 Architecture:
+    - Install Dir: %LOCALAPPDATA%\Programs\Graphiti (contains .venv, lib, bin)
+    - Config/State Dir: %LOCALAPPDATA%\Graphiti (contains config, logs, data)
+
     What it does:
     - Stops and removes NSSM service 'GraphitiBootstrap'
-    - Deletes ~/.graphiti/.venv/ (virtual environment)
-    - Deletes ~/.graphiti/mcp_server/ (deployed package)
-    - Deletes ~/.graphiti/bin/ (wrapper scripts)
-    - Deletes ~/.graphiti/logs/ (service logs)
-    - Optionally preserves ~/.graphiti/data/ and ~/.graphiti/graphiti.config.json
+    - Deletes %LOCALAPPDATA%\Programs\Graphiti\.venv\ (virtual environment)
+    - Deletes %LOCALAPPDATA%\Programs\Graphiti\lib\ (deployed packages: mcp_server, graphiti_core)
+    - Deletes %LOCALAPPDATA%\Programs\Graphiti\bin\ (wrapper scripts)
+    - Deletes %LOCALAPPDATA%\Graphiti\logs\ (service logs)
+    - Optionally preserves %LOCALAPPDATA%\Graphiti\data\ and %LOCALAPPDATA%\Graphiti\config\graphiti.config.json
 
 .PARAMETER Force
     Skip user prompts and delete everything except config/data (default behavior)
@@ -44,16 +48,18 @@
     # Preview what would be deleted without actually deleting
 
 .NOTES
-    Version: 1.0.0
+    Version: 2.1.0
     Created: 2025-12-23
+    Updated: 2025-12-27 (v2.1 architecture)
     Part of: Graphiti MCP Server (https://github.com/getzep/graphiti)
 
     Manual removal if script fails:
     1. nssm stop GraphitiBootstrap
     2. nssm remove GraphitiBootstrap confirm
-    3. rd /s /q %USERPROFILE%\.graphiti
-    4. Remove from Claude config: %APPDATA%\Claude\claude_desktop_config.json
-    5. Remove from PATH if added
+    3. rd /s /q %LOCALAPPDATA%\Programs\Graphiti
+    4. rd /s /q %LOCALAPPDATA%\Graphiti
+    5. Remove from Claude config: %APPDATA%\Claude\claude_desktop_config.json
+    6. Remove from PATH if added
 #>
 
 param(
@@ -113,25 +119,29 @@ if ($DryRun) {
 }
 
 # Check for admin rights (required for service removal)
-if (-not (Test-Administrator)) {
-    Write-Error "This script requires administrator privileges to remove services."
+$IsAdmin = Test-Administrator
+if (-not $IsAdmin) {
+    Write-Warning "Running without administrator privileges."
+    Write-Host "Service removal will be skipped. For complete uninstall, run as Administrator."
     Write-Host ""
-    Write-Host "Please run PowerShell as Administrator and try again:" -ForegroundColor $WarningColor
-    Write-Host "  1. Right-click PowerShell" -ForegroundColor $WarningColor
-    Write-Host "  2. Select 'Run as Administrator'" -ForegroundColor $WarningColor
-    Write-Host "  3. Re-run this script" -ForegroundColor $WarningColor
-    Write-Host ""
-    exit 1
 }
 
-# Define paths
-$GraphitiDir = Join-Path $env:USERPROFILE ".graphiti"
-$VenvDir = Join-Path $GraphitiDir ".venv"
-$PackageDir = Join-Path $GraphitiDir "mcp_server"
-$BinDir = Join-Path $GraphitiDir "bin"
-$LogsDir = Join-Path $GraphitiDir "logs"
-$ConfigFile = Join-Path $GraphitiDir "graphiti.config.json"
-$DataDir = Join-Path $GraphitiDir "data"
+# Define paths (v2.1 architecture)
+# Install Dir: Contains .venv, lib (packages), bin (wrapper scripts)
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\Graphiti"
+# State Dir: Contains config, logs, data (user data)
+$StateDir = Join-Path $env:LOCALAPPDATA "Graphiti"
+
+# Install directory contents
+$VenvDir = Join-Path $InstallDir ".venv"
+$LibDir = Join-Path $InstallDir "lib"
+$BinDir = Join-Path $InstallDir "bin"
+
+# State directory contents
+$ConfigDir = Join-Path $StateDir "config"
+$LogsDir = Join-Path $StateDir "logs"
+$DataDir = Join-Path $StateDir "data"
+$ConfigFile = Join-Path $ConfigDir "graphiti.config.json"
 
 $ServiceName = "GraphitiBootstrap"
 
@@ -162,49 +172,55 @@ foreach ($loc in $NssmLocations) {
     }
 }
 
-if ($NssmPath) {
-    Write-Host "Found NSSM: $NssmPath"
+if ($IsAdmin) {
+    if ($NssmPath) {
+        Write-Host "Found NSSM: $NssmPath"
 
-    # Check if service exists
-    $statusOutput = & $NssmPath status $ServiceName 2>&1
-    $serviceExists = $LASTEXITCODE -eq 0
+        # Check if service exists
+        $statusOutput = & $NssmPath status $ServiceName 2>&1
+        $serviceExists = $LASTEXITCODE -eq 0
 
-    if ($serviceExists) {
-        # Stop service
-        Write-Step "Stopping service '$ServiceName'..."
-        if (-not $DryRun) {
-            $stopOutput = & $NssmPath stop $ServiceName 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "Service stopped"
+        if ($serviceExists) {
+            # Stop service
+            Write-Step "Stopping service '$ServiceName'..."
+            if (-not $DryRun) {
+                $stopOutput = & $NssmPath stop $ServiceName 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Service stopped"
+                } else {
+                    Write-Warning "Failed to stop service (may already be stopped)"
+                }
             } else {
-                Write-Warning "Failed to stop service (may already be stopped)"
+                Write-Host "[DRY RUN] Would stop service"
+            }
+
+            # Remove service
+            Write-Step "Removing service '$ServiceName'..."
+            if (-not $DryRun) {
+                $removeOutput = & $NssmPath remove $ServiceName confirm 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Service removed"
+                } else {
+                    Write-Error "Failed to remove service: $removeOutput"
+                    $ExitCode = 1
+                }
+            } else {
+                Write-Host "[DRY RUN] Would remove service"
             }
         } else {
-            Write-Host "[DRY RUN] Would stop service"
-        }
-
-        # Remove service
-        Write-Step "Removing service '$ServiceName'..."
-        if (-not $DryRun) {
-            $removeOutput = & $NssmPath remove $ServiceName confirm 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "Service removed"
-            } else {
-                Write-Error "Failed to remove service: $removeOutput"
-                $ExitCode = 1
-            }
-        } else {
-            Write-Host "[DRY RUN] Would remove service"
+            Write-Warning "Service '$ServiceName' not found (may not be installed)"
         }
     } else {
-        Write-Warning "Service '$ServiceName' not found (may not be installed)"
+        Write-Warning "NSSM not found - skipping service removal"
+        Write-Host "If service exists, remove manually:"
+        Write-Host "  1. Install NSSM from https://nssm.cc/"
+        Write-Host "  2. Run: nssm stop $ServiceName"
+        Write-Host "  3. Run: nssm remove $ServiceName confirm"
+        Write-Host ""
     }
 } else {
-    Write-Warning "NSSM not found - skipping service removal"
-    Write-Host "If service exists, remove manually:"
-    Write-Host "  1. Install NSSM from https://nssm.cc/"
-    Write-Host "  2. Run: nssm stop $ServiceName"
-    Write-Host "  3. Run: nssm remove $ServiceName confirm"
+    Write-Warning "Skipping service removal (requires Administrator)"
+    Write-Host "To remove service, re-run this script as Administrator"
     Write-Host ""
 }
 
@@ -214,9 +230,9 @@ Write-Step "Cleaning up installation directories..."
 
 $DirsToDelete = @(
     @{ Path = $VenvDir; Name = "Virtual environment (.venv)" },
-    @{ Path = $PackageDir; Name = "Deployed package (mcp_server)" },
-    @{ Path = $BinDir; Name = "Wrapper scripts (bin)" },
-    @{ Path = $LogsDir; Name = "Service logs (logs)" }
+    @{ Path = $LibDir; Name = "Deployed packages (lib/)" },
+    @{ Path = $BinDir; Name = "Wrapper scripts (bin/)" },
+    @{ Path = $LogsDir; Name = "Service logs (logs/)" }
 )
 
 foreach ($dir in $DirsToDelete) {
@@ -271,6 +287,21 @@ if ($PreserveItems.Count -gt 0) {
                 Write-Host "[DRY RUN] Would delete: $($item.Path)"
             }
         }
+        # Also delete the config directory if -DeleteAll
+        if (Test-Path $ConfigDir) {
+            Write-Host "Deleting: Config directory (config/)"
+            if (-not $DryRun) {
+                try {
+                    Remove-Item -Path $ConfigDir -Recurse -Force -ErrorAction Stop
+                    Write-Success "Deleted: Config directory"
+                } catch {
+                    Write-Error "Failed to delete config directory: $_"
+                    $ExitCode = 1
+                }
+            } else {
+                Write-Host "[DRY RUN] Would delete: $ConfigDir"
+            }
+        }
     } elseif ($Force) {
         Write-Warning "Preserving config and data (use -DeleteAll to remove)"
         foreach ($item in $PreserveItems) {
@@ -303,6 +334,21 @@ if ($PreserveItems.Count -gt 0) {
                     Write-Host "[DRY RUN] Would delete: $($item.Path)"
                 }
             }
+            # Also delete the config directory
+            if (Test-Path $ConfigDir) {
+                Write-Host "Deleting: Config directory (config/)"
+                if (-not $DryRun) {
+                    try {
+                        Remove-Item -Path $ConfigDir -Recurse -Force -ErrorAction Stop
+                        Write-Success "Deleted: Config directory"
+                    } catch {
+                        Write-Error "Failed to delete config directory: $_"
+                        $ExitCode = 1
+                    }
+                } else {
+                    Write-Host "[DRY RUN] Would delete: $ConfigDir"
+                }
+            }
         } else {
             Write-Warning "Preserving config and data"
             foreach ($item in $PreserveItems) {
@@ -314,26 +360,53 @@ if ($PreserveItems.Count -gt 0) {
     Write-Host "No config or data found to preserve"
 }
 
-# STEP 4: Clean up ~/.graphiti if empty
+# STEP 4: Clean up installation and state directories if empty
 Write-Host ""
-if (Test-Path $GraphitiDir) {
-    $remainingFiles = Get-ChildItem -Path $GraphitiDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Step "Checking for empty directories to clean up..."
+
+# Clean up Install Dir ($env:LOCALAPPDATA\Programs\Graphiti) if empty
+if (Test-Path $InstallDir) {
+    $remainingFiles = Get-ChildItem -Path $InstallDir -Recurse -Force -ErrorAction SilentlyContinue
     if ($remainingFiles.Count -eq 0) {
-        Write-Step "Removing empty ~/.graphiti directory..."
+        Write-Host "Removing empty install directory..."
         if (-not $DryRun) {
             try {
-                Remove-Item -Path $GraphitiDir -Force -ErrorAction Stop
-                Write-Success "Deleted: ~/.graphiti"
+                Remove-Item -Path $InstallDir -Force -ErrorAction Stop
+                Write-Success "Deleted: $InstallDir"
             } catch {
-                Write-Warning "Failed to delete ~/.graphiti: $_"
+                Write-Warning "Failed to delete install directory: $_"
             }
         } else {
-            Write-Host "[DRY RUN] Would delete: $GraphitiDir"
+            Write-Host "[DRY RUN] Would delete: $InstallDir"
         }
     } else {
-        Write-Warning "~/.graphiti is not empty - leaving directory intact"
+        Write-Warning "Install directory not empty - leaving intact: $InstallDir"
         Write-Host "Remaining files:"
-        Get-ChildItem -Path $GraphitiDir -Recurse -Force | ForEach-Object {
+        Get-ChildItem -Path $InstallDir -Recurse -Force | ForEach-Object {
+            Write-Host "  - $($_.FullName)"
+        }
+    }
+}
+
+# Clean up State Dir ($env:LOCALAPPDATA\Graphiti) if empty
+if (Test-Path $StateDir) {
+    $remainingFiles = Get-ChildItem -Path $StateDir -Recurse -Force -ErrorAction SilentlyContinue
+    if ($remainingFiles.Count -eq 0) {
+        Write-Host "Removing empty state directory..."
+        if (-not $DryRun) {
+            try {
+                Remove-Item -Path $StateDir -Force -ErrorAction Stop
+                Write-Success "Deleted: $StateDir"
+            } catch {
+                Write-Warning "Failed to delete state directory: $_"
+            }
+        } else {
+            Write-Host "[DRY RUN] Would delete: $StateDir"
+        }
+    } else {
+        Write-Warning "State directory not empty - leaving intact: $StateDir"
+        Write-Host "Remaining files:"
+        Get-ChildItem -Path $StateDir -Recurse -Force | ForEach-Object {
             Write-Host "  - $($_.FullName)"
         }
     }
@@ -351,7 +424,7 @@ Write-Host ""
 
 Write-Host "1. Remove from Claude Desktop MCP configuration:" -ForegroundColor $InfoColor
 Write-Host "   - Open: $env:APPDATA\Claude\claude_desktop_config.json"
-Write-Host "   - Remove the 'graphiti' entry from mcpServers"
+Write-Host "   - Remove the 'graphiti-memory' entry from mcpServers"
 Write-Host ""
 
 Write-Host "2. Remove from PATH (if added):" -ForegroundColor $InfoColor
@@ -361,6 +434,11 @@ Write-Host "   - Or run: [Environment]::SetEnvironmentVariable('PATH', ([Environ
 Write-Host ""
 
 Write-Host "3. Restart Claude Desktop to apply changes" -ForegroundColor $InfoColor
+Write-Host ""
+
+Write-Host "v2.1 Paths Reference:" -ForegroundColor $InfoColor
+Write-Host "   - Install Dir: $InstallDir"
+Write-Host "   - State Dir:   $StateDir"
 Write-Host ""
 
 # Final summary

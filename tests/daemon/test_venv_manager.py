@@ -7,10 +7,13 @@ Tests the venv creation, detection, and validation logic:
 - VenvManager.detect_venv()
 - VenvManager.create_venv()
 - Platform-agnostic path handling
+
+Updated for v2.1 architecture using platform-specific paths via paths.py module.
 """
 
 import sys
 import subprocess
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock, call
 
@@ -21,6 +24,11 @@ from mcp_server.daemon.venv_manager import (
     IncompatiblePythonVersionError,
     VenvCreationError,
 )
+
+
+def get_mock_install_dir(tmp_path: Path) -> Path:
+    """Return a mock install directory for testing."""
+    return tmp_path / "Programs" / "Graphiti"
 
 
 class TestCheckUvAvailable:
@@ -237,7 +245,8 @@ class TestPlatformAgnosticPaths:
             venv_str = str(manager.venv_path)
             # Note: Path normalizes to OS format, so on Windows it will be backslashes
             # We verify it's a valid Path object that can handle both formats
-            assert manager.venv_path.parts[-1] == '.venv'
+            # v2.1: Install dir IS the venv (no .venv subdirectory)
+            assert manager.venv_path.parts[-1] == 'Graphiti'
 
     def test_unix_path_handling(self):
         """VenvManager path handling works on Unix (forward slashes)"""
@@ -249,7 +258,9 @@ class TestPlatformAgnosticPaths:
 
             # On Unix, Path should use forward slashes
             venv_str = str(manager.venv_path)
-            assert manager.venv_path.parts[-1] == '.venv'
+            # v2.1: Install dir IS the venv (no .venv subdirectory)
+            # On Linux: ends with 'graphiti' (lowercase)
+            assert manager.venv_path.parts[-1] in ('Graphiti', 'graphiti')
 
     def test_path_operations_work_on_windows(self):
         """Path operations (mkdir, exists, etc.) work correctly on Windows"""
@@ -304,15 +315,19 @@ class TestEdgeCases:
                     with pytest.raises(PermissionError):
                         manager.create_venv()
 
-    def test_venv_path_is_always_under_graphiti_home(self):
-        """Venv path is always ~/.graphiti/.venv (path traversal prevention)"""
-        manager = VenvManager()
+    def test_venv_path_is_always_under_graphiti_home(self, tmp_path):
+        """Venv path IS the platform-specific install dir (v2.1 architecture)"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        # Verify venv path is constructed correctly
-        assert manager.venv_path.parts[-2:] == ('.graphiti', '.venv')
+            # Verify venv path is the install dir itself (v2.1 architecture)
+            # Install dir IS the venv - no .venv subdirectory
+            # On Windows: Programs/Graphiti, on Linux: share/graphiti
+            assert manager.venv_path.parts[-1] in ('Graphiti', 'graphiti')
 
-        # Verify it starts from home directory
-        assert manager.venv_path.parts[0] == Path.home().parts[0]
+            # Verify it IS the mocked install dir (not a subdirectory)
+            assert manager.venv_path == mock_install_dir
 
 
 class TestGetUvExecutable:
@@ -351,33 +366,40 @@ class TestGetUvExecutable:
 class TestDetectRepoLocation:
     """Test repository location detection."""
 
-    def test_detect_repo_location_finds_mcp_server_from_venv_path(self):
-        """VenvManager.detect_repo_location() finds mcp_server directory from venv path"""
-        manager = VenvManager()
+    def test_detect_repo_location_finds_mcp_server_from_venv_path(self, tmp_path):
+        """VenvManager.detect_repo_location() finds mcp_server directory from various sources"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        # Use platform-agnostic path construction
-        if sys.platform == "win32":
-            mock_repo_root = Path('C:/home/user/graphiti')
-        else:
-            mock_repo_root = Path('/home/user/graphiti')
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_repo_root = Path('C:/home/user/graphiti')
+            else:
+                mock_repo_root = Path('/home/user/graphiti')
 
-        mock_venv_path = mock_repo_root / '.graphiti' / '.venv'
+            # v2.1: venv is under install_dir, not repo
+            mock_venv_path = mock_install_dir / '.venv'
 
-        with patch.object(manager, 'venv_path', mock_venv_path):
-            # Mock pyproject.toml exists check
-            expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
+            with patch.object(manager, 'venv_path', mock_venv_path):
+                # Mock GRAPHITI_REPO_PATH env var to force finding our mock path
+                expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
 
-            original_exists = Path.exists
-            def exists_side_effect(self):
-                # Return True only for the target pyproject.toml
-                if self == expected_pyproject:
-                    return True
-                # Use original exists for other paths
-                return original_exists(self)
+                original_exists = Path.exists
+                def exists_side_effect(self):
+                    # Return True only for the target pyproject.toml
+                    if self == expected_pyproject:
+                        return True
+                    if str(self).endswith('pyproject.toml'):
+                        return False  # Don't find real repo
+                    # Use original exists for other paths
+                    return original_exists(self)
 
-            with patch.object(Path, 'exists', exists_side_effect):
-                result = manager.detect_repo_location()
-                assert result == mock_repo_root
+                # Use env var to override CWD detection
+                with patch.dict('os.environ', {'GRAPHITI_REPO_PATH': str(mock_repo_root)}):
+                    with patch.object(Path, 'exists', exists_side_effect):
+                        result = manager.detect_repo_location()
+                    assert result == mock_repo_root
 
     def test_detect_repo_location_handles_repo_moved(self):
         """VenvManager.detect_repo_location() returns None when repo is moved"""
@@ -388,32 +410,41 @@ class TestDetectRepoLocation:
             result = manager.detect_repo_location()
             assert result is None
 
-    def test_detect_repo_location_searches_upward_from_venv(self):
+    def test_detect_repo_location_searches_upward_from_venv(self, tmp_path):
         """VenvManager.detect_repo_location() searches upward from venv location"""
-        manager = VenvManager()
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        # Use platform-agnostic path construction
-        if sys.platform == "win32":
-            mock_venv_path = Path('C:/opt/projects/graphiti/.graphiti/.venv')
-            mock_repo_root = Path('C:/opt/projects/graphiti')
-        else:
-            mock_venv_path = Path('/opt/projects/graphiti/.graphiti/.venv')
-            mock_repo_root = Path('/opt/projects/graphiti')
+            # Use platform-agnostic path construction
+            # v2.1: venv is under install_dir, which is separate from repo
+            if sys.platform == "win32":
+                mock_venv_path = mock_install_dir / '.venv'
+                mock_repo_root = Path('C:/opt/projects/graphiti')
+            else:
+                mock_venv_path = mock_install_dir / '.venv'
+                mock_repo_root = Path('/opt/projects/graphiti')
 
-        with patch.object(manager, 'venv_path', mock_venv_path):
-            expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
+            with patch.object(manager, 'venv_path', mock_venv_path):
+                expected_pyproject = mock_repo_root / "mcp_server" / "pyproject.toml"
 
-            original_exists = Path.exists
-            def exists_side_effect(self):
-                # Return True only for the target pyproject.toml
-                if self == expected_pyproject:
-                    return True
-                # Use original exists for other paths
-                return original_exists(self)
+                original_exists = Path.exists
+                def exists_side_effect(self):
+                    # Return True only for the target pyproject.toml
+                    if self == expected_pyproject:
+                        return True
+                    # Return False for all other pyproject.toml to prevent finding real repo
+                    if str(self).endswith('pyproject.toml'):
+                        return False
+                    # Use original exists for other paths
+                    return original_exists(self)
 
-            with patch.object(Path, 'exists', exists_side_effect):
-                result = manager.detect_repo_location()
-                assert result == mock_repo_root
+                # v2.1: detect_repo_location uses env var, CWD, __file__, then venv upward search
+                # We test the env var path since CWD would find real repo
+                with patch.dict('os.environ', {'GRAPHITI_REPO_PATH': str(mock_repo_root)}):
+                    with patch.object(Path, 'exists', exists_side_effect):
+                        result = manager.detect_repo_location()
+                        assert result == mock_repo_root
 
 
 class TestValidateInstallation:
@@ -464,103 +495,152 @@ class TestValidateInstallation:
 
 
 class TestInstallPackage:
-    """Test package installation."""
+    """Test package installation.
 
-    def test_install_package_uses_uv_pip_when_available(self):
-        """VenvManager.install_package() uses uv pip when uv available in venv"""
-        manager = VenvManager()
+    v2.1 Implementation:
+    - Uses `uv pip install --python <venv_python>` when uv is available in PATH
+    - Falls back to venv's pip when uv not available
+    - Installs from requirements.txt (not editable from source)
+    """
 
-        mock_repo_root = Path('/home/user/graphiti')
+    def test_install_package_uses_uv_pip_when_available(self, tmp_path):
+        """VenvManager.install_package() uses uv pip with --python flag when uv available"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=Path('/venv/bin/uv')):
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
+
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+
+            with patch.object(manager, 'detect_venv', return_value=True):
+                # Mock uv in PATH (v2.1 uses uv from PATH, not venv)
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
                         with patch.object(manager, 'validate_installation', return_value=True):
                             with patch('subprocess.run') as mock_run:
                                 mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
 
                                 success, message = manager.install_package()
 
-                                # Verify uv pip was used
+                                # Verify uv pip was used with --python flag
                                 call_args = mock_run.call_args[0][0]
                                 assert 'uv' in str(call_args[0])
                                 assert 'pip' in call_args
                                 assert 'install' in call_args
+                                assert '--python' in call_args, "v2.1: uv requires --python flag"
                                 assert success is True
 
-    def test_install_package_falls_back_to_pip_when_uv_not_available(self):
+    def test_install_package_falls_back_to_pip_when_uv_not_available(self, tmp_path):
         """VenvManager.install_package() falls back to pip when uv not available"""
-        manager = VenvManager()
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
 
-        mock_repo_root = Path('/home/user/graphiti')
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
-                            with patch.object(manager, 'validate_installation', return_value=True):
-                                with patch('subprocess.run') as mock_run:
-                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-                                    with patch('platform.system', return_value='Linux'):
-                                        success, message = manager.install_package()
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+                mock_pip = Path('C:/venv/Scripts/pip.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+                mock_pip = Path('/venv/bin/pip')
 
-                                        # Verify standard pip was used
-                                        call_args = mock_run.call_args[0][0]
-                                        assert 'pip' in str(call_args[0])
-                                        assert 'install' in call_args
-                                        assert success is True
-
-    def test_install_package_uses_non_editable_install(self):
-        """VenvManager.install_package() uses non-editable install (no -e flag)"""
-        manager = VenvManager()
-
-        mock_repo_root = Path('/home/user/graphiti')
-
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
-                        with patch.object(manager, 'get_pip_executable', return_value=Path('/venv/bin/pip')):
-                            with patch.object(manager, 'validate_installation', return_value=True):
-                                with patch('subprocess.run') as mock_run:
-                                    mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
-
-                                    manager.install_package()
-
-                                    # Verify -e flag is NOT in command
-                                    call_args = mock_run.call_args[0][0]
-                                    assert '-e' not in call_args
-
-    def test_install_package_constructs_correct_path(self):
-        """VenvManager.install_package() constructs correct install command with dynamic path"""
-        manager = VenvManager()
-
-        # Use platform-agnostic path construction
-        if sys.platform == "win32":
-            mock_repo_root = Path('C:/opt/graphiti')
-            mock_pip = Path('C:/venv/bin/pip')
-        else:
-            mock_repo_root = Path('/opt/graphiti')
-            mock_pip = Path('/venv/bin/pip')
-
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=mock_repo_root):
-                with patch.object(Path, 'exists', return_value=True):
-                    with patch.object(manager, 'get_uv_executable', return_value=None):
+            with patch.object(manager, 'detect_venv', return_value=True):
+                # Mock uv NOT in PATH
+                with patch('shutil.which', return_value=None):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
                         with patch.object(manager, 'get_pip_executable', return_value=mock_pip):
                             with patch.object(manager, 'validate_installation', return_value=True):
                                 with patch('subprocess.run') as mock_run:
                                     mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+                                    success, message = manager.install_package()
 
-                                    manager.install_package()
-
-                                    # Verify package path is included (relative path "mcp_server")
+                                    # Verify pip was used with -r flag for requirements.txt
                                     call_args = mock_run.call_args[0][0]
-                                    # Implementation uses relative path from repo root
-                                    assert 'mcp_server' in call_args, \
-                                        f"Expected package 'mcp_server' not found in {call_args}"
+                                    assert 'pip' in str(call_args[0])
+                                    assert '-r' in call_args
+                                    assert 'install' in call_args
+                                    assert success is True
+
+    def test_install_package_uses_non_editable_install(self, tmp_path):
+        """VenvManager.install_package() uses non-editable install (no -e flag)"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
+
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
+
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+
+                                manager.install_package()
+
+                                # Verify -e flag is NOT in command
+                                call_args = mock_run.call_args[0][0]
+                                assert '-e' not in call_args
+
+    def test_install_package_constructs_correct_path(self, tmp_path):
+        """VenvManager.install_package() constructs correct install command with requirements.txt"""
+        mock_install_dir = get_mock_install_dir(tmp_path)
+        with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=mock_install_dir):
+            manager = VenvManager()
+
+            # Create requirements.txt for the test
+            mock_install_dir.mkdir(parents=True, exist_ok=True)
+            requirements_file = mock_install_dir / "requirements.txt"
+            requirements_file.write_text("mcp_server>=1.0.0\n")
+
+            # Use platform-agnostic path construction
+            if sys.platform == "win32":
+                mock_python = Path('C:/venv/Scripts/python.exe')
+            else:
+                mock_python = Path('/venv/bin/python')
+
+            with patch.object(manager, 'detect_venv', return_value=True):
+                # Mock uv in PATH (v2.1: uses uv pip install --python <path>)
+                with patch('shutil.which', return_value='/usr/bin/uv'):
+                    with patch.object(manager, 'get_python_executable', return_value=mock_python):
+                        with patch.object(manager, 'validate_installation', return_value=True):
+                            with patch('subprocess.run') as mock_run:
+                                mock_run.return_value = Mock(returncode=0, stdout='', stderr='')
+
+                                manager.install_package()
+
+                                # v2.1: Verify requirements.txt path is included
+                                call_args = mock_run.call_args[0][0]
+                                # Implementation uses -r requirements.txt flag
+                                assert '-r' in call_args, \
+                                    f"Expected '-r' flag not found in {call_args}"
+                                assert any('requirements.txt' in str(arg) for arg in call_args), \
+                                    f"Expected requirements.txt path not found in {call_args}"
+                                # v2.1: Verify --python flag is used with uv
+                                assert '--python' in call_args, \
+                                    f"Expected '--python' flag for uv not found in {call_args}"
 
     def test_install_package_raises_error_on_failure(self):
         """VenvManager.install_package() raises error on installation failure"""
@@ -600,12 +680,19 @@ class TestInstallPackage:
                                 # Verify validation was called
                                 mock_validate.assert_called_once_with('mcp_server')
 
-    def test_install_package_handles_repo_not_found(self):
-        """VenvManager.install_package() handles case when repo location cannot be detected"""
-        manager = VenvManager()
+    def test_install_package_handles_missing_requirements_file(self):
+        """VenvManager.install_package() handles case when requirements.txt is missing"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            manager = VenvManager(venv_path=temp_path)
 
-        with patch.object(manager, 'detect_venv', return_value=True):
-            with patch.object(manager, 'detect_repo_location', return_value=None):
-                success, message = manager.install_package()
-                assert success is False
-                assert 'cannot find' in message.lower() or 'not found' in message.lower()
+            # Create minimal venv structure but no requirements.txt
+            # The install_package() checks for requirements.txt at get_install_dir() / "requirements.txt"
+            # We need to patch get_install_dir to return our temp path (which has no requirements.txt)
+            with patch.object(manager, 'detect_venv', return_value=True):
+                with patch.object(manager, 'get_python_executable', return_value=temp_path / "Scripts" / "python.exe"):
+                    with patch('mcp_server.daemon.venv_manager.get_install_dir', return_value=temp_path):
+                        # Requirements file doesn't exist at temp_path/requirements.txt
+                        success, message = manager.install_package()
+                        assert success is False
+                        assert 'requirements' in message.lower() or 'not found' in message.lower()

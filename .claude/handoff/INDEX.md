@@ -29,3 +29,11 @@
 | s027 | fix-graphiti-memory-mcp-connection | RESOLVED | 2025-12-23 22:57 | Fix graphiti-memory MCP connection after daemon deploy |
 | s028 | unified-installer-spec-and-deployment | ACTIVE | 2025-12-23 23:36 | Unified installer spec and deployment architecture gap |
 | s029 | per-user-daemon-architecture-v20-spec | ACTIVE | 2025-12-24 00:06 | Create v2.0 daemon architecture spec replacing system services |
+| s032 | windows-v21-daemon-testing-task | ACTIVE | 2025-12-25 17:24 | Windows v2.1 daemon testing - Task Scheduler integ |
+| s033 | windows-v21-daemon-testing-story-14 | ACTIVE | 2025-12-25 18:06 | Windows v2.1 daemon testing - Story 14 completed w |
+| s034 | update-test-suite-for-new-installer | ACTIVE | 2025-12-25 18:53 | Update test suite for new installer implementation |
+| s035 | fix-daemon-paths-to-use-v21 | ACTIVE | 2025-12-26 00:32 | Fix daemon paths to use v2.1 architecture location |
+| s036 | fix-daemon-v21-deployment-add-graphiti | ACTIVE | 2025-12-26 01:06 | Fix daemon v2.1 deployment - add graphiti_core fre |
+| s037 | fix-daemon-v21-sse-transport-and | ACTIVE | 2025-12-26 01:32 | Fix daemon v2.1 SSE transport and installer packag |
+| s038 | fix-daemon-tests-and-identify-stale-v20 | ACTIVE | 2025-12-27 00:24 | Fix daemon tests and identify stale v2.0 reference |
+| s039 | complete-v21-path-migration-and-sprint | ACTIVE | 2025-12-27 09:23 | Complete v2.1 path migration and sprint status rea |

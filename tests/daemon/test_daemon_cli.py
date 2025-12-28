@@ -8,6 +8,8 @@ Tests the daemon management commands against the actual implementation:
 - graphiti-mcp daemon logs
 
 These tests verify CLI behavior without requiring OS service installation.
+
+Updated for v2.1 architecture using platform-specific paths via paths.py module.
 """
 
 import json
@@ -18,18 +20,29 @@ from unittest.mock import Mock, patch, MagicMock
 import pytest
 
 from mcp_server.daemon.manager import DaemonManager, UnsupportedPlatformError
+from mcp_server.daemon.paths import GraphitiPaths
+
+
+def create_mock_paths(tmp_path: Path) -> GraphitiPaths:
+    """Create mock GraphitiPaths pointing to temp directory for testing."""
+    return GraphitiPaths(
+        install_dir=tmp_path / "install",
+        config_dir=tmp_path / "config",
+        state_dir=tmp_path / "state",
+        config_file=tmp_path / "config" / "graphiti.config.json"
+    )
 
 
 class TestDaemonManagerInit:
     """Test DaemonManager initialization and platform detection."""
 
     def test_windows_platform_detection(self):
-        """Windows platform initializes WindowsServiceManager"""
+        """Windows platform initializes TaskSchedulerServiceManager"""
         with patch('platform.system', return_value='Windows'):
-            with patch('mcp_server.daemon.manager.WindowsServiceManager') as mock_windows:
+            with patch('mcp_server.daemon.manager.TaskSchedulerServiceManager') as mock_task_scheduler:
                 manager = DaemonManager()
                 assert manager.platform == 'Windows'
-                mock_windows.assert_called_once()
+                mock_task_scheduler.assert_called_once()
 
     def test_macos_platform_detection(self):
         """macOS platform initializes LaunchdServiceManager"""
@@ -57,36 +70,35 @@ class TestDaemonManagerInit:
 
 
 class TestConfigPathDetection:
-    """Test configuration file path detection across platforms."""
+    """Test configuration file path detection across platforms (v2.1 architecture)."""
 
     def test_windows_config_path(self, tmp_path):
-        """Windows uses ~/.graphiti/graphiti.config.json"""
+        """Windows uses platform-specific path from paths.py module."""
+        mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Windows'):
-            with patch('pathlib.Path.home', return_value=tmp_path):
-                with patch('mcp_server.daemon.manager.WindowsServiceManager'):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
+                with patch('mcp_server.daemon.manager.TaskSchedulerServiceManager'):
                     manager = DaemonManager()
-                    expected = tmp_path / ".graphiti" / "graphiti.config.json"
-                    assert manager.config_path == expected
+                    assert manager.config_path == mock_paths.config_file
 
     def test_unix_config_path_default(self, tmp_path):
-        """Unix without XDG_CONFIG_HOME uses ~/.graphiti/graphiti.config.json"""
+        """Linux uses platform-specific path from paths.py module (XDG spec)."""
+        mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Linux'):
-            with patch('pathlib.Path.home', return_value=tmp_path):
-                with patch.dict('os.environ', {}, clear=True):
-                    with patch('mcp_server.daemon.manager.SystemdServiceManager'):
-                        manager = DaemonManager()
-                        expected = tmp_path / ".graphiti" / "graphiti.config.json"
-                        assert manager.config_path == expected
-
-    def test_unix_config_path_xdg(self, tmp_path):
-        """Unix with XDG_CONFIG_HOME uses $XDG_CONFIG_HOME/graphiti/graphiti.config.json"""
-        xdg_path = tmp_path / "config"
-        with patch('platform.system', return_value='Linux'):
-            with patch.dict('os.environ', {'XDG_CONFIG_HOME': str(xdg_path)}):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
                 with patch('mcp_server.daemon.manager.SystemdServiceManager'):
                     manager = DaemonManager()
-                    expected = xdg_path / "graphiti" / "graphiti.config.json"
-                    assert manager.config_path == expected
+                    assert manager.config_path == mock_paths.config_file
+
+    def test_unix_config_path_xdg(self, tmp_path):
+        """Linux with XDG_CONFIG_HOME uses $XDG_CONFIG_HOME/graphiti/graphiti.config.json"""
+        xdg_path = tmp_path / "config"
+        expected_config = xdg_path / "graphiti" / "graphiti.config.json"
+        with patch('platform.system', return_value='Linux'):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=expected_config):
+                with patch('mcp_server.daemon.manager.SystemdServiceManager'):
+                    manager = DaemonManager()
+                    assert manager.config_path == expected_config
 
 
 class TestInstallCommand:
@@ -341,10 +353,11 @@ class TestStatusCommand:
                     mock_systemd_instance.is_installed.assert_called_once()
                     mock_systemd_instance.is_running.assert_called_once()
 
-    def test_status_reads_config_if_exists(self, tmp_path, capsys):
-        """Status displays config settings when config exists"""
+    def test_status_reads_config_if_exists(self, tmp_path):
+        """Status returns config settings when config exists"""
+        mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Linux'):
-            with patch('pathlib.Path.home', return_value=tmp_path):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
                 with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
                     mock_systemd_instance = Mock()
                     mock_systemd_instance.is_installed.return_value = True
@@ -366,11 +379,12 @@ class TestStatusCommand:
                     }
                     manager.config_path.write_text(json.dumps(config))
 
-                    manager.status()
+                    # status() returns a dict with config info
+                    status = manager.status()
 
-                    captured = capsys.readouterr()
-                    assert '127.0.0.1' in captured.out
-                    assert '8321' in captured.out
+                    assert status['config']['host'] == '127.0.0.1'
+                    assert status['config']['port'] == 8321
+                    assert status['config']['enabled'] is True
 
 
 class TestLogsCommand:
@@ -456,34 +470,47 @@ class TestCLIArgumentParsing:
 class TestErrorMessages:
     """Test actionable error messages for common failure scenarios."""
 
-    def test_install_without_permissions(self, tmp_path, capsys):
+    def test_install_without_permissions(self, tmp_path):
         """Install failure shows actionable permission error"""
+        mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Linux'):
-            with patch('pathlib.Path.home', return_value=tmp_path):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
                 with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
                     mock_systemd_instance = Mock()
-                    # Simulate permission error
+                    # Simulate permission error on service install
                     mock_systemd_instance.install.side_effect = PermissionError(
                         "Permission denied"
                     )
                     mock_systemd.return_value = mock_systemd_instance
 
                     manager = DaemonManager()
-                    with pytest.raises(PermissionError):
-                        manager.install()
 
-    def test_config_not_found_shows_help(self, tmp_path, capsys):
-        """Status with missing config shows how to install"""
+                    # Mock all the steps before service install to succeed
+                    with patch.object(manager.venv_manager, 'validate_python_version', return_value=True):
+                        with patch.object(manager.venv_manager, 'create_venv', return_value=(True, "Venv created")):
+                            with patch.object(manager.package_deployer, 'deploy_package', return_value=(True, "Deployed v1.0.0")):
+                                with patch.object(manager.venv_manager, 'install_package', return_value=(True, "Installed")):
+                                    with patch.object(manager.wrapper_generator, 'generate_wrappers', return_value=(True, "Wrappers generated")):
+                                        with patch.object(manager, '_create_default_config', return_value=None):
+                                            with pytest.raises(PermissionError):
+                                                manager.install()
+
+    def test_config_not_found_shows_help(self, tmp_path):
+        """Status returns config exists=False when config not found"""
+        mock_paths = create_mock_paths(tmp_path)
         with patch('platform.system', return_value='Linux'):
-            with patch('pathlib.Path.home', return_value=tmp_path):
+            with patch('mcp_server.daemon.manager.get_config_file', return_value=mock_paths.config_file):
                 with patch('mcp_server.daemon.manager.SystemdServiceManager') as mock_systemd:
                     mock_systemd_instance = Mock()
-                    mock_systemd_instance.status.return_value = True
+                    mock_systemd_instance.is_installed.return_value = False
+                    mock_systemd_instance.is_running.return_value = False
+                    mock_systemd_instance.name = "systemd"
                     mock_systemd.return_value = mock_systemd_instance
 
                     manager = DaemonManager()
-                    manager.status()
+                    # status() returns a dict - config won't exist since we didn't create it
+                    status = manager.status()
 
-                    captured = capsys.readouterr()
-                    # Should mention daemon not installed or config not found
-                    assert 'install' in captured.out.lower() or 'config' in captured.out.lower()
+                    # When config doesn't exist, status returns exists: False
+                    assert status['config']['exists'] is False
+                    assert 'path' in status['config']

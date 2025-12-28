@@ -15,14 +15,59 @@ daemon.enabled in config, not via CLI commands.
 See: .claude/implementation/DAEMON_ARCHITECTURE_SPEC_v1.0.md
 """
 
+# CRITICAL: Setup frozen package path BEFORE any relative imports
+import sys
+from pathlib import Path
+
+
+def _setup_frozen_path():
+    """
+    Ensure frozen packages in lib/ are importable.
+
+    This function MUST be called before any relative imports.
+
+    Detection:
+    - Frozen mode: bootstrap.py is in {INSTALL}/lib/mcp_server/daemon/
+    - Development mode: bootstrap.py is in {REPO}/mcp_server/daemon/
+
+    Strategy:
+    - Check if lib/ directory exists 2 levels up from bootstrap.py
+    - If exists AND contains mcp_server/, assume frozen installation
+    - Add lib/ to sys.path[0] to prioritize frozen packages
+    """
+    # Get current file's directory
+    # bootstrap.py location: mcp_server/daemon/bootstrap.py
+    bootstrap_dir = Path(__file__).parent.resolve()  # .../mcp_server/daemon/
+
+    # Calculate potential lib/ directory
+    # Frozen: .../lib/mcp_server/daemon/ -> .../lib/
+    potential_lib = bootstrap_dir.parent.parent  # Go up 2 levels: daemon -> mcp_server -> lib
+
+    # Check if this looks like a frozen installation
+    # Criteria: potential_lib is named 'lib' AND contains mcp_server/ directory
+    if potential_lib.name == "lib" and (potential_lib / "mcp_server").is_dir():
+        # Frozen installation detected
+        lib_path = potential_lib
+
+        # Add to sys.path if not already present
+        lib_path_str = str(lib_path)
+        if lib_path_str not in sys.path:
+            sys.path.insert(0, lib_path_str)
+            # Note: Logging not yet configured at this point
+            print(f"[bootstrap] Frozen mode detected: Added {lib_path} to sys.path", file=sys.stderr)
+    # else: Development mode - packages importable from repo root, no action needed
+
+
+# Call setup function IMMEDIATELY
+_setup_frozen_path()
+
+# NOW safe to do relative imports
 import json
 import logging
 import os
 import signal
 import subprocess
-import sys
 import time
-from pathlib import Path
 from typing import Optional
 
 from .venv_manager import (
@@ -30,6 +75,7 @@ from .venv_manager import (
     VenvCreationError,
     IncompatiblePythonVersionError,
 )
+from .paths import get_config_file, get_install_dir
 
 logger = logging.getLogger("graphiti.bootstrap")
 
@@ -39,7 +85,7 @@ def validate_environment() -> bool:
     Validate that the daemon environment is properly set up.
 
     Checks:
-    - Venv exists at ~/.graphiti/.venv/
+    - Venv exists (platform-specific location from paths.py)
     - Python version compatibility
 
     Returns:
@@ -93,20 +139,18 @@ class BootstrapService:
         self._validate_venv_on_startup()
 
     def _get_config_path(self) -> Path:
-        """Get config path (platform-aware)."""
+        """
+        Get config path (platform-aware).
+
+        NOTE: This method is deprecated. Use get_config_file() from paths.py instead.
+        Kept for backward compatibility only.
+        """
         # Check environment override first
         if env_path := os.environ.get("GRAPHITI_CONFIG"):
             return Path(env_path)
 
-        # Default locations
-        if sys.platform == "win32":
-            return Path.home() / ".graphiti" / "graphiti.config.json"
-        else:
-            # Unix: ~/.graphiti/ or XDG_CONFIG_HOME
-            xdg_config = os.environ.get("XDG_CONFIG_HOME", "")
-            if xdg_config:
-                return Path(xdg_config) / "graphiti" / "graphiti.config.json"
-            return Path.home() / ".graphiti" / "graphiti.config.json"
+        # Default to paths.py implementation
+        return get_config_file()
 
     def _validate_venv_on_startup(self):
         """Validate venv exists before starting MCP server (defensive check)."""
@@ -171,7 +215,7 @@ class BootstrapService:
         cmd = [
             sys.executable,
             str(mcp_server_path),
-            "--transport", "http",
+            "--transport", "sse",
             "--host", host,
             "--port", str(port),
         ]
@@ -224,7 +268,7 @@ class BootstrapService:
 
         Detection order:
         1. GRAPHITI_MCP_SERVER environment variable (explicit override)
-        2. Deployed location (~/.graphiti/mcp_server/graphiti_mcp_server.py)
+        2. Deployed location (platform-specific install directory from paths.py)
         3. Relative path (development fallback)
         """
         # 1. Check environment override
@@ -233,7 +277,8 @@ class BootstrapService:
             return Path(env_path)
 
         # 2. Check deployed location (production)
-        deployed_path = Path.home() / ".graphiti" / "mcp_server" / "graphiti_mcp_server.py"
+        # v2.1 architecture: packages are in lib/ subdirectory
+        deployed_path = get_install_dir() / "lib" / "mcp_server" / "graphiti_mcp_server.py"
         if deployed_path.exists():
             logger.info(f"Using deployed MCP server: {deployed_path}")
             return deployed_path

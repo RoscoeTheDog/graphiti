@@ -1,0 +1,408 @@
+# Story 13: Old Installation Cleanup - Discovery Plan
+# Created: 2025-12-25
+# Status: Discovery Phase Complete
+
+overview: |
+  Design comprehensive cleanup workflow for v2.0 installations after successful migration to v2.1.
+  Focus on safety, user control, and rollback capabilities.
+
+# ============================================================================
+# 1. Cleanup Workflow Design
+# ============================================================================
+
+cleanup_workflow:
+  description: |
+    Multi-stage cleanup process with user prompts and safety checks.
+    Cleanup is OPTIONAL and triggered only after successful migration.
+
+  stages:
+    - stage: 1_pre_cleanup_validation
+      description: Verify v2.1 installation is working before cleanup
+      actions:
+        - Detect v2.1 service is installed and running
+        - Verify v2.1 config exists and is valid
+        - Check migration was completed (backup exists)
+        - Warn if v2.1 installation incomplete
+
+    - stage: 2_service_cleanup
+      description: Stop and remove v2.0 services/tasks
+      actions:
+        - Detect running v2.0 services
+        - Stop v2.0 service gracefully (with timeout)
+        - Unregister/remove service definition
+        - Verify service is fully stopped
+      platform_specific:
+        windows:
+          - Stop GraphitiBootstrap_* task if running
+          - Delete task from Task Scheduler
+          - Verify with: Get-ScheduledTask -TaskName 'GraphitiBootstrap*'
+        macos:
+          - Unload LaunchAgent: launchctl unload ~/Library/LaunchAgents/com.graphiti.bootstrap.plist
+          - Remove plist file
+          - Verify with: launchctl list | grep com.graphiti.bootstrap
+        linux:
+          - Stop systemd service: systemctl --user stop graphiti-bootstrap
+          - Disable service: systemctl --user disable graphiti-bootstrap
+          - Remove service file: ~/.config/systemd/user/graphiti-bootstrap.service
+          - Reload daemon: systemctl --user daemon-reload
+
+    - stage: 3_directory_cleanup
+      description: Remove ~/.graphiti/ directory with user control
+      user_prompts:
+        - prompt: "v2.0 cleanup: Remove ~/.graphiti/ directory?"
+          options:
+            - label: "Yes, remove everything"
+              action: delete_all
+            - label: "Keep logs only"
+              action: delete_except_logs
+            - label: "Skip cleanup (keep ~/.graphiti/)"
+              action: skip_cleanup
+          default: skip_cleanup
+          rationale: |
+            User may want to keep logs for troubleshooting or compliance.
+            Default to safe option (skip) to prevent data loss.
+
+      actions:
+        delete_all:
+          - Create backup: ~/.graphiti.backup-{timestamp}/
+          - Copy entire ~/.graphiti/ to backup location
+          - Delete ~/.graphiti/ recursively
+          - Report success with backup location
+
+        delete_except_logs:
+          - Create backup: ~/.graphiti.backup-{timestamp}/
+          - Copy ~/.graphiti/ to backup (selective)
+          - Delete ~/.graphiti/.venv/
+          - Delete ~/.graphiti/mcp_server/
+          - Delete ~/.graphiti/bin/
+          - Delete ~/.graphiti/graphiti.config.json (already migrated)
+          - Keep ~/.graphiti/logs/
+          - Report what was kept
+
+        skip_cleanup:
+          - Log that cleanup was skipped
+          - Inform user how to manually clean later
+          - Continue successfully
+
+    - stage: 4_verification
+      description: Verify cleanup completed as expected
+      checks:
+        - V2.0 service no longer running
+        - V2.0 service no longer registered
+        - Expected directories removed (based on user choice)
+        - Backup created if deletion occurred
+        - V2.1 service still running (not affected)
+
+# ============================================================================
+# 2. Safe vs Preserved Assets
+# ============================================================================
+
+asset_classification:
+  safe_to_remove:
+    description: Can be deleted without user data loss
+    items:
+      - path: ~/.graphiti/.venv/
+        reason: Python virtual environment (recreated in v2.1)
+
+      - path: ~/.graphiti/mcp_server/
+        reason: Deployed package code (reinstalled in v2.1)
+
+      - path: ~/.graphiti/bin/
+        reason: Wrapper scripts (regenerated in v2.1)
+
+      - path: ~/.graphiti/graphiti.config.json
+        reason: Already migrated to v2.1 location (backup exists)
+
+      - path: Task Scheduler task (Windows)
+        reason: Service replaced by v2.1 installation
+
+      - path: LaunchAgent plist (macOS)
+        reason: Service replaced by v2.1 installation
+
+      - path: systemd service file (Linux)
+        reason: Service replaced by v2.1 installation
+
+  preserve_or_prompt:
+    description: Requires user decision due to potential value
+    items:
+      - path: ~/.graphiti/logs/
+        reason: May contain important troubleshooting data
+        recommendation: Prompt user with "Keep logs?" option
+
+      - path: ~/.graphiti/data/
+        reason: User data (if any custom storage exists)
+        recommendation: Always preserve or prompt before deletion
+
+      - path: ~/.graphiti/ (entire directory)
+        reason: May contain unexpected user files
+        recommendation: Create backup before deletion, prompt user
+
+# ============================================================================
+# 3. Rollback Mechanism Design
+# ============================================================================
+
+rollback_strategy:
+  description: |
+    Rollback if cleanup fails mid-process. Does NOT rollback migration
+    (that's a separate concern - migration creates its own backup).
+
+  backup_approach:
+    when: Before any destructive action (service removal, directory deletion)
+    location: ~/.graphiti.cleanup-backup-{timestamp}/
+    contents:
+      - Service definition file (plist, service file, task XML if exportable)
+      - ~/.graphiti/ directory (if being deleted)
+      - Cleanup state metadata (JSON)
+
+  rollback_triggers:
+    - Service removal fails (cannot unload/delete)
+    - Directory deletion fails (permission denied)
+    - V2.1 service stops working during cleanup (unexpected)
+    - User cancels mid-cleanup (interactive mode)
+
+  rollback_actions:
+    - Restore service definition from backup
+    - Restore ~/.graphiti/ from backup
+    - Reload/restart v2.0 service
+    - Report rollback completed
+    - Log reason for rollback
+
+  limitations:
+    note: |
+      Cannot rollback if backup creation failed. In this case,
+      cleanup aborts early without making changes.
+
+# ============================================================================
+# 4. Interactive vs Non-Interactive Modes
+# ============================================================================
+
+execution_modes:
+  interactive:
+    description: |
+      Default mode for human-initiated cleanup via CLI.
+      Prompts user for decisions and confirmation.
+
+    behavior:
+      - Prompt before stopping v2.0 service
+      - Prompt before deleting directories
+      - Prompt for log preservation choice
+      - Show progress and status messages
+      - Allow cancellation at any stage
+
+    use_cases:
+      - Manual cleanup via: python -m mcp_server.daemon.manager cleanup
+      - Interactive installation/upgrade wizard
+      - User explicitly requests cleanup
+
+  non_interactive:
+    description: |
+      Automated mode for scripts and CI/CD.
+      Uses safe defaults without prompting.
+
+    behavior:
+      - Auto-skip cleanup if v2.1 not verified working
+      - Stop and remove v2.0 service automatically
+      - Skip directory deletion (preserve ~/.graphiti/)
+      - Create backup but don't delete (unless --force)
+      - Log all actions for audit trail
+
+    flags:
+      - flag: --force
+        effect: Actually delete directories (otherwise just backup)
+
+      - flag: --keep-logs
+        effect: Preserve ~/.graphiti/logs/ during deletion
+
+      - flag: --delete-all
+        effect: Remove entire ~/.graphiti/ (conflicts with --keep-logs)
+
+    use_cases:
+      - Automated deployment scripts
+      - CI/CD upgrade workflows
+      - Unattended server installations
+
+# ============================================================================
+# 5. Function Signature & Interface
+# ============================================================================
+
+implementation_interface:
+  function_signature: |
+    def cleanup_v2_0_installation(
+        interactive: bool = True,
+        force_delete: bool = False,
+        keep_logs: bool = False
+    ) -> dict:
+        """
+        Clean up v2.0 installation after successful migration to v2.1.
+
+        Args:
+            interactive: If True, prompt user for cleanup decisions.
+                        If False, use safe defaults (skip directory deletion).
+            force_delete: If True (non-interactive only), actually delete directories.
+                         Requires explicit opt-in to prevent accidents.
+            keep_logs: If True, preserve ~/.graphiti/logs/ during deletion.
+
+        Returns:
+            dict: Cleanup result
+                {
+                    "success": bool,
+                    "actions_taken": list[str],
+                    "backup_location": Path or None,
+                    "rollback_performed": bool,
+                    "errors": list[str]
+                }
+
+        Raises:
+            V21NotInstalledError: If v2.1 installation not detected
+            CleanupError: If critical cleanup step fails and rollback fails
+        """
+
+  usage_examples:
+    - example: Interactive cleanup (default)
+      code: |
+        result = cleanup_v2_0_installation()
+        # Prompts user, creates backup, removes based on choices
+
+    - example: Non-interactive safe cleanup
+      code: |
+        result = cleanup_v2_0_installation(interactive=False)
+        # Stops service, creates backup, does NOT delete directories
+
+    - example: Non-interactive forced cleanup
+      code: |
+        result = cleanup_v2_0_installation(
+            interactive=False,
+            force_delete=True,
+            keep_logs=True
+        )
+        # Stops service, deletes dirs except logs, creates backup
+
+# ============================================================================
+# 6. Error Handling & Edge Cases
+# ============================================================================
+
+error_scenarios:
+  - scenario: V2.1 not installed or broken
+    detection: Call detect_v2_1_installation(), check service health
+    action: Abort cleanup, warn user to fix v2.1 first
+    rationale: Don't remove v2.0 if v2.1 isn't working
+
+  - scenario: V2.0 service stuck/won't stop
+    detection: Service stop timeout (30 seconds)
+    action: Try force kill, then continue cleanup with warning
+    rationale: Don't block cleanup on stuck process
+
+  - scenario: Permission denied deleting ~/.graphiti/
+    detection: OSError during directory removal
+    action: Trigger rollback, restore service, report error
+    rationale: Partial deletion is worse than no deletion
+
+  - scenario: Backup creation fails (disk full)
+    detection: OSError during backup copy
+    action: Abort cleanup immediately, no changes made
+    rationale: Cannot rollback without backup
+
+  - scenario: User cancels mid-cleanup (Ctrl+C)
+    detection: KeyboardInterrupt signal
+    action: Trigger rollback, restore from backup
+    rationale: Leave system in clean state even on cancellation
+
+  - scenario: V2.0 and V2.1 both missing
+    detection: Neither installation detected
+    action: Return success with "nothing to clean" message
+    rationale: Idempotent cleanup (safe to run multiple times)
+
+# ============================================================================
+# 7. Integration Points
+# ============================================================================
+
+integration:
+  - component: DaemonManager.install()
+    integration_point: After successful v2.1 installation
+    behavior: |
+      if detect_v2_installation()["detected"]:
+          print("Old v2.0 installation detected")
+          if interactive:
+              choice = prompt("Run cleanup now?")
+              if choice == "yes":
+                  cleanup_v2_0_installation()
+          else:
+              print("Run 'python -m mcp_server.daemon.manager cleanup' later")
+
+  - component: DaemonManager.upgrade()
+    integration_point: After migration completes
+    behavior: |
+      # Migration already happened, prompt for cleanup
+      result = cleanup_v2_0_installation(interactive=True)
+      if result["success"]:
+          print(f"Cleanup complete. Backup: {result['backup_location']}")
+
+  - component: Standalone CLI
+    integration_point: python -m mcp_server.daemon.manager cleanup
+    behavior: |
+      # Dedicated cleanup command for manual invocation
+      cleanup_v2_0_installation(interactive=True)
+
+# ============================================================================
+# 8. Testing Strategy
+# ============================================================================
+
+testing_approach:
+  unit_tests:
+    - Test cleanup with mock v2.0 installation
+    - Test rollback mechanism
+    - Test each platform's service removal
+    - Test interactive prompts (mocked input)
+    - Test non-interactive modes with different flags
+
+  integration_tests:
+    - Test cleanup after real migration
+    - Test cleanup with v2.1 running
+    - Test rollback on failure scenarios
+
+  manual_tests:
+    - Windows: Verify Task Scheduler task removed
+    - macOS: Verify LaunchAgent unloaded
+    - Linux: Verify systemd service removed
+    - All platforms: Verify ~/.graphiti/ backup created
+    - All platforms: Verify v2.1 still works after cleanup
+
+# ============================================================================
+# 9. Documentation Requirements
+# ============================================================================
+
+documentation:
+  user_facing:
+    - Update installation guide with cleanup section
+    - Document manual cleanup procedure (if automated fails)
+    - Add FAQ: "Is it safe to delete ~/.graphiti/?"
+
+  developer_facing:
+    - Document cleanup_v2_0_installation() API
+    - Document rollback mechanism
+    - Add platform-specific service removal notes
+
+# ============================================================================
+# 10. Acceptance Criteria Mapping
+# ============================================================================
+
+acceptance_criteria_completion:
+  - criteria: Design cleanup workflow with user prompts
+    status: COMPLETE
+    reference: Section 1 (cleanup_workflow)
+
+  - criteria: Document what can be safely removed vs preserved
+    status: COMPLETE
+    reference: Section 2 (asset_classification)
+
+  - criteria: Design rollback mechanism if cleanup fails
+    status: COMPLETE
+    reference: Section 3 (rollback_strategy)
+
+  - criteria: Determine interactive vs non-interactive modes
+    status: COMPLETE
+    reference: Section 4 (execution_modes)
+
+# ============================================================================
+# END OF DISCOVERY PLAN
+# ============================================================================

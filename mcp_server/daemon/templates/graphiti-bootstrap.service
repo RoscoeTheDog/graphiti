@@ -18,13 +18,13 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /path/to/mcp_server/daemon/bootstrap.py
+ExecStart=/usr/bin/python3 ~/.local/share/graphiti/lib/mcp_server/daemon/bootstrap.py
 Restart=always
 RestartSec=5
-WorkingDirectory=/path/to/mcp_server/daemon
+WorkingDirectory=/home/user/.local/share/graphiti/lib/mcp_server/daemon
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
-StandardOutput=append:/home/user/.graphiti/logs/bootstrap-stdout.log
-StandardError=append:/home/user/.graphiti/logs/bootstrap-stderr.log
+StandardOutput=append:/home/user/.local/state/graphiti/logs/bootstrap-stdout.log
+StandardError=append:/home/user/.local/state/graphiti/logs/bootstrap-stderr.log
 
 [Install]
 WantedBy=default.target

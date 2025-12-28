@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from .venv_manager import VenvManager, VenvCreationError
+from .paths import get_install_dir, get_log_dir
 
 
 class WindowsServiceManager:
@@ -35,7 +36,7 @@ class WindowsServiceManager:
             venv_manager: Optional VenvManager instance. If None, creates default instance.
 
         Raises:
-            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+            VenvCreationError: If venv doesn't exist (platform-specific location from paths.py)
         """
         self.nssm_path = self._find_nssm()
         self.venv_manager = venv_manager or VenvManager()
@@ -95,7 +96,7 @@ class WindowsServiceManager:
     def install(self) -> bool:
         """Install bootstrap service using NSSM."""
         if not self.nssm_path:
-            print("✗ NSSM not found")
+            print("[ERROR] NSSM not found")
             print()
             print("NSSM is required to install services on Windows.")
             print("Please install NSSM:")
@@ -108,7 +109,7 @@ class WindowsServiceManager:
 
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
         print(f"Using NSSM: {self.nssm_path}")
@@ -127,7 +128,7 @@ class WindowsServiceManager:
         )
 
         if not success:
-            print(f"✗ Failed to install service: {output}")
+            print(f"[ERROR] Failed to install service: {output}")
             return False
 
         # Set display name
@@ -144,13 +145,13 @@ class WindowsServiceManager:
         # Set startup type to automatic
         self._run_nssm("set", self.service_name, "Start", "SERVICE_AUTO_START")
 
-        # Set working directory to ~/.graphiti/
-        working_dir = Path.home() / ".graphiti"
+        # Set working directory (platform-specific install directory)
+        working_dir = get_install_dir()
         working_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         self._run_nssm("set", self.service_name, "AppDirectory", str(working_dir))
 
         # Configure stdout/stderr logging
-        log_dir = Path.home() / ".graphiti" / "logs"
+        log_dir = get_log_dir()
         log_dir.mkdir(parents=True, exist_ok=True)
 
         stdout_log = log_dir / "bootstrap-stdout.log"
@@ -170,18 +171,18 @@ class WindowsServiceManager:
         success, output = self._run_nssm("start", self.service_name)
 
         if not success:
-            print(f"✗ Failed to start service: {output}")
+            print(f"[ERROR] Failed to start service: {output}")
             print("  You can start it manually later via Services app or:")
             print(f"  nssm start {self.service_name}")
             return True  # Service installed, just not started
 
-        print(f"✓ Service '{self.service_name}' started")
+        print(f"[OK] Service '{self.service_name}' started")
         return True
 
     def uninstall(self) -> bool:
         """Uninstall bootstrap service using NSSM."""
         if not self.nssm_path:
-            print("✗ NSSM not found")
+            print("[ERROR] NSSM not found")
             return False
 
         if not self.is_installed():
@@ -197,10 +198,10 @@ class WindowsServiceManager:
         success, output = self._run_nssm("remove", self.service_name, "confirm")
 
         if not success:
-            print(f"✗ Failed to remove service: {output}")
+            print(f"[ERROR] Failed to remove service: {output}")
             return False
 
-        print(f"✓ Service '{self.service_name}' removed")
+        print(f"[OK] Service '{self.service_name}' removed")
         return True
 
     def is_installed(self) -> bool:
@@ -226,7 +227,7 @@ class WindowsServiceManager:
 
     def show_logs(self, follow: bool = False, lines: int = 50) -> None:
         """Show service logs (stdout and stderr)."""
-        log_dir = Path.home() / ".graphiti" / "logs"
+        log_dir = get_log_dir()
         stdout_log = log_dir / "bootstrap-stdout.log"
         stderr_log = log_dir / "bootstrap-stderr.log"
 

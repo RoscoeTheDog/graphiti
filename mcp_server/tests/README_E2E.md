@@ -7,10 +7,20 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 **Automated tests** (Scenarios 1, 4, 5) are in `test_e2e_installation.py`.
 **Manual tests** (Scenarios 2-3) are documented here due to platform-specific service registration requirements.
 
+## v2.1 Installation Paths
+
+The daemon uses OS-native installation paths:
+
+| Platform | Install Directory | Config/State Directory |
+|----------|-------------------|------------------------|
+| **Windows** | `%LOCALAPPDATA%\Programs\Graphiti` | `%LOCALAPPDATA%\Graphiti` |
+| **macOS** | `~/Library/Application Support/Graphiti/` | `~/Library/Preferences/Graphiti/` (config), `~/Library/Logs/Graphiti/` (logs) |
+| **Linux** | `~/.local/share/graphiti/` | `~/.config/graphiti/` (config), `~/.local/state/graphiti/` (state/logs) |
+
 ## Prerequisites
 
 - Administrator/sudo privileges (for service registration)
-- Clean system or willingness to remove `~/.graphiti/` directory
+- Clean system or willingness to remove installation directories (see v2.1 paths above)
 - Graphiti repository cloned locally
 - Python 3.10+ installed
 
@@ -32,12 +42,17 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 - Administrator privileges
 - NSSM installed (bundled with installer)
 
+**v2.1 Paths**:
+- Install: `$env:LOCALAPPDATA\Programs\Graphiti`
+- Config: `$env:LOCALAPPDATA\Graphiti`
+
 **Steps**:
 
 1. **Clean existing installation**:
    ```powershell
    # Open PowerShell as Administrator
-   Remove-Item -Recurse -Force $env:USERPROFILE\.graphiti -ErrorAction SilentlyContinue
+   Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Graphiti" -ErrorAction SilentlyContinue
+   Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Graphiti" -ErrorAction SilentlyContinue
    ```
 
 2. **Run daemon installation**:
@@ -48,16 +63,18 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 3. **Verify directory structure**:
    ```powershell
-   Test-Path $env:USERPROFILE\.graphiti\.venv
-   Test-Path $env:USERPROFILE\.graphiti\mcp_server
-   Test-Path $env:USERPROFILE\.graphiti\bin
-   Test-Path $env:USERPROFILE\.graphiti\graphiti.config.json
-   Test-Path $env:USERPROFILE\.graphiti\logs
+   # Installation directory
+   Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\.venv"
+   Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\mcp_server"
+   Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\bin"
+   # Config/state directory
+   Test-Path "$env:LOCALAPPDATA\Graphiti\graphiti.config.json"
+   Test-Path "$env:LOCALAPPDATA\Graphiti\logs"
    ```
    **Expected**: All return `True`
 
 4. **Enable daemon in config**:
-   Edit `~/.graphiti/graphiti.config.json`:
+   Edit `$env:LOCALAPPDATA\Graphiti\graphiti.config.json`:
    ```json
    {
      "daemon": {
@@ -98,12 +115,12 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 10. **Check logs**:
     ```powershell
-    Get-Content $env:USERPROFILE\.graphiti\logs\bootstrap.log -Tail 20
+    Get-Content "$env:LOCALAPPDATA\Graphiti\logs\bootstrap.log" -Tail 20
     ```
     **Expected**: No errors, MCP server startup messages visible
 
 11. **Disable daemon in config**:
-    Edit `~/.graphiti/graphiti.config.json`:
+    Edit `$env:LOCALAPPDATA\Graphiti\graphiti.config.json`:
     ```json
     {
       "daemon": {
@@ -150,11 +167,18 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 - May require sudo for service installation
 - launchctl available (system utility)
 
+**v2.1 Paths**:
+- Install: `~/Library/Application Support/Graphiti/`
+- Config: `~/Library/Preferences/Graphiti/`
+- Logs: `~/Library/Logs/Graphiti/`
+
 **Steps**:
 
 1. **Clean existing installation**:
    ```bash
-   rm -rf ~/.graphiti
+   rm -rf ~/Library/Application\ Support/Graphiti
+   rm -rf ~/Library/Preferences/Graphiti
+   rm -rf ~/Library/Logs/Graphiti
    ```
 
 2. **Run daemon installation**:
@@ -165,12 +189,21 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 3. **Verify directory structure**:
    ```bash
-   ls -la ~/.graphiti
+   # Installation directory
+   ls -la ~/Library/Application\ Support/Graphiti
+   # Expected: .venv/, mcp_server/, bin/
+
+   # Config directory
+   ls -la ~/Library/Preferences/Graphiti
+   # Expected: graphiti.config.json
+
+   # Logs directory
+   ls -la ~/Library/Logs/Graphiti
+   # Expected: logs/
    ```
-   **Expected**: `.venv/`, `mcp_server/`, `bin/`, `graphiti.config.json`, `logs/`
 
 4. **Enable daemon in config**:
-   Edit `~/.graphiti/graphiti.config.json`:
+   Edit `~/Library/Preferences/Graphiti/graphiti.config.json`:
    ```json
    {
      "daemon": {
@@ -205,12 +238,12 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 9. **Check logs**:
    ```bash
-   tail -20 ~/.graphiti/logs/bootstrap.log
+   tail -20 ~/Library/Logs/Graphiti/bootstrap.log
    ```
    **Expected**: No errors, MCP server startup messages visible
 
 10. **Disable daemon in config**:
-    Edit `~/.graphiti/graphiti.config.json`:
+    Edit `~/Library/Preferences/Graphiti/graphiti.config.json`:
     ```json
     {
       "daemon": {
@@ -257,11 +290,18 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 - May require sudo for service installation
 - systemctl available (system utility)
 
+**v2.1 Paths** (XDG-compliant):
+- Install: `~/.local/share/graphiti/` (or `$XDG_DATA_HOME/graphiti`)
+- Config: `~/.config/graphiti/` (or `$XDG_CONFIG_HOME/graphiti`)
+- State/Logs: `~/.local/state/graphiti/` (or `$XDG_STATE_HOME/graphiti`)
+
 **Steps**:
 
 1. **Clean existing installation**:
    ```bash
-   rm -rf ~/.graphiti
+   rm -rf ~/.local/share/graphiti
+   rm -rf ~/.config/graphiti
+   rm -rf ~/.local/state/graphiti
    ```
 
 2. **Run daemon installation**:
@@ -272,12 +312,21 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 3. **Verify directory structure**:
    ```bash
-   ls -la ~/.graphiti
+   # Installation directory
+   ls -la ~/.local/share/graphiti
+   # Expected: .venv/, mcp_server/, bin/
+
+   # Config directory
+   ls -la ~/.config/graphiti
+   # Expected: graphiti.config.json
+
+   # State/Logs directory
+   ls -la ~/.local/state/graphiti
+   # Expected: logs/
    ```
-   **Expected**: `.venv/`, `mcp_server/`, `bin/`, `graphiti.config.json`, `logs/`
 
 4. **Enable daemon in config**:
-   Edit `~/.graphiti/graphiti.config.json`:
+   Edit `~/.config/graphiti/graphiti.config.json`:
    ```json
    {
      "daemon": {
@@ -318,7 +367,7 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
    **Expected**: No errors, MCP server startup messages visible
 
 10. **Disable daemon in config**:
-    Edit `~/.graphiti/graphiti.config.json`:
+    Edit `~/.config/graphiti/graphiti.config.json`:
     ```json
     {
       "daemon": {
@@ -415,7 +464,7 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
    # Verify daemon still responds
    curl -f http://localhost:6274/health
    ```
-   **Expected**: HTTP 200 OK (daemon runs from ~/.graphiti/)
+   **Expected**: HTTP 200 OK (daemon runs from OS-native install path, not project directory)
 
 8. **Stop daemon** (from Scenario 2 cleanup steps)
 
@@ -432,11 +481,27 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 
 **Symptoms**: `nssm start` or `systemctl start` fails
 
-**Checks**:
+**Checks** (use OS-appropriate paths):
+
+**Windows**:
 1. Verify Python 3.10+ installed: `python --version`
-2. Verify venv exists: `ls ~/.graphiti/.venv`
-3. Verify config valid: `cat ~/.graphiti/graphiti.config.json`
-4. Check logs: `cat ~/.graphiti/logs/bootstrap.log`
+2. Verify venv exists: `Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\.venv"`
+3. Verify config valid: `Get-Content "$env:LOCALAPPDATA\Graphiti\graphiti.config.json"`
+4. Check logs: `Get-Content "$env:LOCALAPPDATA\Graphiti\logs\bootstrap.log"`
+5. Verify port not in use: `netstat -an | findstr 6274`
+
+**macOS**:
+1. Verify Python 3.10+ installed: `python --version`
+2. Verify venv exists: `ls ~/Library/Application\ Support/Graphiti/.venv`
+3. Verify config valid: `cat ~/Library/Preferences/Graphiti/graphiti.config.json`
+4. Check logs: `cat ~/Library/Logs/Graphiti/bootstrap.log`
+5. Verify port not in use: `netstat -an | grep 6274`
+
+**Linux**:
+1. Verify Python 3.10+ installed: `python --version`
+2. Verify venv exists: `ls ~/.local/share/graphiti/.venv`
+3. Verify config valid: `cat ~/.config/graphiti/graphiti.config.json`
+4. Check logs: `cat ~/.local/state/graphiti/logs/bootstrap.log`
 5. Verify port not in use: `netstat -an | grep 6274`
 
 ### Health endpoint not responding
@@ -446,7 +511,10 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 **Checks**:
 1. Verify daemon enabled in config: `daemon.enabled = true`
 2. Wait longer for startup (up to 30 seconds)
-3. Check MCP server logs: `~/.graphiti/logs/mcp_server.log`
+3. Check MCP server logs (use OS-appropriate path):
+   - Windows: `$env:LOCALAPPDATA\Graphiti\logs\mcp_server.log`
+   - macOS: `~/Library/Logs/Graphiti/mcp_server.log`
+   - Linux: `~/.local/state/graphiti/logs/mcp_server.log`
 4. Verify port correct: `daemon.port` in config
 5. Verify firewall not blocking port
 
@@ -457,7 +525,10 @@ This guide covers manual end-to-end testing for the Graphiti MCP daemon installa
 **Solutions**:
 1. Windows: Run PowerShell as Administrator
 2. macOS/Linux: Use `sudo` for service registration
-3. Verify write permissions: `ls -la ~/.graphiti`
+3. Verify write permissions (use OS-appropriate path):
+   - Windows: `icacls "$env:LOCALAPPDATA\Graphiti"`
+   - macOS: `ls -la ~/Library/Application\ Support/Graphiti`
+   - Linux: `ls -la ~/.local/share/graphiti`
 4. Check disk space: `df -h ~`
 
 ### Service doesn't stop gracefully

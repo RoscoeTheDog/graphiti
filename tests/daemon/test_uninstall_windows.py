@@ -62,9 +62,9 @@ class TestUninstallWindowsScript:
 
         # Check for key directories
         required_dirs = [
-            ".graphiti",
+            # v2.1 architecture uses %LOCALAPPDATA% paths, not ~/.graphiti
             ".venv",
-            "mcp_server",
+            "lib",  # v2.1 uses lib/ instead of mcp_server/
             "bin",
             "logs",
         ]

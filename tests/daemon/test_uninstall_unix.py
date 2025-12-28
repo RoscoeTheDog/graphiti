@@ -58,13 +58,12 @@ class TestUninstallMacOSScript:
         """Test that script contains directory deletion logic."""
         content = UNINSTALL_MACOS.read_text(encoding="utf-8")
 
-        # Check for key directories
+        # Check for key directories - v2.1 uses macOS Library paths
         required_dirs = [
-            ".graphiti",
             ".venv",
-            "mcp_server",
+            "lib",  # v2.1 uses lib/ instead of mcp_server/
             "bin",
-            "logs",
+            "Logs",  # macOS uses Library/Logs/Graphiti
         ]
 
         for dir_name in required_dirs:
@@ -196,11 +195,10 @@ class TestUninstallLinuxScript:
         """Test that script contains directory deletion logic."""
         content = UNINSTALL_LINUX.read_text(encoding="utf-8")
 
-        # Check for key directories
+        # Check for key directories - v2.1 uses XDG paths
         required_dirs = [
-            ".graphiti",
             ".venv",
-            "mcp_server",
+            "lib",  # v2.1 uses lib/ instead of mcp_server/
             "bin",
             "logs",
         ]
@@ -327,9 +325,9 @@ class TestBothUnixScripts:
         """Test that scripts use variables for paths (maintainability)."""
         content = script_path.read_text(encoding="utf-8")
 
-        # Check for path variables
+        # Check for path variables - v2.1 uses INSTALL_DIR instead of GRAPHITI_DIR
         path_vars = [
-            "GRAPHITI_DIR",
+            "INSTALL_DIR",  # v2.1 architecture
             "VENV_DIR",
             "BIN_DIR",
         ]

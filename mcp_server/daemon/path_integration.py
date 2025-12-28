@@ -2,10 +2,15 @@
 Graphiti PATH Integration
 
 Handles PATH detection and provides platform-specific instructions for adding
-~/.graphiti/bin/ to the user's PATH.
+the Graphiti bin directory to the user's PATH.
+
+v2.1 Architecture - Bin Directory Locations:
+- Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\bin\\
+- macOS: ~/Library/Application Support/Graphiti/bin/
+- Linux: ~/.local/share/graphiti/bin/
 
 This module provides:
-- Detection of ~/.graphiti/bin/ in current PATH
+- Detection of the Graphiti bin directory in current PATH
 - Platform-specific PATH configuration instructions
 - Optional Windows registry modification (with user consent)
 - Unix shell rc file snippet generation
@@ -39,15 +44,20 @@ class PathIntegration:
         Initialize PathIntegration.
 
         Args:
-            bin_path: Path to bin directory. Defaults to ~/.graphiti/bin/
+            bin_path: Path to bin directory. Defaults to platform-specific location:
+                      - Windows: %LOCALAPPDATA%\\Programs\\Graphiti\\bin\\
+                      - macOS: ~/Library/Application Support/Graphiti/bin/
+                      - Linux: ~/.local/share/graphiti/bin/
         """
         if bin_path is None:
-            bin_path = Path.home() / ".graphiti" / "bin"
+            # Import here to avoid circular dependency
+            from .paths import get_install_dir
+            bin_path = get_install_dir() / "bin"
         self.bin_path = bin_path
 
     def detect_in_path(self) -> bool:
         """
-        Detect if ~/.graphiti/bin/ is in the current PATH.
+        Detect if the Graphiti bin directory is in the current PATH.
 
         Normalizes paths for comparison to handle:
         - Symlinks (resolved to real paths)
@@ -150,8 +160,8 @@ class PathIntegration:
             # Default to bash (covers bash, sh, etc.)
             rc_file = "~/.bashrc"
 
-        # Generate export snippet
-        snippet = f'export PATH="$HOME/.graphiti/bin:$PATH"'
+        # Generate export snippet using actual bin_path (v2.1 platform-specific location)
+        snippet = f'export PATH="{self.bin_path}:$PATH"'
 
         logger.debug(f"Generated Unix snippet for {shell}: {snippet}")
         return rc_file, snippet

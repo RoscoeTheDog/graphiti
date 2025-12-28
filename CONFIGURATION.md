@@ -42,10 +42,13 @@ Graphiti uses a **unified configuration system** where all structural settings a
 
 Configuration files are searched in this order:
 1. `./graphiti.config.json` (project directory)
-2. `~/.graphiti/graphiti.config.json` (global)
+2. Global config at platform-specific location:
+   - **Windows**: `%LOCALAPPDATA%\Graphiti\config\graphiti.config.json`
+   - **macOS**: `~/Library/Preferences/Graphiti/graphiti.config.json`
+   - **Linux**: `~/.config/graphiti/graphiti.config.json`
 3. Built-in defaults (in `mcp_server/unified_config.py`)
 
-**Note**: If upgrading from v0.3.x or earlier, configurations from `~/.claude/graphiti.config.json` will be automatically migrated to `~/.graphiti/` on first use.
+**Note**: If upgrading from v0.3.x or earlier (using `~/.graphiti/` or `~/.claude/graphiti.config.json`), configurations will be automatically migrated to the platform-specific location on first use.
 
 ---
 
@@ -341,7 +344,10 @@ The `preprocessing_prompt` field supports three value types:
 When using template-based preprocessing, templates are searched in this order:
 
 1. **Project templates**: `{project}/.graphiti/templates/{template}.md`
-2. **Global templates**: `~/.graphiti/templates/{template}.md`
+2. **Global templates** (platform-specific):
+   - Windows: `%LOCALAPPDATA%\Graphiti\templates\{template}.md`
+   - macOS: `~/Library/Preferences/Graphiti/templates/{template}.md`
+   - Linux: `~/.config/graphiti/templates/{template}.md`
 3. **Built-in templates**: Packaged with Graphiti (e.g., `default-session-turn.md`)
 
 **Graceful Degradation**: If a template is not found in any location, preprocessing is automatically disabled with a warning logged.
@@ -417,10 +423,21 @@ Consider the following session context when extracting entities:
 EOF
 ```
 
-**Global template** (shared across all projects):
+**Global template** (shared across all projects, platform-specific):
 ```bash
-mkdir -p ~/.graphiti/templates
-cat > ~/.graphiti/templates/my-custom-extraction.md << 'EOF'
+# Windows (PowerShell)
+New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\Graphiti\templates"
+# Then create: %LOCALAPPDATA%\Graphiti\templates\my-custom-extraction.md
+
+# macOS
+mkdir -p ~/Library/Preferences/Graphiti/templates
+cat > ~/Library/Preferences/Graphiti/templates/my-custom-extraction.md << 'EOF'
+[Your custom prompt here]
+EOF
+
+# Linux
+mkdir -p ~/.config/graphiti/templates
+cat > ~/.config/graphiti/templates/my-custom-extraction.md << 'EOF'
 [Your custom prompt here]
 EOF
 ```
@@ -975,13 +992,16 @@ When using LLM summarization (`ContentMode.SUMMARY` for user/agent messages), yo
 
 **Template Resolution Hierarchy:**
 1. **Project templates** - `<project>/.graphiti/auto-tracking/templates/{template}.md`
-2. **Global templates** - `~/.graphiti/auto-tracking/templates/{template}.md`
+2. **Global templates** (platform-specific):
+   - Windows: `%LOCALAPPDATA%\Graphiti\auto-tracking\templates\{template}.md`
+   - macOS: `~/Library/Preferences/Graphiti/auto-tracking/templates/{template}.md`
+   - Linux: `~/.config/graphiti/auto-tracking/templates/{template}.md`
 3. **Built-in templates** - Packaged with Graphiti (default prompts)
 4. **Inline prompts** - Pass prompt string directly (no .md extension)
 
 **Default Templates:**
 
-Three built-in templates are provided and automatically created in `~/.graphiti/auto-tracking/templates/` on first run:
+Three built-in templates are provided and automatically created at the platform-specific global location on first run:
 - `default-tool-content.md` - For tool result summarization
 - `default-user-messages.md` - For user message summarization
 - `default-agent-messages.md` - For agent response summarization
@@ -992,7 +1012,7 @@ Three built-in templates are provided and automatically created in `~/.graphiti/
 
 **Example Custom Template:**
 
-Create `~/.graphiti/auto-tracking/templates/custom-user-summary.md`:
+Create a custom template at the platform-specific global location (example for Linux: `~/.config/graphiti/auto-tracking/templates/custom-user-summary.md`):
 ```markdown
 Summarize this user request concisely, focusing on intent and key requirements.
 
@@ -1016,7 +1036,7 @@ summary = await summarizer.summarize(
     template="default-user-messages.md"
 )
 
-# Use custom template (from ~/.graphiti/auto-tracking/templates/)
+# Use custom template (from platform-specific templates directory)
 summary = await summarizer.summarize(
     content="Long message here...",
     template="custom-user-summary.md"
@@ -1741,8 +1761,10 @@ graphiti-mcp daemon uninstall
 
 **Enable/Disable MCP Server:**
 ```bash
-# Option 1: Edit config file
-# Edit ~/.graphiti/graphiti.config.json:
+# Option 1: Edit config file (platform-specific location)
+# Windows: %LOCALAPPDATA%\Graphiti\config\graphiti.config.json
+# macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+# Linux: ~/.config/graphiti/graphiti.config.json
 {
   "daemon": {
     "enabled": true
@@ -2269,8 +2291,10 @@ Graphiti includes a configuration validator tool to catch errors before runtime:
 # Validate default config file
 python -m mcp_server.config_validator
 
-# Validate specific file
-python -m mcp_server.config_validator ~/.graphiti/graphiti.config.json
+# Validate specific file (use platform-specific path)
+# Windows: python -m mcp_server.config_validator "%LOCALAPPDATA%\Graphiti\config\graphiti.config.json"
+# macOS: python -m mcp_server.config_validator ~/Library/Preferences/Graphiti/graphiti.config.json
+# Linux: python -m mcp_server.config_validator ~/.config/graphiti/graphiti.config.json
 
 # Validation levels
 python -m mcp_server.config_validator --level syntax   # Fast: JSON syntax only

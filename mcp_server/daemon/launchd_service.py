@@ -14,54 +14,59 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .venv_manager import VenvManager, VenvCreationError
+from .paths import get_install_dir, get_log_dir
 
 
 class LaunchdServiceManager:
-    """Manages Graphiti bootstrap service on macOS via launchd."""
+    """Manages Graphiti bootstrap service on macOS via launchd.
+
+    Uses frozen package installation from {INSTALL_DIR}:
+    - Python: {INSTALL_DIR}/bin/python
+    - Bootstrap: -m mcp_server.daemon.bootstrap
+    - PYTHONPATH: {INSTALL_DIR}/lib
+    """
 
     name = "launchd (macOS Service Manager)"
     service_id = "com.graphiti.bootstrap"
 
-    def __init__(self, venv_manager: Optional[VenvManager] = None):
+    def __init__(self):
         """Initialize launchd service manager.
 
-        Args:
-            venv_manager: Optional VenvManager instance. If None, creates default instance.
-
-        Raises:
-            VenvCreationError: If venv doesn't exist at ~/.graphiti/.venv
+        Uses frozen package installation paths from get_install_dir().
+        Python executable: {INSTALL_DIR}/bin/python
+        Bootstrap module: mcp_server.daemon.bootstrap (invoked with -m)
         """
-        self.venv_manager = venv_manager or VenvManager()
-        # Get venv Python executable - raise VenvCreationError if venv doesn't exist
-        # (DaemonManager.install() ensures venv exists before instantiating service managers)
-        self.python_exe = self.venv_manager.get_python_executable()
-        self.bootstrap_script = self._get_bootstrap_path()
+        self.install_dir = get_install_dir()
+        self.python_exe = self.install_dir / "bin" / "python"
         self.plist_path = Path.home() / "Library" / "LaunchAgents" / f"{self.service_id}.plist"
-        self.log_dir = Path.home() / ".graphiti" / "logs"
-
-    def _get_bootstrap_path(self) -> Path:
-        """Get path to bootstrap.py script."""
-        # bootstrap.py is in mcp_server/daemon/
-        return Path(__file__).parent / "bootstrap.py"
+        self.log_dir = get_log_dir()
 
     def _create_plist(self) -> dict:
-        """Create launchd plist configuration."""
+        """Create launchd plist configuration.
+
+        Plist uses frozen package paths:
+        - ProgramArguments: {INSTALL_DIR}/bin/python -m mcp_server.daemon.bootstrap
+        - WorkingDirectory: {INSTALL_DIR}
+        - PYTHONPATH: {INSTALL_DIR}/lib (for frozen package imports)
+        - Logs: {STATE_DIR}/logs/ (via get_log_dir())
+        """
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         plist = {
             "Label": self.service_id,
             "ProgramArguments": [
                 str(self.python_exe),
-                str(self.bootstrap_script),
+                "-m",
+                "mcp_server.daemon.bootstrap",
             ],
             "RunAtLoad": True,
             "KeepAlive": True,
             "StandardOutPath": str(self.log_dir / "bootstrap-stdout.log"),
             "StandardErrorPath": str(self.log_dir / "bootstrap-stderr.log"),
-            "WorkingDirectory": str(self.bootstrap_script.parent),
+            "WorkingDirectory": str(self.install_dir),
             "EnvironmentVariables": {
                 "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+                "PYTHONPATH": str(self.install_dir / "lib"),
             },
         }
 
@@ -90,11 +95,11 @@ class LaunchdServiceManager:
         """Install bootstrap service using launchd."""
         # Check if already installed
         if self.is_installed():
-            print("✓ Service already installed")
+            print("[OK] Service already installed")
             return True
 
         print(f"Python: {self.python_exe}")
-        print(f"Bootstrap script: {self.bootstrap_script}")
+        print(f"Bootstrap module: mcp_server.daemon.bootstrap")
         print(f"Plist: {self.plist_path}")
         print()
 
@@ -107,9 +112,9 @@ class LaunchdServiceManager:
             plist_data = self._create_plist()
             with open(self.plist_path, "wb") as f:
                 plistlib.dump(plist_data, f)
-            print(f"✓ Plist created: {self.plist_path}")
+            print(f"[OK] Plist created: {self.plist_path}")
         except Exception as e:
-            print(f"✗ Failed to create plist: {e}")
+            print(f"[ERROR] Failed to create plist: {e}")
             return False
 
         # Load service
@@ -117,10 +122,10 @@ class LaunchdServiceManager:
         success, output = self._run_launchctl("load", str(self.plist_path))
 
         if not success:
-            print(f"✗ Failed to load service: {output}")
+            print(f"[ERROR] Failed to load service: {output}")
             return False
 
-        print(f"✓ Service '{self.service_id}' loaded and started")
+        print(f"[OK] Service '{self.service_id}' loaded and started")
         return True
 
     def uninstall(self) -> bool:
@@ -134,7 +139,7 @@ class LaunchdServiceManager:
         success, output = self._run_launchctl("unload", str(self.plist_path))
 
         if not success:
-            print(f"⚠ Warning: Failed to unload service: {output}")
+            print(f"[WARN] Warning: Failed to unload service: {output}")
             # Continue anyway to delete plist
 
         # Remove plist file
@@ -142,12 +147,12 @@ class LaunchdServiceManager:
         try:
             if self.plist_path.exists():
                 self.plist_path.unlink()
-                print(f"✓ Plist removed: {self.plist_path}")
+                print(f"[OK] Plist removed: {self.plist_path}")
         except Exception as e:
-            print(f"✗ Failed to remove plist: {e}")
+            print(f"[ERROR] Failed to remove plist: {e}")
             return False
 
-        print(f"✓ Service '{self.service_id}' removed")
+        print(f"[OK] Service '{self.service_id}' removed")
         return True
 
     def is_installed(self) -> bool:

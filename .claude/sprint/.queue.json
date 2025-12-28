@@ -1,0 +1,1082 @@
+{
+  "schema_version": "4.0",
+  "sprint": {
+    "id": "per-user-daemon-v21",
+    "name": "Per-User Daemon Architecture v2.1",
+    "version": "v2.1.0",
+    "status": "active",
+    "branch": "sprint/per-user-daemon-v21",
+    "base_branch": "dev",
+    "created": "2025-12-25T02:02:00Z"
+  },
+  "stories": [
+    {
+      "id": "1",
+      "title": "Create Platform-Aware Path Resolution Module",
+      "status": "completed",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/1-create-platform-aware-path-resolution.md",
+      "dependencies": [],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "1.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "1.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "1.t"
+        }
+      }
+    },
+    {
+      "id": "2",
+      "title": "Migrate Daemon Modules to New Path System",
+      "status": "completed",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/2-migrate-daemon-modules-to-new-paths.md",
+      "dependencies": [
+        "1"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "2.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "2.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "2.t",
+          "metadata": {
+            "test_success": {
+              "pass_rate": 100.0,
+              "threshold": 90.0,
+              "passed_count": 356,
+              "skipped_count": 20,
+              "reason": "All daemon tests passing after v2.1 path architecture updates"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "3",
+      "title": "Path Resolution Test Suite",
+      "status": "completed",
+      "type": "feature",
+      "phase": 1,
+      "file": "stories/3-path-resolution-test-suite.md",
+      "dependencies": [
+        "1"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "3.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "3.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "3.t"
+        }
+      }
+    },
+    {
+      "id": "4",
+      "title": "Create GraphitiInstaller Class",
+      "status": "completed",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/4-create-graphiti-installer-class.md",
+      "dependencies": [
+        "1"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "4.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "4.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "4.t"
+        }
+      }
+    },
+    {
+      "id": "5",
+      "title": "Implement Frozen Package Deployment",
+      "status": "completed",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/5-implement-frozen-package-deployment.md",
+      "dependencies": [
+        "4"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "5.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "5.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "5.t"
+        }
+      }
+    },
+    {
+      "id": "6",
+      "title": "Implement Version Tracking",
+      "status": "completed",
+      "type": "feature",
+      "phase": 2,
+      "file": "stories/6-implement-version-tracking.md",
+      "dependencies": [
+        "4"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "6.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "6.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "6.t"
+        }
+      }
+    },
+    {
+      "id": "7",
+      "title": "Create WindowsTaskSchedulerManager",
+      "status": "completed",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/7-update-windows-task-scheduler-manager.md",
+      "dependencies": [
+        "1",
+        "2"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "7.d",
+          "metadata": {
+            "artifact": "discoveries/7.d-windows-task-scheduler-manager-update.md",
+            "critical_finding": "WindowsTaskSchedulerManager does not exist - creating new implementation",
+            "decision": "Create new WindowsTaskSchedulerManager using Task Scheduler API. Defer NSSM cleanup to future sprint."
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "7.i",
+          "metadata": {
+            "scope": "Create new WindowsTaskSchedulerManager class following LaunchdServiceManager/SystemdServiceManager patterns",
+            "changes": [
+              "Created mcp_server/daemon/task_scheduler_service.py with TaskSchedulerServiceManager class",
+              "Uses Windows Task Scheduler via schtasks.exe for service management",
+              "Updated manager.py to use TaskSchedulerServiceManager instead of WindowsServiceManager",
+              "Updated tests to reference new TaskSchedulerServiceManager",
+              "All 356 daemon tests passing"
+            ]
+          }
+        },
+        "testing": {
+          "status": "completed",
+          "id": "7.t",
+          "metadata": {
+            "test_results": "356/356 tests passing (100%)"
+          }
+        }
+      }
+    },
+    {
+      "id": "8",
+      "title": "Update LaunchdServiceManager (macOS)",
+      "status": "completed",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/8-update-launchd-service-manager.md",
+      "dependencies": [
+        "1",
+        "2"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "8.d",
+          "metadata": {
+            "artifact": "discoveries/8d-launchd-service-manager-analysis.md"
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "8.i",
+          "metadata": {
+            "changes": [
+              "Removed VenvManager import and dependency",
+              "Added get_install_dir import from paths.py",
+              "Removed _get_bootstrap_path() method and self.bootstrap_script",
+              "Updated ProgramArguments to use module invocation: python -m mcp_server.daemon.bootstrap",
+              "Updated WorkingDirectory to use get_install_dir()",
+              "Added PYTHONPATH={INSTALL_DIR}/lib to EnvironmentVariables for frozen packages",
+              "Updated install() debug output to show bootstrap module instead of script path",
+              "Updated class and method docstrings to reflect frozen package architecture"
+            ]
+          }
+        },
+        "testing": {
+          "status": "completed",
+          "id": "8.t",
+          "metadata": {
+            "test_results": "17/17 tests passing (100%)",
+            "commit": "7a850f2"
+          }
+        }
+      }
+    },
+    {
+      "id": "9",
+      "title": "Update SystemdServiceManager (Linux)",
+      "status": "completed",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/9-update-systemd-service-manager.md",
+      "dependencies": [
+        "1",
+        "2"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "9.d",
+          "metadata": {
+            "artifact": "discoveries/9.d-systemd-service-discovery.md"
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "9.i",
+          "metadata": {
+            "changes": [
+              "Added get_install_dir import from paths.py",
+              "Removed _get_bootstrap_path() method and self.bootstrap_script",
+              "Updated ExecStart to use module invocation: python -m mcp_server.daemon.bootstrap",
+              "Updated WorkingDirectory to use get_install_dir()",
+              "Added Environment=PYTHONPATH={lib_dir} for frozen packages",
+              "Updated install() debug output to show install directory instead of bootstrap script"
+            ]
+          }
+        },
+        "testing": {
+          "status": "completed",
+          "id": "9.t",
+          "metadata": {
+            "test_results": "356/356 tests passing (100%)",
+            "commit": "7a850f2"
+          }
+        }
+      }
+    },
+    {
+      "id": "10",
+      "title": "Fix Bootstrap Module Invocation",
+      "status": "completed",
+      "type": "feature",
+      "phase": 3,
+      "file": "stories/10-fix-bootstrap-module-invocation.md",
+      "dependencies": [
+        "1",
+        "5"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "10.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "10.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "10.t"
+        }
+      }
+    },
+    {
+      "id": "11",
+      "title": "Implement v2.0 Installation Detection",
+      "status": "completed",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/11-implement-v20-installation-detection.md",
+      "dependencies": [
+        "1"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "11.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "11.i",
+          "metadata": {
+            "requires_artifact": "plans/11-plan.yaml"
+          }
+        },
+        "testing": {
+          "status": "completed",
+          "id": "11.t"
+        }
+      }
+    },
+    {
+      "id": "12",
+      "title": "Implement Config Migration",
+      "status": "completed",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/12-implement-config-migration.md",
+      "dependencies": [
+        "11"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "12.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "12.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "12.t"
+        }
+      }
+    },
+    {
+      "id": "13",
+      "title": "Implement Old Installation Cleanup",
+      "status": "completed",
+      "type": "feature",
+      "phase": 4,
+      "file": "stories/13-implement-old-installation-cleanup.md",
+      "dependencies": [
+        "11",
+        "12"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "13.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "13.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "13.t"
+        }
+      }
+    },
+    {
+      "id": "14",
+      "title": "Windows Fresh Install Test",
+      "status": "completed",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/14-windows-fresh-install-test.md",
+      "dependencies": [
+        "7",
+        "10"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "14.d",
+          "metadata": {
+            "artifact": "discoveries/14.d-windows-fresh-install-discovery.md",
+            "completed_date": "2025-12-25",
+            "summary": "Defined Windows test environment requirements, documented Task Scheduler integration, created 39-point test checklist, and identified 6 Windows-specific risks with mitigations"
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "14.i",
+          "metadata": {
+            "completed_date": "2025-12-25",
+            "summary": "Windows fresh install validated - MCP server listening on port 8321, 356 daemon tests passing, fixed VenvManager path (install dir IS venv), fixed SessionFilter parameter name"
+          }
+        },
+        "testing": {
+          "status": "completed",
+          "id": "14.t",
+          "metadata": {
+            "test_success": {
+              "pass_rate": 100.0,
+              "threshold": 90.0,
+              "passed_count": 356,
+              "skipped_count": 20,
+              "reason": "All daemon tests passing after Windows fresh install fixes"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "15",
+      "title": "macOS Fresh Install Test",
+      "status": "completed",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/15-macos-fresh-install-test.md",
+      "dependencies": [
+        "8",
+        "10"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "15.d",
+          "metadata": {
+            "artifact": "discoveries/15.d-macos-fresh-install-discovery.md",
+            "completed_date": "2025-12-25",
+            "summary": "Defined macOS test environment requirements, documented expected v2.1 paths, created comprehensive test checklist, and identified 5 macOS-specific risks with mitigations"
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "15.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "15.t"
+        }
+      }
+    },
+    {
+      "id": "16",
+      "title": "Linux Fresh Install Test",
+      "status": "completed",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/16-linux-fresh-install-test.md",
+      "dependencies": [
+        "9",
+        "10"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "16.d",
+          "metadata": {
+            "artifact": "discoveries/16.d-linux-fresh-install-discovery.md",
+            "summary": "Defined Linux test environment requirements, documented XDG compliance verification, created comprehensive test checklist, and identified 8 potential Linux-specific issues with mitigations"
+          }
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "16.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "16.t"
+        }
+      }
+    },
+    {
+      "id": "17",
+      "title": "Windows v2.0 to v2.1 Migration Test",
+      "status": "completed",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/17-windows-v20-to-v21-migration-test.md",
+      "dependencies": [
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "17.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "17.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "17.t"
+        }
+      }
+    },
+    {
+      "id": "18",
+      "title": "Cross-Platform Service Lifecycle Test",
+      "status": "deferred",
+      "type": "testing",
+      "phase": 5,
+      "file": "stories/18-cross-platform-service-lifecycle-test.md",
+      "dependencies": [
+        "14",
+        "15",
+        "16"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "18.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "18.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "18.t"
+        }
+      },
+      "deferred_reason": "E2E cross-platform testing deferred due to time overhead"
+    },
+    {
+      "id": "19",
+      "title": "Update Installation Guide",
+      "status": "completed",
+      "type": "documentation",
+      "phase": 6,
+      "file": "stories/19-update-installation-guide.md",
+      "dependencies": [
+        "14",
+        "15",
+        "16"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "19.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "19.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "19.t"
+        }
+      }
+    },
+    {
+      "id": "20",
+      "title": "Update Configuration Documentation",
+      "status": "completed",
+      "type": "documentation",
+      "phase": 6,
+      "file": "stories/20-update-configuration-documentation.md",
+      "dependencies": [
+        "1",
+        "19"
+      ],
+      "phases": {
+        "discovery": {
+          "status": "completed",
+          "id": "20.d"
+        },
+        "implementation": {
+          "status": "completed",
+          "id": "20.i"
+        },
+        "testing": {
+          "status": "completed",
+          "id": "20.t"
+        }
+      }
+    },
+    {
+      "id": "-1",
+      "title": "Validate Story 1: Create Platform-Aware Path Resolution Module",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "1",
+      "file": "stories/-1-validate-1.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-1.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-1.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-1.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-2",
+      "title": "Validate Story 2: Migrate Daemon Modules to New Path System",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "2",
+      "file": "stories/-2-validate-2.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-2.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-2.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-2.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-3",
+      "title": "Validate Story 3: Path Resolution Test Suite",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "3",
+      "file": "stories/-3-validate-3.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-3.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-3.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-3.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-4",
+      "title": "Validate Story 4: Create GraphitiInstaller Class",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "4",
+      "file": "stories/-4-validate-4.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-4.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-4.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-4.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-5",
+      "title": "Validate Story 5: Implement Frozen Package Deployment",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "5",
+      "file": "stories/-5-validate-5.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-5.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-5.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-5.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-6",
+      "title": "Validate Story 6: Implement Version Tracking",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "6",
+      "file": "stories/-6-validate-6.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-6.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-6.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-6.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-7",
+      "title": "Validate Story 7: Create WindowsTaskSchedulerManager",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "7",
+      "file": "stories/-7-validate-7.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-7.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-7.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-7.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-8",
+      "title": "Validate Story 8: Update LaunchdServiceManager (macOS)",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "8",
+      "file": "stories/-8-validate-8.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-8.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-8.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-8.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-9",
+      "title": "Validate Story 9: Update SystemdServiceManager (Linux)",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "9",
+      "file": "stories/-9-validate-9.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-9.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-9.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-9.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-10",
+      "title": "Validate Story 10: Fix Bootstrap Module Invocation",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "10",
+      "file": "stories/-10-validate-10.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-10.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-10.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-10.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-11",
+      "title": "Validate Story 11: Implement v2.0 Installation Detection",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "11",
+      "file": "stories/-11-validate-11.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-11.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-11.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-11.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-12",
+      "title": "Validate Story 12: Implement Config Migration",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "12",
+      "file": "stories/-12-validate-12.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-12.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-12.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-12.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-13",
+      "title": "Validate Story 13: Implement Old Installation Cleanup",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "13",
+      "file": "stories/-13-validate-13.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-13.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-13.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-13.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-14",
+      "title": "Validate Story 14: Windows Fresh Install Test",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "14",
+      "file": "stories/-14-validate-14.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-14.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-14.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-14.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-15",
+      "title": "Validate Story 15: macOS Fresh Install Test",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "15",
+      "file": "stories/-15-validate-15.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-15.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-15.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-15.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-16",
+      "title": "Validate Story 16: Linux Fresh Install Test",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "16",
+      "file": "stories/-16-validate-16.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-16.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-16.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-16.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-17",
+      "title": "Validate Story 17: Windows v2.0 to v2.1 Migration Test",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "17",
+      "file": "stories/-17-validate-17.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-17.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-17.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-17.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-18",
+      "title": "Validate Story 18: Cross-Platform Service Lifecycle Test",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "18",
+      "file": "stories/-18-validate-18.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-18.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-18.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-18.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-19",
+      "title": "Validate Story 19: Update Installation Guide",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "19",
+      "file": "stories/-19-validate-19.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-19.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-19.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-19.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    },
+    {
+      "id": "-20",
+      "title": "Validate Story 20: Update Configuration Documentation",
+      "status": "skipped",
+      "type": "validation",
+      "validates": "20",
+      "file": "stories/-20-validate-20.md",
+      "phases": {
+        "discovery": {
+          "status": "unassigned",
+          "id": "-20.d"
+        },
+        "implementation": {
+          "status": "unassigned",
+          "id": "-20.i"
+        },
+        "testing": {
+          "status": "unassigned",
+          "id": "-20.t"
+        }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
+    }
+  ]
+}
