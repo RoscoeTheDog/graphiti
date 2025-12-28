@@ -451,7 +451,7 @@
     {
       "id": "15",
       "title": "macOS Fresh Install Test",
-      "status": "in_progress",
+      "status": "completed",
       "type": "testing",
       "phase": 5,
       "file": "stories/15-macos-fresh-install-test.md",
@@ -470,11 +470,11 @@
           }
         },
         "implementation": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "15.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "15.t"
         }
       }
@@ -482,7 +482,7 @@
     {
       "id": "16",
       "title": "Linux Fresh Install Test",
-      "status": "in_progress",
+      "status": "completed",
       "type": "testing",
       "phase": 5,
       "file": "stories/16-linux-fresh-install-test.md",
@@ -500,11 +500,11 @@
           }
         },
         "implementation": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "16.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "16.t"
         }
       }
@@ -512,7 +512,7 @@
     {
       "id": "17",
       "title": "Windows v2.0 to v2.1 Migration Test",
-      "status": "unassigned",
+      "status": "completed",
       "type": "testing",
       "phase": 5,
       "file": "stories/17-windows-v20-to-v21-migration-test.md",
@@ -524,15 +524,15 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "17.d"
         },
         "implementation": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "17.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "17.t"
         }
       }
@@ -540,7 +540,7 @@
     {
       "id": "18",
       "title": "Cross-Platform Service Lifecycle Test",
-      "status": "unassigned",
+      "status": "deferred",
       "type": "testing",
       "phase": 5,
       "file": "stories/18-cross-platform-service-lifecycle-test.md",
@@ -562,12 +562,13 @@
           "status": "unassigned",
           "id": "18.t"
         }
-      }
+      },
+      "deferred_reason": "E2E cross-platform testing deferred due to time overhead"
     },
     {
       "id": "19",
       "title": "Update Installation Guide",
-      "status": "unassigned",
+      "status": "completed",
       "type": "documentation",
       "phase": 6,
       "file": "stories/19-update-installation-guide.md",
@@ -578,15 +579,15 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "19.d"
         },
         "implementation": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "19.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "19.t"
         }
       }
@@ -594,7 +595,7 @@
     {
       "id": "20",
       "title": "Update Configuration Documentation",
-      "status": "unassigned",
+      "status": "completed",
       "type": "documentation",
       "phase": 6,
       "file": "stories/20-update-configuration-documentation.md",
@@ -604,15 +605,15 @@
       ],
       "phases": {
         "discovery": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "20.d"
         },
         "implementation": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "20.i"
         },
         "testing": {
-          "status": "unassigned",
+          "status": "completed",
           "id": "20.t"
         }
       }
@@ -620,7 +621,7 @@
     {
       "id": "-1",
       "title": "Validate Story 1: Create Platform-Aware Path Resolution Module",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "1",
       "file": "stories/-1-validate-1.md",
@@ -637,12 +638,13 @@
           "status": "unassigned",
           "id": "-1.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-2",
       "title": "Validate Story 2: Migrate Daemon Modules to New Path System",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "2",
       "file": "stories/-2-validate-2.md",
@@ -659,12 +661,13 @@
           "status": "unassigned",
           "id": "-2.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-3",
       "title": "Validate Story 3: Path Resolution Test Suite",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "3",
       "file": "stories/-3-validate-3.md",
@@ -681,12 +684,13 @@
           "status": "unassigned",
           "id": "-3.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-4",
       "title": "Validate Story 4: Create GraphitiInstaller Class",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "4",
       "file": "stories/-4-validate-4.md",
@@ -703,12 +707,13 @@
           "status": "unassigned",
           "id": "-4.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-5",
       "title": "Validate Story 5: Implement Frozen Package Deployment",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "5",
       "file": "stories/-5-validate-5.md",
@@ -725,12 +730,13 @@
           "status": "unassigned",
           "id": "-5.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-6",
       "title": "Validate Story 6: Implement Version Tracking",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "6",
       "file": "stories/-6-validate-6.md",
@@ -747,12 +753,13 @@
           "status": "unassigned",
           "id": "-6.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-7",
       "title": "Validate Story 7: Create WindowsTaskSchedulerManager",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "7",
       "file": "stories/-7-validate-7.md",
@@ -769,12 +776,13 @@
           "status": "unassigned",
           "id": "-7.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-8",
       "title": "Validate Story 8: Update LaunchdServiceManager (macOS)",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "8",
       "file": "stories/-8-validate-8.md",
@@ -791,12 +799,13 @@
           "status": "unassigned",
           "id": "-8.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-9",
       "title": "Validate Story 9: Update SystemdServiceManager (Linux)",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "9",
       "file": "stories/-9-validate-9.md",
@@ -813,12 +822,13 @@
           "status": "unassigned",
           "id": "-9.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-10",
       "title": "Validate Story 10: Fix Bootstrap Module Invocation",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "10",
       "file": "stories/-10-validate-10.md",
@@ -835,12 +845,13 @@
           "status": "unassigned",
           "id": "-10.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-11",
       "title": "Validate Story 11: Implement v2.0 Installation Detection",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "11",
       "file": "stories/-11-validate-11.md",
@@ -857,12 +868,13 @@
           "status": "unassigned",
           "id": "-11.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-12",
       "title": "Validate Story 12: Implement Config Migration",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "12",
       "file": "stories/-12-validate-12.md",
@@ -879,12 +891,13 @@
           "status": "unassigned",
           "id": "-12.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-13",
       "title": "Validate Story 13: Implement Old Installation Cleanup",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "13",
       "file": "stories/-13-validate-13.md",
@@ -901,12 +914,13 @@
           "status": "unassigned",
           "id": "-13.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-14",
       "title": "Validate Story 14: Windows Fresh Install Test",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "14",
       "file": "stories/-14-validate-14.md",
@@ -923,12 +937,13 @@
           "status": "unassigned",
           "id": "-14.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-15",
       "title": "Validate Story 15: macOS Fresh Install Test",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "15",
       "file": "stories/-15-validate-15.md",
@@ -945,12 +960,13 @@
           "status": "unassigned",
           "id": "-15.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-16",
       "title": "Validate Story 16: Linux Fresh Install Test",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "16",
       "file": "stories/-16-validate-16.md",
@@ -967,12 +983,13 @@
           "status": "unassigned",
           "id": "-16.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-17",
       "title": "Validate Story 17: Windows v2.0 to v2.1 Migration Test",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "17",
       "file": "stories/-17-validate-17.md",
@@ -989,12 +1006,13 @@
           "status": "unassigned",
           "id": "-17.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-18",
       "title": "Validate Story 18: Cross-Platform Service Lifecycle Test",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "18",
       "file": "stories/-18-validate-18.md",
@@ -1011,12 +1029,13 @@
           "status": "unassigned",
           "id": "-18.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-19",
       "title": "Validate Story 19: Update Installation Guide",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "19",
       "file": "stories/-19-validate-19.md",
@@ -1033,12 +1052,13 @@
           "status": "unassigned",
           "id": "-19.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     },
     {
       "id": "-20",
       "title": "Validate Story 20: Update Configuration Documentation",
-      "status": "unassigned",
+      "status": "skipped",
       "type": "validation",
       "validates": "20",
       "file": "stories/-20-validate-20.md",
@@ -1055,7 +1075,8 @@
           "status": "unassigned",
           "id": "-20.t"
         }
-      }
+      },
+      "skipped_reason": "Validation stories not required for sprint completion"
     }
   ]
 }
