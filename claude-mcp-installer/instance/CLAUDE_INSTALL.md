@@ -763,7 +763,10 @@ claude
 
 1. **Ensure daemon is running**:
    ```bash
-   # Edit ~/.graphiti/graphiti.config.json
+   # Edit config file at platform-specific location:
+   # Windows: %LOCALAPPDATA%\Graphiti\config\graphiti.config.json
+   # macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+   # Linux: ~/.config/graphiti/graphiti.config.json
    # Set: "daemon": { "enabled": true }
 
    # Wait 5 seconds for bootstrap to detect change and start MCP server
@@ -848,7 +851,10 @@ If you need to revert to stdio transport:
 **Troubleshooting Migration**:
 
 - **Connection refused**: Verify daemon is running (`curl http://127.0.0.1:8321/health`)
-- **Daemon not starting**: Check `~/.graphiti/graphiti.config.json` has `daemon.enabled: true`
+- **Daemon not starting**: Check config file at platform-specific location has `daemon.enabled: true`:
+  - Windows: `%LOCALAPPDATA%\Graphiti\config\graphiti.config.json`
+  - macOS: `~/Library/Preferences/Graphiti/graphiti.config.json`
+  - Linux: `~/.config/graphiti/graphiti.config.json`
 - **Bootstrap service not running**: Run `graphiti-mcp daemon status` (if daemon CLI installed)
 - **Credentials still required**: HTTP transport does NOT need credentials in config (uses daemon's config)
 
@@ -933,13 +939,16 @@ graphiti-mcp daemon status
 
 **What Happens During Install**:
 1. Bootstrap service is installed and started
-2. Configuration file is created at `~/.graphiti/graphiti.config.json` with `daemon.enabled: true` (auto-enabled)
+2. Configuration file is created with `daemon.enabled: true` (auto-enabled) at:
+   - **Windows**: `%LOCALAPPDATA%\Graphiti\config\graphiti.config.json`
+   - **macOS**: `~/Library/Preferences/Graphiti/graphiti.config.json`
+   - **Linux**: `~/.config/graphiti/graphiti.config.json`
 3. MCP server starts automatically within 5 seconds
 4. Daemon is ready to accept connections immediately
 
 **Configuration**:
 
-The configuration file `~/.graphiti/graphiti.config.json` is created during daemon install with daemon auto-enabled:
+The configuration file is created during daemon install with daemon auto-enabled:
 
 ```json
 {
@@ -999,8 +1008,10 @@ curl http://127.0.0.1:8321/health
 # Tail daemon logs
 graphiti-mcp daemon logs
 
-# Logs location (default):
-# ~/.graphiti/logs/graphiti-mcp.log
+# Logs location (platform-specific):
+# Windows: %LOCALAPPDATA%\Graphiti\logs\graphiti-mcp.log
+# macOS: ~/Library/Logs/Graphiti/graphiti-mcp.log
+# Linux: ~/.local/state/graphiti/logs/graphiti-mcp.log
 ```
 
 **Uninstallation**:
@@ -1019,9 +1030,14 @@ graphiti-mcp daemon uninstall
 
 This is the most common issue with the auto-enable feature. The daemon should start automatically within 5 seconds of install.
 
-1. Verify daemon was auto-enabled during install:
+1. Verify daemon was auto-enabled during install (check platform-specific config path):
    ```bash
-   cat ~/.graphiti/graphiti.config.json | grep '"enabled"'
+   # Windows (PowerShell)
+   Get-Content "$env:LOCALAPPDATA\Graphiti\config\graphiti.config.json" | Select-String '"enabled"'
+
+   # macOS/Linux
+   cat ~/Library/Preferences/Graphiti/graphiti.config.json | grep '"enabled"'  # macOS
+   cat ~/.config/graphiti/graphiti.config.json | grep '"enabled"'  # Linux
    # Should show: "enabled": true
    ```
 
@@ -1033,8 +1049,10 @@ This is the most common issue with the auto-enable feature. The daemon should st
 
 3. If `daemon.enabled: false` in config (install failed to auto-enable):
    ```bash
-   # Manually enable daemon
-   # Edit ~/.graphiti/graphiti.config.json
+   # Manually enable daemon - edit config file at platform-specific location:
+   # Windows: %LOCALAPPDATA%\Graphiti\config\graphiti.config.json
+   # macOS: ~/Library/Preferences/Graphiti/graphiti.config.json
+   # Linux: ~/.config/graphiti/graphiti.config.json
    # Set: "daemon": { "enabled": true }
 
    # Wait 5 seconds for bootstrap to detect change
@@ -1069,9 +1087,16 @@ If you see connection errors right after running `graphiti-mcp daemon install`:
    # Look for MCP server process (not just bootstrap)
    ```
 
-3. Check if config was created with auto-enable:
+3. Check if config was created with auto-enable (platform-specific path):
    ```bash
-   cat ~/.graphiti/graphiti.config.json
+   # Windows (PowerShell)
+   Get-Content "$env:LOCALAPPDATA\Graphiti\config\graphiti.config.json"
+
+   # macOS
+   cat ~/Library/Preferences/Graphiti/graphiti.config.json
+
+   # Linux
+   cat ~/.config/graphiti/graphiti.config.json
    # Verify daemon.enabled is true
    ```
 
@@ -1082,14 +1107,22 @@ If you see connection errors right after running `graphiti-mcp daemon install`:
    graphiti-mcp daemon status
    ```
 
-2. Verify config file exists and is valid JSON:
+2. Verify config file exists and is valid JSON (platform-specific path):
    ```bash
-   cat ~/.graphiti/graphiti.config.json
+   # Windows (PowerShell)
+   Test-Path "$env:LOCALAPPDATA\Graphiti\config\graphiti.config.json"
+
+   # macOS
+   cat ~/Library/Preferences/Graphiti/graphiti.config.json
+
+   # Linux
+   cat ~/.config/graphiti/graphiti.config.json
    ```
 
 3. Check `daemon.enabled` is set to `true`:
    ```bash
-   cat ~/.graphiti/graphiti.config.json | grep enabled
+   # Use platform-specific path from above
+   grep enabled <config-file>
    ```
 
 4. View logs for errors:
@@ -1339,26 +1372,94 @@ After installing the daemon (optional standalone mode), verify the installation:
 
 #### Directory Structure Verification
 
+The v2.1 architecture uses platform-specific paths following industry conventions (Ollama, VS Code pattern):
+
+**Windows (PowerShell)**:
+```powershell
+# Installation directory (executables and libraries)
+Test-Path "$env:LOCALAPPDATA\Programs\Graphiti"       # Should return True
+Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\bin"   # Should return True
+Test-Path "$env:LOCALAPPDATA\Programs\Graphiti\lib"   # Should return True
+
+# Configuration and state directory
+Test-Path "$env:LOCALAPPDATA\Graphiti\config"         # Should return True
+Test-Path "$env:LOCALAPPDATA\Graphiti\logs"           # Should return True
+Test-Path "$env:LOCALAPPDATA\Graphiti\data"           # Should return True
+```
+
+**macOS**:
 ```bash
-# Windows (PowerShell)
-Test-Path $env:USERPROFILE\.graphiti\.venv       # Should return True
-Test-Path $env:USERPROFILE\.graphiti\mcp_server  # Should return True
-Test-Path $env:USERPROFILE\.graphiti\bin         # Should return True
-Test-Path $env:USERPROFILE\.graphiti\logs        # Should return True
+# Installation directory
+ls -la ~/Library/Application\ Support/Graphiti/
 
-# macOS/Linux
-ls -la ~/.graphiti
-# Should show: .venv/, mcp_server/, bin/, logs/, graphiti.config.json
+# Configuration
+ls -la ~/Library/Preferences/Graphiti/
+
+# Logs
+ls -la ~/Library/Logs/Graphiti/
+
+# Data/Cache
+ls -la ~/Library/Caches/Graphiti/
 ```
 
-**Expected directory structure**:
+**Linux**:
+```bash
+# Installation directory (XDG_DATA_HOME)
+ls -la ~/.local/share/graphiti/
+
+# Configuration (XDG_CONFIG_HOME)
+ls -la ~/.config/graphiti/
+
+# State - logs and data (XDG_STATE_HOME)
+ls -la ~/.local/state/graphiti/
 ```
-~/.graphiti/
-├── .venv/                    # Dedicated virtual environment
-├── mcp_server/               # Deployed package (independent of project)
-├── bin/                      # CLI wrappers (graphiti-mcp scripts)
-├── logs/                     # Bootstrap and MCP server logs
-└── graphiti.config.json      # Daemon configuration
+
+**Expected directory structure (v2.1)**:
+
+**Windows**:
+```
+%LOCALAPPDATA%\Programs\Graphiti\     <- Executables + frozen libs
+├── bin\                              # CLI wrappers
+├── lib\                              # Frozen packages (mcp_server, graphiti_core)
+├── VERSION                           # Version tracking
+└── INSTALL_INFO                      # Installation metadata
+
+%LOCALAPPDATA%\Graphiti\              <- Config + runtime
+├── config\graphiti.config.json       # Daemon configuration
+├── logs\                             # Bootstrap and MCP server logs
+└── data\                             # Runtime data
+```
+
+**macOS**:
+```
+~/Library/Application Support/Graphiti/   <- Executables + frozen libs
+├── bin/
+├── lib/
+├── VERSION
+└── INSTALL_INFO
+
+~/Library/Preferences/Graphiti/           <- Configuration
+└── graphiti.config.json
+
+~/Library/Logs/Graphiti/                  <- Logs
+
+~/Library/Caches/Graphiti/                <- Runtime data
+```
+
+**Linux** (XDG Base Directory spec):
+```
+~/.local/share/graphiti/              <- Executables + frozen libs
+├── bin/
+├── lib/
+├── VERSION
+└── INSTALL_INFO
+
+~/.config/graphiti/                   <- Configuration
+└── graphiti.config.json
+
+~/.local/state/graphiti/              <- State (logs + data)
+├── logs/
+└── data/
 ```
 
 #### Service Verification (Optional - Requires Admin Privileges)
@@ -1408,11 +1509,14 @@ curl -f http://localhost:6274/health
 #### CLI Wrapper Verification
 
 ```bash
-# Windows
-%USERPROFILE%\.graphiti\bin\graphiti-mcp.cmd --help
+# Windows (PowerShell)
+& "$env:LOCALAPPDATA\Programs\Graphiti\bin\graphiti-mcp.cmd" --help
 
-# macOS/Linux
-~/.graphiti/bin/graphiti-mcp --help
+# macOS
+~/Library/Application\ Support/Graphiti/bin/graphiti-mcp --help
+
+# Linux
+~/.local/share/graphiti/bin/graphiti-mcp --help
 ```
 
 **Expected**: Help text showing available commands (daemon, health, etc.)
@@ -1519,15 +1623,25 @@ cd path/to/graphiti/mcp_server/daemon
 ### What Gets Removed
 
 - OS service (Windows Service, launchd agent, or systemd service)
-- Virtual environment (`~/.graphiti/.venv/`)
-- Deployed package (`~/.graphiti/mcp_server/`)
-- Wrapper scripts (`~/.graphiti/bin/`)
-- Service logs (`~/.graphiti/logs/`)
+- Installation directory with virtual environment and frozen packages:
+  - **Windows**: `%LOCALAPPDATA%\Programs\Graphiti\`
+  - **macOS**: `~/Library/Application Support/Graphiti/`
+  - **Linux**: `~/.local/share/graphiti/`
+- Service logs:
+  - **Windows**: `%LOCALAPPDATA%\Graphiti\logs\`
+  - **macOS**: `~/Library/Logs/Graphiti/`
+  - **Linux**: `~/.local/state/graphiti/logs/`
 
 ### What Gets Preserved (by default)
 
-- Your data (`~/.graphiti/data/`)
-- Configuration (`~/.graphiti/graphiti.config.json`)
+- Your data:
+  - **Windows**: `%LOCALAPPDATA%\Graphiti\data\`
+  - **macOS**: `~/Library/Caches/Graphiti/`
+  - **Linux**: `~/.local/state/graphiti/data/`
+- Configuration:
+  - **Windows**: `%LOCALAPPDATA%\Graphiti\config\graphiti.config.json`
+  - **macOS**: `~/Library/Preferences/Graphiti/graphiti.config.json`
+  - **Linux**: `~/.config/graphiti/graphiti.config.json`
 
 Use `--delete-all` (Unix) or `-DeleteAll` (Windows) to remove everything including data.
 

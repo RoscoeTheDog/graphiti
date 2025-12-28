@@ -191,6 +191,10 @@ Implement a professional-grade, per-user daemon architecture for the Graphiti MC
 - 363 daemon tests passing
 - Cross-platform test infrastructure in place
 
+### Documentation Status (Session s040)
+- `CLAUDE_INSTALL.md` - All v2.0 path references replaced with v2.1 platform-specific paths
+- `CONFIGURATION.md` - All v2.0 path references replaced (except migration note)
+
 ---
 
 ## Architecture Reference

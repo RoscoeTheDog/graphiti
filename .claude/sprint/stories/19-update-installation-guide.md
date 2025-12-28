@@ -33,6 +33,14 @@ Update the installation documentation with v2.1 instructions, including new path
 
 **Artifact**: Documentation verified against v2.1 architecture paths
 
+### (t2) Final Documentation Sweep ✅ COMPLETE (Session s040)
+- [x] Replaced all `~/.graphiti/` references with platform-specific paths
+- [x] Added v2.1 directory structure for Windows/macOS/Linux
+- [x] Updated all troubleshooting sections with v2.1 paths
+- [x] Updated verification commands for platform-specific locations
+
+**Artifact**: All v2.0 path references removed from `CLAUDE_INSTALL.md`
+
 ## Dependencies
 
 - Story 14: Windows Fresh Install Test

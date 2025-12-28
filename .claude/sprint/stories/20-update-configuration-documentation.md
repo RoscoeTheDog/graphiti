@@ -33,6 +33,14 @@ Update CONFIGURATION.md and related documentation with new v2.1 paths, directory
 
 **Artifact**: Path documentation verified against `graphiti_mcp_installer/daemon/paths.py`
 
+### (t2) Final Documentation Sweep ✅ COMPLETE (Session s040)
+- [x] Replaced all `~/.graphiti/` references with platform-specific paths
+- [x] Updated template resolution hierarchy for all platforms
+- [x] Updated config file location references
+- [x] Updated validator command examples with platform-specific paths
+
+**Artifact**: All v2.0 path references removed from `CONFIGURATION.md` (except migration note)
+
 ## Dependencies
 
 - Story 1: Create Platform-Aware Path Resolution Module
